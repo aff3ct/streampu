@@ -3,11 +3,11 @@
 #include <sstream>
 
 #include "Tools/Exception/exception.hpp"
-#include "Module/Socket.hpp"
+#include "Runtime/Socket/Socket.hpp"
 
 namespace aff3ct
 {
-namespace module
+namespace runtime
 {
 static std::unordered_map<std::type_index,std::string> type_to_string = {{typeid(int8_t  ), "int8"   },
                                                                          {typeid(uint8_t ), "uint8"  },

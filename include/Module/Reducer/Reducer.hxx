@@ -6,14 +6,14 @@ namespace module
 {
 
 template <typename TI, typename TO, tools::proto_bop<TI,TO> BOP>
-Task& Reducer<TI,TO,BOP>
+runtime::Task& Reducer<TI,TO,BOP>
 ::operator[](const red::tsk t)
 {
 	return Module::operator[]((size_t)t);
 }
 
 template <typename TI, typename TO, tools::proto_bop<TI,TO> BOP>
-Socket& Reducer<TI,TO,BOP>
+runtime::Socket& Reducer<TI,TO,BOP>
 ::operator[](const red::sck::reduce s)
 {
 	return Module::operator[]((size_t)red::tsk::reduce)[(size_t)s];
@@ -39,13 +39,13 @@ Reducer<TI,TO,BOP>
 	auto &p = this->create_task("reduce");
 	auto ps_in  = this->template create_socket_in <TI>(p, "in",  this->n_elmts);
 	auto ps_out = this->template create_socket_out<TO>(p, "out", 1);
-	this->create_codelet(p, [ps_in, ps_out](Module &m, Task &t, const size_t frame_id) -> int
+	this->create_codelet(p, [ps_in, ps_out](Module &m, runtime::Task &t, const size_t frame_id) -> int
 	{
 		auto &red = static_cast<Reducer&>(m);
 		red._reduce(static_cast<const TI*>(t[ps_in ].get_dataptr()),
 		            static_cast<      TO*>(t[ps_out].get_dataptr()),
 		            frame_id);
-		return status_t::SUCCESS;
+		return runtime::status_t::SUCCESS;
 	});
 }
 

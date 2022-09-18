@@ -9,15 +9,15 @@
 #include "Module/Adaptor/Adaptor_n_to_1.hpp"
 #include "Tools/Interface/Interface_waiting.hpp"
 #include "Tools/Exception/exception.hpp"
-#include "Tools/Sequence/Pipeline.hpp"
+#include "Runtime/Pipeline/Pipeline.hpp"
 
 using namespace aff3ct;
-using namespace aff3ct::tools;
+using namespace aff3ct::runtime;
 
 // Pipeline
-// ::Pipeline(const module::Task &first,
-//            const module::Task &last,
-//            const std::vector<std::pair<std::vector<const module::Task*>, std::vector<const module::Task*>>> &sep_stages,
+// ::Pipeline(const runtime::Task &first,
+//            const runtime::Task &last,
+//            const std::vector<std::pair<std::vector<const runtime::Task*>, std::vector<const runtime::Task*>>> &sep_stages,
 //            const std::vector<size_t> &n_threads,
 //            const std::vector<size_t> &synchro_buffer_sizes,
 //            const std::vector<bool> &synchro_active_waiting,
@@ -30,19 +30,19 @@ using namespace aff3ct::tools;
 //   saved_lasts_tasks_id(sep_stages.size()),
 //   bound_adaptors(false)
 // {
-// 	this->init<const module::Task>(first,
-// 	                               &last,
-// 	                               sep_stages,
-// 	                               n_threads,
-// 	                               synchro_buffer_sizes,
-// 	                               synchro_active_waiting,
-// 	                               thread_pinning,
-// 	                               puids);
+// 	this->init<const runtime::Task>(first,
+// 	                                &last,
+// 	                                sep_stages,
+// 	                                n_threads,
+// 	                                synchro_buffer_sizes,
+// 	                                synchro_active_waiting,
+// 	                                thread_pinning,
+// 	                                puids);
 // }
 
 // Pipeline
-// ::Pipeline(const module::Task &first,
-//            const std::vector<std::pair<std::vector<const module::Task*>, std::vector<const module::Task*>>> &sep_stages,
+// ::Pipeline(const runtime::Task &first,
+//            const std::vector<std::pair<std::vector<const runtime::Task*>, std::vector<const runtime::Task*>>> &sep_stages,
 //            const std::vector<size_t> &n_threads,
 //            const std::vector<size_t> &synchro_buffer_sizes,
 //            const std::vector<bool> &synchro_active_waiting,
@@ -55,21 +55,21 @@ using namespace aff3ct::tools;
 //   saved_lasts_tasks_id(sep_stages.size()),
 //   bound_adaptors(false)
 // {
-// 	const module::Task* last = nullptr;
-// 	this->init<const module::Task>(first,
-// 	                               last,
-// 	                               sep_stages,
-// 	                               n_threads,
-// 	                               synchro_buffer_sizes,
-// 	                               synchro_active_waiting,
-// 	                               thread_pinning,
-// 	                               puids);
+// 	const runtime::Task* last = nullptr;
+// 	this->init<const runtime::Task>(first,
+// 	                                last,
+// 	                                sep_stages,
+// 	                                n_threads,
+// 	                                synchro_buffer_sizes,
+// 	                                synchro_active_waiting,
+// 	                                thread_pinning,
+// 	                                puids);
 // }
 
 Pipeline
-::Pipeline(const std::vector<module::Task*> &firsts,
-           const std::vector<module::Task*> &lasts,
-           const std::vector<std::tuple<std::vector<module::Task*>, std::vector<module::Task*>, std::vector<module::Task*>>> &sep_stages,
+::Pipeline(const std::vector<runtime::Task*> &firsts,
+           const std::vector<runtime::Task*> &lasts,
+           const std::vector<std::tuple<std::vector<runtime::Task*>, std::vector<runtime::Task*>, std::vector<runtime::Task*>>> &sep_stages,
            const std::vector<size_t> &n_threads,
            const std::vector<size_t> &synchro_buffer_sizes,
            const std::vector<bool> &synchro_active_waiting,
@@ -84,20 +84,20 @@ Pipeline
   bound_adaptors(false),
   auto_stop(true)
 {
-	this->init<module::Task>(firsts,
-	                         lasts,
-	                         sep_stages,
-	                         n_threads,
-	                         synchro_buffer_sizes,
-	                         synchro_active_waiting,
-	                         thread_pinning, puids
-	                         /*, tasks_inplace*/);
+	this->init<runtime::Task>(firsts,
+	                          lasts,
+	                          sep_stages,
+	                          n_threads,
+	                          synchro_buffer_sizes,
+	                          synchro_active_waiting,
+	                          thread_pinning, puids
+	                          /*, tasks_inplace*/);
 }
 
 Pipeline
-::Pipeline(const std::vector<module::Task*> &firsts,
-           const std::vector<module::Task*> &lasts,
-           const std::vector<std::pair<std::vector<module::Task*>, std::vector<module::Task*>>> &sep_stages,
+::Pipeline(const std::vector<runtime::Task*> &firsts,
+           const std::vector<runtime::Task*> &lasts,
+           const std::vector<std::pair<std::vector<runtime::Task*>, std::vector<runtime::Task*>>> &sep_stages,
            const std::vector<size_t> &n_threads,
            const std::vector<size_t> &synchro_buffer_sizes,
            const std::vector<bool> &synchro_active_waiting,
@@ -112,25 +112,25 @@ Pipeline
   bound_adaptors(false),
   auto_stop(true)
 {
-	std::vector<std::tuple<std::vector<module::Task*>,
-	                       std::vector<module::Task*>,
-	                       std::vector<module::Task*>>> sep_stages_bis;
+	std::vector<std::tuple<std::vector<runtime::Task*>,
+	                       std::vector<runtime::Task*>,
+	                       std::vector<runtime::Task*>>> sep_stages_bis;
 	for (auto &sep_stage : sep_stages)
-		sep_stages_bis.push_back(std::make_tuple(sep_stage.first, sep_stage.second, std::vector<module::Task*>()));
+		sep_stages_bis.push_back(std::make_tuple(sep_stage.first, sep_stage.second, std::vector<runtime::Task*>()));
 
-	this->init<module::Task>(firsts,
-	                         lasts,
-	                         sep_stages_bis,
-	                         n_threads,
-	                         synchro_buffer_sizes,
-	                         synchro_active_waiting,
-	                         thread_pinning, puids
-	                         /*, tasks_inplace*/);
+	this->init<runtime::Task>(firsts,
+	                          lasts,
+	                          sep_stages_bis,
+	                          n_threads,
+	                          synchro_buffer_sizes,
+	                          synchro_active_waiting,
+	                          thread_pinning, puids
+	                          /*, tasks_inplace*/);
 }
 
 Pipeline
-::Pipeline(const std::vector<module::Task*> &firsts,
-           const std::vector<std::tuple<std::vector<module::Task*>, std::vector<module::Task*>, std::vector<module::Task*>>> &sep_stages,
+::Pipeline(const std::vector<runtime::Task*> &firsts,
+           const std::vector<std::tuple<std::vector<runtime::Task*>, std::vector<runtime::Task*>, std::vector<runtime::Task*>>> &sep_stages,
            const std::vector<size_t> &n_threads,
            const std::vector<size_t> &synchro_buffer_sizes,
            const std::vector<bool> &synchro_active_waiting,
@@ -149,8 +149,8 @@ Pipeline
 }
 
 Pipeline
-::Pipeline(const std::vector<module::Task*> &firsts,
-           const std::vector<std::pair<std::vector<module::Task*>, std::vector<module::Task*>>> &sep_stages,
+::Pipeline(const std::vector<runtime::Task*> &firsts,
+           const std::vector<std::pair<std::vector<runtime::Task*>, std::vector<runtime::Task*>>> &sep_stages,
            const std::vector<size_t> &n_threads,
            const std::vector<size_t> &synchro_buffer_sizes,
            const std::vector<bool> &synchro_active_waiting,
@@ -169,9 +169,9 @@ Pipeline
 }
 
 Pipeline
-::Pipeline(module::Task &first,
-           module::Task &last,
-           const std::vector<std::pair<std::vector<module::Task*>, std::vector<module::Task*>>> &sep_stages,
+::Pipeline(runtime::Task &first,
+           runtime::Task &last,
+           const std::vector<std::pair<std::vector<runtime::Task*>, std::vector<runtime::Task*>>> &sep_stages,
            const std::vector<size_t> &n_threads,
            const std::vector<size_t> &synchro_buffer_sizes,
            const std::vector<bool> &synchro_active_waiting,
@@ -191,8 +191,8 @@ Pipeline
 }
 
 Pipeline
-::Pipeline(module::Task &first,
-           const std::vector<std::pair<std::vector<module::Task*>, std::vector<module::Task*>>> &sep_stages,
+::Pipeline(runtime::Task &first,
+           const std::vector<std::pair<std::vector<runtime::Task*>, std::vector<runtime::Task*>>> &sep_stages,
            const std::vector<size_t> &n_threads,
            const std::vector<size_t> &synchro_buffer_sizes,
            const std::vector<bool> &synchro_active_waiting,
@@ -234,39 +234,39 @@ Sequence& Pipeline
 }
 
 template <class TA>
-tools::Sequence* create_sequence(const std::vector<TA*> &firsts,
-                                 const std::vector<TA*> &lasts,
-                                 const std::vector<TA*> &exclusions,
-                                 const size_t &n_threads,
-                                 const bool &thread_pinning,
-                                 const std::vector<size_t> &puids,
-                                 const bool &tasks_inplace)
+runtime::Sequence* create_sequence(const std::vector<TA*> &firsts,
+                                   const std::vector<TA*> &lasts,
+                                   const std::vector<TA*> &exclusions,
+                                   const size_t &n_threads,
+                                   const bool &thread_pinning,
+                                   const std::vector<size_t> &puids,
+                                   const bool &tasks_inplace)
 {
 	throw tools::unimplemented_error(__FILE__, __LINE__, __func__);
 }
 
 template <>
-tools::Sequence* create_sequence<const module::Task>(const std::vector<const module::Task*> &firsts,
-                                                     const std::vector<const module::Task*> &lasts,
-                                                     const std::vector<const module::Task*> &exclusions,
-                                                     const size_t &n_threads,
-                                                     const bool &thread_pinning,
-                                                     const std::vector<size_t> &puids,
-                                                     const bool &tasks_inplace)
+runtime::Sequence* create_sequence<const runtime::Task>(const std::vector<const runtime::Task*> &firsts,
+                                                        const std::vector<const runtime::Task*> &lasts,
+                                                        const std::vector<const runtime::Task*> &exclusions,
+                                                        const size_t &n_threads,
+                                                        const bool &thread_pinning,
+                                                        const std::vector<size_t> &puids,
+                                                        const bool &tasks_inplace)
 {
-	return new tools::Sequence(firsts, lasts, exclusions, n_threads, thread_pinning, puids);
+	return new runtime::Sequence(firsts, lasts, exclusions, n_threads, thread_pinning, puids);
 }
 
 template <>
-Sequence* create_sequence<module::Task>(const std::vector<module::Task*> &firsts,
-                                        const std::vector<module::Task*> &lasts,
-                                        const std::vector<module::Task*> &exclusions,
-                                        const size_t &n_threads,
-                                        const bool &thread_pinning,
-                                        const std::vector<size_t> &puids,
-                                        const bool &tasks_inplace)
+Sequence* create_sequence<runtime::Task>(const std::vector<runtime::Task*> &firsts,
+                                         const std::vector<runtime::Task*> &lasts,
+                                         const std::vector<runtime::Task*> &exclusions,
+                                         const size_t &n_threads,
+                                         const bool &thread_pinning,
+                                         const std::vector<size_t> &puids,
+                                         const bool &tasks_inplace)
 {
-	return new tools::Sequence(firsts, lasts, exclusions, n_threads, thread_pinning, puids, tasks_inplace);
+	return new runtime::Sequence(firsts, lasts, exclusions, n_threads, thread_pinning, puids, tasks_inplace);
 }
 
 template <class TA>
@@ -407,7 +407,7 @@ void Pipeline
 ::create_adaptors(const std::vector<size_t> &synchro_buffer_sizes, const std::vector<bool> &synchro_active_waiting)
 {
 	//                     sck out addr     occ     stage   tsk id  sck id
-	std::vector<std::tuple<module::Socket*, size_t, size_t, size_t, size_t>> out_sck_orphans;
+	std::vector<std::tuple<runtime::Socket*, size_t, size_t, size_t, size_t>> out_sck_orphans;
 
 	// for all the stages in the pipeline
 	for (size_t sta = 0; sta < this->stages.size() -1; sta++)
@@ -415,7 +415,7 @@ void Pipeline
 		// ------------------------------------------------------------------------------------------------------------
 		// --------------------------------------------------------------- collect orphan output sockets in stage 'sta'
 		// ------------------------------------------------------------------------------------------------------------
-		std::vector<std::vector<module::Task*>> tasks_per_threads = this->stages[sta]->get_tasks_per_threads();
+		std::vector<std::vector<runtime::Task*>> tasks_per_threads = this->stages[sta]->get_tasks_per_threads();
 		// for all the threads in the current stage
 		// for (size_t t = 0; t < tasks_per_threads.size(); t++)
 		size_t t = 0;
@@ -429,7 +429,7 @@ void Pipeline
 				{
 					auto sck = tsk->sockets[sck_id];
 					// if the current socket is an output socket type
-					if (tsk->get_socket_type(*sck) == module::socket_t::SOUT)
+					if (tsk->get_socket_type(*sck) == socket_t::SOUT)
 					{
 						// for all the bounded sockets to the current socket
 						for (auto bsck : sck->get_bound_sockets())
@@ -472,9 +472,9 @@ void Pipeline
 				{
 					auto sck = tsk->sockets[sck_id];
 					// if the current socket is an input socket type
-					if (tsk->get_socket_type(*sck) == module::socket_t::SIN)
+					if (tsk->get_socket_type(*sck) == socket_t::SIN)
 					{
-						module::Socket* bsck = nullptr;
+						runtime::Socket* bsck = nullptr;
 						try
 						{
 							// get output bounded socket
@@ -503,12 +503,12 @@ void Pipeline
 									                                               sck_out->get_bound_sockets().end(),
 									                                               sck_in));
 									this->sck_orphan_binds.push_back(std::make_pair(
-									                               std::make_tuple(std::get<0>(out_sck_orphans[pos]),
-									                                               std::get<2>(out_sck_orphans[pos]),
-									                                               std::get<3>(out_sck_orphans[pos]),
-									                                               std::get<4>(out_sck_orphans[pos]),
-									                                               unbind_sout_pos),
-									                               std::make_tuple(sck_in, sta +1, tsk_id, sck_id)));
+									                                 std::make_tuple(std::get<0>(out_sck_orphans[pos]),
+									                                                 std::get<2>(out_sck_orphans[pos]),
+									                                                 std::get<3>(out_sck_orphans[pos]),
+									                                                 std::get<4>(out_sck_orphans[pos]),
+									                                                 unbind_sout_pos),
+									                                 std::make_tuple(sck_in, sta +1, tsk_id, sck_id)));
 								}
 							}
 						}
@@ -562,11 +562,11 @@ void Pipeline
 	// ----------------------------------------------------------------------------------------------------------------
 	auto sck_orphan_binds = this->sck_orphan_binds;
 	module::Adaptor* adp = nullptr;
-	std::map<module::Socket*, size_t> sck_to_adp_sck_id;
+	std::map<runtime::Socket*, size_t> sck_to_adp_sck_id;
 	for (size_t sta = 0; sta < this->stages.size(); sta++)
 	{
 		const auto n_threads = this->stages[sta]->get_n_threads();
-		std::vector<std::vector<module::Task*>> tasks_per_threads = this->stages[sta]->get_tasks_per_threads();
+		std::vector<std::vector<runtime::Task*>> tasks_per_threads = this->stages[sta]->get_tasks_per_threads();
 
 		// ------------------------------------------------------------------------------------------------------------
 		// ----------------------------------------------------------------------------------------------- pull adaptor
@@ -627,7 +627,7 @@ void Pipeline
 		// ------------------------------------------------------------------------------------------------------------
 		// ----------------------------------------------------------------------------------------------- push adaptor
 		// ------------------------------------------------------------------------------------------------------------
-		std::map<module::Socket*, size_t> sck_to_adp_sck_id_new;
+		std::map<runtime::Socket*, size_t> sck_to_adp_sck_id_new;
 		if (sta < this->stages.size() -1)
 		{
 			std::vector<size_t         > adp_n_elmts;
@@ -637,7 +637,7 @@ void Pipeline
 			                                                  synchro_active_waiting[sta] : false;
 			size_t                       adp_n_frames = 1;
 
-			std::vector<module::Socket*> passed_scks_out;
+			std::vector<runtime::Socket*> passed_scks_out;
 			for (auto &bind : sck_orphan_binds)
 			{
 				auto tsk_out_sta = std::get<1>(bind.first);
@@ -1070,13 +1070,13 @@ void Pipeline
 	this->exec([]() { return false; });
 }
 
-const std::vector<std::vector<module::Task*>>& Pipeline
+const std::vector<std::vector<runtime::Task*>>& Pipeline
 ::get_firsts_tasks() const
 {
 	return this->stages[0]->get_firsts_tasks();
 }
 
-const std::vector<std::vector<module::Task*>>& Pipeline
+const std::vector<std::vector<runtime::Task*>>& Pipeline
 ::get_lasts_tasks() const
 {
 	return this->stages.back()->get_lasts_tasks();
@@ -1114,10 +1114,10 @@ std::vector<std::vector<module::Module*>> Pipeline
 	return modules_per_types;
 }
 
-std::vector<std::vector<module::Task*>> Pipeline
+std::vector<std::vector<runtime::Task*>> Pipeline
 ::get_tasks_per_threads() const
 {
-	std::vector<std::vector<module::Task*>> tasks_per_threads;
+	std::vector<std::vector<runtime::Task*>> tasks_per_threads;
 	for (auto &stage : this->stages)
 	{
 		auto tasks_per_threads_add = stage->get_tasks_per_threads();
@@ -1132,10 +1132,10 @@ std::vector<std::vector<module::Task*>> Pipeline
 	return tasks_per_threads;
 }
 
-std::vector<std::vector<module::Task*>> Pipeline
+std::vector<std::vector<runtime::Task*>> Pipeline
 ::get_tasks_per_types() const
 {
-	std::vector<std::vector<module::Task*>> tasks_per_types;
+	std::vector<std::vector<runtime::Task*>> tasks_per_types;
 	for (auto &stage : this->stages)
 	{
 		auto tasks_per_types_add = stage->get_tasks_per_types();
@@ -1149,11 +1149,11 @@ std::vector<std::vector<module::Task*>> Pipeline
 void Pipeline
 ::export_dot(std::ostream &stream) const
 {
-	std::function<void(Digraph_node<Sub_sequence>*,
+	std::function<void(tools::Digraph_node<Sub_sequence>*,
 	                   const size_t,
 	                   const std::string&,
 	                   std::ostream&)> export_dot_subsequences_recursive =
-		[&export_dot_subsequences_recursive, this](Digraph_node<Sub_sequence> *cur_node,
+		[&export_dot_subsequences_recursive, this](tools::Digraph_node<Sub_sequence> *cur_node,
 		                                           const size_t sta,
 		                                           const std::string &tab,
 		                                           std::ostream &stream)
@@ -1172,11 +1172,11 @@ void Pipeline
 			}
 		};
 
-	std::function<void(Digraph_node<Sub_sequence>*,
+	std::function<void(tools::Digraph_node<Sub_sequence>*,
 	                   const size_t,
 	                   const std::string&,
 	                   std::ostream&)> export_dot_connections_recursive =
-		[&export_dot_connections_recursive, this](Digraph_node<Sub_sequence> *cur_node,
+		[&export_dot_connections_recursive, this](tools::Digraph_node<Sub_sequence> *cur_node,
 		                                          const size_t sta,
 		                                          const std::string &tab,
 		                                          std::ostream &stream)

@@ -2,11 +2,11 @@
 #include <sstream>
 #include <cassert>
 
-#include "Module/Task.hpp"
+#include "Runtime/Task/Task.hpp"
 
 namespace aff3ct
 {
-namespace module
+namespace runtime
 {
 bool Task
 ::is_autoalloc() const
@@ -44,7 +44,7 @@ bool Task
 	return last_input_socket == &s_in;
 }
 
-Module& Task
+module::Module& Task
 ::get_module() const
 {
 	return *this->module;

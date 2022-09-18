@@ -7,13 +7,13 @@ namespace aff3ct
 namespace module
 {
 
-Task& Controller
+runtime::Task& Controller
 ::operator[](const ctr::tsk t)
 {
 	return Module::operator[]((size_t)t);
 }
 
-Socket& Controller
+runtime::Socket& Controller
 ::operator[](const ctr::sck::control s)
 {
 	return Module::operator[]((size_t)ctr::tsk::control)[(size_t)s];

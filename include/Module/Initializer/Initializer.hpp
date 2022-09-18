@@ -27,8 +27,8 @@ template <typename T = int>
 class Initializer : public Module
 {
 public:
-	inline Task&   operator[](const ini::tsk             t);
-	inline Socket& operator[](const ini::sck::initialize s);
+	inline runtime::Task&   operator[](const ini::tsk             t);
+	inline runtime::Socket& operator[](const ini::sck::initialize s);
 
 protected:
 	std::vector<std::vector<T>> init_data;

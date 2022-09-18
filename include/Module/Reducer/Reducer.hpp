@@ -30,8 +30,8 @@ template <typename TI, typename TO, tools::proto_bop<TI,TO> BOP>
 class Reducer : public Module
 {
 public:
-	inline Task&   operator[](const red::tsk         t);
-	inline Socket& operator[](const red::sck::reduce s);
+	inline runtime::Task&   operator[](const red::tsk         t);
+	inline runtime::Socket& operator[](const red::sck::reduce s);
 
 protected:
 	const size_t n_elmts;

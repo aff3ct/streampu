@@ -9,7 +9,7 @@ namespace aff3ct
 {
 namespace module
 {
-Task& Module
+runtime::Task& Module
 ::operator[](const size_t id)
 {
 	assert(id < this->tasks_with_nullptr.size());
@@ -18,7 +18,7 @@ Task& Module
 	return *this->tasks_with_nullptr[id];
 }
 
-const Task& Module
+const runtime::Task& Module
 ::operator[](const size_t id) const
 {
 	assert(id < this->tasks_with_nullptr.size());
@@ -27,7 +27,7 @@ const Task& Module
 	return *this->tasks_with_nullptr[id];
 }
 
-Socket& Module
+runtime::Socket& Module
 ::operator[](const std::string &tsk_sck)
 {
 	size_t pos = tsk_sck.find("::", 0);
@@ -44,28 +44,28 @@ Socket& Module
 	auto &cur_tsk = this->operator()(tsk_name);
 
 	auto it = find_if(cur_tsk.sockets.begin(), cur_tsk.sockets.end(),
-	                  [sck_name](std::shared_ptr<Socket> s){return s->get_name()==sck_name;});
+	                  [sck_name](std::shared_ptr<runtime::Socket> s){return s->get_name()==sck_name;});
 
 	if (it == cur_tsk.sockets.end())
 	{
 		std::stringstream message;
-		message << "Socket '" << sck_name << "' not found for task '" << tsk_name << "'.";
+		message << "runtime::Socket '" << sck_name << "' not found for task '" << tsk_name << "'.";
 		throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
 	}
 
 	return *it->get();
 }
 
-Task& Module
+runtime::Task& Module
 ::operator()(const std::string &tsk_name)
 {
 	auto it = find_if(this->tasks.begin(), this->tasks.end(),
-					  [tsk_name](std::shared_ptr<Task> t){return t->get_name()==tsk_name;});
+					  [tsk_name](std::shared_ptr<runtime::Task> t){return t->get_name()==tsk_name;});
 
 	if (it == this->tasks.end())
 	{
 		std::stringstream message;
-		message << "Task '" << tsk_name << "' not found.";
+		message << "runtime::Task '" << tsk_name << "' not found.";
 		throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
 	}
 
@@ -74,14 +74,14 @@ Task& Module
 
 template <typename T>
 inline size_t Module
-::create_socket_in(Task& task, const std::string &name, const size_t n_elmts)
+::create_socket_in(runtime::Task& task, const std::string &name, const size_t n_elmts)
 {
 	return task.template create_socket_in<T>(name, n_elmts * this->n_frames);
 }
 
 template <typename T>
 inline size_t Module
-::create_socket_out(Task& task, const std::string &name, const size_t n_elmts)
+::create_socket_out(runtime::Task& task, const std::string &name, const size_t n_elmts)
 {
 	return task.template create_socket_out<T>(name, n_elmts * this->n_frames);
 }

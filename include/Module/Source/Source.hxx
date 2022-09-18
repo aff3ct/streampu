@@ -10,14 +10,14 @@ namespace module
 {
 
 template <typename B>
-Task& Source<B>
+runtime::Task& Source<B>
 ::operator[](const src::tsk t)
 {
 	return Module::operator[]((size_t)t);
 }
 
 template <typename B>
-Socket& Source<B>
+runtime::Socket& Source<B>
 ::operator[](const src::sck::generate s)
 {
 	return Module::operator[]((size_t)src::tsk::generate)[(size_t)s];
@@ -42,7 +42,7 @@ Source<B>
 	auto &p = this->create_task("generate");
 	auto ps_U_K = this->template create_socket_out<B>(p, "U_K", this->K);
 	auto ps_real_K = this->template create_socket_out<uint32_t>(p, "real_K", 1);
-	this->create_codelet(p, [ps_U_K, ps_real_K](Module &m, Task &t, const size_t frame_id) -> int
+	this->create_codelet(p, [ps_U_K, ps_real_K](Module &m, runtime::Task &t, const size_t frame_id) -> int
 	{
 		auto &src = static_cast<Source<B>&>(m);
 
@@ -50,7 +50,7 @@ Source<B>
 			          static_cast<uint32_t*>(t[ps_real_K].get_dataptr()),
 		              frame_id);
 
-		return status_t::SUCCESS;
+		return runtime::status_t::SUCCESS;
 	});
 }
 

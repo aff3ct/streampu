@@ -11,13 +11,13 @@ namespace aff3ct
 namespace module
 {
 
-Task& Switcher
+runtime::Task& Switcher
 ::operator[](const swi::tsk t)
 {
 	return Module::operator[]((size_t)t);
 }
 
-const Task& Switcher
+const runtime::Task& Switcher
 ::operator[](const swi::tsk t) const
 {
 	return Module::operator[]((size_t)t);
@@ -75,7 +75,7 @@ Switcher
 	for (size_t s = 0; s < this->get_n_data_sockets(); s++)
 		p1s_out_data.push_back(this->create_socket_out(p1, "data" + std::to_string(s), n_elmts_commute, datatype_commute));
 
-	this->create_codelet(p1, [p1s_in_data, p1s_in_ctrl, p1s_out_data](Module &m, Task &t, const size_t frame_id) -> int
+	this->create_codelet(p1, [p1s_in_data, p1s_in_ctrl, p1s_out_data](Module &m, runtime::Task &t, const size_t frame_id) -> int
 	{
 		auto &swi = static_cast<Switcher&>(m);
 
@@ -102,7 +102,7 @@ Switcher
 		p2s_in_data.push_back(this->create_socket_in(p2, "data" + std::to_string(s), n_elmts_select, datatype_select));
 	auto p2s_out_data = this->create_socket_out(p2, "data", n_elmts_select, datatype_select);
 
-	this->create_codelet(p2, [p2s_in_data, p2s_out_data](Module &m, Task &t, const size_t frame_id) -> int
+	this->create_codelet(p2, [p2s_in_data, p2s_out_data](Module &m, runtime::Task &t, const size_t frame_id) -> int
 	{
 		auto &swi = static_cast<Switcher&>(m);
 
@@ -118,7 +118,7 @@ Switcher
 			          data_socket_out);
 		}
 
-		return status_t::SUCCESS;
+		return runtime::status_t::SUCCESS;
 	});
 }
 

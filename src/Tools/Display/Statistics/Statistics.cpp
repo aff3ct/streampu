@@ -183,7 +183,7 @@ void Statistics
 ::show(std::vector<MODULE_OR_TASK*> modules_or_tasks, const bool ordered, std::ostream &stream)
 {
 	std::stringstream message;
-	message << "The 'Statistics::show' method expect a 'std::vector' of 'module::Module' or 'module::Task'.";
+	message << "The 'Statistics::show' method expect a 'std::vector' of 'module::Module' or 'runtime::Task'.";
 	throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
 }
 
@@ -206,16 +206,16 @@ void Statistics
 
 template <>
 void Statistics
-::show<module::Task>(std::vector<module::Task*> tasks, const bool ordered, std::ostream &stream)
+::show<runtime::Task>(std::vector<runtime::Task*> tasks, const bool ordered, std::ostream &stream)
 {
-	Statistics::show_tasks<module::Task>(tasks, ordered, stream);
+	Statistics::show_tasks<runtime::Task>(tasks, ordered, stream);
 }
 
 template <>
 void Statistics
-::show<const module::Task>(std::vector<const module::Task*> tasks, const bool ordered, std::ostream &stream)
+::show<const runtime::Task>(std::vector<const runtime::Task*> tasks, const bool ordered, std::ostream &stream)
 {
-	Statistics::show_tasks<const module::Task>(tasks, ordered, stream);
+	Statistics::show_tasks<const runtime::Task>(tasks, ordered, stream);
 }
 
 }
@@ -225,7 +225,7 @@ template <class MODULE>
 void Statistics
 ::show_modules(std::vector<MODULE*> modules, const bool ordered, std::ostream &stream)
 {
-	std::vector<const module::Task*> tasks;
+	std::vector<const runtime::Task*> tasks;
 	for (auto& m : modules)
 		if (m != nullptr)
 			for (auto& t : m->tasks)
@@ -245,7 +245,7 @@ void Statistics
 
 	if (ordered)
 	{
-		std::sort(tasks.begin(), tasks.end(), [](const module::Task* t1, const module::Task* t2)
+		std::sort(tasks.begin(), tasks.end(), [](const runtime::Task* t1, const runtime::Task* t2)
 		{
 			return t1->get_duration_total() > t2->get_duration_total();
 		});
@@ -339,7 +339,7 @@ void Statistics
 {
 	std::stringstream message;
 	message << "The 'Statistics::show' method expect a 'std::vector' of 'std::vector' of 'module::Module' or "
-	        << "'module::Task'.";
+	        << "'runtime::Task'.";
 	throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
 }
 
@@ -362,16 +362,16 @@ void Statistics
 
 template <>
 void Statistics
-::show<module::Task>(std::vector<std::vector<module::Task*>> tasks, const bool ordered, std::ostream &stream)
+::show<runtime::Task>(std::vector<std::vector<runtime::Task*>> tasks, const bool ordered, std::ostream &stream)
 {
-	Statistics::show_tasks<module::Task>(tasks, ordered, stream);
+	Statistics::show_tasks<runtime::Task>(tasks, ordered, stream);
 }
 
 template <>
 void Statistics
-::show<const module::Task>(std::vector<std::vector<const module::Task*>> tasks, const bool ordered, std::ostream &stream)
+::show<const runtime::Task>(std::vector<std::vector<const runtime::Task*>> tasks, const bool ordered, std::ostream &stream)
 {
-	Statistics::show_tasks<const module::Task>(tasks, ordered, stream);
+	Statistics::show_tasks<const runtime::Task>(tasks, ordered, stream);
 }
 
 }
@@ -381,14 +381,14 @@ template <class MODULE>
 void Statistics
 ::show_modules(std::vector<std::vector<MODULE*>> modules, const bool ordered, std::ostream &stream)
 {
-	std::vector<std::vector<const module::Task*>> tasks;
+	std::vector<std::vector<const runtime::Task*>> tasks;
 	for (auto &vm : modules)
 		if (vm.size() > 0 && vm[0] != nullptr)
 		{
 			auto &tasks0 = vm[0]->tasks;
 			for (size_t t = 0; t < tasks0.size(); t++)
 			{
-				std::vector<const module::Task*> tsk;
+				std::vector<const runtime::Task*> tsk;
 				for (auto& m : vm)
 					tsk.push_back(m->tasks[t].get());
 				tasks.push_back(tsk);

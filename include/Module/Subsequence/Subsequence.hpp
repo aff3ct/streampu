@@ -12,7 +12,7 @@
 
 namespace aff3ct
 {
-namespace tools
+namespace runtime
 {
 class Sequence;
 }
@@ -25,21 +25,21 @@ namespace module
 
 class Subsequence : public Module
 {
-	std::shared_ptr<tools::Sequence> sequence_cloned;
-	                tools::Sequence *sequence_extern;
+	std::shared_ptr<runtime::Sequence> sequence_cloned;
+	                runtime::Sequence *sequence_extern;
 
 public:
-	inline Task& operator[](const ssq::tsk t);
+	inline runtime::Task& operator[](const ssq::tsk t);
 
-	explicit Subsequence(const tools::Sequence &sequence);
-	explicit Subsequence(      tools::Sequence &sequence);
+	explicit Subsequence(const runtime::Sequence &sequence);
+	explicit Subsequence(      runtime::Sequence &sequence);
 	virtual ~Subsequence() = default;
 
 	virtual void init();
 
 	virtual Subsequence* clone() const;
 
-	tools::Sequence& get_sequence();
+	runtime::Sequence& get_sequence();
 
 	virtual void set_n_frames(const size_t n_frames);
 

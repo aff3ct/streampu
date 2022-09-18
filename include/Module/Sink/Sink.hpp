@@ -10,8 +10,8 @@
 #include <vector>
 
 #include "Tools/Interface/Interface_reset.hpp"
-#include "Module/Task.hpp"
-#include "Module/Socket.hpp"
+#include "Runtime/Task/Task.hpp"
+#include "Runtime/Socket/Socket.hpp"
 #include "Module/Module.hpp"
 
 namespace aff3ct
@@ -41,9 +41,9 @@ template <typename B = int>
 class Sink : public Module, public tools::Interface_reset
 {
 public:
-	inline Task&   operator[](const snk::tsk         t);
-	inline Socket& operator[](const snk::sck::send   s);
-	inline Socket& operator[](const snk::sck::send_k s);
+	inline runtime::Task&   operator[](const snk::tsk         t);
+	inline runtime::Socket& operator[](const snk::sck::send   s);
+	inline runtime::Socket& operator[](const snk::sck::send_k s);
 
 protected:
 	const int K; /*!< Size of one frame (= number of samples in one frame) */

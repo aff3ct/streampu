@@ -12,8 +12,8 @@
 #include <cstddef>
 #include <typeindex>
 
-#include "Module/Task.hpp"
-#include "Module/Socket.hpp"
+#include "Runtime/Task/Task.hpp"
+#include "Runtime/Socket/Socket.hpp"
 #include "Module/Module.hpp"
 #include "Tools/Interface/Interface_reset.hpp"
 #include "Tools/Reporter/Probe/Reporter_probe.hpp"
@@ -43,8 +43,8 @@ template <typename T>
 class Probe : public AProbe, public tools::Interface_reset
 {
 public:
-	inline Task&   operator[](const prb::tsk        t);
-	inline Socket& operator[](const prb::sck::probe s);
+	inline runtime::Task&   operator[](const prb::tsk        t);
+	inline runtime::Socket& operator[](const prb::sck::probe s);
 
 protected:
 	const int size;

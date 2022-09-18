@@ -1,6 +1,6 @@
 /*!
  * \file
- * \brief Class module::Socket.
+ * \brief Class runtime::Socket.
  */
 #ifndef SOCKET_HPP_
 #define SOCKET_HPP_
@@ -12,9 +12,7 @@
 #include <typeindex>
 
 #include "Tools/Interface/Interface_reset.hpp"
-#include "Module/Task.hpp"
-
-namespace aff3ct { namespace tools { class Sequence; } }
+#include "Runtime/Task/Task.hpp"
 
 namespace aff3ct
 {
@@ -22,14 +20,18 @@ namespace module
 {
 class Adaptor_n_to_1;
 class Adaptor_1_to_n;
+}
+namespace runtime
+{
+class Sequence;
 
 class Socket : public tools::Interface_reset
 {
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 	friend Task;
-	friend Adaptor_n_to_1;
-	friend Adaptor_1_to_n;
-	friend tools::Sequence;
+	friend module::Adaptor_n_to_1;
+	friend module::Adaptor_1_to_n;
+	friend Sequence;
 #endif
 protected:
 	Task &task;
@@ -132,7 +134,7 @@ private:
 }
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
-#include "Module/Socket.hxx"
+#include "Runtime/Socket/Socket.hxx"
 #endif
 
 #endif /* SOCKET_HPP_ */

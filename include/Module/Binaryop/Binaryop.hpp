@@ -10,8 +10,8 @@
 #include <vector>
 
 #include "Tools/Math/binaryop.h"
-#include "Module/Task.hpp"
-#include "Module/Socket.hpp"
+#include "Runtime/Task/Task.hpp"
+#include "Runtime/Socket/Socket.hpp"
 #include "Module/Module.hpp"
 
 namespace aff3ct
@@ -33,8 +33,8 @@ template <typename TI, typename TO, tools::proto_bop<TI,TO> BOP>
 class Binaryop : public Module
 {
 public:
-	inline Task&   operator[](const bop::tsk          t);
-	inline Socket& operator[](const bop::sck::perform s);
+	inline runtime::Task&   operator[](const bop::tsk          t);
+	inline runtime::Socket& operator[](const bop::sck::perform s);
 
 protected:
 	const size_t n_elmts;

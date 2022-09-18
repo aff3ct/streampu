@@ -26,8 +26,8 @@ namespace module
 class Sleeper : public Module
 {
 public:
-	inline Task&   operator[](const slp::tsk        t);
-	inline Socket& operator[](const slp::sck::sleep s);
+	inline runtime::Task&   operator[](const slp::tsk        t);
+	inline runtime::Socket& operator[](const slp::sck::sleep s);
 
 protected:
 	size_t ns;

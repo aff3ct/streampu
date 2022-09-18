@@ -32,7 +32,7 @@ void Module
 			this->tasks_with_nullptr.push_back(nullptr);
 		else
 		{
-			auto t_new = std::shared_ptr<Task>(t->clone());
+			auto t_new = std::shared_ptr<runtime::Task>(t->clone());
 			t_new->module = this;
 			this->tasks_with_nullptr.push_back(t_new);
 			this->tasks.push_back(std::move(t_new));
@@ -153,21 +153,21 @@ void Module
 	this->custom_name = "";
 }
 
-Task& Module
+runtime::Task& Module
 ::create_task(const std::string &name, const int id)
 {
 
 	auto it = find_if(this->tasks.begin(), this->tasks.end(),
-					  [name](std::shared_ptr<Task> t){return t->get_name()==name;});
+					  [name](std::shared_ptr<runtime::Task> t){return t->get_name()==name;});
 
 	if (it != this->tasks.end())
 	{
 		std::stringstream message;
-		message << "Task '" << name << "' already exists.";
+		message << "runtime::Task '" << name << "' already exists.";
 		throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
 	}
 
-	auto t = std::make_shared<Task>(*this, name);
+	auto t = std::make_shared<runtime::Task>(*this, name);
 
 	if (id < 0)
 	{
@@ -192,25 +192,25 @@ Task& Module
 }
 
 void Module
-::create_codelet(Task& task, std::function<int(Module &m, Task &t, const size_t frame_id)> codelet)
+::create_codelet(runtime::Task& task, std::function<int(Module &m, runtime::Task &t, const size_t frame_id)> codelet)
 {
 	task.create_codelet(codelet);
 }
 
 size_t Module
-::create_socket_in(Task& task, const std::string &name, const size_t n_elmts, const std::type_index& datatype)
+::create_socket_in(runtime::Task& task, const std::string &name, const size_t n_elmts, const std::type_index& datatype)
 {
 	return task.create_socket_in(name, n_elmts * this->n_frames, datatype);
 }
 
 size_t Module
-::create_socket_out(Task& task, const std::string &name, const size_t n_elmts, const std::type_index& datatype)
+::create_socket_out(runtime::Task& task, const std::string &name, const size_t n_elmts, const std::type_index& datatype)
 {
 	return task.create_socket_out(name, n_elmts * this->n_frames, datatype);
 }
 
 void Module
-::register_timer(Task& task, const std::string &key)
+::register_timer(runtime::Task& task, const std::string &key)
 {
 	task.register_timer(key);
 }
@@ -234,7 +234,7 @@ void Module
 	}
 
 	auto &p = this->create_task("reset");
-	this->create_codelet(p, [](Module &m, Task &t, const size_t frame_id) -> int
+	this->create_codelet(p, [](Module &m, runtime::Task &t, const size_t frame_id) -> int
 	{
 		auto &iface = dynamic_cast<aff3ct::tools::Interface_reset&>(m);
 		iface.reset();

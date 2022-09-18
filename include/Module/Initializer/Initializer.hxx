@@ -11,14 +11,14 @@ namespace module
 {
 
 template <typename T>
-Task& Initializer<T>
+runtime::Task& Initializer<T>
 ::operator[](const ini::tsk t)
 {
 	return Module::operator[]((size_t)t);
 }
 
 template <typename T>
-Socket& Initializer<T>
+runtime::Socket& Initializer<T>
 ::operator[](const ini::sck::initialize s)
 {
 	return Module::operator[]((size_t)ini::tsk::initialize)[(size_t)s];

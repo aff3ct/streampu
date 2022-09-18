@@ -5,7 +5,7 @@ namespace aff3ct
 namespace module
 {
 
-Task& Subsequence
+runtime::Task& Subsequence
 ::operator[](const ssq::tsk t)
 {
 	return Module::operator[]((size_t)t);

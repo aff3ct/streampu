@@ -27,8 +27,8 @@ namespace module
 class Controller : public Module, public tools::Interface_reset
 {
 public:
-	inline Task&   operator[](const ctr::tsk          t);
-	inline Socket& operator[](const ctr::sck::control s);
+	inline runtime::Task&   operator[](const ctr::tsk          t);
+	inline runtime::Socket& operator[](const ctr::sck::control s);
 
 protected:
 	const size_t init_path;

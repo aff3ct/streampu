@@ -1,8 +1,8 @@
-#include "Tools/Sequence/Pipeline.hpp"
+#include "Runtime/Pipeline/Pipeline.hpp"
 
 namespace aff3ct
 {
-namespace tools
+namespace runtime
 {
 
 template <class C>

@@ -12,20 +12,20 @@
 #include "Tools/Thread_pinning/Thread_pinning.hpp"
 #include "Tools/Exception/exception.hpp"
 #include "Module/Module.hpp"
-#include "Module/Task.hpp"
-#include "Module/Socket.hpp"
 #include "Module/Probe/Probe.hpp"
 #include "Module/Switcher/Switcher.hpp"
 #include "Module/Adaptor/Adaptor.hpp"
-#include "Tools/Sequence/Sequence.hpp"
+#include "Runtime/Task/Task.hpp"
+#include "Runtime/Socket/Socket.hpp"
+#include "Runtime/Sequence/Sequence.hpp"
 
 using namespace aff3ct;
-using namespace aff3ct::tools;
+using namespace aff3ct::runtime;
 
 Sequence
-::Sequence(const std::vector<const module::Task*> &firsts,
-           const std::vector<const module::Task*> &lasts,
-           const std::vector<const module::Task*> &exclusions,
+::Sequence(const std::vector<const runtime::Task*> &firsts,
+           const std::vector<const runtime::Task*> &lasts,
+           const std::vector<const runtime::Task*> &exclusions,
            const size_t n_threads,
            const bool thread_pinning,
            const std::vector<size_t> &puids)
@@ -50,7 +50,7 @@ Sequence
 #ifndef AFF3CT_HWLOC
 	if (thread_pinning)
 		std::clog << rang::tag::warning << "AFF3CT has not been linked with the 'hwloc' library, the 'thread_pinning' "
-		                                   "option of the 'tools::Sequence' will have no effect." << std::endl;
+		                                   "option of the 'runtime::Sequence' will have no effect." << std::endl;
 #endif
 
 	if (thread_pinning && puids.size() < n_threads)
@@ -61,12 +61,12 @@ Sequence
 		throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
 	}
 
-	this->init<tools::Sub_sequence_const,const module::Task>(firsts, lasts, exclusions);
+	this->init<runtime::Sub_sequence_const,const runtime::Task>(firsts, lasts, exclusions);
 }
 
 Sequence
-::Sequence(const std::vector<const module::Task*> &firsts,
-           const std::vector<const module::Task*> &lasts,
+::Sequence(const std::vector<const runtime::Task*> &firsts,
+           const std::vector<const runtime::Task*> &lasts,
            const size_t n_threads,
            const bool thread_pinning,
            const std::vector<size_t> &puids)
@@ -75,7 +75,7 @@ Sequence
 }
 
 Sequence
-::Sequence(const std::vector<const module::Task*> &firsts,
+::Sequence(const std::vector<const runtime::Task*> &firsts,
            const size_t n_threads,
            const bool thread_pinning,
            const std::vector<size_t> &puids)
@@ -84,8 +84,8 @@ Sequence
 }
 
 Sequence
-::Sequence(const module::Task &first,
-           const module::Task &last,
+::Sequence(const runtime::Task &first,
+           const runtime::Task &last,
            const size_t n_threads,
            const bool thread_pinning,
            const std::vector<size_t> &puids)
@@ -94,7 +94,7 @@ Sequence
 }
 
 Sequence
-::Sequence(const module::Task &first,
+::Sequence(const runtime::Task &first,
            const size_t n_threads,
            const bool thread_pinning,
            const std::vector<size_t> &puids)
@@ -102,18 +102,18 @@ Sequence
 {
 }
 
-std::vector<const module::Task*> exclusions_convert_to_const(const std::vector<module::Task*> &exclusions)
+std::vector<const runtime::Task*> exclusions_convert_to_const(const std::vector<runtime::Task*> &exclusions)
 {
-	std::vector<const module::Task*> exclusions_const;
+	std::vector<const runtime::Task*> exclusions_const;
 	for (auto exception : exclusions)
 		exclusions_const.push_back(exception);
 	return exclusions_const;
 }
 
 Sequence
-::Sequence(const std::vector<module::Task*> &firsts,
-           const std::vector<module::Task*> &lasts,
-           const std::vector<module::Task*> &exclusions,
+::Sequence(const std::vector<runtime::Task*> &firsts,
+           const std::vector<runtime::Task*> &lasts,
+           const std::vector<runtime::Task*> &exclusions,
            const size_t n_threads,
            const bool thread_pinning,
            const std::vector<size_t> &puids,
@@ -145,22 +145,22 @@ Sequence
 	}
 
 	if (tasks_inplace)
-		this->init<tools::Sub_sequence,module::Task>(firsts, lasts, exclusions);
+		this->init<runtime::Sub_sequence,runtime::Task>(firsts, lasts, exclusions);
 	else
 	{
-		std::vector<const module::Task*> firsts_bis;
+		std::vector<const runtime::Task*> firsts_bis;
 		for (auto first : firsts) firsts_bis.push_back(first);
-		std::vector<const module::Task*> lasts_bis;
+		std::vector<const runtime::Task*> lasts_bis;
 		for (auto last : lasts) lasts_bis.push_back(last);
-		std::vector<const module::Task*> exclusions_bis;
+		std::vector<const runtime::Task*> exclusions_bis;
 		for (auto exception : exclusions) exclusions_bis.push_back(exception);
-		this->init<tools::Sub_sequence_const,const module::Task>(firsts_bis, lasts_bis, exclusions_bis);
+		this->init<runtime::Sub_sequence_const,const runtime::Task>(firsts_bis, lasts_bis, exclusions_bis);
 	}
 }
 
 Sequence
-::Sequence(const std::vector<module::Task*> &firsts,
-           const std::vector<module::Task*> &lasts,
+::Sequence(const std::vector<runtime::Task*> &firsts,
+           const std::vector<runtime::Task*> &lasts,
            const size_t n_threads,
            const bool thread_pinning,
            const std::vector<size_t> &puids,
@@ -170,7 +170,7 @@ Sequence
 }
 
 Sequence
-::Sequence(const std::vector<module::Task*> &firsts,
+::Sequence(const std::vector<runtime::Task*> &firsts,
            const size_t n_threads,
            const bool thread_pinning,
            const std::vector<size_t> &puids,
@@ -180,8 +180,8 @@ Sequence
 }
 
 Sequence
-::Sequence(module::Task &first,
-           module::Task &last,
+::Sequence(runtime::Task &first,
+           runtime::Task &last,
            const size_t n_threads,
            const bool thread_pinning,
            const std::vector<size_t> &puids,
@@ -191,7 +191,7 @@ Sequence
 }
 
 Sequence
-::Sequence(module::Task &first,
+::Sequence(runtime::Task &first,
            const size_t n_threads,
            const bool thread_pinning,
            const std::vector<size_t> &puids,
@@ -203,7 +203,7 @@ Sequence
 Sequence
 ::~Sequence()
 {
-	std::vector<Digraph_node<Sub_sequence>*> already_deleted_nodes;
+	std::vector<tools::Digraph_node<Sub_sequence>*> already_deleted_nodes;
 	for (auto s : this->sequences)
 		this->delete_tree(s, already_deleted_nodes);
 }
@@ -213,7 +213,7 @@ void Sequence
 ::init(const std::vector<TA*> &firsts, const std::vector<TA*> &lasts, const std::vector<TA*> &exclusions)
 {
 	if (this->is_thread_pinning())
-		Thread_pinning::pin(this->puids[0]);
+		tools::Thread_pinning::pin(this->puids[0]);
 
 	if (firsts.size() == 0)
 	{
@@ -250,11 +250,11 @@ void Sequence
 		}
 	}
 
-	auto root = new Digraph_node<SS>({}, {}, nullptr, 0);
+	auto root = new tools::Digraph_node<SS>({}, {}, nullptr, 0);
 	root->set_contents(nullptr);
 	size_t ssid = 0, taid = 0;
 	std::vector<TA*> switchers;
-	std::vector<std::pair<TA*,Digraph_node<SS>*>> selectors;
+	std::vector<std::pair<TA*,tools::Digraph_node<SS>*>> selectors;
 	std::vector<TA*> real_lasts;
 
 	this->lasts_tasks_id.clear();
@@ -263,7 +263,7 @@ void Sequence
 	std::map<TA*,unsigned> in_sockets_feed;
 	for (auto first : firsts)
 	{
-		std::map<TA*,std::pair<Digraph_node<SS>*,size_t>> task_subseq;
+		std::map<TA*,std::pair<tools::Digraph_node<SS>*,size_t>> task_subseq;
 		auto contents = last_subseq->get_contents();
 		this->firsts_tasks_id.push_back(contents ? contents->tasks_id[contents->tasks_id.size() -1] : 0);
 		last_subseq = this->init_recursive<SS,TA>(last_subseq,
@@ -323,15 +323,15 @@ Sequence* Sequence
 	c->tasks_inplace = false;
 	c->modules.resize(c->get_n_threads());
 
-	std::vector<const module::Task*> firsts_tasks;
+	std::vector<const runtime::Task*> firsts_tasks;
 	for (auto ta : this->get_firsts_tasks()[0])
 		firsts_tasks.push_back(ta);
 
-	std::vector<const module::Task*> lasts_tasks;
+	std::vector<const runtime::Task*> lasts_tasks;
 	for (auto ta : this->get_lasts_tasks()[0])
 		lasts_tasks.push_back(ta);
 
-	c->init<tools::Sub_sequence_const,const module::Task>(firsts_tasks, lasts_tasks, this->saved_exclusions);
+	c->init<runtime::Sub_sequence_const,const runtime::Task>(firsts_tasks, lasts_tasks, this->saved_exclusions);
 	c->mtx_exception.reset(new std::mutex());
 	c->force_exit_loop.reset(new std::atomic<bool>(false));
 	return c;
@@ -385,15 +385,15 @@ std::vector<std::vector<module::Module*>> Sequence
 	return modules_per_types;
 }
 
-std::vector<std::vector<module::Task*>> Sequence
+std::vector<std::vector<runtime::Task*>> Sequence
 ::get_tasks_per_threads() const
 {
-	std::vector<std::vector<module::Task*>> tasks_per_threads(this->n_threads);
+	std::vector<std::vector<runtime::Task*>> tasks_per_threads(this->n_threads);
 
-	std::function<void(Digraph_node<Sub_sequence>*, const size_t,
-		               std::vector<Digraph_node<Sub_sequence>*> &)> get_tasks_recursive =
-		[&](Digraph_node<Sub_sequence>* cur_ss, const size_t tid,
-			std::vector<Digraph_node<Sub_sequence>*> &already_parsed_nodes)
+	std::function<void(tools::Digraph_node<Sub_sequence>*, const size_t,
+		               std::vector<tools::Digraph_node<Sub_sequence>*> &)> get_tasks_recursive =
+		[&](tools::Digraph_node<Sub_sequence>* cur_ss, const size_t tid,
+			std::vector<tools::Digraph_node<Sub_sequence>*> &already_parsed_nodes)
 		{
 			if (std::find(already_parsed_nodes.begin(),
 			              already_parsed_nodes.end(),
@@ -411,22 +411,22 @@ std::vector<std::vector<module::Task*>> Sequence
 
 	for (size_t tid = 0; tid < this->n_threads; tid++)
 	{
-		std::vector<Digraph_node<Sub_sequence>*> already_parsed_nodes;
+		std::vector<tools::Digraph_node<Sub_sequence>*> already_parsed_nodes;
 		get_tasks_recursive(this->sequences[tid], tid, already_parsed_nodes);
 	}
 
 	return tasks_per_threads;
 }
 
-std::vector<std::vector<module::Task*>> Sequence
+std::vector<std::vector<runtime::Task*>> Sequence
 ::get_tasks_per_types() const
 {
-	std::vector<std::vector<module::Task*>> tasks_per_types(this->n_tasks);
+	std::vector<std::vector<runtime::Task*>> tasks_per_types(this->n_tasks);
 
-	std::function<void(Digraph_node<Sub_sequence>*, size_t&,
-		               std::vector<Digraph_node<Sub_sequence>*>&)> get_tasks_recursive =
-		[&](Digraph_node<Sub_sequence>* cur_ss, size_t &mid,
-			std::vector<Digraph_node<Sub_sequence>*> &already_parsed_nodes)
+	std::function<void(tools::Digraph_node<Sub_sequence>*, size_t&,
+		               std::vector<tools::Digraph_node<Sub_sequence>*>&)> get_tasks_recursive =
+		[&](tools::Digraph_node<Sub_sequence>* cur_ss, size_t &mid,
+			std::vector<tools::Digraph_node<Sub_sequence>*> &already_parsed_nodes)
 		{
 			if (std::find(already_parsed_nodes.begin(),
 			    already_parsed_nodes.end(),
@@ -444,7 +444,7 @@ std::vector<std::vector<module::Task*>> Sequence
 	for (size_t tid = 0; tid < this->n_threads; tid++)
 	{
 		size_t mid = 0;
-		std::vector<Digraph_node<Sub_sequence>*> already_parsed_nodes;
+		std::vector<tools::Digraph_node<Sub_sequence>*> already_parsed_nodes;
 		get_tasks_recursive(this->sequences[tid], mid, already_parsed_nodes);
 	}
 
@@ -463,13 +463,13 @@ bool Sequence
 void Sequence
 ::_exec(const size_t tid,
         std::function<bool(const std::vector<const int*>&)> &stop_condition,
-        Digraph_node<Sub_sequence>* sequence)
+        tools::Digraph_node<Sub_sequence>* sequence)
 {
 	if (this->is_thread_pinning())
-		Thread_pinning::pin(this->puids[tid]);
+		tools::Thread_pinning::pin(this->puids[tid]);
 
-	std::function<void(Digraph_node<Sub_sequence>*, std::vector<const int*>&)> exec_sequence =
-		[&exec_sequence](Digraph_node<Sub_sequence>* cur_ss, std::vector<const int*>& statuses)
+	std::function<void(tools::Digraph_node<Sub_sequence>*, std::vector<const int*>&)> exec_sequence =
+		[&exec_sequence](tools::Digraph_node<Sub_sequence>* cur_ss, std::vector<const int*>& statuses)
 		{
 			auto type = cur_ss->get_c()->type;
 			auto &tasks_id = cur_ss->get_c()->tasks_id;
@@ -540,19 +540,19 @@ void Sequence
 	}
 
 	if (this->is_thread_pinning())
-		Thread_pinning::unpin();
+		tools::Thread_pinning::unpin();
 }
 
 void Sequence
 ::_exec_without_statuses(const size_t tid,
                          std::function<bool()> &stop_condition,
-                         Digraph_node<Sub_sequence>* sequence)
+                         tools::Digraph_node<Sub_sequence>* sequence)
 {
 	if (this->is_thread_pinning())
-		Thread_pinning::pin(this->puids[tid]);
+		tools::Thread_pinning::pin(this->puids[tid]);
 
-	std::function<void(Digraph_node<Sub_sequence>*)> exec_sequence =
-		[&exec_sequence](Digraph_node<Sub_sequence>* cur_ss)
+	std::function<void(tools::Digraph_node<Sub_sequence>*)> exec_sequence =
+		[&exec_sequence](tools::Digraph_node<Sub_sequence>* cur_ss)
 		{
 			auto type = cur_ss->get_c()->type;
 			auto &processes = cur_ss->get_c()->processes;
@@ -619,7 +619,7 @@ void Sequence
 	}
 
 	if (this->is_thread_pinning())
-		Thread_pinning::unpin();
+		tools::Thread_pinning::unpin();
 }
 
 void Sequence
@@ -719,8 +719,8 @@ void Sequence
 		throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
 	}
 
-	std::function<void(Digraph_node<Sub_sequence>*)> exec_sequence =
-		[&exec_sequence, frame_id](Digraph_node<Sub_sequence>* cur_ss)
+	std::function<void(tools::Digraph_node<Sub_sequence>*)> exec_sequence =
+		[&exec_sequence, frame_id](tools::Digraph_node<Sub_sequence>* cur_ss)
 		{
 			auto type = cur_ss->get_c()->type;
 			auto &tasks = cur_ss->get_c()->tasks;
@@ -742,7 +742,7 @@ void Sequence
 	exec_sequence(this->sequences[tid]);
 }
 
-module::Task* Sequence
+runtime::Task* Sequence
 ::exec_step(const size_t tid, const int frame_id)
 {
 	if (tid >= this->sequences.size())
@@ -753,7 +753,7 @@ module::Task* Sequence
 		throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
 	}
 
-	module::Task* executed_task = nullptr;
+	runtime::Task* executed_task = nullptr;
 	if (this->next_round_is_over[tid])
 	{
 		this->next_round_is_over[tid] = false;
@@ -820,11 +820,11 @@ module::Task* Sequence
 }
 
 template <class SS, class TA>
-Digraph_node<SS>* Sequence
-::init_recursive(Digraph_node<SS> *cur_subseq,
+tools::Digraph_node<SS>* Sequence
+::init_recursive(tools::Digraph_node<SS> *cur_subseq,
                  size_t &ssid,
                  size_t &taid,
-                 std::vector<std::pair<TA*,Digraph_node<SS>*>> &selectors,
+                 std::vector<std::pair<TA*,tools::Digraph_node<SS>*>> &selectors,
                  std::vector<TA*> &switchers,
                  TA &first,
                  TA &current_task,
@@ -833,7 +833,7 @@ Digraph_node<SS>* Sequence
                  std::vector<size_t> &real_lasts_id,
                  std::vector<TA*> &real_lasts,
                  std::map<TA*,unsigned> &in_sockets_feed,
-                 std::map<TA*,std::pair<Digraph_node<SS>*,size_t>> &task_subseq)
+                 std::map<TA*,std::pair<tools::Digraph_node<SS>*,size_t>> &task_subseq)
 {
 	if (this->tasks_inplace && !current_task.is_autoalloc())
 	{
@@ -866,7 +866,7 @@ Digraph_node<SS>* Sequence
 	}
 
 	bool is_last = true;
-	Digraph_node<SS>* last_subseq = nullptr;
+	tools::Digraph_node<SS>* last_subseq = nullptr;
 
 	if (auto switcher = dynamic_cast<const module::Switcher*>(&current_task.get_module()))
 	{
@@ -876,7 +876,7 @@ Digraph_node<SS>* Sequence
 			if (std::find(switchers.begin(), switchers.end(), &current_task) == switchers.end())
 			{
 				switchers.push_back(&current_task);
-				auto node_switcher = new Digraph_node<SS>({cur_subseq}, {}, nullptr, cur_subseq->get_depth() +1);
+				auto node_switcher = new tools::Digraph_node<SS>({cur_subseq}, {}, nullptr, cur_subseq->get_depth() +1);
 
 				node_switcher->set_contents(new SS());
 				node_switcher->get_c()->tasks.push_back(&current_task);
@@ -888,7 +888,7 @@ Digraph_node<SS>* Sequence
 
 				for (size_t sdo = 0; sdo < switcher->get_n_data_sockets(); sdo++)
 				{
-					auto node_switcher_son = new Digraph_node<SS>({node_switcher}, {}, nullptr,
+					auto node_switcher_son = new tools::Digraph_node<SS>({node_switcher}, {}, nullptr,
 						node_switcher->get_depth() +1);
 
 					node_switcher_son->set_contents(new SS());
@@ -924,7 +924,7 @@ Digraph_node<SS>* Sequence
 									if (dynamic_cast<const module::Switcher*>(&t.get_module()) &&
 										t.get_name() == "select")
 									{
-										Digraph_node<SS>* node_selector = nullptr;
+										tools::Digraph_node<SS>* node_selector = nullptr;
 										for (auto &sel : selectors)
 											if (sel.first == &t)
 											{
@@ -934,7 +934,7 @@ Digraph_node<SS>* Sequence
 
 										if (!node_selector)
 										{
-											node_selector = new Digraph_node<SS>({node_switcher_son}, {}, nullptr,
+											node_selector = new tools::Digraph_node<SS>({node_switcher_son}, {}, nullptr,
 												node_switcher_son->get_depth() +1);
 											selectors.push_back({&t, node_selector});
 										}
@@ -979,7 +979,7 @@ Digraph_node<SS>* Sequence
 		}
 		else if (current_task_name == "select") // ------------------------------------------------------------- SELECT
 		{
-			Digraph_node<SS>* node_selector = nullptr;
+			tools::Digraph_node<SS>* node_selector = nullptr;
 
 			for (auto &sel : selectors)
 				if (sel.first == &current_task)
@@ -990,7 +990,7 @@ Digraph_node<SS>* Sequence
 
 			if (!node_selector)
 			{
-				node_selector = new Digraph_node<SS>({cur_subseq}, {}, nullptr, cur_subseq->get_depth() +1);
+				node_selector = new tools::Digraph_node<SS>({cur_subseq}, {}, nullptr, cur_subseq->get_depth() +1);
 				selectors.push_back({&current_task, node_selector});
 			}
 
@@ -1002,7 +1002,7 @@ Digraph_node<SS>* Sequence
 
 			cur_subseq->add_child(node_selector);
 
-			auto node_selector_son = new Digraph_node<SS>({node_selector}, {}, nullptr, node_selector->get_depth() +1);
+			auto node_selector_son = new tools::Digraph_node<SS>({node_selector}, {}, nullptr, node_selector->get_depth() +1);
 
 			node_selector_son->set_contents(new SS());
 			node_selector_son->get_c()->id = ssid++;
@@ -1011,7 +1011,7 @@ Digraph_node<SS>* Sequence
 
 			for (auto &s : current_task.sockets)
 			{
-				if (current_task.get_socket_type(*s) == module::socket_t::SOUT)
+				if (current_task.get_socket_type(*s) == socket_t::SOUT)
 				{
 					auto bss = s->get_bound_sockets();
 					for (auto bs : bss)
@@ -1042,7 +1042,7 @@ Digraph_node<SS>* Sequence
 									if (dynamic_cast<const module::Switcher*>(&t.get_module()) &&
 										t.get_name() == "select")
 									{
-										Digraph_node<SS>* node_selector = nullptr;
+										tools::Digraph_node<SS>* node_selector = nullptr;
 										for (auto &sel : selectors)
 											if (sel.first == &t)
 											{
@@ -1052,7 +1052,7 @@ Digraph_node<SS>* Sequence
 
 										if (!node_selector)
 										{
-											node_selector = new Digraph_node<SS>({node_selector_son}, {}, nullptr,
+											node_selector = new tools::Digraph_node<SS>({node_selector_son}, {}, nullptr,
 												node_selector_son->get_depth() +1);
 											selectors.push_back({&t, node_selector});
 										}
@@ -1077,7 +1077,7 @@ Digraph_node<SS>* Sequence
 		{
 			for (auto &s : current_task.sockets)
 			{
-				if (current_task.get_socket_type(*s) == module::socket_t::SOUT)
+				if (current_task.get_socket_type(*s) == socket_t::SOUT)
 				{
 					auto bss = s->get_bound_sockets();
 					for (auto &bs : bss)
@@ -1107,7 +1107,7 @@ Digraph_node<SS>* Sequence
 									if (dynamic_cast<const module::Switcher*>(&t.get_module()) &&
 										t.get_name() == "select")
 									{
-										Digraph_node<SS>* node_selector = nullptr;
+										tools::Digraph_node<SS>* node_selector = nullptr;
 										for (auto &sel : selectors)
 											if (sel.first == &t)
 											{
@@ -1117,7 +1117,7 @@ Digraph_node<SS>* Sequence
 
 										if (!node_selector)
 										{
-											node_selector = new Digraph_node<SS>({cur_subseq}, {}, nullptr,
+											node_selector = new tools::Digraph_node<SS>({cur_subseq}, {}, nullptr,
 												cur_subseq->get_depth() +1);
 											selectors.push_back({&t, node_selector});
 										}
@@ -1130,7 +1130,7 @@ Digraph_node<SS>* Sequence
 						}
 					}
 				}
-				else if (current_task.get_socket_type(*s) == module::socket_t::SIN)
+				else if (current_task.get_socket_type(*s) == socket_t::SIN)
 				{
 					if (s->get_bound_sockets().size() > 1)
 					{
@@ -1163,12 +1163,12 @@ Digraph_node<SS>* Sequence
 
 template <class SS, class MO>
 void Sequence
-::duplicate(const Digraph_node<SS> *sequence)
+::duplicate(const tools::Digraph_node<SS> *sequence)
 {
 	std::set<MO*> modules_set;
 
-	std::function<void(const Digraph_node<SS>*, std::vector<const Digraph_node<SS>*> &)> collect_modules_list;
-	collect_modules_list = [&](const Digraph_node<SS> *node, std::vector<const Digraph_node<SS>*> &already_parsed_nodes)
+	std::function<void(const tools::Digraph_node<SS>*, std::vector<const tools::Digraph_node<SS>*> &)> collect_modules_list;
+	collect_modules_list = [&](const tools::Digraph_node<SS> *node, std::vector<const tools::Digraph_node<SS>*> &already_parsed_nodes)
 	{
 		if (node != nullptr &&
 		    std::find(already_parsed_nodes.begin(), already_parsed_nodes.end(), node) == already_parsed_nodes.end())
@@ -1181,7 +1181,7 @@ void Sequence
 				collect_modules_list(c, already_parsed_nodes);
 		}
 	};
-	std::vector<const Digraph_node<SS>*> already_parsed_nodes;
+	std::vector<const tools::Digraph_node<SS>*> already_parsed_nodes;
 	collect_modules_list(sequence, already_parsed_nodes);
 
 	std::vector<MO*> modules_vec;
@@ -1194,7 +1194,7 @@ void Sequence
 		if (this->is_thread_pinning())
 		{
 			const auto real_tid = tid + (this->tasks_inplace ? 1 : 0);
-			Thread_pinning::pin(this->puids[real_tid]);
+			tools::Thread_pinning::pin(this->puids[real_tid]);
 		}
 
 		this->modules[tid].resize(modules_vec.size());
@@ -1215,7 +1215,7 @@ void Sequence
 		}
 
 		if (this->is_thread_pinning())
-			Thread_pinning::unpin();
+			tools::Thread_pinning::unpin();
 	}
 
 	auto get_module_id = [](const std::vector<MO*> &modules, const module::Module &module)
@@ -1227,7 +1227,7 @@ void Sequence
 		return -1;
 	};
 
-	auto get_task_id = [](const std::vector<std::shared_ptr<module::Task>> &tasks, const module::Task &task)
+	auto get_task_id = [](const std::vector<std::shared_ptr<runtime::Task>> &tasks, const runtime::Task &task)
 	{
 		int t_id;
 		for (t_id = 0; t_id < (int)tasks.size(); t_id++)
@@ -1236,7 +1236,7 @@ void Sequence
 		return -1;
 	};
 
-	auto get_socket_id = [](const std::vector<std::shared_ptr<module::Socket>> &sockets, const module::Socket &socket)
+	auto get_socket_id = [](const std::vector<std::shared_ptr<runtime::Socket>> &sockets, const runtime::Socket &socket)
 	{
 		int s_id;
 		for (s_id = 0; s_id < (int)sockets.size(); s_id++)
@@ -1245,17 +1245,17 @@ void Sequence
 		return -1;
 	};
 
-	std::function<void(const Digraph_node<SS>*,
-	                         Digraph_node<Sub_sequence>*,
+	std::function<void(const tools::Digraph_node<SS>*,
+	                         tools::Digraph_node<Sub_sequence>*,
 	                   const size_t,
-	                         std::vector<const Digraph_node<SS>*>&,
-	                         std::map<size_t,Digraph_node<Sub_sequence>*>&)> duplicate_sequence;
+	                         std::vector<const tools::Digraph_node<SS>*>&,
+	                         std::map<size_t,tools::Digraph_node<Sub_sequence>*>&)> duplicate_sequence;
 
-	duplicate_sequence = [&](const Digraph_node<SS>           *sequence_ref,
-	                               Digraph_node<Sub_sequence> *sequence_cpy,
+	duplicate_sequence = [&](const tools::Digraph_node<SS>           *sequence_ref,
+	                               tools::Digraph_node<Sub_sequence> *sequence_cpy,
 	                         const size_t thread_id,
-	                               std::vector<const Digraph_node<SS>*> &already_parsed_nodes,
-	                               std::map<size_t,Digraph_node<Sub_sequence>*> &allocated_nodes)
+	                               std::vector<const tools::Digraph_node<SS>*> &already_parsed_nodes,
+	                               std::map<size_t,tools::Digraph_node<Sub_sequence>*> &allocated_nodes)
 	{
 		if (sequence_ref != nullptr && sequence_ref->get_c() &&
 		    std::find(already_parsed_nodes.begin(),
@@ -1286,9 +1286,9 @@ void Sequence
 				// replicate the sockets binding
 				for (size_t s_id = 0; s_id < t_ref->sockets.size(); s_id++)
 				{
-					if (t_ref->get_socket_type(*t_ref->sockets[s_id]) == module::socket_t::SIN)
+					if (t_ref->get_socket_type(*t_ref->sockets[s_id]) == socket_t::SIN)
 					{
-						const module::Socket* s_ref_out = nullptr;
+						const runtime::Socket* s_ref_out = nullptr;
 						try { s_ref_out = &t_ref->sockets[s_id]->get_bound_socket(); } catch (...) {}
 						if (s_ref_out)
 						{
@@ -1318,7 +1318,7 @@ void Sequence
 				// replicate the tasks binding
 				if (t_ref->is_no_input_socket() && t_ref->fake_input_socket != nullptr)
 				{
-					const module::Socket* s_ref_out = nullptr;
+					const runtime::Socket* s_ref_out = nullptr;
 					try { s_ref_out = &t_ref->fake_input_socket->get_bound_socket(); } catch (...) {}
 					if (s_ref_out)
 					{
@@ -1356,10 +1356,10 @@ void Sequence
 				              sequence_ref->get_children()[c]) != already_parsed_nodes.end())
 					sequence_cpy->add_child(allocated_nodes[sequence_ref->get_children()[c]->get_c()->id]);
 				else
-					sequence_cpy->add_child(new Digraph_node<Sub_sequence>({sequence_cpy},
-					                                                       {},
-					                                                       nullptr,
-					                                                       sequence_cpy->get_depth() +1));
+					sequence_cpy->add_child(new tools::Digraph_node<Sub_sequence>({sequence_cpy},
+					                                                              {},
+					                                                              nullptr,
+					                                                              sequence_cpy->get_depth() +1));
 			}
 
 			for (size_t c = 0; c < sequence_ref->get_children().size(); c++)
@@ -1368,9 +1368,9 @@ void Sequence
 		}
 	};
 
-	std::function<void(Digraph_node<Sub_sequence>*, std::vector<Digraph_node<Sub_sequence>*> &)> set_autoalloc_true =
-		[&set_autoalloc_true](Digraph_node<Sub_sequence>* node,
-		                      std::vector<Digraph_node<Sub_sequence>*> &already_parsed_nodes)
+	std::function<void(tools::Digraph_node<Sub_sequence>*, std::vector<tools::Digraph_node<Sub_sequence>*> &)> set_autoalloc_true =
+		[&set_autoalloc_true](tools::Digraph_node<Sub_sequence>* node,
+		                      std::vector<tools::Digraph_node<Sub_sequence>*> &already_parsed_nodes)
 		{
 			if (std::find(already_parsed_nodes.begin(),
 			              already_parsed_nodes.end(),
@@ -1388,26 +1388,26 @@ void Sequence
 	for (size_t thread_id = (this->tasks_inplace ? 1 : 0); thread_id < this->sequences.size(); thread_id++)
 	{
 		if (this->is_thread_pinning())
-			Thread_pinning::pin(this->puids[thread_id]);
+			tools::Thread_pinning::pin(this->puids[thread_id]);
 
-		this->sequences[thread_id] = new Digraph_node<Sub_sequence>({}, {}, nullptr, 0);
+		this->sequences[thread_id] = new tools::Digraph_node<Sub_sequence>({}, {}, nullptr, 0);
 		already_parsed_nodes.clear();
-		std::map<size_t,Digraph_node<Sub_sequence>*> allocated_nodes;
+		std::map<size_t,tools::Digraph_node<Sub_sequence>*> allocated_nodes;
 		duplicate_sequence(sequence, this->sequences[thread_id], thread_id, already_parsed_nodes, allocated_nodes);
-		std::vector<Digraph_node<Sub_sequence>*> already_parsed_nodes_bis;
+		std::vector<tools::Digraph_node<Sub_sequence>*> already_parsed_nodes_bis;
 		set_autoalloc_true(this->sequences[thread_id], already_parsed_nodes_bis);
 
 		if (this->is_thread_pinning())
-			Thread_pinning::unpin();
+			tools::Thread_pinning::unpin();
 	}
 }
 
-template void tools::Sequence::duplicate<tools::Sub_sequence_const, const module::Module>(const Digraph_node<tools::Sub_sequence_const>*);
-template void tools::Sequence::duplicate<tools::Sub_sequence,             module::Module>(const Digraph_node<tools::Sub_sequence      >*);
+template void runtime::Sequence::duplicate<runtime::Sub_sequence_const, const module::Module>(const tools::Digraph_node<runtime::Sub_sequence_const>*);
+template void runtime::Sequence::duplicate<runtime::Sub_sequence,             module::Module>(const tools::Digraph_node<runtime::Sub_sequence      >*);
 
 template <class SS>
 void Sequence
-::delete_tree(Digraph_node<SS> *node, std::vector<Digraph_node<SS>*> &already_deleted_nodes)
+::delete_tree(tools::Digraph_node<SS> *node, std::vector<tools::Digraph_node<SS>*> &already_deleted_nodes)
 {
 	if (node != nullptr &&
 	    std::find(already_deleted_nodes.begin(), already_deleted_nodes.end(), node) == already_deleted_nodes.end())
@@ -1421,8 +1421,8 @@ void Sequence
 	}
 }
 
-template void tools::Sequence::delete_tree<tools::Sub_sequence_const>(Digraph_node<tools::Sub_sequence_const>*, std::vector<Digraph_node<Sub_sequence_const>*> &already_deleted_nodes);
-template void tools::Sequence::delete_tree<tools::Sub_sequence      >(Digraph_node<tools::Sub_sequence      >*, std::vector<Digraph_node<Sub_sequence      >*> &already_deleted_nodes);
+template void runtime::Sequence::delete_tree<runtime::Sub_sequence_const>(tools::Digraph_node<runtime::Sub_sequence_const>*, std::vector<tools::Digraph_node<Sub_sequence_const>*> &already_deleted_nodes);
+template void runtime::Sequence::delete_tree<runtime::Sub_sequence      >(tools::Digraph_node<runtime::Sub_sequence      >*, std::vector<tools::Digraph_node<Sub_sequence      >*> &already_deleted_nodes);
 
 template <class VTA>
 void Sequence
@@ -1464,11 +1464,11 @@ void Sequence
 			bool static_input = false;
 			switch (t->get_socket_type(*s))
 			{
-				case module::socket_t::SIN:
+				case socket_t::SIN:
 					stype = "in[" + std::to_string(sid) + "]";
 					static_input = s->get_dataptr() != nullptr && s->bound_socket == nullptr;
 					break;
-				case module::socket_t::SOUT: stype = "out[" + std::to_string(sid) + "]"; break;
+				case socket_t::SOUT: stype = "out[" + std::to_string(sid) + "]"; break;
 				default: stype = "unkn"; break;
 			}
 
@@ -1503,8 +1503,8 @@ void Sequence
 	}
 }
 
-template void tools::Sequence::export_dot_subsequence<std::vector<      module::Task*>>(const std::vector<      module::Task*>&, const std::vector<size_t>&, const subseq_t&, const std::string&, const std::string&, std::ostream&) const;
-template void tools::Sequence::export_dot_subsequence<std::vector<const module::Task*>>(const std::vector<const module::Task*>&, const std::vector<size_t>&, const subseq_t&, const std::string&, const std::string&, std::ostream&) const;
+template void runtime::Sequence::export_dot_subsequence<std::vector<      runtime::Task*>>(const std::vector<      runtime::Task*>&, const std::vector<size_t>&, const subseq_t&, const std::string&, const std::string&, std::ostream&) const;
+template void runtime::Sequence::export_dot_subsequence<std::vector<const runtime::Task*>>(const std::vector<const runtime::Task*>&, const std::vector<size_t>&, const subseq_t&, const std::string&, const std::string&, std::ostream&) const;
 
 template <class VTA>
 void Sequence
@@ -1516,7 +1516,7 @@ void Sequence
 	{
 		for (auto &s : t->sockets)
 		{
-			if (t->get_socket_type(*s) == module::socket_t::SOUT)
+			if (t->get_socket_type(*s) == socket_t::SOUT)
 			{
 				auto &bss = s->get_bound_sockets();
 				size_t id = 0;
@@ -1530,8 +1530,8 @@ void Sequence
 	}
 }
 
-template void tools::Sequence::export_dot_connections<std::vector<      module::Task*>>(const std::vector<      module::Task*>&, const std::string&, std::ostream&) const;
-template void tools::Sequence::export_dot_connections<std::vector<const module::Task*>>(const std::vector<const module::Task*>&, const std::string&, std::ostream&) const;
+template void runtime::Sequence::export_dot_connections<std::vector<      runtime::Task*>>(const std::vector<      runtime::Task*>&, const std::string&, std::ostream&) const;
+template void runtime::Sequence::export_dot_connections<std::vector<const runtime::Task*>>(const std::vector<const runtime::Task*>&, const std::string&, std::ostream&) const;
 
 void Sequence
 ::export_dot(std::ostream &stream) const
@@ -1542,16 +1542,16 @@ void Sequence
 
 template <class SS>
 void Sequence
-::export_dot(Digraph_node<SS>* root, std::ostream &stream) const
+::export_dot(tools::Digraph_node<SS>* root, std::ostream &stream) const
 {
-	std::function<void(Digraph_node<SS>*,
+	std::function<void(tools::Digraph_node<SS>*,
 	                   const std::string&,
 	                   std::ostream&,
-	                   std::vector<Digraph_node<SS>*>&)> export_dot_subsequences_recursive =
-		[&export_dot_subsequences_recursive, this](Digraph_node<SS>* cur_node,
+	                   std::vector<tools::Digraph_node<SS>*>&)> export_dot_subsequences_recursive =
+		[&export_dot_subsequences_recursive, this](tools::Digraph_node<SS>* cur_node,
 		                                           const std::string &tab,
 		                                           std::ostream &stream,
-		                                           std::vector<Digraph_node<SS>*> &already_parsed_nodes)
+		                                           std::vector<tools::Digraph_node<SS>*> &already_parsed_nodes)
 		{
 			if (cur_node != nullptr &&
 			    std::find(already_parsed_nodes.begin(),
@@ -1571,14 +1571,14 @@ void Sequence
 			}
 		};
 
-	std::function<void(Digraph_node<SS>*,
+	std::function<void(tools::Digraph_node<SS>*,
 	                   const std::string&,
 	                   std::ostream&,
-	                   std::vector<Digraph_node<SS>*> &)> export_dot_connections_recursive =
-		[&export_dot_connections_recursive, this](Digraph_node<SS> *cur_node,
+	                   std::vector<tools::Digraph_node<SS>*> &)> export_dot_connections_recursive =
+		[&export_dot_connections_recursive, this](tools::Digraph_node<SS> *cur_node,
 		                                          const std::string &tab,
 		                                          std::ostream &stream,
-		                                          std::vector<Digraph_node<SS>*> &already_parsed_nodes)
+		                                          std::vector<tools::Digraph_node<SS>*> &already_parsed_nodes)
 		{
 			if (cur_node != nullptr &&
 				std::find(already_parsed_nodes.begin(),
@@ -1595,7 +1595,7 @@ void Sequence
 
 	std::string tab = "\t";
 	stream << "digraph Sequence {" << std::endl;
-	std::vector<Digraph_node<SS>*> already_parsed_nodes;
+	std::vector<tools::Digraph_node<SS>*> already_parsed_nodes;
 	export_dot_subsequences_recursive(root, tab, stream, already_parsed_nodes);
 	already_parsed_nodes.clear();
 	export_dot_connections_recursive (root, tab, stream, already_parsed_nodes);
@@ -1605,10 +1605,10 @@ void Sequence
 void Sequence
 ::gen_processes(const bool no_copy_mode)
 {
-	std::function<void(            Digraph_node<Sub_sequence>*,
-	                   std::vector<Digraph_node<Sub_sequence>*>&)> gen_processes_recursive =
-		[&gen_processes_recursive, no_copy_mode](            Digraph_node<Sub_sequence>   *cur_node,
-		                                         std::vector<Digraph_node<Sub_sequence>*> &already_parsed_nodes)
+	std::function<void(            tools::Digraph_node<Sub_sequence>*,
+	                   std::vector<tools::Digraph_node<Sub_sequence>*>&)> gen_processes_recursive =
+		[&gen_processes_recursive, no_copy_mode](            tools::Digraph_node<Sub_sequence>   *cur_node,
+		                                         std::vector<tools::Digraph_node<Sub_sequence>*> &already_parsed_nodes)
 		{
 			if (cur_node != nullptr &&
 			    std::find(already_parsed_nodes.begin(),
@@ -1617,7 +1617,7 @@ void Sequence
 			{
 				already_parsed_nodes.push_back(cur_node);
 
-				std::map<module::Task*, std::function<const int*()>> modified_tasks;
+				std::map<runtime::Task*, std::function<const int*()>> modified_tasks;
 				auto contents = cur_node->get_c();
 				contents->processes.clear();
 				contents->rebind_sockets.clear();
@@ -1638,9 +1638,9 @@ void Sequence
 						for (size_t s = 0; s < select_task->sockets.size() -1; s++)
 						{
 							// there should be only one output socket at this time
-							if (select_task->get_socket_type(*select_task->sockets[s]) == module::socket_t::SOUT)
+							if (select_task->get_socket_type(*select_task->sockets[s]) == socket_t::SOUT)
 							{
-								std::vector<module::Socket*> bound_sockets;
+								std::vector<runtime::Socket*> bound_sockets;
 								std::vector<void*> dataptrs;
 
 								auto bs = select_task->sockets[s]->get_bound_sockets();
@@ -1684,9 +1684,9 @@ void Sequence
 
 						for (size_t s = 0; s < commute_task->sockets.size() -1; s++)
 						{
-							if (commute_task->get_socket_type(*commute_task->sockets[s]) == module::socket_t::SOUT)
+							if (commute_task->get_socket_type(*commute_task->sockets[s]) == socket_t::SOUT)
 							{
-								std::vector<module::Socket*> bound_sockets;
+								std::vector<runtime::Socket*> bound_sockets;
 								std::vector<void*> dataptrs;
 
 								auto bs = commute_task->sockets[s]->get_bound_sockets();
@@ -1726,9 +1726,9 @@ void Sequence
 
 						for (size_t s = 0; s < pull_task->sockets.size() -1; s++)
 						{
-							if (pull_task->get_socket_type(*pull_task->sockets[s]) == module::socket_t::SOUT)
+							if (pull_task->get_socket_type(*pull_task->sockets[s]) == socket_t::SOUT)
 							{
-								std::vector<module::Socket*> bound_sockets;
+								std::vector<runtime::Socket*> bound_sockets;
 								std::vector<void*> dataptrs;
 
 								bound_sockets.push_back(pull_task->sockets[s].get());
@@ -1782,9 +1782,9 @@ void Sequence
 						contents->rebind_dataptrs.resize(rebind_id +1);
 
 						for (size_t s = 0; s < push_task->sockets.size() -1; s++)
-							if (push_task->get_socket_type(*push_task->sockets[s]) == module::socket_t::SIN)
+							if (push_task->get_socket_type(*push_task->sockets[s]) == socket_t::SIN)
 							{
-								std::vector<module::Socket*> bound_sockets;
+								std::vector<runtime::Socket*> bound_sockets;
 								std::vector<void*> dataptrs;
 
 								bound_sockets.push_back(push_task->sockets[s].get());
@@ -1850,23 +1850,23 @@ void Sequence
 	for (auto &sequence : this->sequences)
 	{
 		if (this->is_thread_pinning())
-			Thread_pinning::pin(this->puids[thread_id++]);
+			tools::Thread_pinning::pin(this->puids[thread_id++]);
 
-		std::vector<Digraph_node<Sub_sequence>*> already_parsed_nodes;
+		std::vector<tools::Digraph_node<Sub_sequence>*> already_parsed_nodes;
 		gen_processes_recursive(sequence, already_parsed_nodes);
 
 		if (this->is_thread_pinning())
-			Thread_pinning::unpin();
+			tools::Thread_pinning::unpin();
 	}
 }
 
 void Sequence
 ::reset_no_copy_mode()
 {
-	std::function<void(Digraph_node<Sub_sequence>*,
-	                   std::vector<Digraph_node<Sub_sequence>*> &)> reset_no_copy_mode_recursive =
-		[&reset_no_copy_mode_recursive](Digraph_node<Sub_sequence>* cur_node,
-		                                std::vector<Digraph_node<Sub_sequence>*> &already_parsed_nodes)
+	std::function<void(tools::Digraph_node<Sub_sequence>*,
+	                   std::vector<tools::Digraph_node<Sub_sequence>*> &)> reset_no_copy_mode_recursive =
+		[&reset_no_copy_mode_recursive](tools::Digraph_node<Sub_sequence>* cur_node,
+		                                std::vector<tools::Digraph_node<Sub_sequence>*> &already_parsed_nodes)
 		{
 			if (cur_node != nullptr &&
 			    std::find(already_parsed_nodes.begin(),
@@ -1925,7 +1925,7 @@ void Sequence
 
 	for (auto &sequence : this->sequences)
 	{
-		std::vector<Digraph_node<Sub_sequence>*> already_parsed_nodes;
+		std::vector<tools::Digraph_node<Sub_sequence>*> already_parsed_nodes;
 		reset_no_copy_mode_recursive(sequence, already_parsed_nodes);
 	}
 }
@@ -1957,10 +1957,10 @@ bool Sequence
 Sub_sequence* Sequence
 ::get_last_subsequence(const size_t tid)
 {
-	std::function<Sub_sequence*(Digraph_node<Sub_sequence>*,
-	              std::vector<Digraph_node<Sub_sequence>*>&)> get_last_subsequence_recursive =
-		[&get_last_subsequence_recursive](Digraph_node<Sub_sequence>* cur_node,
-		                                  std::vector<Digraph_node<Sub_sequence>*> &already_parsed_nodes) -> Sub_sequence*
+	std::function<Sub_sequence*(tools::Digraph_node<Sub_sequence>*,
+	              std::vector<tools::Digraph_node<Sub_sequence>*>&)> get_last_subsequence_recursive =
+		[&get_last_subsequence_recursive](tools::Digraph_node<Sub_sequence>* cur_node,
+		                                  std::vector<tools::Digraph_node<Sub_sequence>*> &already_parsed_nodes) -> Sub_sequence*
 		{
 			if (cur_node != nullptr &&
 			    std::find(already_parsed_nodes.begin(),
@@ -1980,17 +1980,17 @@ Sub_sequence* Sequence
 			}
 		};
 
-	std::vector<Digraph_node<Sub_sequence>*> already_parsed_nodes;
+	std::vector<tools::Digraph_node<Sub_sequence>*> already_parsed_nodes;
 	return get_last_subsequence_recursive(this->sequences[tid], already_parsed_nodes);
 }
 
 void Sequence
 ::update_tasks_id(const size_t tid)
 {
-	std::function<void(Digraph_node<Sub_sequence>*, size_t&,
-		               std::vector<Digraph_node<Sub_sequence>*> &)> update_tasks_id_recursive =
-		[&update_tasks_id_recursive](Digraph_node<Sub_sequence>* cur_node, size_t& taid,
-		                             std::vector<Digraph_node<Sub_sequence>*> &already_parsed_nodes)
+	std::function<void(tools::Digraph_node<Sub_sequence>*, size_t&,
+		               std::vector<tools::Digraph_node<Sub_sequence>*> &)> update_tasks_id_recursive =
+		[&update_tasks_id_recursive](tools::Digraph_node<Sub_sequence>* cur_node, size_t& taid,
+		                             std::vector<tools::Digraph_node<Sub_sequence>*> &already_parsed_nodes)
 		{
 			if (cur_node != nullptr &&
 			    std::find(already_parsed_nodes.begin(),
@@ -2009,19 +2009,19 @@ void Sequence
 		};
 
 	size_t taid = 0;
-	std::vector<Digraph_node<Sub_sequence>*> already_parsed_nodes;
+	std::vector<tools::Digraph_node<Sub_sequence>*> already_parsed_nodes;
 	return update_tasks_id_recursive(this->sequences[tid], taid, already_parsed_nodes);
 }
 
-std::vector<module::Task*> Sequence
+std::vector<runtime::Task*> Sequence
 ::get_tasks_from_id(const size_t taid)
 {
-	std::function<void(Digraph_node<Sub_sequence>*, const size_t, std::vector<module::Task*>&,
-		               std::vector<Digraph_node<Sub_sequence>*> &)> get_tasks_from_id_recursive =
-		[&get_tasks_from_id_recursive](Digraph_node<Sub_sequence>* cur_node,
+	std::function<void(tools::Digraph_node<Sub_sequence>*, const size_t, std::vector<runtime::Task*>&,
+		               std::vector<tools::Digraph_node<Sub_sequence>*> &)> get_tasks_from_id_recursive =
+		[&get_tasks_from_id_recursive](tools::Digraph_node<Sub_sequence>* cur_node,
 		                               const size_t taid,
-		                               std::vector<module::Task*> &tasks,
-		                               std::vector<Digraph_node<Sub_sequence>*> &already_parsed_nodes)
+		                               std::vector<runtime::Task*> &tasks,
+		                               std::vector<tools::Digraph_node<Sub_sequence>*> &already_parsed_nodes)
 		{
 			if (cur_node != nullptr &&
 			    std::find(already_parsed_nodes.begin(),
@@ -2045,10 +2045,10 @@ std::vector<module::Task*> Sequence
 			}
 		};
 
-	std::vector<module::Task*> tasks;
+	std::vector<runtime::Task*> tasks;
 	for (auto &s : this->sequences)
 	{
-		std::vector<Digraph_node<Sub_sequence>*> already_parsed_nodes;
+		std::vector<tools::Digraph_node<Sub_sequence>*> already_parsed_nodes;
 		get_tasks_from_id_recursive(s, taid, tasks, already_parsed_nodes);
 	}
 	return tasks;
@@ -2089,15 +2089,15 @@ void Sequence
 			throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
 		}
 
-		std::vector<std::pair<module::Socket*, module::Socket*>> unbind_sockets;
-		std::vector<std::pair<module::Task*, module::Socket*>> unbind_tasks;
-		std::function<void(const std::vector<module::Task*>, module::Task*)> unbind_sockets_recursive =
-		[&unbind_sockets, &unbind_tasks, &unbind_sockets_recursive](const std::vector<module::Task*> possessed_tsks,
-		                                                            module::Task* tsk_out)
+		std::vector<std::pair<runtime::Socket*, runtime::Socket*>> unbind_sockets;
+		std::vector<std::pair<runtime::Task*, runtime::Socket*>> unbind_tasks;
+		std::function<void(const std::vector<runtime::Task*>, runtime::Task*)> unbind_sockets_recursive =
+		[&unbind_sockets, &unbind_tasks, &unbind_sockets_recursive](const std::vector<runtime::Task*> possessed_tsks,
+		                                                            runtime::Task* tsk_out)
 		{
 			for (auto sck_out : tsk_out->sockets)
 			{
-				if (tsk_out->get_socket_type(*sck_out) == module::socket_t::SOUT)
+				if (tsk_out->get_socket_type(*sck_out) == socket_t::SOUT)
 				{
 					for (auto sck_in : sck_out->get_bound_sockets())
 					{

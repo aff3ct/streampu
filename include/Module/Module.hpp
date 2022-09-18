@@ -14,8 +14,8 @@
 
 #include "Tools/Interface/Interface_clone.hpp"
 #include "Tools/Interface/Interface_get_set_n_frames.hpp"
-#include "Module/Task.hpp"
-#include "Module/Socket.hpp"
+#include "Runtime/Task/Task.hpp"
+#include "Runtime/Socket/Socket.hpp"
 
 namespace aff3ct
 {
@@ -37,10 +37,10 @@ protected:
 	std::string name;         /*!< Name of the Module. */
 	std::string short_name;   /*!< Short name of the Module. */
 	std::string custom_name;  /*!< Custom name of the Module. */
-	std::vector<std::shared_ptr<Task>> tasks_with_nullptr;
+	std::vector<std::shared_ptr<runtime::Task>> tasks_with_nullptr;
 
 public:
-	std::vector<std::shared_ptr<Task>> tasks;
+	std::vector<std::shared_ptr<runtime::Task>> tasks;
 
 	/*!
 	 * \brief Constructor.
@@ -81,10 +81,10 @@ public:
 
 	void remove_custom_name();
 
-	inline       Task&   operator[](const size_t id            );
-	inline const Task&   operator[](const size_t id            ) const;
-	inline       Socket& operator[](const std::string &tsk_sck );
-	inline       Task&   operator()(const std::string &tsk_name);
+	inline       runtime::Task&   operator[](const size_t id            );
+	inline const runtime::Task&   operator[](const size_t id            ) const;
+	inline       runtime::Socket& operator[](const std::string &tsk_sck );
+	inline       runtime::Task&   operator()(const std::string &tsk_name);
 
 	void set_fast(const bool fast);
 
@@ -97,19 +97,19 @@ protected:
 
 	void set_short_name(const std::string &short_name);
 
-	Task& create_task(const std::string &name, const int id = -1);
+	runtime::Task& create_task(const std::string &name, const int id = -1);
 
 	template <typename T>
-	size_t create_socket_in(Task& task, const std::string &name, const size_t n_elmts);
-	size_t create_socket_in(Task& task, const std::string &name, const size_t n_elmts, const std::type_index& datatype);
+	size_t create_socket_in(runtime::Task& task, const std::string &name, const size_t n_elmts);
+	size_t create_socket_in(runtime::Task& task, const std::string &name, const size_t n_elmts, const std::type_index& datatype);
 
 	template <typename T>
-	size_t create_socket_out(Task& task, const std::string &name, const size_t n_elmts);
-	size_t create_socket_out(Task& task, const std::string &name, const size_t n_elmts, const std::type_index& datatype);
+	size_t create_socket_out(runtime::Task& task, const std::string &name, const size_t n_elmts);
+	size_t create_socket_out(runtime::Task& task, const std::string &name, const size_t n_elmts, const std::type_index& datatype);
 
-	void create_codelet(Task& task, std::function<int(Module &m, Task &t, const size_t frame_id)> codelet);
+	void create_codelet(runtime::Task& task, std::function<int(Module &m, runtime::Task &t, const size_t frame_id)> codelet);
 
-	void register_timer(Task& task, const std::string &key);
+	void register_timer(runtime::Task& task, const std::string &key);
 
 	virtual void set_n_frames_per_wave(const size_t n_frames_per_wave);
 

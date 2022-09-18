@@ -6,14 +6,14 @@ namespace module
 {
 
 template <typename T>
-Task& Incrementer<T>
+runtime::Task& Incrementer<T>
 ::operator[](const inc::tsk t)
 {
 	return Module::operator[]((size_t)t);
 }
 
 template <typename T>
-Socket& Incrementer<T>
+runtime::Socket& Incrementer<T>
 ::operator[](const inc::sck::increment s)
 {
 	return Module::operator[]((size_t)inc::tsk::increment)[(size_t)s];

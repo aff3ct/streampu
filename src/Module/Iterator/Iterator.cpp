@@ -19,19 +19,19 @@ Iterator
 
 	auto &p1 = this->create_task("iterate");
 	const auto p1s_out = this->create_socket_out(p1, "out", 1, typeid(int8_t));
-	this->create_codelet(p1, [p1s_out](Module &m, Task &t, const size_t frame_id) -> int
+	this->create_codelet(p1, [p1s_out](Module &m, runtime::Task &t, const size_t frame_id) -> int
 	{
 		auto &ite = static_cast<Iterator&>(m);
 		ite._iterate(static_cast<int8_t*>(t[p1s_out].get_dataptr()), frame_id);
-		return status_t::SUCCESS;
+		return runtime::status_t::SUCCESS;
 	});
 
 	auto &p2 = this->create_task("reset");
-	this->create_codelet(p2, [](Module &m, Task &t, const size_t frame_id) -> int
+	this->create_codelet(p2, [](Module &m, runtime::Task &t, const size_t frame_id) -> int
 	{
 		auto &ite = static_cast<Iterator&>(m);
 		ite.reset();
-		return status_t::SUCCESS;
+		return runtime::status_t::SUCCESS;
 	});
 }
 

@@ -15,19 +15,19 @@ Controller
 
 	auto &p1 = this->create_task("control");
 	const auto p1s_out = this->create_socket_out(p1, "out", 1, typeid(int8_t));
-	this->create_codelet(p1, [p1s_out](Module &m, Task &t, const size_t frame_id) -> int
+	this->create_codelet(p1, [p1s_out](Module &m, runtime::Task &t, const size_t frame_id) -> int
 	{
 		auto &ctr = static_cast<Controller&>(m);
 		ctr._control(static_cast<int8_t*>(t[p1s_out].get_dataptr()), frame_id);
-		return status_t::SUCCESS;
+		return runtime::status_t::SUCCESS;
 	});
 
 	auto &p2 = this->create_task("reset");
-	this->create_codelet(p2, [](Module &m, Task &t, const size_t frame_id) -> int
+	this->create_codelet(p2, [](Module &m, runtime::Task &t, const size_t frame_id) -> int
 	{
 		auto &ctr = static_cast<Controller&>(m);
 		ctr.reset();
-		return status_t::SUCCESS;
+		return runtime::status_t::SUCCESS;
 	});
 }
 

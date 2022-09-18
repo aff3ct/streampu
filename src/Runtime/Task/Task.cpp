@@ -8,14 +8,14 @@
 
 #include "Tools/Exception/exception.hpp"
 #include "Module/Module.hpp"
-#include "Module/Socket.hpp"
-#include "Module/Task.hpp"
+#include "Runtime/Socket/Socket.hpp"
+#include "Runtime/Task/Task.hpp"
 
 using namespace aff3ct;
-using namespace aff3ct::module;
+using namespace aff3ct::runtime;
 
 Task
-::Task(Module &module, const std::string &name, const bool autoalloc, const bool stats, const bool fast,
+::Task(module::Module &module, const std::string &name, const bool autoalloc, const bool stats, const bool fast,
        const bool debug)
 : module(&module),
   name(name),
@@ -28,7 +28,7 @@ Task
   debug_limit(-1),
   debug_precision(2),
   debug_frame_max(-1),
-  codelet([](Module &m, Task &t, const size_t frame_id) -> int
+  codelet([](module::Module &m, Task &t, const size_t frame_id) -> int
   	{ throw tools::unimplemented_error(__FILE__, __LINE__, __func__); return 0; }),
   n_input_sockets(0),
   n_output_sockets(0),
@@ -625,7 +625,7 @@ size_t Task
 }
 
 void Task
-::create_codelet(std::function<int(Module &m, Task& t, const size_t frame_id)> &codelet)
+::create_codelet(std::function<int(module::Module &m, Task& t, const size_t frame_id)> &codelet)
 {
 	this->codelet = codelet;
 

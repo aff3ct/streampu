@@ -1,6 +1,6 @@
 /*!
  * \file
- * \brief Class tools::Sequence.
+ * \brief Class runtime::Sequence.
  */
 #ifndef SEQUENCE_HPP_
 #define SEQUENCE_HPP_
@@ -14,7 +14,7 @@
 #include <mutex>
 #include <map>
 
-#include "Module/Socket.hpp"
+#include "Runtime/Socket/Socket.hpp"
 #include "Tools/Interface/Interface_clone.hpp"
 #include "Tools/Algo/Digraph/Digraph_node.hpp"
 #include "Tools/Interface/Interface_get_set_n_frames.hpp"
@@ -27,13 +27,13 @@ namespace module
 class Task;
 class Module;
 }
-namespace tools
+namespace runtime
 {
 class Pipeline;
 
 enum class subseq_t : size_t { STD, COMMUTE, SELECT };
 
-template <class VTA = std::vector<module::Task*>>
+template <class VTA = std::vector<runtime::Task*>>
 class Sub_sequence_generic
 {
 public:
@@ -44,27 +44,27 @@ public:
 	size_t id;
 
 	// usefull in case of adaptor to make zero copy and restore original states at the end of the chain execution
-	std::vector<std::vector<std::vector<module::Socket*>>> rebind_sockets;
+	std::vector<std::vector<std::vector<Socket*>>> rebind_sockets;
 	std::vector<std::vector<std::vector<void*>>> rebind_dataptrs;
 
 	explicit Sub_sequence_generic() : type(subseq_t::STD), id(0) {}
 	virtual ~Sub_sequence_generic() = default;
 };
 
-using Sub_sequence       = Sub_sequence_generic<std::vector<      module::Task*>>;
-using Sub_sequence_const = Sub_sequence_generic<std::vector<const module::Task*>>;
+using Sub_sequence       = Sub_sequence_generic<std::vector<      runtime::Task*>>;
+using Sub_sequence_const = Sub_sequence_generic<std::vector<const runtime::Task*>>;
 
-class Sequence : public Interface_clone, public Interface_get_set_n_frames, public Interface_is_done
+class Sequence : public tools::Interface_clone, public tools::Interface_get_set_n_frames, public tools::Interface_is_done
 {
 	friend Pipeline;
 
 protected:
 	size_t n_threads;
-	std::vector<Digraph_node<Sub_sequence>*> sequences;
+	std::vector<tools::Digraph_node<Sub_sequence>*> sequences;
 	std::vector<size_t> firsts_tasks_id;
 	std::vector<size_t> lasts_tasks_id;
-	std::vector<std::vector<module::Task*>> firsts_tasks;
-	std::vector<std::vector<module::Task*>> lasts_tasks;
+	std::vector<std::vector<runtime::Task*>> firsts_tasks;
+	std::vector<std::vector<runtime::Task*>> lasts_tasks;
 	std::vector<std::vector<std::shared_ptr<module::Module>>> modules;
 	std::vector<std::vector<module::Module*>> all_modules;
 	std::shared_ptr<std::mutex> mtx_exception;
@@ -76,7 +76,7 @@ protected:
 	bool thread_pinning;
 	std::vector<size_t> puids;
 	bool no_copy_mode;
-	const std::vector<const module::Task*> saved_exclusions;
+	const std::vector<const runtime::Task*> saved_exclusions;
 	std::vector<tools::Interface_is_done*> donners;
 	std::vector<std::vector<tools::Interface_reset*>> switchers_reset;
 	bool auto_stop;
@@ -85,58 +85,58 @@ protected:
 	// internal state for the `exec_step` method
 	std::vector<bool> next_round_is_over;
 	std::vector<size_t> cur_task_id;
-	std::vector<Digraph_node<Sub_sequence>*> cur_ss;
+	std::vector<tools::Digraph_node<Sub_sequence>*> cur_ss;
 
 public:
-	Sequence(const std::vector<const module::Task*> &firsts,
+	Sequence(const std::vector<const runtime::Task*> &firsts,
 	         const size_t n_threads = 1,
 	         const bool thread_pinning = false,
 	         const std::vector<size_t> &puids = {} );
-	Sequence(const std::vector<const module::Task*> &firsts,
-	         const std::vector<const module::Task*> &lasts,
+	Sequence(const std::vector<const runtime::Task*> &firsts,
+	         const std::vector<const runtime::Task*> &lasts,
 	         const size_t n_threads = 1,
 	         const bool thread_pinning = false,
 	         const std::vector<size_t> &puids = {});
-	Sequence(const std::vector<const module::Task*> &firsts,
-	         const std::vector<const module::Task*> &lasts,
-	         const std::vector<const module::Task*> &exclusions,
+	Sequence(const std::vector<const runtime::Task*> &firsts,
+	         const std::vector<const runtime::Task*> &lasts,
+	         const std::vector<const runtime::Task*> &exclusions,
 	         const size_t n_threads = 1,
 	         const bool thread_pinning = false,
 	         const std::vector<size_t> &puids = {});
-	Sequence(const module::Task &first,
+	Sequence(const runtime::Task &first,
 	         const size_t n_threads = 1,
 	         const bool thread_pinning = false,
 	         const std::vector<size_t> &puids = {} );
-	Sequence(const module::Task &first,
-	         const module::Task &last,
+	Sequence(const runtime::Task &first,
+	         const runtime::Task &last,
 	         const size_t n_threads = 1,
 	         const bool thread_pinning = false,
 	         const std::vector<size_t> &puids = {});
-	Sequence(const std::vector<module::Task*> &firsts,
+	Sequence(const std::vector<runtime::Task*> &firsts,
 	         const size_t n_threads = 1,
 	         const bool thread_pinning = false,
 	         const std::vector<size_t> &puids = {},
 	         const bool tasks_inplace = true);
-	Sequence(const std::vector<module::Task*> &firsts,
-	         const std::vector<module::Task*> &lasts,
+	Sequence(const std::vector<runtime::Task*> &firsts,
+	         const std::vector<runtime::Task*> &lasts,
 	         const size_t n_threads = 1,
 	         const bool thread_pinning = false,
 	         const std::vector<size_t> &puids = {},
 	         const bool tasks_inplace = true);
-	Sequence(const std::vector<module::Task*> &firsts,
-	         const std::vector<module::Task*> &lasts,
-	         const std::vector<module::Task*> &exclusions,
+	Sequence(const std::vector<runtime::Task*> &firsts,
+	         const std::vector<runtime::Task*> &lasts,
+	         const std::vector<runtime::Task*> &exclusions,
 	         const size_t n_threads = 1,
 	         const bool thread_pinning = false,
 	         const std::vector<size_t> &puids = {},
 	         const bool tasks_inplace = true);
-	Sequence(module::Task &first,
+	Sequence(runtime::Task &first,
 	         const size_t n_threads = 1,
 	         const bool thread_pinning = false,
 	         const std::vector<size_t> &puids = {},
 	         const bool tasks_inplace = true);
-	Sequence(module::Task &first,
-	         module::Task &last,
+	Sequence(runtime::Task &first,
+	         runtime::Task &last,
 	         const size_t n_threads = 1,
 	         const bool thread_pinning = false,
 	         const std::vector<size_t> &puids = {},
@@ -149,11 +149,11 @@ public:
 	void set_thread_pinning(const bool thread_pinning, const std::vector<size_t> &puids = {});
 	bool is_thread_pinning();
 
-	void          exec     (std::function<bool(const std::vector<const int*>&)> stop_condition);
-	void          exec     (std::function<bool(                              )> stop_condition);
-	void          exec     (                                                                  );
-	void          exec_seq (const size_t tid = 0, const int frame_id = -1                     );
-	module::Task* exec_step(const size_t tid = 0, const int frame_id = -1                     );
+	void           exec     (std::function<bool(const std::vector<const int*>&)> stop_condition);
+	void           exec     (std::function<bool(                              )> stop_condition);
+	void           exec     (                                                                  );
+	void           exec_seq (const size_t tid = 0, const int frame_id = -1                     );
+	runtime::Task* exec_step(const size_t tid = 0, const int frame_id = -1                     );
 
 	inline size_t get_n_threads() const;
 
@@ -165,11 +165,11 @@ public:
 	std::vector<std::vector<module::Module*>> get_modules_per_threads() const;
 	std::vector<std::vector<module::Module*>> get_modules_per_types  () const;
 
-	std::vector<std::vector<module::Task*>> get_tasks_per_threads() const;
-	std::vector<std::vector<module::Task*>> get_tasks_per_types  () const;
+	std::vector<std::vector<runtime::Task*>> get_tasks_per_threads() const;
+	std::vector<std::vector<runtime::Task*>> get_tasks_per_types  () const;
 
-	inline const std::vector<std::vector<module::Task*>>& get_firsts_tasks() const;
-	inline const std::vector<std::vector<module::Task*>>& get_lasts_tasks () const;
+	inline const std::vector<std::vector<runtime::Task*>>& get_firsts_tasks() const;
+	inline const std::vector<std::vector<runtime::Task*>>& get_lasts_tasks () const;
 
 	void export_dot(std::ostream &stream = std::cout) const;
 
@@ -186,22 +186,22 @@ public:
 
 protected:
 	template <class SS>
-	void delete_tree(Digraph_node<SS> *node, std::vector<Digraph_node<SS>*> &already_deleted_nodes);
+	void delete_tree(tools::Digraph_node<SS> *node, std::vector<tools::Digraph_node<SS>*> &already_deleted_nodes);
 
 	template <class SS, class TA>
-	Digraph_node<SS>* init_recursive(Digraph_node<SS> *cur_subseq,
-	                                 size_t &ssid,
-	                                 size_t &taid,
-	                                 std::vector<std::pair<TA*,Digraph_node<SS>*>> &selectors,
-	                                 std::vector<TA*> &switchers,
-	                                 TA& first,
-	                                 TA& current_task,
-	                                 const std::vector<TA*> &lasts,
-	                                 const std::vector<TA*> &exclusions,
-	                                 std::vector<size_t> &real_lasts_id,
-	                                 std::vector<TA*> &real_lasts,
-	                                 std::map<TA*,unsigned> &in_sockets_feed,
-	                                 std::map<TA*,std::pair<Digraph_node<SS>*,size_t>> &task_subseq);
+	tools::Digraph_node<SS>* init_recursive(tools::Digraph_node<SS> *cur_subseq,
+	                                        size_t &ssid,
+	                                        size_t &taid,
+	                                        std::vector<std::pair<TA*,tools::Digraph_node<SS>*>> &selectors,
+	                                        std::vector<TA*> &switchers,
+	                                        TA& first,
+	                                        TA& current_task,
+	                                        const std::vector<TA*> &lasts,
+	                                        const std::vector<TA*> &exclusions,
+	                                        std::vector<size_t> &real_lasts_id,
+	                                        std::vector<TA*> &real_lasts,
+	                                        std::map<TA*,unsigned> &in_sockets_feed,
+	                                        std::map<TA*,std::pair<tools::Digraph_node<SS>*,size_t>> &task_subseq);
 
 	template <class VTA>
 	void export_dot_subsequence(const VTA &subseq,
@@ -217,18 +217,18 @@ protected:
 	                                  std::ostream &stream = std::cout) const;
 
 	template <class SS>
-	void export_dot(Digraph_node<SS>* root, std::ostream &stream = std::cout) const;
+	void export_dot(tools::Digraph_node<SS>* root, std::ostream &stream = std::cout) const;
 
 	template <class SS, class MO>
-	void duplicate(const Digraph_node<SS> *sequence);
+	void duplicate(const tools::Digraph_node<SS> *sequence);
 
 	void _exec(const size_t tid,
 	           std::function<bool(const std::vector<const int*>&)> &stop_condition,
-	           Digraph_node<Sub_sequence>* sequence);
+	           tools::Digraph_node<Sub_sequence>* sequence);
 
 	void _exec_without_statuses(const size_t tid,
 	                            std::function<bool()> &stop_condition,
-	                            Digraph_node<Sub_sequence>* sequence);
+	                            tools::Digraph_node<Sub_sequence>* sequence);
 
 	void gen_processes(const bool no_copy_mode = false);
 	void reset_no_copy_mode();
@@ -236,7 +236,7 @@ protected:
 	Sub_sequence* get_last_subsequence(const size_t tid);
 	void update_tasks_id(const size_t tid);
 
-	std::vector<module::Task*> get_tasks_from_id(const size_t taid);
+	std::vector<runtime::Task*> get_tasks_from_id(const size_t taid);
 
 	void update_firsts_and_lasts_tasks();
 
@@ -244,13 +244,13 @@ private:
 	template <class SS, class TA>
 	void init(const std::vector<TA*> &firsts, const std::vector<TA*> &lasts, const std::vector<TA*> &exclusions);
 	template <class SS>
-	inline void _init(Digraph_node<SS> *root);
+	inline void _init(tools::Digraph_node<SS> *root);
 };
 }
 }
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
-#include "Tools/Sequence/Sequence.hxx"
+#include "Runtime/Sequence/Sequence.hxx"
 #endif
 
 #endif /* SEQUENCE_HPP_ */

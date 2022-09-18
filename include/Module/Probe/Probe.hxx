@@ -9,14 +9,14 @@ namespace module
 {
 
 template <typename T>
-Task& Probe<T>
+runtime::Task& Probe<T>
 ::operator[](const prb::tsk t)
 {
 	return Module::operator[]((int)t);
 }
 
 template <typename T>
-Socket& Probe<T>
+runtime::Socket& Probe<T>
 ::operator[](const prb::sck::probe s)
 {
 	return Module::operator[]((int)prb::tsk::probe)[(int)s];
@@ -41,14 +41,14 @@ Probe<T>
 
 	auto &p1 = this->create_task("probe");
 	auto p1s_in = this->template create_socket_in<T>(p1, "in", this->size);
-	this->create_codelet(p1, [p1s_in](Module &m, Task &t, const size_t frame_id) -> int
+	this->create_codelet(p1, [p1s_in](Module &m, runtime::Task &t, const size_t frame_id) -> int
 	{
 		auto &prb = static_cast<Probe<T>&>(m);
 
 		prb._probe(static_cast<const T*>(t[p1s_in].get_dataptr()),
 		           frame_id);
 
-		return status_t::SUCCESS;
+		return runtime::status_t::SUCCESS;
 	});
 }
 

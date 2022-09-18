@@ -6,14 +6,14 @@ namespace module
 {
 
 template <typename T>
-Task& Finalizer<T>
+runtime::Task& Finalizer<T>
 ::operator[](const fin::tsk t)
 {
 	return Module::operator[]((size_t)t);
 }
 
 template <typename T>
-Socket& Finalizer<T>
+runtime::Socket& Finalizer<T>
 ::operator[](const fin::sck::finalize s)
 {
 	return Module::operator[]((size_t)fin::tsk::finalize)[(size_t)s];

@@ -6,14 +6,14 @@ namespace module
 {
 
 template <typename TI, typename TO, tools::proto_bop<TI,TO> BOP>
-Task& Binaryop<TI,TO,BOP>
+runtime::Task& Binaryop<TI,TO,BOP>
 ::operator[](const bop::tsk t)
 {
 	return Module::operator[]((size_t)t);
 }
 
 template <typename TI, typename TO, tools::proto_bop<TI,TO> BOP>
-Socket& Binaryop<TI,TO,BOP>
+runtime::Socket& Binaryop<TI,TO,BOP>
 ::operator[](const bop::sck::perform s)
 {
 	return Module::operator[]((size_t)bop::tsk::perform)[(size_t)s];
@@ -39,14 +39,14 @@ Binaryop<TI,TO,BOP>
 	auto ps1_in = this->template create_socket_in <TI>(p, "in1", this->n_elmts);
 	auto ps2_in = this->template create_socket_in <TI>(p, "in2", this->n_elmts);
 	auto ps_out = this->template create_socket_out<TO>(p, "out", this->n_elmts);
-	this->create_codelet(p, [ps1_in, ps2_in, ps_out](Module &m, Task &t, const size_t frame_id) -> int
+	this->create_codelet(p, [ps1_in, ps2_in, ps_out](Module &m, runtime::Task &t, const size_t frame_id) -> int
 	{
 		auto &bop = static_cast<Binaryop&>(m);
 		bop._perform(static_cast<const TI*>(t[ps1_in].get_dataptr()),
 		             static_cast<const TI*>(t[ps2_in].get_dataptr()),
 		             static_cast<      TO*>(t[ps_out].get_dataptr()),
 		             frame_id);
-		return status_t::SUCCESS;
+		return runtime::status_t::SUCCESS;
 	});
 }
 

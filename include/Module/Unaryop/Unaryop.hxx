@@ -6,14 +6,14 @@ namespace module
 {
 
 template <typename TI, typename TO, tools::proto_uop<TI,TO> UOP>
-Task& Unaryop<TI,TO,UOP>
+runtime::Task& Unaryop<TI,TO,UOP>
 ::operator[](const uop::tsk t)
 {
 	return Module::operator[]((size_t)t);
 }
 
 template <typename TI, typename TO, tools::proto_uop<TI,TO> UOP>
-Socket& Unaryop<TI,TO,UOP>
+runtime::Socket& Unaryop<TI,TO,UOP>
 ::operator[](const uop::sck::perform s)
 {
 	return Module::operator[]((size_t)uop::tsk::perform)[(size_t)s];
@@ -38,13 +38,13 @@ Unaryop<TI,TO,UOP>
 	auto &p = this->create_task("perform");
 	auto ps_in  = this->template create_socket_in <TI>(p, "in",  this->n_elmts);
 	auto ps_out = this->template create_socket_out<TO>(p, "out", this->n_elmts);
-	this->create_codelet(p, [ps_in, ps_out](Module &m, Task &t, const size_t frame_id) -> int
+	this->create_codelet(p, [ps_in, ps_out](Module &m, runtime::Task &t, const size_t frame_id) -> int
 	{
 		auto &uop = static_cast<Unaryop&>(m);
 		uop._perform(static_cast<const TI*>(t[ps_in ].get_dataptr()),
 		             static_cast<      TO*>(t[ps_out].get_dataptr()),
 		             frame_id);
-		return status_t::SUCCESS;
+		return runtime::status_t::SUCCESS;
 	});
 }
 

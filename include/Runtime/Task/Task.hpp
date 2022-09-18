@@ -1,6 +1,6 @@
 /*!
  * \file
- * \brief Class module::Task.
+ * \brief Class runtime::Task.
  */
 #ifndef TASK_HPP_
 #define TASK_HPP_
@@ -23,6 +23,9 @@ namespace aff3ct
 namespace module
 {
 class Module;
+}
+namespace runtime
+{
 class Socket;
 
 enum status_t : int { SUCCESS = 0,
@@ -42,11 +45,11 @@ class Task : public tools::Interface_clone, public tools::Interface_reset
 {
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 	friend Socket;
-	friend Module;
+	friend module::Module;
 #endif
 
 protected:
-	Module *module;
+	module::Module *module;
 	const std::string name;
 	bool autoalloc;
 	bool stats;
@@ -57,7 +60,7 @@ protected:
 	int32_t debug_limit;
 	uint8_t debug_precision;
 	int32_t debug_frame_max;
-	std::function<int(Module &m, Task& t, const size_t frame_id)> codelet;
+	std::function<int(module::Module &m, Task& t, const size_t frame_id)> codelet;
 	size_t n_input_sockets;
 	size_t n_output_sockets;
 
@@ -88,7 +91,7 @@ public:
 	std::shared_ptr<Socket> fake_input_socket;
 	std::vector<std::shared_ptr<Socket>> sockets;
 
-	Task(      Module &module,
+	Task(      module::Module &module,
 	     const std::string &name,
 	     const bool autoalloc = true,
 	     const bool stats     = false,
@@ -116,10 +119,10 @@ public:
 	inline bool is_last_input_socket(const Socket &s_in) const;
 	       bool can_exec            (                  ) const;
 
-	inline Module&     get_module     (               ) const;
-	inline std::string get_name       (               ) const;
-	inline uint32_t    get_n_calls    (               ) const;
-	       socket_t    get_socket_type(const Socket &s) const;
+	inline module::Module& get_module     (               ) const;
+	inline std::string     get_name       (               ) const;
+	inline uint32_t        get_n_calls    (               ) const;
+	       socket_t        get_socket_type(const Socket &s) const;
 
 	// get stats
 	std::chrono::nanoseconds                     get_duration_total() const;
@@ -168,7 +171,7 @@ protected:
 	size_t create_socket_out(const std::string &name, const size_t n_elmts, const std::type_index& datatype,
 	                         const bool hack_status = false);
 
-	void create_codelet(std::function<int(Module &m, Task& t, const size_t frame_id)> &codelet);
+	void create_codelet(std::function<int(module::Module &m, Task& t, const size_t frame_id)> &codelet);
 
 	void update_n_frames(const size_t old_n_frames, const size_t new_n_frames);
 
@@ -182,7 +185,7 @@ private:
 }
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
-#include "Module/Task.hxx"
+#include "Runtime/Task/Task.hxx"
 #endif
 
 #endif /* TASK_HPP_ */

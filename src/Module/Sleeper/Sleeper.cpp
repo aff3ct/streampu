@@ -16,11 +16,11 @@ Sleeper
 	this->set_short_name(name);
 
 	auto &p = this->create_task("sleep");
-	this->create_codelet(p, [](Module &m, Task &t, const size_t frame_id) -> int
+	this->create_codelet(p, [](Module &m, runtime::Task &t, const size_t frame_id) -> int
 	{
 		auto &slp = static_cast<Sleeper&>(m);
 		slp._sleep(frame_id);
-		return status_t::SUCCESS;
+		return runtime::status_t::SUCCESS;
 	});
 }
 

@@ -11,10 +11,10 @@
 #include <vector>
 #include <typeindex>
 
-#include "Module/Task.hpp"
-#include "Module/Socket.hpp"
+#include "Runtime/Task/Task.hpp"
+#include "Runtime/Socket/Socket.hpp"
 #include "Module/Module.hpp"
-#include "Tools/Sequence/Sequence.hpp"
+#include "Runtime/Sequence/Sequence.hpp"
 #include "Tools/Interface/Interface_reset.hpp"
 
 namespace aff3ct
@@ -28,11 +28,11 @@ namespace module
 
 class Switcher : public Module, public tools::Interface_reset
 {
-friend tools::Sequence; // Sequence is friend to enable the no copy mode (0 copy)
+friend runtime::Sequence; // Sequence is friend to enable the no copy mode (0 copy)
 
 public:
-	inline       Task& operator[](const swi::tsk t);
-	inline const Task& operator[](const swi::tsk t) const;
+	inline       runtime::Task& operator[](const swi::tsk t);
+	inline const runtime::Task& operator[](const swi::tsk t) const;
 
 protected:
 	const size_t n_data_sockets;

@@ -25,13 +25,13 @@ Incrementer<T>
 	auto &p = this->create_task("increment");
 	auto ps_in  = this->template create_socket_in <T>(p, "in",  this->n_elmts);
 	auto ps_out = this->template create_socket_out<T>(p, "out", this->n_elmts);
-	this->create_codelet(p, [ps_in, ps_out](Module &m, Task &t, const size_t frame_id) -> int
+	this->create_codelet(p, [ps_in, ps_out](Module &m, runtime::Task &t, const size_t frame_id) -> int
 	{
 		auto &inc = static_cast<Incrementer&>(m);
 		inc._increment(static_cast<const T*>(t[ps_in ].get_dataptr()),
 		               static_cast<      T*>(t[ps_out].get_dataptr()),
 		               frame_id);
-		return status_t::SUCCESS;
+		return runtime::status_t::SUCCESS;
 	});
 }
 

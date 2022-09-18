@@ -14,8 +14,8 @@
 #include <condition_variable>
 #include <mutex>
 
-#include "Module/Task.hpp"
-#include "Module/Socket.hpp"
+#include "Runtime/Task/Task.hpp"
+#include "Runtime/Socket/Socket.hpp"
 #include "Module/Adaptor/Adaptor.hpp"
 
 namespace aff3ct
@@ -26,9 +26,9 @@ namespace module
 class Adaptor_n_to_1 : public Adaptor
 {
 public:
-	inline Task&   operator[](const adp::tsk         t);
-	inline Socket& operator[](const adp::sck::push_n s);
-	inline Socket& operator[](const adp::sck::pull_1 s);
+	inline runtime::Task&   operator[](const adp::tsk         t);
+	inline runtime::Socket& operator[](const adp::sck::push_n s);
+	inline runtime::Socket& operator[](const adp::sck::pull_1 s);
 
 	const bool active_waiting;
 

@@ -84,9 +84,6 @@
 #ifndef SLEEPER_HPP_
 #include <Module/Sleeper/Sleeper.hpp>
 #endif
-#ifndef SOCKET_HPP_
-#include <Module/Socket.hpp>
-#endif
 #ifndef SOURCE_AZCW_HPP_
 #include <Module/Source/AZCW/Source_AZCW.hpp>
 #endif
@@ -108,11 +105,20 @@
 #ifndef SWITCHER_HPP_
 #include <Module/Switcher/Switcher.hpp>
 #endif
-#ifndef TASK_HPP_
-#include <Module/Task.hpp>
-#endif
 #ifndef UNARYOP_HPP_
 #include <Module/Unaryop/Unaryop.hpp>
+#endif
+#ifndef PIPELINE_HPP_
+#include <Runtime/Pipeline/Pipeline.hpp>
+#endif
+#ifndef SEQUENCE_HPP_
+#include <Runtime/Sequence/Sequence.hpp>
+#endif
+#ifndef SOCKET_HPP_
+#include <Runtime/Socket/Socket.hpp>
+#endif
+#ifndef TASK_HPP_
+#include <Runtime/Task/Task.hpp>
 #endif
 #ifndef BIT_PACKER_HPP_
 #include <Tools/Algo/Bit_packer/Bit_packer.hpp>
@@ -203,12 +209,6 @@
 #endif
 #ifndef REPORTER_HPP__
 #include <Tools/Reporter/Reporter.hpp>
-#endif
-#ifndef PIPELINE_HPP_
-#include <Tools/Sequence/Pipeline.hpp>
-#endif
-#ifndef SEQUENCE_HPP_
-#include <Tools/Sequence/Sequence.hpp>
 #endif
 #ifndef THREAD_PINNING_HPP
 #include <Tools/Thread_pinning/Thread_pinning.hpp>

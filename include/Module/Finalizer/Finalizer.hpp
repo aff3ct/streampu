@@ -28,8 +28,8 @@ template <typename T = int>
 class Finalizer : public Module
 {
 public:
-	inline Task&   operator[](const fin::tsk           t);
-	inline Socket& operator[](const fin::sck::finalize s);
+	inline runtime::Task&   operator[](const fin::tsk           t);
+	inline runtime::Socket& operator[](const fin::sck::finalize s);
 
 protected:
 	std::vector<std::vector<T>> final_data;

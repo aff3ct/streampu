@@ -10,13 +10,13 @@ namespace aff3ct
 namespace module
 {
 
-Task& Iterator
+runtime::Task& Iterator
 ::operator[](const ite::tsk t)
 {
 	return Module::operator[]((size_t)t);
 }
 
-Socket& Iterator
+runtime::Socket& Iterator
 ::operator[](const ite::sck::iterate s)
 {
 	return Module::operator[]((size_t)ite::tsk::iterate)[(size_t)s];

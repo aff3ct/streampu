@@ -12,8 +12,8 @@
 #include "Tools/Interface/Interface_set_seed.hpp"
 #include "Tools/Interface/Interface_is_done.hpp"
 #include "Tools/Interface/Interface_reset.hpp"
-#include "Module/Task.hpp"
-#include "Module/Socket.hpp"
+#include "Runtime/Task/Task.hpp"
+#include "Runtime/Socket/Socket.hpp"
 #include "Module/Module.hpp"
 
 namespace aff3ct
@@ -45,8 +45,8 @@ class Source : public Module, public tools::Interface_set_seed,
                               public tools::Interface_reset
 {
 public:
-	inline Task&   operator[](const src::tsk           t);
-	inline Socket& operator[](const src::sck::generate s);
+	inline runtime::Task&   operator[](const src::tsk           t);
+	inline runtime::Socket& operator[](const src::sck::generate s);
 
 protected:
 	const int K; /*!< Number of information bits in one frame */
@@ -69,7 +69,7 @@ public:
 	virtual int get_K() const;
 
 	/*!
-	 * \brief Task method method fulfills a vector with bits.
+	 * \brief runtime::Task method method fulfills a vector with bits.
 	 *
 	 * \param U_K: a vector of bits to fill.
 	 */

@@ -10,21 +10,21 @@ namespace module
 {
 
 template <typename B>
-Task& Sink<B>
+runtime::Task& Sink<B>
 ::operator[](const snk::tsk t)
 {
 	return Module::operator[]((size_t)t);
 }
 
 template <typename B>
-Socket& Sink<B>
+runtime::Socket& Sink<B>
 ::operator[](const snk::sck::send s)
 {
 	return Module::operator[]((size_t)snk::tsk::send)[(size_t)s];
 }
 
 template <typename B>
-Socket& Sink<B>
+runtime::Socket& Sink<B>
 ::operator[](const snk::sck::send_k s)
 {
 	return Module::operator[]((size_t)snk::tsk::send_k)[(size_t)s];
@@ -48,20 +48,20 @@ Sink<B>
 
 	auto &p1 = this->create_task("send");
 	auto p1s_V = this->template create_socket_in<B>(p1, "V", K);
-	this->create_codelet(p1, [p1s_V](Module& m, Task& t, const size_t frame_id) -> int
+	this->create_codelet(p1, [p1s_V](Module& m, runtime::Task& t, const size_t frame_id) -> int
 	{
 		auto &snk = static_cast<Sink<B>&>(m);
 
 		snk._send(static_cast<const B*>(t[p1s_V].get_dataptr()),
 		          frame_id);
 
-		return status_t::SUCCESS;
+		return runtime::status_t::SUCCESS;
 	});
 
 	auto &p2 = this->create_task("send_k");
 	auto p2s_V = this->template create_socket_in<B>(p2, "V", K);
 	auto p2s_real_K = this->template create_socket_in<uint32_t>(p2, "real_K", 1);
-	this->create_codelet(p2, [p2s_V, p2s_real_K](Module& m, Task& t, const size_t frame_id) -> int
+	this->create_codelet(p2, [p2s_V, p2s_real_K](Module& m, runtime::Task& t, const size_t frame_id) -> int
 	{
 		auto &snk = static_cast<Sink<B>&>(m);
 
@@ -69,7 +69,7 @@ Sink<B>
 			        static_cast<const uint32_t*>(t[p2s_real_K].get_dataptr()),
 		            frame_id);
 
-		return status_t::SUCCESS;
+		return runtime::status_t::SUCCESS;
 	});
 }
 

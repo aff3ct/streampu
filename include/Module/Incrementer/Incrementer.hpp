@@ -28,8 +28,8 @@ template <typename T = int>
 class Incrementer : public Module
 {
 public:
-	inline Task&   operator[](const inc::tsk            t);
-	inline Socket& operator[](const inc::sck::increment s);
+	inline runtime::Task&   operator[](const inc::tsk            t);
+	inline runtime::Socket& operator[](const inc::sck::increment s);
 
 protected:
 	const size_t n_elmts;

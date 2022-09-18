@@ -12,10 +12,10 @@
 #include <vector>
 #include <atomic>
 
-#include "Module/Task.hpp"
-#include "Module/Socket.hpp"
+#include "Runtime/Task/Task.hpp"
+#include "Runtime/Socket/Socket.hpp"
 #include "Module/Module.hpp"
-#include "Tools/Sequence/Sequence.hpp"
+#include "Runtime/Sequence/Sequence.hpp"
 #include "Tools/Interface/Interface_waiting.hpp"
 
 namespace aff3ct
@@ -38,7 +38,7 @@ namespace module
 class Adaptor : public Module, public tools::Interface_waiting
 {
 
-friend tools::Sequence; // Sequence is friend to enable the no copy mode (0 copy)
+friend runtime::Sequence; // Sequence is friend to enable the no copy mode (0 copy)
 
 protected:
 	std::vector<size_t> n_elmts;

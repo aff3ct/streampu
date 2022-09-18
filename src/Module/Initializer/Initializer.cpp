@@ -26,11 +26,11 @@ Initializer<T>
 
 	auto &p = this->create_task("initialize");
 	auto ps_out = this->template create_socket_out<T>(p, "out", n_elmts);
-	this->create_codelet(p, [ps_out](Module &m, Task &t, const size_t frame_id) -> int
+	this->create_codelet(p, [ps_out](Module &m, runtime::Task &t, const size_t frame_id) -> int
 	{
 		auto &ini = static_cast<Initializer&>(m);
 		ini._initialize(static_cast<T*>(t[ps_out].get_dataptr()), frame_id);
-		return status_t::SUCCESS;
+		return runtime::status_t::SUCCESS;
 	});
 }
 

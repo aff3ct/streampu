@@ -2,14 +2,14 @@
 #include <sstream>
 
 #include "Tools/Exception/exception.hpp"
-#include "Tools/Sequence/Sequence.hpp"
+#include "Runtime/Sequence/Sequence.hpp"
 #include "Module/Subsequence/Subsequence.hpp"
 
 using namespace aff3ct;
 using namespace aff3ct::module;
 
 Subsequence
-::Subsequence(tools::Sequence &sequence)
+::Subsequence(runtime::Sequence &sequence)
 : Module(),
   sequence_extern(&sequence)
 {
@@ -17,7 +17,7 @@ Subsequence
 }
 
 Subsequence
-::Subsequence(const tools::Sequence &sequence)
+::Subsequence(const runtime::Sequence &sequence)
 : Module(),
   sequence_cloned(sequence.clone()), sequence_extern(nullptr)
 {
@@ -48,16 +48,24 @@ void Subsequence
 	auto &firsts = sequence.get_firsts_tasks()[0];
 	for (auto &first : firsts) for (auto &s : first->sockets)
 	{
-		if (first->get_socket_type(*s) == socket_t::SIN)
+		if (first->get_socket_type(*s) == runtime::socket_t::SIN)
 		{
 			if (s->get_datatype() == typeid(int8_t ))
 				this->template create_socket_in<int8_t >(p, s->get_name(), s->get_n_elmts() / this->get_n_frames());
+			else if (s->get_datatype() == typeid(uint8_t))
+				this->template create_socket_in<uint8_t>(p, s->get_name(), s->get_n_elmts() / this->get_n_frames());
 			else if (s->get_datatype() == typeid(int16_t))
 				this->template create_socket_in<int16_t>(p, s->get_name(), s->get_n_elmts() / this->get_n_frames());
+			else if (s->get_datatype() == typeid(uint16_t))
+				this->template create_socket_in<uint16_t>(p, s->get_name(), s->get_n_elmts() / this->get_n_frames());
 			else if (s->get_datatype() == typeid(int32_t))
 				this->template create_socket_in<int32_t>(p, s->get_name(), s->get_n_elmts() / this->get_n_frames());
+			else if (s->get_datatype() == typeid(uint32_t))
+				this->template create_socket_in<uint32_t>(p, s->get_name(), s->get_n_elmts() / this->get_n_frames());
 			else if (s->get_datatype() == typeid(int64_t))
 				this->template create_socket_in<int64_t>(p, s->get_name(), s->get_n_elmts() / this->get_n_frames());
+			else if (s->get_datatype() == typeid(uint64_t))
+				this->template create_socket_in<uint64_t>(p, s->get_name(), s->get_n_elmts() / this->get_n_frames());
 			else if (s->get_datatype() == typeid(float  ))
 				this->template create_socket_in<float  >(p, s->get_name(), s->get_n_elmts() / this->get_n_frames());
 			else if (s->get_datatype() == typeid(double ))
@@ -67,16 +75,24 @@ void Subsequence
 	auto &lasts  = sequence.get_lasts_tasks()[0];
 	for (auto &last : lasts) for (auto &s : last->sockets)
 	{
-		if (last->get_socket_type(*s) == socket_t::SOUT && s->get_name() != "status")
+		if (last->get_socket_type(*s) == runtime::socket_t::SOUT && s->get_name() != "status")
 		{
 			if (s->get_datatype() == typeid(int8_t ))
 				this->template create_socket_out<int8_t >(p, s->get_name(), s->get_n_elmts() / this->get_n_frames());
+			else if (s->get_datatype() == typeid(uint8_t))
+				this->template create_socket_out<uint8_t>(p, s->get_name(), s->get_n_elmts() / this->get_n_frames());
 			else if (s->get_datatype() == typeid(int16_t))
 				this->template create_socket_out<int16_t>(p, s->get_name(), s->get_n_elmts() / this->get_n_frames());
+			else if (s->get_datatype() == typeid(uint16_t))
+				this->template create_socket_out<uint16_t>(p, s->get_name(), s->get_n_elmts() / this->get_n_frames());
 			else if (s->get_datatype() == typeid(int32_t))
 				this->template create_socket_out<int32_t>(p, s->get_name(), s->get_n_elmts() / this->get_n_frames());
+			else if (s->get_datatype() == typeid(uint32_t))
+				this->template create_socket_out<uint32_t>(p, s->get_name(), s->get_n_elmts() / this->get_n_frames());
 			else if (s->get_datatype() == typeid(int64_t))
 				this->template create_socket_out<int64_t>(p, s->get_name(), s->get_n_elmts() / this->get_n_frames());
+			else if (s->get_datatype() == typeid(uint64_t))
+				this->template create_socket_out<uint64_t>(p, s->get_name(), s->get_n_elmts() / this->get_n_frames());
 			else if (s->get_datatype() == typeid(float  ))
 				this->template create_socket_out<float  >(p, s->get_name(), s->get_n_elmts() / this->get_n_frames());
 			else if (s->get_datatype() == typeid(double ))
@@ -87,14 +103,14 @@ void Subsequence
 	size_t sid = 0;
 	for (auto &last : lasts) for (auto &s : last->sockets)
 	{
-		if (last->get_socket_type(*s) == socket_t::SOUT && s->get_name() != "status")
+		if (last->get_socket_type(*s) == runtime::socket_t::SOUT && s->get_name() != "status")
 		{
-			while (p.get_socket_type(*p.sockets[sid]) != socket_t::SOUT) sid++;
+			while (p.get_socket_type(*p.sockets[sid]) != runtime::socket_t::SOUT) sid++;
 			p.sockets[sid++]->bind(*s);
 		}
 	}
 
-	this->create_codelet(p, [](Module &m, Task &t, const size_t frame_id) -> int
+	this->create_codelet(p, [](Module &m, runtime::Task &t, const size_t frame_id) -> int
 	{
 		auto &ss = static_cast<Subsequence&>(m);
 
@@ -102,9 +118,9 @@ void Subsequence
 		size_t sid = 0;
 		for (auto &first : firsts) for (auto &s : first->sockets)
 		{
-			if (first->get_socket_type(*s) == socket_t::SIN)
+			if (first->get_socket_type(*s) == runtime::socket_t::SIN)
 			{
-				while (t.get_socket_type(*t.sockets[sid]) != socket_t::SIN) sid++;
+				while (t.get_socket_type(*t.sockets[sid]) != runtime::socket_t::SIN) sid++;
 				s->bind(t.sockets[sid++]->get_dataptr());
 			}
 		}
@@ -112,11 +128,11 @@ void Subsequence
 		// execute all frames sequentially
 		ss.get_sequence().exec_seq();
 
-		return status_t::SUCCESS;
+		return runtime::status_t::SUCCESS;
 	});
 }
 
-tools::Sequence& Subsequence
+runtime::Sequence& Subsequence
 ::get_sequence()
 {
 	if (this->sequence_extern)
@@ -152,9 +168,9 @@ void Subsequence
 	size_t sid = 0;
 	for (auto &last : lasts) for (auto &s : last->sockets)
 	{
-		if (last->get_socket_type(*s) == socket_t::SOUT && s->get_name() != "status")
+		if (last->get_socket_type(*s) == runtime::socket_t::SOUT && s->get_name() != "status")
 		{
-			while (p.get_socket_type(*p.sockets[sid]) != socket_t::SOUT) sid++;
+			while (p.get_socket_type(*p.sockets[sid]) != runtime::socket_t::SOUT) sid++;
 			p.sockets[sid++]->bind(*s);
 		}
 	}
@@ -171,9 +187,9 @@ void Subsequence
 		size_t sid = 0;
 		for (auto &last : lasts) for (auto &s : last->sockets)
 		{
-			if (last->get_socket_type(*s) == socket_t::SOUT && s->get_name() != "status")
+			if (last->get_socket_type(*s) == runtime::socket_t::SOUT && s->get_name() != "status")
 			{
-				while (p.get_socket_type(*p.sockets[sid]) != socket_t::SOUT) sid++;
+				while (p.get_socket_type(*p.sockets[sid]) != runtime::socket_t::SOUT) sid++;
 				p.sockets[sid++]->unbind(*s);
 			}
 		}
@@ -188,9 +204,9 @@ void Subsequence
 		sid = 0;
 		for (auto &last : lasts) for (auto &s : last->sockets)
 		{
-			if (last->get_socket_type(*s) == socket_t::SOUT && s->get_name() != "status")
+			if (last->get_socket_type(*s) == runtime::socket_t::SOUT && s->get_name() != "status")
 			{
-				while (p.get_socket_type(*p.sockets[sid]) != socket_t::SOUT) sid++;
+				while (p.get_socket_type(*p.sockets[sid]) != runtime::socket_t::SOUT) sid++;
 				p.sockets[sid++]->bind(*s);
 			}
 		}

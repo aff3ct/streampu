@@ -13,7 +13,7 @@
 #include <string>
 
 #include "Module/Module.hpp"
-#include "Module/Task.hpp"
+#include "Runtime/Task/Task.hpp"
 
 namespace aff3ct
 {
@@ -38,13 +38,13 @@ private:
 	template <class MODULE = const module::Module>
 	static void show_modules(std::vector<MODULE*> modules, const bool ordered = false,
 	                         std::ostream &stream = std::cout);
-	template <class TASK = const module::Task>
+	template <class TASK = const runtime::Task>
 	static void show_tasks(std::vector<TASK*> tasks, const bool ordered = false,
 	                       std::ostream &stream = std::cout);
 	template <class MODULE = const module::Module>
 	static void show_modules(std::vector<std::vector<MODULE*>> modules, const bool ordered = false,
 	                         std::ostream &stream = std::cout);
-	template <class TASK = const module::Task>
+	template <class TASK = const runtime::Task>
 	static void show_tasks(std::vector<std::vector<TASK*>> tasks, const bool ordered = false,
 	                       std::ostream &stream = std::cout);
 

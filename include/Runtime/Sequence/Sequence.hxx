@@ -1,11 +1,11 @@
 #include <set>
 
 #include "Module/Subsequence/Subsequence.hpp"
-#include "Tools/Sequence/Sequence.hpp"
+#include "Runtime/Sequence/Sequence.hpp"
 
 namespace aff3ct
 {
-namespace tools
+namespace runtime
 {
 size_t Sequence
 ::get_n_threads() const
@@ -13,13 +13,13 @@ size_t Sequence
 	return this->n_threads;
 }
 
-const std::vector<std::vector<module::Task*>>& Sequence
+const std::vector<std::vector<runtime::Task*>>& Sequence
 ::get_firsts_tasks() const
 {
 	return this->firsts_tasks;
 }
 
-const std::vector<std::vector<module::Task*>>& Sequence
+const std::vector<std::vector<runtime::Task*>>& Sequence
 ::get_lasts_tasks() const
 {
 	return this->lasts_tasks;
@@ -87,7 +87,7 @@ std::vector<C*> Sequence
 
 template <class SS>
 inline void Sequence
-::_init(Digraph_node<SS> *root)
+::_init(tools::Digraph_node<SS> *root)
 {
 	std::stringstream message;
 	message << "This should never happen.";
@@ -96,21 +96,21 @@ inline void Sequence
 
 template <>
 inline void Sequence
-::_init(Digraph_node<tools::Sub_sequence_const> *root)
+::_init(tools::Digraph_node<runtime::Sub_sequence_const> *root)
 {
-	this->duplicate<tools::Sub_sequence_const, const module::Module>(root);
-	std::vector<Digraph_node<Sub_sequence_const>*> already_deleted_nodes;
+	this->duplicate<runtime::Sub_sequence_const, const module::Module>(root);
+	std::vector<tools::Digraph_node<Sub_sequence_const>*> already_deleted_nodes;
 	this->delete_tree(root, already_deleted_nodes);
 }
 
 template <>
 inline void Sequence
-::_init(Digraph_node<tools::Sub_sequence> *root)
+::_init(tools::Digraph_node<runtime::Sub_sequence> *root)
 {
-	std::function<void(Digraph_node<tools::Sub_sequence>*, size_t &dec_ssid,
-	                   std::vector<Digraph_node<tools::Sub_sequence>*>&)> remove_useless_nodes;
-	remove_useless_nodes = [&](Digraph_node<tools::Sub_sequence> *node, size_t &dec_ssid,
-	                           std::vector<Digraph_node<tools::Sub_sequence>*> &already_parsed_nodes)
+	std::function<void(tools::Digraph_node<runtime::Sub_sequence>*, size_t &dec_ssid,
+	                   std::vector<tools::Digraph_node<runtime::Sub_sequence>*>&)> remove_useless_nodes;
+	remove_useless_nodes = [&](tools::Digraph_node<runtime::Sub_sequence> *node, size_t &dec_ssid,
+	                           std::vector<tools::Digraph_node<runtime::Sub_sequence>*> &already_parsed_nodes)
 	{
 		if (node != nullptr &&
 		    std::find(already_parsed_nodes.begin(),
@@ -206,17 +206,17 @@ inline void Sequence
 			}
 		}
 	};
-	std::vector<Digraph_node<tools::Sub_sequence>*> already_parsed_nodes1;
+	std::vector<tools::Digraph_node<runtime::Sub_sequence>*> already_parsed_nodes1;
 	size_t dec_ssid = 0;
 	remove_useless_nodes(root, dec_ssid, already_parsed_nodes1);
 
 	this->sequences[0] = root;
 
 	std::set<module::Module*> modules_set;
-	std::function<void(const Digraph_node<tools::Sub_sequence>*,
-	                   std::vector<const Digraph_node<tools::Sub_sequence>*>&)> collect_modules_list;
-	collect_modules_list = [&](const Digraph_node<tools::Sub_sequence> *node,
-	                           std::vector<const Digraph_node<tools::Sub_sequence>*> &already_parsed_nodes)
+	std::function<void(const tools::Digraph_node<runtime::Sub_sequence>*,
+	                   std::vector<const tools::Digraph_node<runtime::Sub_sequence>*>&)> collect_modules_list;
+	collect_modules_list = [&](const tools::Digraph_node<runtime::Sub_sequence> *node,
+	                           std::vector<const tools::Digraph_node<runtime::Sub_sequence>*> &already_parsed_nodes)
 	{
 		if (node != nullptr &&
 		    std::find(already_parsed_nodes.begin(),
@@ -231,13 +231,13 @@ inline void Sequence
 				collect_modules_list(c, already_parsed_nodes);
 		}
 	};
-	std::vector<const Digraph_node<tools::Sub_sequence>*> already_parsed_nodes2;
+	std::vector<const tools::Digraph_node<runtime::Sub_sequence>*> already_parsed_nodes2;
 	collect_modules_list(root, already_parsed_nodes2);
 
 	for (auto m : modules_set)
 		this->all_modules[0].push_back(m);
 
-	this->duplicate<tools::Sub_sequence, module::Module>(root);
+	this->duplicate<runtime::Sub_sequence, module::Module>(root);
 }
 
 size_t Sequence

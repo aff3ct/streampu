@@ -24,11 +24,11 @@ Finalizer<T>
 
 	auto &p = this->create_task("finalize");
 	auto ps_in = this->template create_socket_in<T>(p, "in", n_elmts);
-	this->create_codelet(p, [ps_in](Module &m, Task &t, const size_t frame_id) -> int
+	this->create_codelet(p, [ps_in](Module &m, runtime::Task &t, const size_t frame_id) -> int
 	{
 		auto &fin = static_cast<Finalizer&>(m);
 		fin._finalize(static_cast<const T*>(t[ps_in].get_dataptr()), frame_id);
-		return status_t::SUCCESS;
+		return runtime::status_t::SUCCESS;
 	});
 }
 
