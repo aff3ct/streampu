@@ -190,7 +190,6 @@ endif()
 # ---------------------------------------------------------------------------------------------------------------------
 
 macro(aff3ct_core_target_link_libraries privacy lib)
-    target_link_libraries(aff3ct-core-obj ${privacy} ${lib})
     if(AFF3CT_CORE_COMPILE_SHARED_LIB)
        target_link_libraries(aff3ct-core-shared-lib ${privacy} ${lib})
     endif(AFF3CT_CORE_COMPILE_SHARED_LIB)
