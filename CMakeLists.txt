@@ -107,6 +107,7 @@ endif(AFF3CT_CORE_COMPILE_STATIC_LIB)
 # ---------------------------------------------------------------------------------------------------------------------
 
 macro(aff3ct_core_target_compile_definitions privacy def)
+    target_compile_definitions(aff3ct-core-obj ${privacy} $<BUILD_INTERFACE:${def}> $<INSTALL_INTERFACE:${def}>)
     if(AFF3CT_CORE_COMPILE_SHARED_LIB)
         target_compile_definitions(aff3ct-core-shared-lib ${privacy} $<BUILD_INTERFACE:${def}> $<INSTALL_INTERFACE:${def}>)
     endif()
@@ -189,6 +190,7 @@ endif()
 # ---------------------------------------------------------------------------------------------------------------------
 
 macro(aff3ct_core_target_link_libraries privacy lib)
+    target_link_libraries(aff3ct-core-obj ${privacy} ${lib})
     if(AFF3CT_CORE_COMPILE_SHARED_LIB)
        target_link_libraries(aff3ct-core-shared-lib ${privacy} ${lib})
     endif(AFF3CT_CORE_COMPILE_SHARED_LIB)
