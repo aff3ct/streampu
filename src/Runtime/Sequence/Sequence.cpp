@@ -47,7 +47,7 @@ Sequence
   cur_task_id(n_threads,0),
   cur_ss(n_threads, nullptr)
 {
-#ifndef AFF3CT_HWLOC
+#ifndef AFF3CT_CORE_HWLOC
 	if (thread_pinning)
 		std::clog << rang::tag::warning << "AFF3CT has not been linked with the 'hwloc' library, the 'thread_pinning' "
 		                                   "option of the 'runtime::Sequence' will have no effect." << std::endl;
