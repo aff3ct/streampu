@@ -1,6 +1,6 @@
 /*!
  * \file
- * \brief AFF3CT_CORE main header file, include all the other headers.
+ * \brief AFF3CT-core main header file, include all the other headers.
  *
  * \section LICENSE
  * This file is under MIT license (https://opensource.org/licenses/MIT).

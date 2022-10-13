@@ -92,14 +92,14 @@ if(AFF3CT_CORE_COMPILE_SHARED_LIB)
     set_target_properties(aff3ct-core-shared-lib PROPERTIES
                                                  OUTPUT_NAME aff3ct-core
                                                  POSITION_INDEPENDENT_CODE ON) # set -fpic
-    message(STATUS "AFF3CT_CORE - Compile: shared library")
+    message(STATUS "AFF3CT-core - Compile: shared library")
 endif(AFF3CT_CORE_COMPILE_SHARED_LIB)
 if(AFF3CT_CORE_COMPILE_STATIC_LIB)
     add_library(aff3ct-core-static-lib STATIC $<TARGET_OBJECTS:aff3ct-core-obj>)
     set_target_properties(aff3ct-core-static-lib PROPERTIES
                                                  OUTPUT_NAME aff3ct-core
                                                  POSITION_INDEPENDENT_CODE ON) # set -fpic
-    message(STATUS "AFF3CT_CORE - Compile: static library")
+    message(STATUS "AFF3CT-core - Compile: static library")
 endif(AFF3CT_CORE_COMPILE_STATIC_LIB)
 
 # ---------------------------------------------------------------------------------------------------------------------

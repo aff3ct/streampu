@@ -2,7 +2,7 @@
 
 SRC_DIR=".\/include"
 if [ -z "$1" ]; then
-  AFF3CT_HEADER=.\/include\/aff3ct_core.hpp
+  AFF3CT_HEADER=.\/include\/aff3ct-core.hpp
 else
   AFF3CT_HEADER="$1"
 fi
@@ -10,7 +10,7 @@ fi
 # create the aff3ct header file with the C++ header
 echo "/*!"                                                                      >  $AFF3CT_HEADER
 echo " * \\file"                                                                >> $AFF3CT_HEADER
-echo " * \\brief AFF3CT_CORE main header file, include all the other headers."  >> $AFF3CT_HEADER
+echo " * \\brief AFF3CT-core main header file, include all the other headers."  >> $AFF3CT_HEADER
 echo " *"                                                                       >> $AFF3CT_HEADER
 echo " * \\section LICENSE"                                                     >> $AFF3CT_HEADER
 echo " * This file is under MIT license (https://opensource.org/licenses/MIT)." >> $AFF3CT_HEADER
@@ -26,7 +26,7 @@ headersh=$(find .\/include\/ -type f -follow -print | # find all source files
 
 headershpp=$(find .\/include\/ -type f -follow -print | # find all source files
              grep "[.]hpp$" |                           # take all .hpp files
-             grep -v aff3ct_core.hpp |                  # remove aff3ct.hpp from the file list
+             grep -v aff3ct-core.hpp |                  # remove aff3ct.hpp from the file list
              sed 's/[[:blank:]]\+/\n/g')                # change end lines with '\n'
 
 headers="$headersh $headershpp"
