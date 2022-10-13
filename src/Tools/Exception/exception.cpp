@@ -15,7 +15,7 @@ exception
 exception
 ::exception(const std::string &message) throw()
 : message(message)
-#ifdef AFF3CT_BACKTRACE
+#ifdef AFF3CT_CORE_BACKTRACE
 ,backtrace(message + "\n" + get_back_trace(3))
 #endif
 {
@@ -36,7 +36,7 @@ exception
 	this->message += ": ";
 	this->message += "\"" + _message + "\"";
 
-#ifdef AFF3CT_BACKTRACE
+#ifdef AFF3CT_CORE_BACKTRACE
 	backtrace = this->message + "\n" + get_back_trace(3);
 #endif
 }
@@ -44,7 +44,7 @@ exception
 const char* exception
 ::what() const throw()
 {
-#ifdef AFF3CT_BACKTRACE
+#ifdef AFF3CT_CORE_BACKTRACE
 	if (no_backtrace)
 		return message.c_str();
 	else if (no_addr_to_line)

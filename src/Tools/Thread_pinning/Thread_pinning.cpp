@@ -6,7 +6,7 @@
 #include <string.h>
 #include <vector>
 #include <mutex>
-#ifdef AFF3CT_HWLOC
+#ifdef AFF3CT_CORE_HWLOC
 #include <hwloc.h>
 #endif
 
@@ -16,7 +16,7 @@
 using namespace aff3ct;
 using namespace aff3ct::tools;
 
-#ifdef AFF3CT_HWLOC
+#ifdef AFF3CT_CORE_HWLOC
 static hwloc_topology_t g_topology;
 static int g_topodepth = 0;
 #endif
@@ -34,7 +34,7 @@ void Thread_pinning
 		{
 			g_is_init = true;
 
-#ifdef AFF3CT_HWLOC
+#ifdef AFF3CT_CORE_HWLOC
 			/* Allocate and initialize topology object. */
 			hwloc_topology_init(&g_topology);
 
@@ -64,7 +64,7 @@ void Thread_pinning
 		g_mtx.lock();
 		if (g_is_init)
 		{
-#ifdef AFF3CT_HWLOC
+#ifdef AFF3CT_CORE_HWLOC
 			/* Destroy topology object. */
 			hwloc_topology_destroy(g_topology);
 			g_topodepth = 0;
@@ -94,7 +94,7 @@ void Thread_pinning
 ::pin(const size_t puid)
 {
 	g_mtx.lock();
-#ifdef AFF3CT_HWLOC
+#ifdef AFF3CT_CORE_HWLOC
 	if (g_is_init)
 	{
 		int pu_depth = hwloc_get_type_or_below_depth(g_topology, HWLOC_OBJ_PU);
@@ -159,7 +159,7 @@ void Thread_pinning
 ::unpin()
 {
 	g_mtx.lock();
-#ifdef AFF3CT_HWLOC
+#ifdef AFF3CT_CORE_HWLOC
 	if (!g_is_init)
 	{
 		if (g_enable_logs)
@@ -180,7 +180,7 @@ void Thread_pinning
 std::string Thread_pinning
 ::get_cur_cpuset_str()
 {
-#ifdef AFF3CT_HWLOC
+#ifdef AFF3CT_CORE_HWLOC
 	hwloc_cpuset_t cur_cpuset = hwloc_bitmap_alloc();
 
 	hwloc_get_cpubind(g_topology, cur_cpuset, HWLOC_CPUBIND_THREAD);
