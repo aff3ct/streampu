@@ -22,13 +22,13 @@ private:
 	int src_counter;
 
 public:
-	Source_user(const int K, const std::string &filename, const int start_idx = 0);
+	Source_user(const int max_data_size, const std::string &filename, const int start_idx = 0);
 	virtual ~Source_user() = default;
 
 	virtual Source_user<B>* clone() const;
 
 protected:
-	void _generate(B *U_K, const size_t frame_id);
+	void _generate(B *out_data, const size_t frame_id);
 };
 }
 }

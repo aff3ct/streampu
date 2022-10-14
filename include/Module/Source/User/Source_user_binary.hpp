@@ -25,7 +25,7 @@ private:
 	std::vector<B> left_bits; // to store bits that are left by last call (n_left & n_completing)
 
 public:
-	Source_user_binary(const int K,
+	Source_user_binary(const int max_data_size,
 	                   const std::string &filename,
 	                   const bool auto_reset = true,
 	                   const bool fifo_mode = false);
@@ -36,7 +36,7 @@ public:
 	virtual void reset();
 
 protected:
-	void _generate(B *U_K, uint32_t* real_K, const size_t frame_id);
+	void _generate(B *out_data, uint32_t* out_count, const size_t frame_id);
 };
 }
 }

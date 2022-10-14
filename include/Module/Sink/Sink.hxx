@@ -25,49 +25,49 @@ runtime::Socket& Sink<B>
 
 template <typename B>
 runtime::Socket& Sink<B>
-::operator[](const snk::sck::send_k s)
+::operator[](const snk::sck::send_count s)
 {
-	return Module::operator[]((size_t)snk::tsk::send_k)[(size_t)s];
+	return Module::operator[]((size_t)snk::tsk::send_count)[(size_t)s];
 }
 
 template <typename B>
 Sink<B>
-::Sink(const int K)
-: Module(), K(K)
+::Sink(const int max_data_size)
+: Module(), max_data_size(max_data_size)
 {
 	const std::string name = "Sink";
 	this->set_name(name);
 	this->set_short_name(name);
 
-	if (K <= 0)
+	if (max_data_size <= 0)
 	{
 		std::stringstream message;
-		message << "'K' has to be greater than 0 ('K' = " << K << ").";
+		message << "'max_data_size' has to be greater than 0 ('max_data_size' = " << max_data_size << ").";
 		throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
 	}
 
 	auto &p1 = this->create_task("send");
-	auto p1s_V = this->template create_socket_in<B>(p1, "V", K);
-	this->create_codelet(p1, [p1s_V](Module& m, runtime::Task& t, const size_t frame_id) -> int
+	auto p1s_in_data = this->template create_socket_in<B>(p1, "in_data", max_data_size);
+	this->create_codelet(p1, [p1s_in_data](Module& m, runtime::Task& t, const size_t frame_id) -> int
 	{
 		auto &snk = static_cast<Sink<B>&>(m);
 
-		snk._send(static_cast<const B*>(t[p1s_V].get_dataptr()),
+		snk._send(static_cast<const B*>(t[p1s_in_data].get_dataptr()),
 		          frame_id);
 
 		return runtime::status_t::SUCCESS;
 	});
 
-	auto &p2 = this->create_task("send_k");
-	auto p2s_V = this->template create_socket_in<B>(p2, "V", K);
-	auto p2s_real_K = this->template create_socket_in<uint32_t>(p2, "real_K", 1);
-	this->create_codelet(p2, [p2s_V, p2s_real_K](Module& m, runtime::Task& t, const size_t frame_id) -> int
+	auto &p2 = this->create_task("send_count");
+	auto p2s_in_data = this->template create_socket_in<B>(p2, "in_data", max_data_size);
+	auto p2s_in_count = this->template create_socket_in<uint32_t>(p2, "in_count", 1);
+	this->create_codelet(p2, [p2s_in_data, p2s_in_count](Module& m, runtime::Task& t, const size_t frame_id) -> int
 	{
 		auto &snk = static_cast<Sink<B>&>(m);
 
-		snk._send_k(static_cast<const B*>(t[p2s_V].get_dataptr()),
-			        static_cast<const uint32_t*>(t[p2s_real_K].get_dataptr()),
-		            frame_id);
+		snk._send_count(static_cast<const B*>(t[p2s_in_data].get_dataptr()),
+			            static_cast<const uint32_t*>(t[p2s_in_count].get_dataptr()),
+		                frame_id);
 
 		return runtime::status_t::SUCCESS;
 	});
@@ -83,50 +83,50 @@ Sink<B>* Sink<B>
 template <typename B>
 template <class A>
 void Sink<B>
-::send(const std::vector<B,A>& V, const int frame_id, const bool managed_memory)
+::send(const std::vector<B,A>& in_data, const int frame_id, const bool managed_memory)
 {
-	(*this)[snk::sck::send::V].bind(V);
+	(*this)[snk::sck::send::in_data].bind(in_data);
 	(*this)[snk::tsk::send].exec(frame_id, managed_memory);
 }
 
 template <typename B>
 void Sink<B>
-::send(const B *V, const int frame_id, const bool managed_memory)
+::send(const B *in_data, const int frame_id, const bool managed_memory)
 {
-	(*this)[snk::sck::send::V].bind(V);
+	(*this)[snk::sck::send::in_data].bind(in_data);
 	(*this)[snk::tsk::send].exec(frame_id, managed_memory);
 }
 
 template <typename B>
 template <class A>
 void Sink<B>
-::send_k(const std::vector<B,A>& V, const std::vector<uint32_t>& real_K, const int frame_id, const bool managed_memory)
+::send_count(const std::vector<B,A>& in_data, const std::vector<uint32_t>& in_count, const int frame_id, const bool managed_memory)
 {
-	(*this)[snk::sck::send_k::V].bind(V);
-	(*this)[snk::sck::send_k::real_K].bind(real_K);
-	(*this)[snk::tsk::send_k].exec(frame_id, managed_memory);
+	(*this)[snk::sck::send_count::in_data].bind(in_data);
+	(*this)[snk::sck::send_count::in_count].bind(in_count);
+	(*this)[snk::tsk::send_count].exec(frame_id, managed_memory);
 }
 
 template <typename B>
 void Sink<B>
-::send_k(const B *V, uint32_t* real_K, const int frame_id, const bool managed_memory)
+::send_count(const B *in_data, uint32_t* in_count, const int frame_id, const bool managed_memory)
 {
-	(*this)[snk::sck::send_k::V].bind(V);
-	(*this)[snk::sck::send_k::real_K].bind(real_K);
-	(*this)[snk::tsk::send_k].exec(frame_id, managed_memory);
+	(*this)[snk::sck::send_count::in_data].bind(in_data);
+	(*this)[snk::sck::send_count::in_count].bind(in_count);
+	(*this)[snk::tsk::send_count].exec(frame_id, managed_memory);
 }
 
 template <typename B>
 void Sink<B>
-::_send(const B *V, const size_t frame_id)
+::_send(const B *in_data, const size_t frame_id)
 {
-	const uint32_t real_K = (uint32_t)this->K;
-	this->_send_k(V, &real_K, frame_id);
+	const uint32_t in_count = (uint32_t)this->max_data_size;
+	this->_send_count(in_data, &in_count, frame_id);
 }
 
 template <typename B>
 void Sink<B>
-::_send_k(const B *V, const uint32_t* real_K, const size_t frame_id)
+::_send_count(const B *in_data, const uint32_t* in_count, const size_t frame_id)
 {
 	throw tools::unimplemented_error(__FILE__, __LINE__, __func__);
 }

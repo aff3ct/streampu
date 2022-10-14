@@ -6,8 +6,8 @@ using namespace aff3ct::module;
 
 template <typename B>
 Source_AZCW<B>
-::Source_AZCW(const int K)
-: Source<B>(K)
+::Source_AZCW(const int max_data_size)
+: Source<B>(max_data_size)
 {
 	const std::string name = "Source_AZCW";
 	this->set_name(name);
@@ -24,9 +24,9 @@ Source_AZCW<B>* Source_AZCW<B>
 
 template <typename B>
 void Source_AZCW<B>
-::_generate(B *U_K, const size_t frame_id)
+::_generate(B *out_data, const size_t frame_id)
 {
-	std::fill(U_K, U_K + this->K, 0);
+	std::fill(out_data, out_data + this->max_data_size, 0);
 }
 
 // ==================================================================================== explicit template instantiation

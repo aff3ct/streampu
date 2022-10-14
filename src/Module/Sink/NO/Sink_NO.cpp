@@ -7,8 +7,8 @@ using namespace aff3ct::module;
 
 template <typename B>
 Sink_NO<B>
-::Sink_NO(const int K)
-: Sink<B>(K)
+::Sink_NO(const int max_data_size)
+: Sink<B>(max_data_size)
 {
 	const std::string name = "Sink_NO";
 	this->set_name(name);
@@ -25,7 +25,7 @@ Sink_NO<B>* Sink_NO<B>
 
 template <typename B>
 void Sink_NO<B>
-::_send_k(const B *V, const uint32_t* real_K, const size_t frame_id)
+::_send_k(const B *in_data, const uint32_t* in_count, const size_t frame_id)
 {
 	// do nothing, best module ever :-D
 }

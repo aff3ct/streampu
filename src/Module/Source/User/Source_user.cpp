@@ -9,8 +9,8 @@ using namespace aff3ct::module;
 
 template <typename B>
 Source_user<B>
-::Source_user(const int K, const std::string &filename, const int start_idx)
-: Source<B>(K), source(), src_counter(start_idx)
+::Source_user(const int max_data_size, const std::string &filename, const int start_idx)
+: Source<B>(max_data_size), source(), src_counter(start_idx)
 {
 	const std::string name = "Source_user";
 	this->set_name(name);
@@ -39,7 +39,7 @@ Source_user<B>
 		for (auto i = 0; i < n_src; i++)
 			this->source[i].resize(src_size);
 
-		if (src_size == this->K)
+		if (src_size == this->max_data_size)
 		{
 			for (auto i = 0; i < n_src; i++)
 				for (auto j = 0; j < src_size; j++)
@@ -55,7 +55,7 @@ Source_user<B>
 			file.close();
 
 			std::stringstream message;
-			message << "The size is wrong (read: " << src_size << ", expected: " << this->K << ").";
+			message << "The size is wrong (read: " << src_size << ", expected: " << this->max_data_size << ").";
 			throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
 		}
 
@@ -78,11 +78,11 @@ Source_user<B>* Source_user<B>
 
 template <typename B>
 void Source_user<B>
-::_generate(B *U_K, const size_t frame_id)
+::_generate(B *out_data, const size_t frame_id)
 {
 	std::copy(this->source[this->src_counter].begin(),
 	          this->source[this->src_counter].end  (),
-	          U_K);
+	          out_data);
 
 	this->src_counter = (this->src_counter +1) % (int)this->source.size();
 }

@@ -7,17 +7,17 @@ using namespace aff3ct::module;
 
 template <typename B>
 Source_user_binary<B>
-::Source_user_binary(const int K,
+::Source_user_binary(const int max_data_size,
                      const std::string &filename,
                      const bool auto_reset,
                      const bool fifo_mode)
-: Source<B>(K),
+: Source<B>(max_data_size),
   source_file(filename.c_str(), std::ios::in | std::ios::binary),
   auto_reset(fifo_mode ? true : auto_reset),
   fifo_mode(fifo_mode),
   done(false),
   n_left(0),
-  memblk(K),
+  memblk(max_data_size),
   left_bits(CHAR_BIT)
 {
 	const std::string name = "Source_user_binary";
@@ -53,17 +53,17 @@ bool Source_user_binary<B>
 
 template <typename B>
 void Source_user_binary<B>
-::_generate(B *U_K, uint32_t* real_K, const size_t frame_id)
+::_generate(B *out_data, uint32_t* out_count, const size_t frame_id)
 {
 	if (this->is_done())
-		std::fill(U_K, U_K + this->K, (B)0);
+		std::fill(out_data, out_data + this->max_data_size, (B)0);
 	else
 	{
 		size_t n_bytes_read = 0;
-		const size_t n_bytes_needed = (size_t)(this->K - this->n_left + CHAR_BIT -1) / CHAR_BIT; // number of bytes needed
+		const size_t n_bytes_needed = (size_t)(this->max_data_size - this->n_left + CHAR_BIT -1) / CHAR_BIT; // number of bytes needed
 
 		for (size_t i = 0; i < this->n_left; i++)
-			U_K[i] = this->left_bits[i];
+			out_data[i] = this->left_bits[i];
 
 		while (n_bytes_read < n_bytes_needed)
 		{
@@ -84,9 +84,9 @@ void Source_user_binary<B>
 			}
 		}
 
-		if (this->n_left + n_bytes_read * CHAR_BIT <= (size_t)this->K)
+		if (this->n_left + n_bytes_read * CHAR_BIT <= (size_t)this->max_data_size)
 		{
-			*real_K = this->n_left + n_bytes_read * CHAR_BIT;
+			*out_count = this->n_left + n_bytes_read * CHAR_BIT;
 
 			if (!this->auto_reset && source_file.eof()) {
 				this->done = true;
@@ -94,19 +94,19 @@ void Source_user_binary<B>
 					throw tools::processing_aborted(__FILE__, __LINE__, __func__);
 			}
 
-			tools::Bit_packer::unpack(this->memblk.data(), U_K + this->n_left, n_bytes_read * CHAR_BIT);
-			std::fill(U_K + this->n_left + n_bytes_read * CHAR_BIT, U_K + this->K, (B)0);
+			tools::Bit_packer::unpack(this->memblk.data(), out_data + this->n_left, n_bytes_read * CHAR_BIT);
+			std::fill(out_data + this->n_left + n_bytes_read * CHAR_BIT, out_data + this->max_data_size, (B)0);
 
-			int tmp_n_left = ((int)n_bytes_read * (int)CHAR_BIT) - (this->K - (int)this->n_left);
+			int tmp_n_left = ((int)n_bytes_read * (int)CHAR_BIT) - (this->max_data_size - (int)this->n_left);
 			this->n_left = tmp_n_left < 0 ? (size_t)0 : (size_t)tmp_n_left;
 		}
 		else
 		{
-			*real_K = this->K;
+			*out_count = this->max_data_size;
 
-			tools::Bit_packer::unpack(this->memblk.data(), U_K + this->n_left, this->K - this->n_left);
+			tools::Bit_packer::unpack(this->memblk.data(), out_data + this->n_left, this->max_data_size - this->n_left);
 
-			int tmp_n_left = ((int)n_bytes_read * (int)CHAR_BIT) - (this->K - (int)this->n_left);
+			int tmp_n_left = ((int)n_bytes_read * (int)CHAR_BIT) - (this->max_data_size - (int)this->n_left);
 			this->n_left = tmp_n_left < 0 ? (size_t)0 : (size_t)tmp_n_left;
 
 			if (this->n_left)

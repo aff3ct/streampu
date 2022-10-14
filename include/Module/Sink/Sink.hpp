@@ -20,70 +20,49 @@ namespace module
 {
 	namespace snk
 	{
-		enum class tsk : size_t { send, send_k, SIZE };
+		enum class tsk : size_t { send, send_count, SIZE };
 
 		namespace sck
 		{
-			enum class send : size_t { V, status };
-			enum class send_k : size_t { V, real_K, status };
+			enum class send : size_t { in_data, status };
+			enum class send_count : size_t { in_data, in_count, status };
 		}
 	}
 
-/*!
- * \class Sink
- *
- * \brief Send data into outer world.
- *
- * \tparam B: type of the data to send or receive.
- *
- */
 template <typename B = int>
 class Sink : public Module, public tools::Interface_reset
 {
 public:
-	inline runtime::Task&   operator[](const snk::tsk         t);
-	inline runtime::Socket& operator[](const snk::sck::send   s);
-	inline runtime::Socket& operator[](const snk::sck::send_k s);
+	inline runtime::Task&   operator[](const snk::tsk             t);
+	inline runtime::Socket& operator[](const snk::sck::send       s);
+	inline runtime::Socket& operator[](const snk::sck::send_count s);
 
 protected:
-	const int K; /*!< Size of one frame (= number of samples in one frame) */
+	const int max_data_size;
 
 public:
-	/*!
-	 * \brief Constructor.
-	 *
-	 * \param K: Radio_frame length.
-	 */
-	Sink(const int K);
+	Sink(const int max_data_size);
 
-	/*!
-	 * \brief Destructor.
-	 */
 	virtual ~Sink() = default;
 
 	virtual Sink<B>* clone() const;
 
-	/*!
-	 * \brief Consume a frame.
-	 *
-	 * \param V : a vector of data to consume.
-	 */
 	template <class A = std::allocator<B>>
-	void send(const std::vector<B,A>& V, const int frame_id = -1, const bool managed_memory = true);
+	void send(const std::vector<B,A>& in_data, const int frame_id = -1, const bool managed_memory = true);
 
-	void send(const B *V, const int frame_id = -1, const bool managed_memory = true);
+	void send(const B *in_data, const int frame_id = -1, const bool managed_memory = true);
 
 	template <class A = std::allocator<B>>
-	void send_k(const std::vector<B,A>& V, const std::vector<uint32_t>& real_K, const int frame_id = -1,
-	            const bool managed_memory = true);
+	void send_count(const std::vector<B,A>& in_data, const std::vector<uint32_t>& in_count, const int frame_id = -1,
+	                const bool managed_memory = true);
 
-	void send_k(const B *V, uint32_t *real_K, const int frame_id = -1, const bool managed_memory = true);
+	void send_count(const B *in_data, uint32_t *in_count, const int frame_id = -1, const bool managed_memory = true);
 
 	virtual void reset();
 
 protected:
-	virtual void _send(const B *V, const size_t frame_id);
-	virtual void _send_k(const B *V, const uint32_t *real_K, const size_t frame_id);
+	virtual void _send(const B *in_data, const size_t frame_id);
+	virtual void _send_count(const B *in_data, const uint32_t *in_count, const size_t frame_id);
 };
 
 }

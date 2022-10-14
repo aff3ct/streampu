@@ -23,22 +23,13 @@ template <typename B = int>
 class Sink_NO : public Sink<B>
 {
 public:
-	/*!
-	 * \brief Constructor.
-	 *
-	 * \param K: Radio_frame length.
-	 */
-	Sink_NO(const int K);
-
-	/*!
-	 * \brief Destructor.
-	 */
+	Sink_NO(const int max_data_size);
 	~Sink_NO() = default;
 
 	virtual Sink_NO<B>* clone() const;
 
 protected:
-	virtual void _send_k(const B *V, const uint32_t* real_K, const size_t frame_id);
+	virtual void _send_k(const B *in_data, const uint32_t* in_count, const size_t frame_id);
 };
 
 }

@@ -22,7 +22,7 @@ private:
 	std::uniform_int_distribution<short> uniform_dist;
 
 public:
-	Source_random(const int K, const int seed = 0);
+	Source_random(const int max_data_size, const int seed = 0);
 
 	virtual ~Source_random() = default;
 
@@ -31,7 +31,7 @@ public:
 	virtual void set_seed(const int seed);
 
 protected:
-	void _generate(B *U_K, const size_t frame_id);
+	void _generate(B *out_data, const size_t frame_id);
 };
 }
 }

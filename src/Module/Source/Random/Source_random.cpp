@@ -4,8 +4,8 @@ using namespace aff3ct::module;
 
 template <typename B>
 Source_random<B>
-::Source_random(const int K, const int seed)
-: Source<B>(K),
+::Source_random(const int max_data_size, const int seed)
+: Source<B>(max_data_size),
   rd_engine(seed),
   uniform_dist(0, 1)
 {
@@ -24,11 +24,11 @@ Source_random<B>* Source_random<B>
 
 template <typename B>
 void Source_random<B>
-::_generate(B *U_K, const size_t frame_id)
+::_generate(B *out_data, const size_t frame_id)
 {
-	// generate a random k bits vector U_k
-	for (auto i = 0; i < this->K; i++)
-		U_K[i] = (B)this->uniform_dist(this->rd_engine);
+	// generate a random k bits vector out_data
+	for (auto i = 0; i < this->max_data_size; i++)
+		out_data[i] = (B)this->uniform_dist(this->rd_engine);
 }
 
 template <typename B>

@@ -35,22 +35,13 @@ private:
 	size_t n_left; // number of bits left by last call
 
 public:
-	/*!
-	 * \brief Constructor.
-	 *
-	 * \param K: Radio_frame length.
-	 */
-	Sink_user_binary(const int K, const std::string &filename);
-
-	/*!
-	 * \brief Destructor.
-	 */
+	Sink_user_binary(const int max_data_size, const std::string &filename);
 	~Sink_user_binary() = default;
 
 	virtual void reset();
 
 protected:
-	virtual void _send_k(const B *V, const uint32_t *real_K, const size_t frame_id);
+	virtual void _send_k(const B *in_data, const uint32_t *in_count, const size_t frame_id);
 };
 
 }
