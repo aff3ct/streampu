@@ -33,6 +33,9 @@
 #ifndef CONTROLLER_STATIC_HPP_
 #include <Module/Controller/Controller_static/Controller_static.hpp>
 #endif
+#ifndef DELAYER_HPP_
+#include <Module/Delayer/Delayer.hpp>
+#endif
 #ifndef FINALIZER_HPP_
 #include <Module/Finalizer/Finalizer.hpp>
 #endif

@@ -20,14 +20,20 @@ echo "#ifndef AFF3CT_CORE_HPP"                                                  
 echo "#define AFF3CT_CORE_HPP"                                                  >> $AFF3CT_HEADER
 echo ""                                                                         >> $AFF3CT_HEADER
 
-headersh=$(find .\/include\/ -type f -follow -print | # find all source files
-           grep "[.]h$" |                             # take all .h files
-           sed 's/[[:blank:]]\+/\n/g')                # change end lines with '\n'
+if [[ $OSTYPE == 'darwin'* ]]; then
+  INCLUDE_PATH=.\/include
+else
+  INCLUDE_PATH=.\/include\/
+fi
 
-headershpp=$(find .\/include\/ -type f -follow -print | # find all source files
-             grep "[.]hpp$" |                           # take all .hpp files
-             grep -v aff3ct-core.hpp |                  # remove aff3ct.hpp from the file list
-             sed 's/[[:blank:]]\+/\n/g')                # change end lines with '\n'
+headersh=$(find $INCLUDE_PATH -type f -follow -print | # find all source files
+           grep "[.]h$" |                              # take all .h files
+           sed 's/[[:blank:]]\+/\n/g')                 # change end lines with '\n'
+
+headershpp=$(find $INCLUDE_PATH -type f -follow -print | # find all source files
+             grep "[.]hpp$" |                            # take all .hpp files
+             grep -v aff3ct-core.hpp |                   # remove aff3ct.hpp from the file list
+             sed 's/[[:blank:]]\+/\n/g')                 # change end lines with '\n'
 
 headers="$headersh $headershpp"
 # sort the header by alphabetical order

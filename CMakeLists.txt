@@ -19,6 +19,7 @@ option(AFF3CT_CORE_COMPILE_STATIC_LIB "Compile the static library"              
 option(AFF3CT_CORE_COMPILE_SHARED_LIB "Compile the shared library"                             OFF)
 option(AFF3CT_CORE_LINK_HWLOC         "Link with the hwloc library (used for threads pinning)" OFF)
 option(AFF3CT_CORE_COLORS             "Enable the colors in the terminal"                      ON )
+option(AFF3CT_CORE_TESTS              "Enable the compilation of the tests"                    ON )
 
 if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/.git" AND NOT AFF3CT_CORE_OVERRIDE_VERSION)
     message(FATAL_ERROR "The '.git' folder can't be found, AFF3CT_CORE can't be compiled if it is not cloned "
@@ -85,6 +86,7 @@ endif()
 add_library(aff3ct-core-obj OBJECT ${source_files})
 set_target_properties(aff3ct-core-obj PROPERTIES
                                       POSITION_INDEPENDENT_CODE ON) # set -fpic
+list(APPEND aff3ct_core_targets_list aff3ct-core-obj)
 
 # Library
 if(AFF3CT_CORE_COMPILE_SHARED_LIB)
@@ -92,6 +94,7 @@ if(AFF3CT_CORE_COMPILE_SHARED_LIB)
     set_target_properties(aff3ct-core-shared-lib PROPERTIES
                                                  OUTPUT_NAME aff3ct-core
                                                  POSITION_INDEPENDENT_CODE ON) # set -fpic
+    list(APPEND aff3ct_core_targets_list aff3ct-core-shared-lib)
     message(STATUS "AFF3CT-core - Compile: shared library")
 endif(AFF3CT_CORE_COMPILE_SHARED_LIB)
 if(AFF3CT_CORE_COMPILE_STATIC_LIB)
@@ -99,28 +102,63 @@ if(AFF3CT_CORE_COMPILE_STATIC_LIB)
     set_target_properties(aff3ct-core-static-lib PROPERTIES
                                                  OUTPUT_NAME aff3ct-core
                                                  POSITION_INDEPENDENT_CODE ON) # set -fpic
+    list(APPEND aff3ct_core_targets_list aff3ct-core-static-lib)
     message(STATUS "AFF3CT-core - Compile: static library")
 endif(AFF3CT_CORE_COMPILE_STATIC_LIB)
+
+# Tests
+if(AFF3CT_CORE_TESTS)
+    add_executable(aff3ct-core-test-simple-chain $<TARGET_OBJECTS:aff3ct-core-obj>
+                                                 ${CMAKE_CURRENT_SOURCE_DIR}/tests/simple_chain.cpp)
+    set_target_properties(aff3ct-core-test-simple-chain PROPERTIES
+                                                        OUTPUT_NAME test-simple-chain
+                                                        POSITION_INDEPENDENT_CODE ON) # set -fpie
+    list(APPEND aff3ct_core_targets_list aff3ct-core-test-simple-chain)
+
+    add_executable(aff3ct-core-test-for-loop $<TARGET_OBJECTS:aff3ct-core-obj>
+                                                 ${CMAKE_CURRENT_SOURCE_DIR}/tests/for_loop.cpp)
+    set_target_properties(aff3ct-core-test-for-loop PROPERTIES
+                                                    OUTPUT_NAME test-for-loop
+                                                    POSITION_INDEPENDENT_CODE ON) # set -fpie
+    list(APPEND aff3ct_core_targets_list aff3ct-core-test-for-loop)
+
+    add_executable(aff3ct-core-test-do-while-loop $<TARGET_OBJECTS:aff3ct-core-obj>
+                                                  ${CMAKE_CURRENT_SOURCE_DIR}/tests/do_while_loop.cpp)
+    set_target_properties(aff3ct-core-test-do-while-loop PROPERTIES
+                                                         OUTPUT_NAME test-do-while-loop
+                                                         POSITION_INDEPENDENT_CODE ON) # set -fpie
+    list(APPEND aff3ct_core_targets_list aff3ct-core-test-do-while-loop)
+
+    add_executable(aff3ct-core-test-exclusive-paths $<TARGET_OBJECTS:aff3ct-core-obj>
+                                                    ${CMAKE_CURRENT_SOURCE_DIR}/tests/exclusive_paths.cpp)
+    set_target_properties(aff3ct-core-test-exclusive-paths PROPERTIES
+                                                           OUTPUT_NAME test-exclusive-paths
+                                                           POSITION_INDEPENDENT_CODE ON) # set -fpie
+    list(APPEND aff3ct_core_targets_list aff3ct-core-test-exclusive-paths)
+
+    add_executable(aff3ct-core-test-nested-loops $<TARGET_OBJECTS:aff3ct-core-obj>
+                                                 ${CMAKE_CURRENT_SOURCE_DIR}/tests/nested_loops.cpp)
+    set_target_properties(aff3ct-core-test-nested-loops PROPERTIES
+                                                        OUTPUT_NAME test-nested-loops
+                                                        POSITION_INDEPENDENT_CODE ON) # set -fpie
+    list(APPEND aff3ct_core_targets_list aff3ct-core-test-nested-loops)
+endif()
 
 # ---------------------------------------------------------------------------------------------------------------------
 # ------------------------------------------------------------------------------------------------ COMPILER DEFINITIONS
 # ---------------------------------------------------------------------------------------------------------------------
 
-macro(aff3ct_core_target_compile_definitions privacy def)
-    target_compile_definitions(aff3ct-core-obj ${privacy} $<BUILD_INTERFACE:${def}> $<INSTALL_INTERFACE:${def}>)
-    if(AFF3CT_CORE_COMPILE_SHARED_LIB)
-        target_compile_definitions(aff3ct-core-shared-lib ${privacy} $<BUILD_INTERFACE:${def}> $<INSTALL_INTERFACE:${def}>)
-    endif()
-    if(AFF3CT_CORE_COMPILE_STATIC_LIB)
-        target_compile_definitions(aff3ct-core-static-lib ${privacy} $<BUILD_INTERFACE:${def}> $<INSTALL_INTERFACE:${def}>)
-    endif()
+macro(aff3ct_core_target_compile_definitions targets privacy def)
+    foreach(_target IN ITEMS ${targets})
+        target_compile_definitions(${_target} ${privacy} $<BUILD_INTERFACE:${def}> $<INSTALL_INTERFACE:${def}>)
+    endforeach()
 endmacro()
 
 # by system
 if(WIN32) # for Windows operating system in general
     set(WINDOWS_VISTA 0x0600)
-    aff3ct_core_target_compile_definitions(PUBLIC _WIN32_WINNT=${WINDOWS_VISTA})
-    aff3ct_core_target_compile_definitions(PUBLIC NOMINMAX)
+    aff3ct_core_target_compile_definitions("${aff3ct_core_targets_list}" PUBLIC _WIN32_WINNT=${WINDOWS_VISTA})
+    aff3ct_core_target_compile_definitions("${aff3ct_core_targets_list}" PUBLIC NOMINMAX)
     message(STATUS "AFF3CT-core - System: Windows")
 elseif(APPLE) # for macOS
     message(STATUS "AFF3CT-core - System: macOS")
@@ -130,13 +168,13 @@ endif()
 
 # common
 if(AFF3CT_CORE_COLORS)
-    aff3ct_core_target_compile_definitions(PUBLIC AFF3CT_CORE_COLORS)
+    aff3ct_core_target_compile_definitions("${aff3ct_core_targets_list}" PUBLIC AFF3CT_CORE_COLORS)
     message(STATUS "AFF3CT-core - Terminal colors: on")
 else()
     message(STATUS "AFF3CT-core - Terminal colors: off")
 endif()
 if(AFF3CT_CORE_BACKTRACE)
-    aff3ct_core_target_compile_definitions(PUBLIC AFF3CT_CORE_BACKTRACE)
+    aff3ct_core_target_compile_definitions("${aff3ct_core_targets_list}" PUBLIC AFF3CT_CORE_BACKTRACE)
     message(STATUS "AFF3CT-core - Backtrace: on")
 else()
     message(STATUS "AFF3CT-core - Backtrace: off")
@@ -146,39 +184,28 @@ endif()
 # ----------------------------------------------------------------------------------------------- HEADER ONLY LIBRARIES
 # ---------------------------------------------------------------------------------------------------------------------
 
-macro(aff3ct_core_target_include_directories privacy dir_build dir_install)
-    target_include_directories(aff3ct-core-obj ${privacy}
-                               $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${dir_build}/>
-                               $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/aff3ct-core/${dir_install}>)
-
-    if(AFF3CT_CORE_COMPILE_SHARED_LIB)
-        target_include_directories(aff3ct-core-shared-lib ${privacy}
+macro(aff3ct_core_target_include_directories targets privacy dir_build dir_install)
+    foreach(_target IN ITEMS ${targets})
+        target_include_directories(${_target}
+                                   ${privacy}
                                    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${dir_build}/>
                                    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/aff3ct-core/${dir_install}>)
-    endif()
-    if(AFF3CT_CORE_COMPILE_STATIC_LIB)
-        target_include_directories(aff3ct-core-static-lib ${privacy}
-                                   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${dir_build}/>
-                                   $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/aff3ct-core/${dir_install}>)
-    endif()
+    endforeach()
 endmacro()
 
-macro(aff3ct_core_target_include_directories2 privacy dir)
-    if(AFF3CT_CORE_COMPILE_SHARED_LIB)
-        target_include_directories(aff3ct-core-shared-lib ${privacy} $<BUILD_INTERFACE:${dir}> $<INSTALL_INTERFACE:${dir}>)
-    endif()
-    if(AFF3CT_CORE_COMPILE_STATIC_LIB)
-        target_include_directories(aff3ct-core-static-lib ${privacy} $<BUILD_INTERFACE:${dir}> $<INSTALL_INTERFACE:${dir}>)
-    endif()
+macro(aff3ct_core_target_include_directories2 targets privacy dir)
+    foreach(_target IN ITEMS ${targets})
+        target_include_directories(${_target} ${privacy} $<BUILD_INTERFACE:${dir}> $<INSTALL_INTERFACE:${dir}>)
+    endforeach()
 endmacro()
 
 # AFF3CT_CORE headers
-aff3ct_core_target_include_directories(PRIVATE "src"     "aff3ct-core")
-aff3ct_core_target_include_directories(PUBLIC  "include" "aff3ct-core")
+aff3ct_core_target_include_directories("${aff3ct_core_targets_list}" PRIVATE "src"     "aff3ct-core")
+aff3ct_core_target_include_directories("${aff3ct_core_targets_list}" PUBLIC  "include" "aff3ct-core")
 
 # rang
 if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/lib/rang/include/rang.hpp")
-    aff3ct_core_target_include_directories(PUBLIC "lib/rang/include" "rang")
+    aff3ct_core_target_include_directories("${aff3ct_core_targets_list}" PUBLIC "lib/rang/include" "rang")
     message(STATUS "AFF3CT-core - Header found: rang")
 else()
     message(FATAL_ERROR "AFF3CT-core - rang can't be found, try to init the submodule with the following cmd:\n"
@@ -189,24 +216,21 @@ endif()
 # -------------------------------------------------------------------------------------------------- COMPILED LIBRARIES
 # ---------------------------------------------------------------------------------------------------------------------
 
-macro(aff3ct_core_target_link_libraries privacy lib)
-    if(AFF3CT_CORE_COMPILE_SHARED_LIB)
-       target_link_libraries(aff3ct-core-shared-lib ${privacy} ${lib})
-    endif(AFF3CT_CORE_COMPILE_SHARED_LIB)
-    if(AFF3CT_CORE_COMPILE_STATIC_LIB)
-        target_link_libraries(aff3ct-core-static-lib ${privacy} ${lib})
-    endif(AFF3CT_CORE_COMPILE_STATIC_LIB)
+macro(aff3ct_core_target_link_libraries targets privacy lib)
+    foreach(_target IN ITEMS ${targets})
+        target_link_libraries(${_target} ${privacy} ${lib})
+    endforeach()
 endmacro()
 
 # hwloc
 if(AFF3CT_CORE_LINK_HWLOC)
-    aff3ct_core_target_compile_definitions(PUBLIC "AFF3CT_CORE_HWLOC")
+    aff3ct_core_target_compile_definitions("${aff3ct_core_targets_list}" PUBLIC "AFF3CT_CORE_HWLOC")
 
     find_package(Hwloc REQUIRED QUIET)
     if(Hwloc_FOUND)
         message(STATUS "AFF3CT-core - Library found: hwloc")
-        aff3ct_core_target_include_directories2(PUBLIC "${Hwloc_INCLUDE_DIRS}")
-        aff3ct_core_target_link_libraries(PUBLIC "${Hwloc_LIBRARIES}")
+        aff3ct_core_target_include_directories2("${aff3ct_core_targets_list}" PUBLIC "${Hwloc_INCLUDE_DIRS}")
+        aff3ct_core_target_link_libraries("${aff3ct_core_targets_list}" PUBLIC "${Hwloc_LIBRARIES}")
     endif(Hwloc_FOUND)
 endif(AFF3CT_CORE_LINK_HWLOC)
 
@@ -214,7 +238,7 @@ endif(AFF3CT_CORE_LINK_HWLOC)
 set(CMAKE_THREAD_PREFER_PTHREAD ON)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
-aff3ct_core_target_link_libraries(PUBLIC Threads::Threads)
+aff3ct_core_target_link_libraries("${aff3ct_core_targets_list}" PUBLIC Threads::Threads)
 
 # ---------------------------------------------------------------------------------------------------------------------
 # -------------------------------------------------------------------------------------------------------------- EXPORT
