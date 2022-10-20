@@ -89,7 +89,7 @@ int main(int argc, char** argv)
 				          << "Size of data to process in one task                                   "
 				          << "[" << data_length << "]" << std::endl;
 				std::cout << "  -e, --n-exec          "
-				          << "Number of sequence executions (if zero, force `limit` to 1)           "
+				          << "Number of sequence executions                                         "
 				          << "[" << n_exec << "]" << std::endl;
 				std::cout << "  -o, --dot-filepath    "
 				          << "Path to dot output file                                               "
@@ -116,9 +116,9 @@ int main(int argc, char** argv)
 		}
 	}
 
-	std::cout << "###############################################" << std::endl;
-	std::cout << "# Micro-benchmark: Simple chain               #" << std::endl;
-	std::cout << "###############################################" << std::endl;
+	std::cout << "#################################" << std::endl;
+	std::cout << "# Micro-benchmark: Simple chain #" << std::endl;
+	std::cout << "#################################" << std::endl;
 	std::cout << std::endl;
 
 	std::cout << "Command line arguments:" << std::endl;
@@ -134,8 +134,6 @@ int main(int argc, char** argv)
 	std::cout << "  - debug          = " << (debug ? "true" : "false") << std::endl;
 	std::cout << std::endl;
 
-	unsigned int limit = n_exec ? n_exec * n_threads : 1;
-	std::cout << "  - limit          = " << limit << std::endl << std::endl;
 	unsigned int test_results = 0;
 
 	// modules creation
@@ -191,14 +189,14 @@ int main(int argc, char** argv)
 	if (!step_by_step)
 	{
 		// execute the sequence (multi-threaded)
-		sequence_chain.exec([&counter, limit]() { return ++counter >= limit; });
+		sequence_chain.exec([&counter, n_exec]() { return ++counter >= n_exec; });
 	}
 	else
 	{
 		do
 			for (size_t tid = 0; tid < n_threads; tid++)
 				while (sequence_chain.exec_step(tid));
-		while (++counter < (limit / n_threads));
+		while (++counter < (n_exec / n_threads));
 	}
 
 	std::chrono::nanoseconds duration = std::chrono::steady_clock::now() - t_start;
@@ -210,7 +208,7 @@ int main(int argc, char** argv)
 	for (auto &inc : incs)
 		chain_sleep_time += inc->get_ns();
 
-	auto theoretical_time = (chain_sleep_time * limit * n_inter_frames) / 1000.f / 1000.f / n_threads;
+	auto theoretical_time = (chain_sleep_time * n_exec * n_inter_frames) / 1000.f / 1000.f / n_threads;
 	std::cout << "Sequence theoretical time: " << theoretical_time << " ms" << std::endl;
 
 	// verification of the sequence execution

@@ -89,7 +89,7 @@ int main(int argc, char** argv)
 				          << "Size of data to process in one task                                   "
 				          << "[" << data_length << "]" << std::endl;
 				std::cout << "  -e, --n-exec          "
-				          << "Number of sequence executions (if zero, force `limit` to 1)           "
+				          << "Number of sequence executions                                         "
 				          << "[" << n_exec << "]" << std::endl;
 				std::cout << "  -o, --dot-filepath    "
 				          << "Path to dot output file                                               "
@@ -116,9 +116,9 @@ int main(int argc, char** argv)
 		}
 	}
 
-	std::cout << "###############################################" << std::endl;
-	std::cout << "# Micro-benchmark: Exclusive paths            #" << std::endl;
-	std::cout << "###############################################" << std::endl;
+	std::cout << "####################################" << std::endl;
+	std::cout << "# Micro-benchmark: Exclusive paths #" << std::endl;
+	std::cout << "####################################" << std::endl;
 	std::cout << std::endl;
 
 	std::cout << "Command line arguments:" << std::endl;
@@ -193,7 +193,6 @@ int main(int argc, char** argv)
 	for (size_t path = 0; path < 3; path++)
 	{
 		std::cout << "Sub-test " << (path+1) << " - path = " << path << " ---------------------" << std::endl;
-		auto limit = n_exec ? n_exec * n_threads * multiplier[path] : 1;
 
 		for (auto cur_module : sequence_exclusive_paths.get_modules<tools::Interface_reset>())
 			cur_module->reset();
@@ -216,14 +215,14 @@ int main(int argc, char** argv)
 		if (!step_by_step)
 		{
 			// execute the sequence (multi-threaded)
-			sequence_exclusive_paths.exec([&counter, limit]() { return ++counter >= limit; });
+			sequence_exclusive_paths.exec([&counter, n_exec]() { return ++counter >= n_exec; });
 		}
 		else
 		{
 			do
 				for (size_t tid = 0; tid < n_threads; tid++)
 					while (sequence_exclusive_paths.exec_step(tid));
-			while (++counter < (limit / n_threads));
+			while (++counter < (n_exec / n_threads));
 		}
 		auto duration = std::chrono::steady_clock::now() - t_start;
 
@@ -234,7 +233,7 @@ int main(int argc, char** argv)
 		for (auto &inc : incs)
 			chain_sleep_time += inc->get_ns();
 
-		auto theoretical_time = (((chain_sleep_time / multiplier[path]) * limit * n_inter_frames) / 1000.f / 1000.f / n_threads);
+		auto theoretical_time = (((chain_sleep_time / multiplier[path]) * n_exec * n_inter_frames) / 1000.f / 1000.f / n_threads);
 		std::cout << "Sequence theoretical time: " << theoretical_time << " ms" << std::endl;
 
 		// verification of the sequence execution
