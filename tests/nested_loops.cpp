@@ -173,8 +173,6 @@ int main(int argc, char** argv)
 	module::Iterator iterator2(n_loop_in);
 	iterator2.set_custom_name("IteratorIn");
 
-	unsigned int test_results = 0;
-
 	switcher2 [module::swi::tsk::select ][1]    = initializer[module::ini::sck::initialize::out];
 	iterator2 [module::ite::tsk::iterate]       = switcher2  [module::swi::tsk::select][3];
 	switcher2 [module::swi::tsk::commute][0]    = switcher2  [module::swi::tsk::select][2];
@@ -277,13 +275,13 @@ int main(int argc, char** argv)
 	else
 		std::cout << "# " << rang::style::bold << rang::fg::red << "Tests failed :-(" << rang::style::reset << std::endl;
 
-	test_results += !tests_passed;
+	unsigned int test_results = !tests_passed;
 
 	// display the statistics of the tasks (if enabled)
 	if (print_stats)
 	{
 		std::cout << "#" << std::endl;
-		tools::Stats::show(sequence_nested_loops.get_modules_per_types(), true);
+		tools::Stats::show(sequence_nested_loops.get_modules_per_types(), true, false);
 	}
 
 	return test_results;

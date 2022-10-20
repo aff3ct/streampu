@@ -29,30 +29,30 @@ public:
 
 	template <class MODULE_OR_TASK>
 	static void show(std::vector<MODULE_OR_TASK*> modules_or_tasks, const bool ordered = false,
-	                 std::ostream &stream = std::cout);
+	                 const bool display_thr = true, std::ostream &stream = std::cout);
 	template <class MODULE_OR_TASK>
 	static void show(std::vector<std::vector<MODULE_OR_TASK*>> modules_or_tasks, const bool ordered = false,
-	                 std::ostream &stream = std::cout);
+		             const bool display_thr = true, std::ostream &stream = std::cout);
 
 private:
 	template <class MODULE = const module::Module>
-	static void show_modules(std::vector<MODULE*> modules, const bool ordered = false,
+	static void show_modules(std::vector<MODULE*> modules, const bool ordered = false, const bool display_thr = true,
 	                         std::ostream &stream = std::cout);
 	template <class TASK = const runtime::Task>
-	static void show_tasks(std::vector<TASK*> tasks, const bool ordered = false,
+	static void show_tasks(std::vector<TASK*> tasks, const bool ordered = false, const bool display_thr = true,
 	                       std::ostream &stream = std::cout);
 	template <class MODULE = const module::Module>
 	static void show_modules(std::vector<std::vector<MODULE*>> modules, const bool ordered = false,
-	                         std::ostream &stream = std::cout);
+	                         const bool display_thr = true, std::ostream &stream = std::cout);
 	template <class TASK = const runtime::Task>
 	static void show_tasks(std::vector<std::vector<TASK*>> tasks, const bool ordered = false,
-	                       std::ostream &stream = std::cout);
+	                       const bool display_thr = true, std::ostream &stream = std::cout);
 
-	static void separation1(std::ostream &stream = std::cout);
+	static void separation1(const bool display_thr = true, std::ostream &stream = std::cout);
 
-	static void separation2(std::ostream &stream = std::cout);
+	static void separation2(const bool display_thr = true, std::ostream &stream = std::cout);
 
-	static void show_header(std::ostream &stream = std::cout);
+	static void show_header(const bool display_thr = true, std::ostream &stream = std::cout);
 
 	static void show_task(const float                    total_sec,
 	                      const std::string&             module_sname,
@@ -62,6 +62,7 @@ private:
 	                      const std::chrono::nanoseconds task_tot_duration,
 	                      const std::chrono::nanoseconds task_min_duration,
 	                      const std::chrono::nanoseconds task_max_duration,
+	                      const bool                     display_thr = true,
 	                            std::ostream             &stream = std::cout);
 
 	static void show_timer(const float                    total_sec,

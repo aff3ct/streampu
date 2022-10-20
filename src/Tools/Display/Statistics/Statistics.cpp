@@ -12,32 +12,58 @@ using namespace aff3ct;
 using namespace aff3ct::tools;
 
 void Statistics
-::separation1(std::ostream &stream)
+::separation1(const bool display_thr, std::ostream &stream)
 {
-	stream << "# " << rang::style::bold << "-------------------------------------------||------------------------------||--------------------------------||--------------------------------" << rang::style::reset << std::endl;
+	if (display_thr)
+		stream << "# " << rang::style::bold << "-------------------------------------------||------------------------------||--------------------------------||--------------------------------" << rang::style::reset << std::endl;
+	else
+		stream << "# " << rang::style::bold << "-------------------------------------------||------------------------------||--------------------------------" << rang::style::reset << std::endl;
 }
 
 void Statistics
-::separation2(std::ostream &stream)
+::separation2(const bool display_thr, std::ostream &stream)
 {
-	stream << "# " << rang::style::bold << "-------------|-------------------|---------||----------|----------|--------||----------|----------|----------||----------|----------|----------" << rang::style::reset << std::endl;
+	if (display_thr)
+		stream << "# " << rang::style::bold << "-------------|-------------------|---------||----------|----------|--------||----------|----------|----------||----------|----------|----------" << rang::style::reset << std::endl;
+	else
+		stream << "# " << rang::style::bold << "-------------|-------------------|---------||----------|----------|--------||----------|----------|----------" << rang::style::reset << std::endl;
 }
 
 void Statistics
-::show_header(std::ostream &stream)
+::show_header(const bool display_thr, std::ostream &stream)
 {
-	Statistics::separation1(stream);
-//	stream << "# " << rang::style::bold << "-------------------------------------------||------------------------------||--------------------------------||--------------------------------" << rang::style::reset << std::endl;
-	stream << "# " << rang::style::bold << "       Statistics for the given task       ||       Basic statistics       ||       Measured throughput      ||        Measured latency        " << rang::style::reset << std::endl;
-	stream << "# " << rang::style::bold << "    ('*' = any, '-' = same as previous)    ||          on the task         ||   considering the last socket  ||   considering the last socket  " << rang::style::reset << std::endl;
-//	stream << "# " << rang::style::bold << "-------------------------------------------||------------------------------||--------------------------------||--------------------------------" << rang::style::reset << std::endl;
-	Statistics::separation1(stream);
-	Statistics::separation2(stream);
-//	stream << "# " << rang::style::bold << "-------------|-------------------|---------||----------|----------|--------||----------|----------|----------||----------|----------|----------" << rang::style::reset << std::endl;
-	stream << "# " << rang::style::bold << "      MODULE |              TASK |   TIMER ||    CALLS |     TIME |   PERC ||  AVERAGE |  MINIMUM |  MAXIMUM ||  AVERAGE |  MINIMUM |  MAXIMUM " << rang::style::reset << std::endl;
-	stream << "# " << rang::style::bold << "             |                   |         ||          |      (s) |    (%) ||   (Mb/s) |   (Mb/s) |   (Mb/s) ||     (us) |     (us) |     (us) " << rang::style::reset << std::endl;
-//	stream << "# " << rang::style::bold << "-------------|-------------------|---------||----------|----------|--------||----------|----------|----------||----------|----------|----------" << rang::style::reset << std::endl;
-	Statistics::separation2(stream);
+	Statistics::separation1(display_thr, stream);
+	if (display_thr)
+	{
+//		stream << "# " << rang::style::bold << "-------------------------------------------||------------------------------||--------------------------------||--------------------------------" << rang::style::reset << std::endl;
+		stream << "# " << rang::style::bold << "       Statistics for the given task       ||       Basic statistics       ||       Measured throughput      ||        Measured latency        " << rang::style::reset << std::endl;
+		stream << "# " << rang::style::bold << "    ('*' = any, '-' = same as previous)    ||          on the task         ||   considering the last socket  ||                                " << rang::style::reset << std::endl;
+//		stream << "# " << rang::style::bold << "-------------------------------------------||------------------------------||--------------------------------||--------------------------------" << rang::style::reset << std::endl;
+	}
+	else
+	{
+//		stream << "# " << rang::style::bold << "-------------------------------------------||------------------------------||--------------------------------" << rang::style::reset << std::endl;
+		stream << "# " << rang::style::bold << "       Statistics for the given task       ||       Basic statistics       ||        Measured latency        " << rang::style::reset << std::endl;
+		stream << "# " << rang::style::bold << "    ('*' = any, '-' = same as previous)    ||          on the task         ||                                " << rang::style::reset << std::endl;
+//		stream << "# " << rang::style::bold << "-------------------------------------------||------------------------------||--------------------------------" << rang::style::reset << std::endl;
+	}
+	Statistics::separation1(display_thr, stream);
+	Statistics::separation2(display_thr, stream);
+	if (display_thr)
+	{
+//		stream << "# " << rang::style::bold << "-------------|-------------------|---------||----------|----------|--------||----------|----------|----------||----------|----------|----------" << rang::style::reset << std::endl;
+		stream << "# " << rang::style::bold << "      MODULE |              TASK |   TIMER ||    CALLS |     TIME |   PERC ||  AVERAGE |  MINIMUM |  MAXIMUM ||  AVERAGE |  MINIMUM |  MAXIMUM " << rang::style::reset << std::endl;
+		stream << "# " << rang::style::bold << "             |                   |         ||          |      (s) |    (%) ||   (Mb/s) |   (Mb/s) |   (Mb/s) ||     (us) |     (us) |     (us) " << rang::style::reset << std::endl;
+//		stream << "# " << rang::style::bold << "-------------|-------------------|---------||----------|----------|--------||----------|----------|----------||----------|----------|----------" << rang::style::reset << std::endl;
+	}
+	else
+	{
+//		stream << "# " << rang::style::bold << "-------------|-------------------|---------||----------|----------|--------||----------|----------|----------" << rang::style::reset << std::endl;
+		stream << "# " << rang::style::bold << "      MODULE |              TASK |   TIMER ||    CALLS |     TIME |   PERC ||  AVERAGE |  MINIMUM |  MAXIMUM " << rang::style::reset << std::endl;
+		stream << "# " << rang::style::bold << "             |                   |         ||          |      (s) |    (%) ||     (us) |     (us) |     (us) " << rang::style::reset << std::endl;
+//		stream << "# " << rang::style::bold << "-------------|-------------------|---------||----------|----------|--------||----------|----------|----------" << rang::style::reset << std::endl;
+	}
+	Statistics::separation2(display_thr, stream);
 }
 
 void Statistics
@@ -49,6 +75,7 @@ void Statistics
             const std::chrono::nanoseconds task_tot_duration,
             const std::chrono::nanoseconds task_min_duration,
             const std::chrono::nanoseconds task_max_duration,
+            const bool                     display_thr,
                   std::ostream             &stream)
 {
 	if (task_n_calls == 0)
@@ -102,14 +129,22 @@ void Statistics
 	else if (percent <  5.0f) stream << rang::fg::gray   << sspercent.str() << rang::style::reset;
 	else                      stream <<                     sspercent.str();
 
-	stream <<                    rang::style::bold << " || " << rang::style::reset
-	       << ssavg_thr.str() << rang::style::bold << " | "  << rang::style::reset
-	       << ssmin_thr.str() << rang::style::bold << " | "  << rang::style::reset
-	       << ssmax_thr.str() << rang::style::bold << " || " << rang::style::reset
-	       << ssavg_lat.str() << rang::style::bold << " | "  << rang::style::reset
-	       << ssmin_lat.str() << rang::style::bold << " | "  << rang::style::reset
-	       << ssmax_lat.str() << ""
-	       << std::endl;
+	if (display_thr)
+		stream <<                    rang::style::bold << " || " << rang::style::reset
+		       << ssavg_thr.str() << rang::style::bold << " | "  << rang::style::reset
+		       << ssmin_thr.str() << rang::style::bold << " | "  << rang::style::reset
+		       << ssmax_thr.str() << rang::style::bold << " || " << rang::style::reset
+		       << ssavg_lat.str() << rang::style::bold << " | "  << rang::style::reset
+		       << ssmin_lat.str() << rang::style::bold << " | "  << rang::style::reset
+		       << ssmax_lat.str() << ""
+		       << std::endl;
+	else
+		stream <<                    rang::style::bold << " || " << rang::style::reset
+		       << ssavg_lat.str() << rang::style::bold << " | "  << rang::style::reset
+		       << ssmin_lat.str() << rang::style::bold << " | "  << rang::style::reset
+		       << ssmax_lat.str() << ""
+		       << std::endl;
+
 }
 
 void Statistics
@@ -180,7 +215,7 @@ void Statistics
 
 template <class MODULE_OR_TASK>
 void Statistics
-::show(std::vector<MODULE_OR_TASK*> modules_or_tasks, const bool ordered, std::ostream &stream)
+::show(std::vector<MODULE_OR_TASK*> modules_or_tasks, const bool ordered, const bool display_thr, std::ostream &stream)
 {
 	std::stringstream message;
 	message << "The 'Statistics::show' method expect a 'std::vector' of 'module::Module' or 'runtime::Task'.";
@@ -192,30 +227,34 @@ namespace tools {
 
 template <>
 void Statistics
-::show<module::Module>(std::vector<module::Module*> modules, const bool ordered, std::ostream &stream)
+::show<module::Module>(std::vector<module::Module*> modules, const bool ordered, const bool display_thr,
+                       std::ostream &stream)
 {
-	Statistics::show_modules<module::Module>(modules, ordered, stream);
+	Statistics::show_modules<module::Module>(modules, ordered, display_thr, stream);
 }
 
 template <>
 void Statistics
-::show<const module::Module>(std::vector<const module::Module*> modules, const bool ordered, std::ostream &stream)
+::show<const module::Module>(std::vector<const module::Module*> modules, const bool ordered, const bool display_thr,
+                             std::ostream &stream)
 {
-	Statistics::show_modules<const module::Module>(modules, ordered, stream);
+	Statistics::show_modules<const module::Module>(modules, ordered, display_thr, stream);
 }
 
 template <>
 void Statistics
-::show<runtime::Task>(std::vector<runtime::Task*> tasks, const bool ordered, std::ostream &stream)
+::show<runtime::Task>(std::vector<runtime::Task*> tasks, const bool ordered, const bool display_thr,
+                      std::ostream &stream)
 {
-	Statistics::show_tasks<runtime::Task>(tasks, ordered, stream);
+	Statistics::show_tasks<runtime::Task>(tasks, ordered, display_thr, stream);
 }
 
 template <>
 void Statistics
-::show<const runtime::Task>(std::vector<const runtime::Task*> tasks, const bool ordered, std::ostream &stream)
+::show<const runtime::Task>(std::vector<const runtime::Task*> tasks, const bool ordered, const bool display_thr,
+                            std::ostream &stream)
 {
-	Statistics::show_tasks<const runtime::Task>(tasks, ordered, stream);
+	Statistics::show_tasks<const runtime::Task>(tasks, ordered, display_thr, stream);
 }
 
 }
@@ -223,7 +262,7 @@ void Statistics
 
 template <class MODULE>
 void Statistics
-::show_modules(std::vector<MODULE*> modules, const bool ordered, std::ostream &stream)
+::show_modules(std::vector<MODULE*> modules, const bool ordered, const bool display_thr, std::ostream &stream)
 {
 	std::vector<const runtime::Task*> tasks;
 	for (auto& m : modules)
@@ -232,12 +271,12 @@ void Statistics
 				if (t->get_n_calls())
 					tasks.push_back(t.get());
 
-	Statistics::show_tasks(tasks, ordered, stream);
+	Statistics::show_tasks(tasks, ordered, display_thr, stream);
 }
 
 template <class TASK>
 void Statistics
-::show_tasks(std::vector<TASK*> tasks, const bool ordered, std::ostream &stream)
+::show_tasks(std::vector<TASK*> tasks, const bool ordered, const bool display_thr, std::ostream &stream)
 {
 	for (size_t t = 0; t < tasks.size(); t++)
 		if (tasks[t] == nullptr)
@@ -261,7 +300,7 @@ void Statistics
 
 	if (ttask_tot_duration.count())
 	{
-		Statistics::show_header(stream);
+		Statistics::show_header(display_thr, stream);
 
 		size_t   ttask_n_elmts = 0;
 		uint32_t ttask_n_calls = 0;
@@ -303,7 +342,7 @@ void Statistics
 			ttask_max_duration += (task_max_duration * task_n_calls) / ttask_n_calls;
 
 			Statistics::show_task(total_sec, module_name, task_name, task_n_elmts, task_n_calls,
-			                      task_tot_duration, task_min_duration, task_max_duration, stream);
+			                      task_tot_duration, task_min_duration, task_max_duration, display_thr, stream);
 
 			auto task_total_sec = ((float)task_tot_duration.count()) * 0.000000001f;
 
@@ -321,10 +360,10 @@ void Statistics
 				                       timers_min_duration[i], timers_max_duration[i], stream);
 			}
 		}
-		Statistics::separation2(stream);
+		Statistics::separation2(display_thr, stream);
 
 		Statistics::show_task(total_sec, "TOTAL", "*", ttask_n_elmts, ttask_n_calls,
-		                      ttask_tot_duration, ttask_min_duration, ttask_max_duration, stream);
+		                      ttask_tot_duration, ttask_min_duration, ttask_max_duration, display_thr, stream);
 	}
 	else
 	{
@@ -335,7 +374,8 @@ void Statistics
 
 template <class MODULE_OR_TASK>
 void Statistics
-::show(std::vector<std::vector<MODULE_OR_TASK*>> modules_or_tasks, const bool ordered, std::ostream &stream)
+::show(std::vector<std::vector<MODULE_OR_TASK*>> modules_or_tasks, const bool ordered, const bool display_thr,
+       std::ostream &stream)
 {
 	std::stringstream message;
 	message << "The 'Statistics::show' method expect a 'std::vector' of 'std::vector' of 'module::Module' or "
@@ -348,30 +388,34 @@ namespace tools {
 
 template <>
 void Statistics
-::show<module::Module>(std::vector<std::vector<module::Module*>> modules, const bool ordered, std::ostream &stream)
+::show<module::Module>(std::vector<std::vector<module::Module*>> modules, const bool ordered, const bool display_thr,
+                       std::ostream &stream)
 {
-	Statistics::show_modules<module::Module>(modules, ordered, stream);
+	Statistics::show_modules<module::Module>(modules, ordered, display_thr, stream);
 }
 
 template <>
 void Statistics
-::show<const module::Module>(std::vector<std::vector<const module::Module*>> modules, const bool ordered, std::ostream &stream)
+::show<const module::Module>(std::vector<std::vector<const module::Module*>> modules, const bool ordered,
+                             const bool display_thr, std::ostream &stream)
 {
-	Statistics::show_modules<const module::Module>(modules, ordered, stream);
+	Statistics::show_modules<const module::Module>(modules, ordered, display_thr, stream);
 }
 
 template <>
 void Statistics
-::show<runtime::Task>(std::vector<std::vector<runtime::Task*>> tasks, const bool ordered, std::ostream &stream)
+::show<runtime::Task>(std::vector<std::vector<runtime::Task*>> tasks, const bool ordered, const bool display_thr,
+                      std::ostream &stream)
 {
-	Statistics::show_tasks<runtime::Task>(tasks, ordered, stream);
+	Statistics::show_tasks<runtime::Task>(tasks, ordered, display_thr, stream);
 }
 
 template <>
 void Statistics
-::show<const runtime::Task>(std::vector<std::vector<const runtime::Task*>> tasks, const bool ordered, std::ostream &stream)
+::show<const runtime::Task>(std::vector<std::vector<const runtime::Task*>> tasks, const bool ordered,
+                            const bool display_thr, std::ostream &stream)
 {
-	Statistics::show_tasks<const runtime::Task>(tasks, ordered, stream);
+	Statistics::show_tasks<const runtime::Task>(tasks, ordered, display_thr, stream);
 }
 
 }
@@ -379,7 +423,8 @@ void Statistics
 
 template <class MODULE>
 void Statistics
-::show_modules(std::vector<std::vector<MODULE*>> modules, const bool ordered, std::ostream &stream)
+::show_modules(std::vector<std::vector<MODULE*>> modules, const bool ordered, const bool display_thr,
+               std::ostream &stream)
 {
 	std::vector<std::vector<const runtime::Task*>> tasks;
 	for (auto &vm : modules)
@@ -395,12 +440,12 @@ void Statistics
 			}
 		}
 
-	Statistics::show_tasks(tasks, ordered, stream);
+	Statistics::show_tasks(tasks, ordered, display_thr, stream);
 }
 
 template <class TASK>
 void Statistics
-::show_tasks(std::vector<std::vector<TASK*>> tasks, const bool ordered, std::ostream &stream)
+::show_tasks(std::vector<std::vector<TASK*>> tasks, const bool ordered, const bool display_thr, std::ostream &stream)
 {
 	using namespace std::chrono;
 
@@ -435,7 +480,7 @@ void Statistics
 
 	if (ttask_tot_duration.count())
 	{
-		Statistics::show_header(stream);
+		Statistics::show_header(display_thr, stream);
 
 		size_t ttask_n_elmts = 0;
 		auto   ttask_n_calls = 0;
@@ -467,7 +512,6 @@ void Statistics
 
 		for (auto &vt : tasks)
 		{
-
 			auto module_name       = vt[0]->get_module().get_custom_name().empty() ?
 			                         vt[0]->get_module().get_short_name() :
 			                         vt[0]->get_module().get_custom_name();
@@ -490,7 +534,7 @@ void Statistics
 			ttask_max_duration += (task_max_duration * task_n_calls) / ttask_n_calls;
 
 			Statistics::show_task(total_sec, module_name, task_name, task_n_elmts, task_n_calls,
-			                      task_tot_duration, task_min_duration, task_max_duration, stream);
+			                      task_tot_duration, task_min_duration, task_max_duration, display_thr, stream);
 
 			auto task_total_sec = ((float)task_tot_duration.count()) * 0.000000001f;
 
@@ -516,10 +560,10 @@ void Statistics
 				                       timers_min_duration[tn], timers_max_duration[tn], stream);
 			}
 		}
-		Statistics::separation2(stream);
+		Statistics::separation2(display_thr, stream);
 
 		Statistics::show_task(total_sec, "TOTAL", "*", ttask_n_elmts, ttask_n_calls,
-		                      ttask_tot_duration, ttask_min_duration, ttask_max_duration, stream);
+		                      ttask_tot_duration, ttask_min_duration, ttask_max_duration, display_thr, stream);
 	}
 	else
 	{

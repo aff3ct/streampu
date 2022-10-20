@@ -290,13 +290,12 @@ int main(int argc, char** argv)
 	else
 		std::cout << "# " << rang::style::bold << rang::fg::red << "Tests failed :-(" << rang::style::reset << std::endl;
 
-	unsigned int test_results = 0;
-	test_results += !tests_passed;
+	unsigned int test_results = !tests_passed;
 
 	// display the statistics of the tasks (if enabled)
 	if (print_stats) {
 		std::cout << "#" << std::endl;
-		tools::Stats::show(sequence_exclusive_paths.get_modules_per_types(), true);
+		tools::Stats::show(sequence_exclusive_paths.get_modules_per_types(), true, false);
 	}
 
 	sequence_exclusive_paths.set_n_frames(1);

@@ -146,8 +146,6 @@ int main(int argc, char** argv)
 	module::Switcher switcher(2, data_length, typeid(int));
 	module::Iterator iterator(n_loop);
 
-	unsigned int test_results = 0;
-
 	// modules creation
 	module::Initializer<uint8_t> initializer(data_length);
 	module::Finalizer  <uint8_t> finalizer  (data_length);
@@ -257,13 +255,13 @@ int main(int argc, char** argv)
 	else
 		std::cout << "# " << rang::style::bold << rang::fg::red << "Tests failed :-(" << rang::style::reset << std::endl;
 
-	test_results += !tests_passed;
+	unsigned int test_results = !tests_passed;
 
 	// display the statistics of the tasks (if enabled)
 	if (print_stats)
 	{
 		std::cout << "#" << std::endl;
-		tools::Stats::show(sequence_for_loop.get_modules_per_types(), true);
+		tools::Stats::show(sequence_for_loop.get_modules_per_types(), true, false);
 	}
 
 	// unbind

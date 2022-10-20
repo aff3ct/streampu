@@ -134,8 +134,6 @@ int main(int argc, char** argv)
 	std::cout << "#   - debug          = " << (debug ? "true" : "false") << std::endl;
 	std::cout << "#" << std::endl;
 
-	unsigned int test_results = 0;
-
 	// modules creation
 	module::Initializer<uint8_t> initializer(data_length);
 	module::Finalizer  <uint8_t> finalizer  (data_length);
@@ -238,13 +236,13 @@ int main(int argc, char** argv)
 	else
 		std::cout << "# " << rang::style::bold << rang::fg::red << "Tests failed :-(" << rang::style::reset << std::endl;
 
-	test_results += !tests_passed;
+	unsigned int test_results = !tests_passed;
 
 	// display the statistics of the tasks (if enabled)
 	if (print_stats)
 	{
 		std::cout << "#" << std::endl;
-		tools::Stats::show(sequence_chain.get_modules_per_types(), true);
+		tools::Stats::show(sequence_chain.get_modules_per_types(), true, false);
 	}
 
 	// sockets unbinding
