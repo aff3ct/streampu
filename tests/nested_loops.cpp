@@ -150,7 +150,7 @@ int main(int argc, char** argv)
 	std::cout << "#   - print_stats    = " << (print_stats ? "true" : "false") << std::endl;
 	std::cout << "#   - step_by_step   = " << (step_by_step ? "true" : "false") << std::endl;
 	std::cout << "#   - debug          = " << (debug ? "true" : "false") << std::endl;
-	std::cout << std::endl;
+	std::cout << "#" << std::endl;
 
 	module::Switcher switcher(2, data_length, typeid(int));
 	switcher.set_custom_name("SwitcherOut");
