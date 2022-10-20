@@ -169,7 +169,7 @@ int main(int argc, char** argv)
 	else
 		controller_ptr = std::unique_ptr<module::Controller>(new module::Controller_static(path));
 	module::Controller &controller = *controller_ptr;
-	module::Switcher switchex(3, data_length, typeid(int));
+	module::Switcher switchex(3, data_length, typeid(uint8_t));
 
 	// modules creation
 	module::Initializer<uint8_t> initializer(data_length);

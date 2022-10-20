@@ -143,7 +143,7 @@ int main(int argc, char** argv)
 	std::cout << "#   - debug          = " << (debug ? "true" : "false") << std::endl;
 	std::cout << "#" << std::endl;
 
-	module::Switcher switcher(2, data_length, typeid(int));
+	module::Switcher switcher(2, data_length, typeid(uint8_t));
 	module::Iterator iterator(n_loop);
 
 	// modules creation

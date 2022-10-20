@@ -152,7 +152,7 @@ int main(int argc, char** argv)
 	std::cout << "#   - debug          = " << (debug ? "true" : "false") << std::endl;
 	std::cout << "#" << std::endl;
 
-	module::Switcher switcher(2, data_length, typeid(int));
+	module::Switcher switcher(2, data_length, typeid(uint8_t));
 	switcher.set_custom_name("SwitcherOut");
 	module::Iterator iterator(n_loop_out);
 	iterator.set_custom_name("IteratorOut");
@@ -168,7 +168,7 @@ int main(int argc, char** argv)
 		incs[s]->set_custom_name("Inc" + std::to_string(s));
 	}
 
-	module::Switcher switcher2(2, data_length, typeid(int));
+	module::Switcher switcher2(2, data_length, typeid(uint8_t));
 	switcher2.set_custom_name("SwitcherIn");
 	module::Iterator iterator2(n_loop_in);
 	iterator2.set_custom_name("IteratorIn");
@@ -283,6 +283,22 @@ int main(int argc, char** argv)
 		std::cout << "#" << std::endl;
 		tools::Stats::show(sequence_nested_loops.get_modules_per_types(), true, false);
 	}
+
+	sequence_nested_loops.set_n_frames(1);
+	switcher2 [module::swi::tsk::select ][1]   .unbind(initializer[module::ini::sck::initialize::out]);
+	iterator2 [module::ite::tsk::iterate]      .unbind(switcher2  [module::swi::tsk::select][3]);
+	switcher2 [module::swi::tsk::commute][0]   .unbind(switcher2  [module::swi::tsk::select][2]);
+	switcher2 [module::swi::tsk::commute][1]   .unbind(iterator2  [module::ite::sck::iterate::out]);
+	switcher  [module::swi::tsk::select ][1]   .unbind(switcher2  [module::swi::tsk::commute][2]);
+	iterator  [module::ite::tsk::iterate]      .unbind(switcher   [module::swi::tsk::select ][3]);
+	switcher  [module::swi::tsk::commute][0]   .unbind(switcher   [module::swi::tsk::select ][2]);
+	switcher  [module::swi::tsk::commute][1]   .unbind(iterator   [module::ite::sck::iterate::out]);
+	(*incs[0])[module::inc::sck::increment::in].unbind(switcher   [module::swi::tsk::commute][2]);
+	for (size_t s = 0; s < incs.size() -1; s++)
+		(*incs[s+1])[module::inc::sck::increment::in].unbind((*incs[s])[module::inc::sck::increment::out]);
+	switcher  [module::swi::tsk::select][0]    .unbind((*incs[incs.size()-1])[module::inc::sck::increment::out]);
+	switcher2 [module::swi::tsk::select][0]    .unbind(switcher   [module::swi::tsk::commute][3]);
+	finalizer [module::fin::sck::finalize::in] .unbind(switcher2  [module::swi::tsk::commute][3]);
 
 	return test_results;
 }
