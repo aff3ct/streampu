@@ -91,7 +91,7 @@ int main(int argc, char** argv)
 				          << "Sleep time duration in one task (microseconds)                        "
 				          << "[" << sleep_time_us << "]" << std::endl;
 				std::cout << "  -d, --data-length     "
-				          << "Size of data to process in one task                                   "
+				          << "Size of data to process in one task (in bytes)                        "
 				          << "[" << data_length << "]" << std::endl;
 				std::cout << "  -e, --n-exec          "
 				          << "Number of sequence executions                                         "
@@ -149,13 +149,13 @@ int main(int argc, char** argv)
 	unsigned int test_results = 0;
 
 	// modules creation
-	module::Initializer<> initializer(data_length);
-	module::Finalizer  <> finalizer  (data_length);
+	module::Initializer<uint8_t> initializer(data_length);
+	module::Finalizer  <uint8_t> finalizer  (data_length);
 
-	std::vector<std::shared_ptr<module::Incrementer<>>> incs(6);
+	std::vector<std::shared_ptr<module::Incrementer<uint8_t>>> incs(6);
 	for (size_t s = 0; s < incs.size(); s++)
 	{
-		incs[s].reset(new module::Incrementer<>(data_length));
+		incs[s].reset(new module::Incrementer<uint8_t>(data_length));
 		incs[s]->set_ns(sleep_time_us * 1000);
 		incs[s]->set_custom_name("Inc" + std::to_string(s));
 	}
@@ -178,9 +178,9 @@ int main(int argc, char** argv)
 		cur_module->reset();
 
 	auto tid = 0;
-	for (auto cur_initializer : sequence_for_loop.get_cloned_modules<module::Initializer<>>(initializer))
+	for (auto cur_initializer : sequence_for_loop.get_cloned_modules<module::Initializer<uint8_t>>(initializer))
 	{
-		std::vector<std::vector<int>> init_data(n_inter_frames, std::vector<int>(data_length, 0));
+		std::vector<std::vector<uint8_t>> init_data(n_inter_frames, std::vector<uint8_t>(data_length, 0));
 		for (size_t f = 0; f < n_inter_frames; f++)
 			std::fill(init_data[f].begin(), init_data[f].end(), tid * n_inter_frames +f);
 		cur_initializer->set_init_data(init_data);
@@ -233,7 +233,7 @@ int main(int argc, char** argv)
 	// verification of the sequence execution
 	auto tests_passed = true;
 	tid = 0;
-	for (auto cur_finalizer : sequence_for_loop.get_cloned_modules<module::Finalizer<>>(finalizer))
+	for (auto cur_finalizer : sequence_for_loop.get_cloned_modules<module::Finalizer<uint8_t>>(finalizer))
 	{
 		for (size_t f = 0; f < n_inter_frames; f++)
 		{
