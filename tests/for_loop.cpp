@@ -16,7 +16,8 @@ int main(int argc, char** argv)
 		{"n-inter-frames", required_argument, NULL, 'f'},
 		{"sleep-time", required_argument, NULL, 's'},
 		{"data-length", required_argument, NULL, 'd'},
-		{"n-exect", required_argument, NULL, 'e'},
+		{"n-exec", required_argument, NULL, 'e'},
+		{"n-loop", required_argument, NULL, 'i'},
 		{"dot-filepath", required_argument, NULL, 'o'},
 		{"copy-mode", no_argument, NULL, 'c'},
 		{"print-stats", no_argument, NULL, 'p'},
@@ -30,6 +31,7 @@ int main(int argc, char** argv)
 	size_t sleep_time_us = 5;
 	size_t data_length = 2048;
 	size_t n_exec = 100000;
+	size_t n_loop = 10;
 	std::string dot_filepath;
 	bool no_copy_mode = true;
 	bool print_stats = false;
@@ -38,7 +40,7 @@ int main(int argc, char** argv)
 
 	while (1)
 	{
-		const int opt = getopt_long(argc, argv, "t:f:s:d:e:o:cpbgh", longopts, 0);
+		const int opt = getopt_long(argc, argv, "t:f:s:d:e:i:o:cpbgh", longopts, 0);
 		if (opt == -1)
 			break;
 		switch (opt)
@@ -57,6 +59,9 @@ int main(int argc, char** argv)
 				break;
 			case 'e':
 				n_exec = atoi(optarg);
+				break;
+			case 'i':
+				n_loop = atoi(optarg);
 				break;
 			case 'o':
 				dot_filepath = std::string(optarg);
@@ -91,6 +96,9 @@ int main(int argc, char** argv)
 				std::cout << "  -e, --n-exec          "
 				          << "Number of sequence executions                                         "
 				          << "[" << n_exec << "]" << std::endl;
+				std::cout << "  -i, --n-loop          "
+				          << "Number of iterations to perform in the loop                           "
+				          << "[" << n_loop << "]" << std::endl;
 				std::cout << "  -o, --dot-filepath    "
 				          << "Path to dot output file                                               "
 				          << "[" << (dot_filepath.empty() ? "empty" : "\"" + dot_filepath + "\"") << "]" << std::endl;
@@ -119,23 +127,24 @@ int main(int argc, char** argv)
 	std::cout << "#############################################" << std::endl;
 	std::cout << "# Micro-benchmark: For loop (or while loop) #" << std::endl;
 	std::cout << "#############################################" << std::endl;
-	std::cout << std::endl;
+	std::cout << "#" << std::endl;
 
-	std::cout << "Command line arguments:" << std::endl;
-	std::cout << "  - n_threads      = " << n_threads << std::endl;
-	std::cout << "  - n_inter_frames = " << n_inter_frames << std::endl;
-	std::cout << "  - sleep_time_us  = " << sleep_time_us << std::endl;
-	std::cout << "  - data_length    = " << data_length << std::endl;
-	std::cout << "  - n_exec         = " << n_exec << std::endl;
-	std::cout << "  - dot_filepath   = " << (dot_filepath.empty() ? "[empty]" : dot_filepath.c_str()) << std::endl;
-	std::cout << "  - no_copy_mode   = " << (no_copy_mode ? "true" : "false") << std::endl;
-	std::cout << "  - print_stats    = " << (print_stats ? "true" : "false") << std::endl;
-	std::cout << "  - step_by_step   = " << (step_by_step ? "true" : "false") << std::endl;
-	std::cout << "  - debug          = " << (debug ? "true" : "false") << std::endl;
-	std::cout << std::endl;
+	std::cout << "# Command line arguments:" << std::endl;
+	std::cout << "#   - n_threads      = " << n_threads << std::endl;
+	std::cout << "#   - n_inter_frames = " << n_inter_frames << std::endl;
+	std::cout << "#   - sleep_time_us  = " << sleep_time_us << std::endl;
+	std::cout << "#   - data_length    = " << data_length << std::endl;
+	std::cout << "#   - n_exec         = " << n_exec << std::endl;
+	std::cout << "#   - n_loop         = " << n_loop << std::endl;
+	std::cout << "#   - dot_filepath   = " << (dot_filepath.empty() ? "[empty]" : dot_filepath.c_str()) << std::endl;
+	std::cout << "#   - no_copy_mode   = " << (no_copy_mode ? "true" : "false") << std::endl;
+	std::cout << "#   - print_stats    = " << (print_stats ? "true" : "false") << std::endl;
+	std::cout << "#   - step_by_step   = " << (step_by_step ? "true" : "false") << std::endl;
+	std::cout << "#   - debug          = " << (debug ? "true" : "false") << std::endl;
+	std::cout << "#" << std::endl;
 
 	module::Switcher switcher(2, data_length, typeid(int));
-	module::Iterator iterator(10);
+	module::Iterator iterator(n_loop);
 
 	unsigned int test_results = 0;
 
@@ -217,7 +226,8 @@ int main(int argc, char** argv)
 	for (auto &inc : incs)
 		chain_sleep_time += inc->get_ns();
 
-	auto theoretical_time = ((chain_sleep_time * n_exec * n_inter_frames) / 1000.f / 1000.f / n_threads) * iterator.get_limit();
+	auto theoretical_time = ((chain_sleep_time * n_exec * n_inter_frames) / 1000.f / 1000.f / n_threads) *
+	                        iterator.get_limit();
 	std::cout << "Sequence theoretical time: " << theoretical_time << " ms" << std::endl;
 
 	// verification of the sequence execution
@@ -233,7 +243,7 @@ int main(int argc, char** argv)
 				auto expected = (int)(incs.size() * iterator.get_limit() + (tid * n_inter_frames +f));
 				if (final_data[d] != expected)
 				{
-					std::cout << "expected = " << expected << " - obtained = "
+					std::cout << "# expected = " << expected << " - obtained = "
 					          << final_data[d] << " (d = " << d << ", tid = " << tid << ")" << std::endl;
 					tests_passed = false;
 				}
@@ -243,16 +253,16 @@ int main(int argc, char** argv)
 	}
 
 	if (tests_passed)
-		std::cout << rang::style::bold << rang::fg::green << "Tests passed!" << rang::style::reset << std::endl;
+		std::cout << "# " << rang::style::bold << rang::fg::green << "Tests passed!" << rang::style::reset << std::endl;
 	else
-		std::cout << rang::style::bold << rang::fg::red << "Tests failed :-(" << rang::style::reset << std::endl;
+		std::cout << "# " << rang::style::bold << rang::fg::red << "Tests failed :-(" << rang::style::reset << std::endl;
 
 	test_results += !tests_passed;
 
 	// display the statistics of the tasks (if enabled)
 	if (print_stats)
 	{
-		std::cout << std::endl;
+		std::cout << "#" << std::endl;
 		tools::Stats::show(sequence_for_loop.get_modules_per_types(), true);
 	}
 
