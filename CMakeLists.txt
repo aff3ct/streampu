@@ -113,6 +113,7 @@ if(AFF3CT_CORE_TESTS)
     set_target_properties(aff3ct-core-test-simple-chain PROPERTIES
                                                         OUTPUT_NAME test-simple-chain
                                                         POSITION_INDEPENDENT_CODE ON) # set -fpie
+    list(APPEND aff3ct_core_tests_list aff3ct-core-test-simple-chain)
     list(APPEND aff3ct_core_targets_list aff3ct-core-test-simple-chain)
 
     add_executable(aff3ct-core-test-for-loop $<TARGET_OBJECTS:aff3ct-core-obj>
@@ -120,6 +121,7 @@ if(AFF3CT_CORE_TESTS)
     set_target_properties(aff3ct-core-test-for-loop PROPERTIES
                                                     OUTPUT_NAME test-for-loop
                                                     POSITION_INDEPENDENT_CODE ON) # set -fpie
+    list(APPEND aff3ct_core_tests_list aff3ct-core-test-for-loop)
     list(APPEND aff3ct_core_targets_list aff3ct-core-test-for-loop)
 
     add_executable(aff3ct-core-test-do-while-loop $<TARGET_OBJECTS:aff3ct-core-obj>
@@ -127,6 +129,7 @@ if(AFF3CT_CORE_TESTS)
     set_target_properties(aff3ct-core-test-do-while-loop PROPERTIES
                                                          OUTPUT_NAME test-do-while-loop
                                                          POSITION_INDEPENDENT_CODE ON) # set -fpie
+    list(APPEND aff3ct_core_tests_list aff3ct-core-test-do-while-loop)
     list(APPEND aff3ct_core_targets_list aff3ct-core-test-do-while-loop)
 
     add_executable(aff3ct-core-test-exclusive-paths $<TARGET_OBJECTS:aff3ct-core-obj>
@@ -134,6 +137,7 @@ if(AFF3CT_CORE_TESTS)
     set_target_properties(aff3ct-core-test-exclusive-paths PROPERTIES
                                                            OUTPUT_NAME test-exclusive-paths
                                                            POSITION_INDEPENDENT_CODE ON) # set -fpie
+    list(APPEND aff3ct_core_tests_list aff3ct-core-test-exclusive-paths)
     list(APPEND aff3ct_core_targets_list aff3ct-core-test-exclusive-paths)
 
     add_executable(aff3ct-core-test-nested-loops $<TARGET_OBJECTS:aff3ct-core-obj>
@@ -141,6 +145,7 @@ if(AFF3CT_CORE_TESTS)
     set_target_properties(aff3ct-core-test-nested-loops PROPERTIES
                                                         OUTPUT_NAME test-nested-loops
                                                         POSITION_INDEPENDENT_CODE ON) # set -fpie
+    list(APPEND aff3ct_core_tests_list aff3ct-core-test-nested-loops)
     list(APPEND aff3ct_core_targets_list aff3ct-core-test-nested-loops)
 endif()
 
@@ -318,4 +323,57 @@ if (AFF3CT_CORE_COMPILE_SHARED_LIB OR AFF3CT_CORE_COMPILE_STATIC_LIB)
             DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/aff3ct-core/rang
             COMPONENT headers
             FILES_MATCHING PATTERN "*.hpp")
+endif()
+
+# ---------------------------------------------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------------------------------------------- TEST
+# ---------------------------------------------------------------------------------------------------------------------
+
+if(AFF3CT_CORE_TESTS)
+    enable_testing()
+
+    macro(aff3ct_core_run_1t_tests targets)
+        foreach(_target IN ITEMS ${targets})
+             add_test(NAME run-1t::${_target} COMMAND ${_target} -e 100 -t 1)
+        endforeach()
+    endmacro()
+
+    aff3ct_core_run_1t_tests("${aff3ct_core_tests_list}")
+
+    macro(aff3ct_core_run_tests targets)
+        foreach(_target IN ITEMS ${targets})
+             add_test(NAME run::${_target} COMMAND ${_target} -e 100)
+        endforeach()
+    endmacro()
+
+    aff3ct_core_run_tests("${aff3ct_core_tests_list}")
+
+    macro(aff3ct_core_inter_frames_tests targets)
+        foreach(_target IN ITEMS ${targets})
+             add_test(NAME inter-frames::${_target} COMMAND ${_target} -e 100 -f 13)
+        endforeach()
+    endmacro()
+
+    aff3ct_core_inter_frames_tests("${aff3ct_core_tests_list}")
+
+    macro(aff3ct_core_step_by_step_tests targets)
+        foreach(_target IN ITEMS ${targets})
+             add_test(NAME step-by-step::${_target} COMMAND ${_target} -e 51 -f 13 -b)
+        endforeach()
+    endmacro()
+
+    aff3ct_core_step_by_step_tests("${aff3ct_core_tests_list}")
+
+    macro(aff3ct_core_copy_mode_tests targets)
+        foreach(_target IN ITEMS ${targets})
+             add_test(NAME copy-mode::${_target} COMMAND ${_target} -e 142 -f 13 -c)
+        endforeach()
+    endmacro()
+
+    aff3ct_core_copy_mode_tests("${aff3ct_core_tests_list}")
+
+    add_test(NAME path0::aff3ct-core-test-exclusive-paths COMMAND aff3ct-core-test-exclusive-paths -e 142 -f 13 -a 0)
+    add_test(NAME path1::aff3ct-core-test-exclusive-paths COMMAND aff3ct-core-test-exclusive-paths -e 142 -f 13 -a 1)
+    add_test(NAME path2::aff3ct-core-test-exclusive-paths COMMAND aff3ct-core-test-exclusive-paths -e 142 -f 13 -a 2)
+    add_test(NAME cyclic::aff3ct-core-test-exclusive-paths COMMAND aff3ct-core-test-exclusive-paths -e 142 -f 13 -y)
 endif()
