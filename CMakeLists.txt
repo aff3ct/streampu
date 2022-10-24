@@ -302,11 +302,6 @@ if (AFF3CT_CORE_COMPILE_SHARED_LIB OR AFF3CT_CORE_COMPILE_STATIC_LIB)
             DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/aff3ct-core/"
             NAMESPACE aff3ct-core::
             COMPONENT library)
-
-    install(FILES "${CMAKE_CURRENT_BINARY_DIR}/lib/cmake/aff3ct-core/aff3ct-core-config-version.cmake"
-            DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/aff3ct-core/"
-            COMPONENT library)
-
     install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/"
             DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/aff3ct-core/aff3ct-core
             COMPONENT headers
