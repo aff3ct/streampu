@@ -25,7 +25,7 @@ Sink_NO<B>* Sink_NO<B>
 
 template <typename B>
 void Sink_NO<B>
-::_send_k(const B *in_data, const uint32_t* in_count, const size_t frame_id)
+::_send_count(const B *in_data, const uint32_t* in_count, const size_t frame_id)
 {
 	// do nothing, best module ever :-D
 }

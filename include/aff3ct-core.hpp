@@ -75,6 +75,9 @@
 #ifndef INCREMENTER_HPP_
 #include <Module/Reducer/Reducer.hpp>
 #endif
+#ifndef RELAYER_HPP_
+#include <Module/Relayer/Relayer.hpp>
+#endif
 #ifndef SINK_NO_HPP
 #include <Module/Sink/NO/Sink_NO.hpp>
 #endif

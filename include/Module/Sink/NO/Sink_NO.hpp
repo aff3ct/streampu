@@ -29,7 +29,7 @@ public:
 	virtual Sink_NO<B>* clone() const;
 
 protected:
-	virtual void _send_k(const B *in_data, const uint32_t* in_count, const size_t frame_id);
+	virtual void _send_count(const B *in_data, const uint32_t* in_count, const size_t frame_id);
 };
 
 }

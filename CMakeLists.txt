@@ -147,6 +147,14 @@ if(AFF3CT_CORE_TESTS)
                                                         POSITION_INDEPENDENT_CODE ON) # set -fpie
     list(APPEND aff3ct_core_tests_list aff3ct-core-test-nested-loops)
     list(APPEND aff3ct_core_targets_list aff3ct-core-test-nested-loops)
+
+    add_executable(aff3ct-core-test-simple-pipeline $<TARGET_OBJECTS:aff3ct-core-obj>
+                                                    ${CMAKE_CURRENT_SOURCE_DIR}/tests/simple_pipeline.cpp)
+    set_target_properties(aff3ct-core-test-simple-pipeline PROPERTIES
+                                                           OUTPUT_NAME test-simple-pipeline
+                                                           POSITION_INDEPENDENT_CODE ON) # set -fpie
+    # list(APPEND aff3ct_core_tests_list aff3ct-core-test-simple-pipeline)
+    list(APPEND aff3ct_core_targets_list aff3ct-core-test-simple-pipeline)
 endif()
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -367,8 +375,27 @@ if(AFF3CT_CORE_TESTS)
 
     aff3ct_core_copy_mode_tests("${aff3ct_core_tests_list}")
 
+    macro(aff3ct_core_graph_dot_tests targets)
+        foreach(_target IN ITEMS ${targets})
+             add_test(NAME graph-dot::${_target} COMMAND ${_target} -e 142 -f 13 -o graph.dot)
+        endforeach()
+    endmacro()
+
+    aff3ct_core_graph_dot_tests("${aff3ct_core_tests_list}")
+
     add_test(NAME path0::aff3ct-core-test-exclusive-paths COMMAND aff3ct-core-test-exclusive-paths -e 142 -f 13 -a 0)
     add_test(NAME path1::aff3ct-core-test-exclusive-paths COMMAND aff3ct-core-test-exclusive-paths -e 142 -f 13 -a 1)
     add_test(NAME path2::aff3ct-core-test-exclusive-paths COMMAND aff3ct-core-test-exclusive-paths -e 142 -f 13 -a 2)
     add_test(NAME cyclic::aff3ct-core-test-exclusive-paths COMMAND aff3ct-core-test-exclusive-paths -e 142 -f 13 -y)
+
+    add_test(NAME sequence0::aff3ct-core-test-simple-pipeline COMMAND aff3ct-core-test-simple-pipeline -q -t 1 -i ./bin/test-simple-pipeline)
+    add_test(NAME sequence1::aff3ct-core-test-simple-pipeline COMMAND aff3ct-core-test-simple-pipeline -q -t 1 -i ./bin/test-simple-pipeline -p -g)
+    add_test(NAME sequence2::aff3ct-core-test-simple-pipeline COMMAND aff3ct-core-test-simple-pipeline -q -t 1 -i ./bin/test-simple-pipeline -b)
+    add_test(NAME sequence3::aff3ct-core-test-simple-pipeline COMMAND aff3ct-core-test-simple-pipeline -q -t 1 -i ./bin/test-simple-pipeline -o graph.dot)
+    add_test(NAME pipeline0::aff3ct-core-test-simple-pipeline COMMAND aff3ct-core-test-simple-pipeline -i ./bin/test-simple-pipeline)
+    add_test(NAME pipeline1::aff3ct-core-test-simple-pipeline COMMAND aff3ct-core-test-simple-pipeline -i ./bin/test-simple-pipeline -p)
+    add_test(NAME pipeline2::aff3ct-core-test-simple-pipeline COMMAND aff3ct-core-test-simple-pipeline -i ./bin/test-simple-pipeline -w)
+    add_test(NAME pipeline3::aff3ct-core-test-simple-pipeline COMMAND aff3ct-core-test-simple-pipeline -i ./bin/test-simple-pipeline -u 1)
+    add_test(NAME pipeline4::aff3ct-core-test-simple-pipeline COMMAND aff3ct-core-test-simple-pipeline -i ./bin/test-simple-pipeline -u 1024)
+    add_test(NAME pipeline5::aff3ct-core-test-simple-pipeline COMMAND aff3ct-core-test-simple-pipeline -i ./bin/test-simple-pipeline -u 128 -o graph.dot)
 endif()
