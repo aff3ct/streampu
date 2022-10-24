@@ -239,10 +239,11 @@ int main(int argc, char** argv)
 			for (size_t d = 0; d < final_data.size(); d++)
 			{
 				auto expected = (int)(incs.size() * (iterator.get_limit()+1) + (tid * n_inter_frames +f));
+				expected = expected % 256;
 				if (final_data[d] != expected)
 				{
-					std::cout << "# expected = " << expected << " - obtained = "
-					          << final_data[d] << " (d = " << d << ", tid = " << tid << ")" << std::endl;
+					std::cout << "# expected = " << +expected << " - obtained = "
+					          << +final_data[d] << " (d = " << d << ", tid = " << tid << ")" << std::endl;
 					tests_passed = false;
 				}
 			}
