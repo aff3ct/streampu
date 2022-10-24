@@ -1,7 +1,7 @@
 # AFF3CT-core
 
 [![GitLab Pipeline Status](https://img.shields.io/gitlab/pipeline-status/aff3ct/aff3ct-core.svg?branch=development)](https://gitlab.com/aff3ct/aff3ct-core/pipelines)
-[![GitLab Code Coverage](https://img.shields.io/gitlab/pipeline-coverage/aff3ct/aff3ct-core?branch=developement)](https://aff3ct.gitlab.io/aff3ct-core/)
+[![GitLab Code Coverage](https://img.shields.io/gitlab/pipeline-coverage/aff3ct/aff3ct-core?branch=development)](https://aff3ct.gitlab.io/aff3ct-core/)
 [![License: MIT](https://img.shields.io/github/license/aff3ct/aff3ct-core.svg)](./LICENSE)
 
 This project contains the core features of AFF3CT:
