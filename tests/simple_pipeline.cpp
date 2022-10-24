@@ -72,7 +72,7 @@ int main(int argc, char** argv)
 
 	while (1)
 	{
-		const int opt = getopt_long(argc, argv, "t:f:s:d:u:e:o:i:j:cpbgqwh", longopts, 0);
+		const int opt = getopt_long(argc, argv, "t:f:s:d:u:o:i:j:cpbgqwh", longopts, 0);
 		if (opt == -1)
 			break;
 		switch (opt)

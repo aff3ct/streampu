@@ -22,6 +22,7 @@ int main(int argc, char** argv)
 		{"print-stats", no_argument, NULL, 'p'},
 		{"step-by-step", no_argument, NULL, 'b'},
 		{"debug", no_argument, NULL, 'g'},
+		{"subseq", no_argument, NULL, 'u'},
 		{"help", no_argument, NULL, 'h'},
 		{0}};
 
@@ -35,10 +36,11 @@ int main(int argc, char** argv)
 	bool print_stats = false;
 	bool step_by_step = false;
 	bool debug = false;
+	bool subseq = false;
 
 	while (1)
 	{
-		const int opt = getopt_long(argc, argv, "t:f:s:d:e:o:cpbgh", longopts, 0);
+		const int opt = getopt_long(argc, argv, "t:f:s:d:e:o:cpbguh", longopts, 0);
 		if (opt == -1)
 			break;
 		switch (opt)
@@ -73,6 +75,9 @@ int main(int argc, char** argv)
 			case 'g':
 				debug = true;
 				break;
+			case 'u':
+				subseq = true;
+				break;
 			case 'h':
 				std::cout << "usage: " << argv[0] << " [options]" << std::endl;
 				std::cout << std::endl;
@@ -106,6 +111,9 @@ int main(int argc, char** argv)
 				std::cout << "  -g, --debug           "
 				          << "Enable task debug mode (print socket data)                            "
 				          << "[" << (debug ? "true" : "false") << "]" << std::endl;
+				std::cout << "  -u, --subseq          "
+				          << "Enable subsequence in the executed sequence                           "
+				          << "[" << (subseq ? "true" : "false") << "]" << std::endl;
 				std::cout << "  -h, --help            "
 				          << "This help                                                             "
 				          << "[false]" << std::endl;
@@ -132,6 +140,7 @@ int main(int argc, char** argv)
 	std::cout << "#   - print_stats    = " << (print_stats ? "true" : "false") << std::endl;
 	std::cout << "#   - step_by_step   = " << (step_by_step ? "true" : "false") << std::endl;
 	std::cout << "#   - debug          = " << (debug ? "true" : "false") << std::endl;
+	std::cout << "#   - subseq         = " << (subseq ? "true" : "false") << std::endl;
 	std::cout << "#" << std::endl;
 
 	// modules creation
@@ -146,11 +155,28 @@ int main(int argc, char** argv)
 		incs[s]->set_custom_name("Inc" + std::to_string(s));
 	}
 
+	std::shared_ptr<runtime::Sequence> partial_sequence;
+	std::shared_ptr<module::Subsequence> subsequence;
+
 	// sockets binding
-	(*incs[0])[module::inc::sck::increment::in] = initializer[module::ini::sck::initialize::out];
-	for (size_t s = 0; s < incs.size() -1; s++)
-		(*incs[s+1])[module::inc::sck::increment::in] = (*incs[s])[module::inc::sck::increment::out];
-	finalizer[module::fin::sck::finalize::in] = (*incs[incs.size()-1])[module::inc::sck::increment::out];
+	if (!subseq)
+	{
+		(*incs[0])[module::inc::sck::increment::in] = initializer[module::ini::sck::initialize::out];
+		for (size_t s = 0; s < incs.size() -1; s++)
+			(*incs[s+1])[module::inc::sck::increment::in] = (*incs[s])[module::inc::sck::increment::out];
+		finalizer[module::fin::sck::finalize::in] = (*incs[incs.size()-1])[module::inc::sck::increment::out];
+	}
+	else
+	{
+		for (size_t s = 0; s < incs.size() -1; s++)
+			(*incs[s+1])[module::inc::sck::increment::in] = (*incs[s])[module::inc::sck::increment::out];
+
+		partial_sequence.reset(new runtime::Sequence((*incs[0])[module::inc::tsk::increment],
+		                                             (*incs[incs.size() -1])[module::inc::tsk::increment]));
+		subsequence.reset(new module::Subsequence(*partial_sequence));
+		(*subsequence)[module::ssq::tsk::exec    ][ 0] = initializer   [module::ini::sck::initialize::out];
+		finalizer     [module::fin::sck::finalize::in] = (*subsequence)[module::ssq::tsk::exec      ][  1];
+	}
 
 	runtime::Sequence sequence_chain(initializer[module::ini::tsk::initialize], n_threads);
 	sequence_chain.set_n_frames(n_inter_frames);
@@ -248,10 +274,20 @@ int main(int argc, char** argv)
 
 	// sockets unbinding
 	sequence_chain.set_n_frames(1);
-	(*incs[0])[module::inc::sck::increment::in].unbind(initializer[module::ini::sck::initialize::out]);
-	for (size_t s = 0; s < incs.size() -1; s++)
-		(*incs[s+1])[module::inc::sck::increment::in].unbind((*incs[s])[module::inc::sck::increment::out]);
-	finalizer[module::fin::sck::finalize::in].unbind((*incs[incs.size()-1])[module::inc::sck::increment::out]);
+	if (!subseq)
+	{
+		(*incs[0])[module::inc::sck::increment::in].unbind(initializer[module::ini::sck::initialize::out]);
+		for (size_t s = 0; s < incs.size() -1; s++)
+			(*incs[s+1])[module::inc::sck::increment::in].unbind((*incs[s])[module::inc::sck::increment::out]);
+		finalizer[module::fin::sck::finalize::in].unbind((*incs[incs.size()-1])[module::inc::sck::increment::out]);
+	}
+	else
+	{
+		for (size_t s = 0; s < incs.size() -1; s++)
+			(*incs[s+1])[module::inc::sck::increment::in].unbind((*incs[s])[module::inc::sck::increment::out]);
+		(*subsequence)[module::ssq::tsk::exec    ][ 0].unbind(initializer   [module::ini::sck::initialize::out]);
+		finalizer     [module::fin::sck::finalize::in].unbind((*subsequence)[module::ssq::tsk::exec      ][  1]);
+	}
 
 	return test_results;
 }
