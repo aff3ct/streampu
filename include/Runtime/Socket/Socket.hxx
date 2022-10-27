@@ -514,8 +514,9 @@ void Socket
 {
 	if (this->bound_socket != nullptr)
 		this->unbind(*this->bound_socket);
-	for (auto socket : this->bound_sockets)
-		socket->unbind(*this);
+	// the backforward loop is required here because the 'unbind' method can remove elements in 'bound_sockets' array
+	for (int sid = (int)this->bound_sockets.size() -1; sid >= 0; sid--)
+		this->bound_sockets[sid]->unbind(*this);
 }
 
 size_t Socket
