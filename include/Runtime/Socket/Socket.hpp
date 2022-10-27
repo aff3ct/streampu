@@ -48,7 +48,7 @@ protected:
 public:
 	inline Socket(Task &task, const std::string &name, const std::type_index datatype, const size_t databytes,
 	              const socket_t type, const bool fast = false, void *dataptr = nullptr);
-	virtual ~Socket() = default;
+	virtual ~Socket();
 
 	inline const std::string&          get_name           () const;
 	inline const std::type_index&      get_datatype       () const;

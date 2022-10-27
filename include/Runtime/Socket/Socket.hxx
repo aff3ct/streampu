@@ -48,6 +48,12 @@ Socket
 	}
 }
 
+Socket
+::~Socket()
+{
+	this->reset();
+}
+
 const std::string& Socket
 ::get_name() const
 {
