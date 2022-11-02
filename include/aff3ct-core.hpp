@@ -183,6 +183,9 @@
 #ifndef WAITING_CANCELED_HPP_
 #include <Tools/Exception/waiting_canceled/waiting_canceled.hpp>
 #endif
+#ifndef HELP_HPP_
+#include <Tools/Help/Help.hpp>
+#endif
 #ifndef INTERFACE_CLONE_HPP__
 #include <Tools/Interface/Interface_clone.hpp>
 #endif
