@@ -383,7 +383,8 @@ if(AFF3CT_CORE_TESTS)
 
     aff3ct_core_graph_dot_tests("${aff3ct_core_tests_list}")
 
-    add_test(NAME subseq::aff3ct-core-test-simple-chain COMMAND aff3ct-core-test-simple-chain -e 142 -f 13 -u)
+    add_test(NAME subseq0::aff3ct-core-test-simple-chain COMMAND aff3ct-core-test-simple-chain -e 142 -f 13 -u)
+    add_test(NAME subseq1::aff3ct-core-test-simple-chain COMMAND aff3ct-core-test-simple-chain -v)
 
     add_test(NAME path0::aff3ct-core-test-exclusive-paths COMMAND aff3ct-core-test-exclusive-paths -e 142 -f 13 -a 0)
     add_test(NAME path1::aff3ct-core-test-exclusive-paths COMMAND aff3ct-core-test-exclusive-paths -e 142 -f 13 -a 1)
