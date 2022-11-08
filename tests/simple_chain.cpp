@@ -36,11 +36,12 @@ int main(int argc, char** argv)
 	bool print_stats = false;
 	bool step_by_step = false;
 	bool debug = false;
+	bool verbose = false;
 	bool subseq = false;
 
 	while (1)
 	{
-		const int opt = getopt_long(argc, argv, "t:f:s:d:e:o:cpbguh", longopts, 0);
+		const int opt = getopt_long(argc, argv, "t:f:s:d:e:o:cpbguvh", longopts, 0);
 		if (opt == -1)
 			break;
 		switch (opt)
@@ -78,6 +79,9 @@ int main(int argc, char** argv)
 			case 'u':
 				subseq = true;
 				break;
+			case 'v':
+				verbose = true;
+				break;
 			case 'h':
 				std::cout << "usage: " << argv[0] << " [options]" << std::endl;
 				std::cout << std::endl;
@@ -114,6 +118,10 @@ int main(int argc, char** argv)
 				std::cout << "  -u, --subseq          "
 				          << "Enable subsequence in the executed sequence                           "
 				          << "[" << (subseq ? "true" : "false") << "]" << std::endl;
+				std::cout << "  -v, --verbose         "
+				          << "Enable verbose mode                                                   "
+				          << "[" << (verbose ? "true" : "false") << "]" << std::endl;
+
 				std::cout << "  -h, --help            "
 				          << "This help                                                             "
 				          << "[false]" << std::endl;
@@ -146,6 +154,18 @@ int main(int argc, char** argv)
 	// modules creation
 	module::Initializer<uint8_t> initializer(data_length);
 	module::Finalizer  <uint8_t> finalizer  (data_length);
+
+	if (verbose)
+	{
+		std::cout << "Initializer information:" << std::endl;
+		std::cout << "------------------------" << std::endl;
+		aff3ct::tools::help(initializer);
+		std::cout << std::endl;
+		std::cout << "Finalizer information:" << std::endl;
+		std::cout << "------------------------" << std::endl;
+		aff3ct::tools::help(finalizer);
+		std::cout << std::endl;
+	}
 
 	std::vector<std::shared_ptr<module::Incrementer<uint8_t>>> incs(6);
 	for (size_t s = 0; s < incs.size(); s++)
