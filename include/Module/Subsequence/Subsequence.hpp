@@ -44,6 +44,7 @@ public:
 	virtual void set_n_frames(const size_t n_frames);
 
 protected:
+	using Module::deep_copy;
 	virtual void deep_copy(const Subsequence& m);
 };
 }
