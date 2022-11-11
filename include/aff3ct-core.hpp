@@ -141,6 +141,15 @@
 #ifndef STATISTICS_HPP_
 #include <Tools/Display/Statistics/Statistics.hpp>
 #endif
+#ifndef TERMINAL_DUMP_HPP_
+#include <Tools/Display/Terminal/Dump/Terminal_dump.hpp>
+#endif
+#ifndef TERMINAL_STD_HPP_
+#include <Tools/Display/Terminal/Standard/Terminal_std.hpp>
+#endif
+#ifndef TERMINAL_HPP_
+#include <Tools/Display/Terminal/Terminal.hpp>
+#endif
 #ifndef CANNOT_ALLOCATE_HPP_
 #include <Tools/Exception/cannot_allocate/cannot_allocate.hpp>
 #endif
