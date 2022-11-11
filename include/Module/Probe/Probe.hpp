@@ -29,6 +29,7 @@ namespace module
 		namespace sck
 		{
 			enum class probe : uint8_t { in, status };
+			enum class probe_noin : uint8_t { status };
 		}
 	}
 
@@ -39,12 +40,13 @@ protected:
 	virtual ~AProbe() = default;
 };
 
-template <typename T>
+template <typename T = uint8_t>
 class Probe : public AProbe, public tools::Interface_reset
 {
 public:
-	inline runtime::Task&   operator[](const prb::tsk        t);
-	inline runtime::Socket& operator[](const prb::sck::probe s);
+	inline runtime::Task&   operator[](const prb::tsk             t);
+	inline runtime::Socket& operator[](const prb::sck::probe      s);
+	inline runtime::Socket& operator[](const prb::sck::probe_noin s);
 
 protected:
 	const int size;
@@ -60,6 +62,8 @@ public:
 	void probe(const std::vector<T,AT>& in, const int frame_id = -1, const bool managed_memory = true);
 
 	void probe(const T *in, const int frame_id = -1, const bool managed_memory = true);
+
+	void probe(const int frame_id = -1, const bool managed_memory = true);
 
 	virtual std::type_index get_datatype() const = 0;
 

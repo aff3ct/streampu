@@ -48,12 +48,16 @@ void Reporter_probe
 {
 	const int col = this->name_to_col[name];
 	// bool can_push = false;
-	     if (this->datatypes[col] == typeid(double )) /* can_push = */ this->push<double >(col, (double* )data);
-	else if (this->datatypes[col] == typeid(float  )) /* can_push = */ this->push<float  >(col, (float*  )data);
-	else if (this->datatypes[col] == typeid(int64_t)) /* can_push = */ this->push<int64_t>(col, (int64_t*)data);
-	else if (this->datatypes[col] == typeid(int32_t)) /* can_push = */ this->push<int32_t>(col, (int32_t*)data);
-	else if (this->datatypes[col] == typeid(int16_t)) /* can_push = */ this->push<int16_t>(col, (int16_t*)data);
-	else if (this->datatypes[col] == typeid(int8_t )) /* can_push = */ this->push<int8_t >(col, (int8_t* )data);
+	     if (this->datatypes[col] == typeid(double  )) /* can_push = */ this->push<double  >(col, ( double* )data);
+	else if (this->datatypes[col] == typeid(float   )) /* can_push = */ this->push<float   >(col, ( float*  )data);
+	else if (this->datatypes[col] == typeid( int64_t)) /* can_push = */ this->push< int64_t>(col, ( int64_t*)data);
+	else if (this->datatypes[col] == typeid(uint64_t)) /* can_push = */ this->push<uint64_t>(col, (uint64_t*)data);
+	else if (this->datatypes[col] == typeid( int32_t)) /* can_push = */ this->push< int32_t>(col, ( int32_t*)data);
+	else if (this->datatypes[col] == typeid(uint32_t)) /* can_push = */ this->push<uint32_t>(col, (uint32_t*)data);
+	else if (this->datatypes[col] == typeid( int16_t)) /* can_push = */ this->push< int16_t>(col, ( int16_t*)data);
+	else if (this->datatypes[col] == typeid(uint16_t)) /* can_push = */ this->push<uint16_t>(col, (uint16_t*)data);
+	else if (this->datatypes[col] == typeid( int8_t )) /* can_push = */ this->push< int8_t >(col, ( int8_t* )data);
+	else if (this->datatypes[col] == typeid(uint8_t )) /* can_push = */ this->push<uint8_t >(col, (uint8_t* )data);
 	else
 	{
 		std::stringstream message;
@@ -109,12 +113,16 @@ Reporter::report_t Reporter_probe
 		{
 			std::stringstream stream, temp_stream;
 			temp_stream.flags(this->stream_flags[col]);
-			     if (this->datatypes[col] == typeid(double )) /* can_pull = */ format_values<double >(col, temp_stream);
-			else if (this->datatypes[col] == typeid(float  )) /* can_pull = */ format_values<float  >(col, temp_stream);
-			else if (this->datatypes[col] == typeid(int64_t)) /* can_pull = */ format_values<int64_t>(col, temp_stream);
-			else if (this->datatypes[col] == typeid(int32_t)) /* can_pull = */ format_values<int32_t>(col, temp_stream);
-			else if (this->datatypes[col] == typeid(int16_t)) /* can_pull = */ format_values<int16_t>(col, temp_stream);
-			else if (this->datatypes[col] == typeid(int8_t )) /* can_pull = */ format_values<int8_t >(col, temp_stream);
+			     if (this->datatypes[col] == typeid(double  )) /* can_pull = */ format_values<double  >(col, temp_stream);
+			else if (this->datatypes[col] == typeid(float   )) /* can_pull = */ format_values<float   >(col, temp_stream);
+			else if (this->datatypes[col] == typeid( int64_t)) /* can_pull = */ format_values< int64_t>(col, temp_stream);
+			else if (this->datatypes[col] == typeid(uint64_t)) /* can_pull = */ format_values<uint64_t>(col, temp_stream);
+			else if (this->datatypes[col] == typeid( int32_t)) /* can_pull = */ format_values< int32_t>(col, temp_stream);
+			else if (this->datatypes[col] == typeid(uint32_t)) /* can_pull = */ format_values<uint32_t>(col, temp_stream);
+			else if (this->datatypes[col] == typeid( int16_t)) /* can_pull = */ format_values< int16_t>(col, temp_stream);
+			else if (this->datatypes[col] == typeid(uint16_t)) /* can_pull = */ format_values<uint16_t>(col, temp_stream);
+			else if (this->datatypes[col] == typeid( int8_t )) /* can_pull = */ format_values< int8_t >(col, temp_stream);
+			else if (this->datatypes[col] == typeid(uint8_t )) /* can_pull = */ format_values<uint8_t >(col, temp_stream);
 			else
 			{
 				std::stringstream message;
@@ -136,12 +144,16 @@ Reporter::report_t Reporter_probe
 
 size_t B_from_datatype(const std::type_index &type)
 {
-	if (type == typeid(double )) return 8;
-	if (type == typeid(float  )) return 4;
-	if (type == typeid(int64_t)) return 8;
-	if (type == typeid(int32_t)) return 4;
-	if (type == typeid(int16_t)) return 2;
-	if (type == typeid(int8_t )) return 1;
+	if (type == typeid(double  )) return 8;
+	if (type == typeid(float   )) return 4;
+	if (type == typeid(int64_t )) return 8;
+	if (type == typeid(uint64_t)) return 8;
+	if (type == typeid(int32_t )) return 4;
+	if (type == typeid(uint32_t)) return 4;
+	if (type == typeid(int16_t )) return 2;
+	if (type == typeid(uint16_t)) return 2;
+	if (type == typeid(int8_t  )) return 1;
+	if (type == typeid(uint8_t )) return 1;
 
 	std::stringstream message;
 	message << "Unsupported type.";
@@ -191,15 +203,14 @@ module::Probe_value<T>* Reporter_probe
 	return probe;
 }
 
-template <typename T>
-module::Probe_throughput<T>* Reporter_probe
-::create_probe_throughput(const std::string &name,
-                          const size_t socket_size,
-                          const std::ios_base::fmtflags ff,
-                          const size_t precision)
+module::Probe_throughput* Reporter_probe
+::create_probe_throughput_mbps(const std::string &name,
+                               const size_t data_size,
+                               const std::ios_base::fmtflags ff,
+                               const size_t precision)
 {
 	this->create_probe_checks(name);
-	auto probe = new module::Probe_throughput<T>(socket_size, name, *this, this->n_frames);
+	auto probe = new module::Probe_throughput(data_size, name, *this, this->n_frames);
 	this->head                 .push_back(0);
 	this->tail                 .push_back(0);
 	this->buffer               .push_back(std::vector<std::vector<int8_t>>(this->n_frames * 100,
@@ -214,15 +225,37 @@ module::Probe_throughput<T>* Reporter_probe
 	return probe;
 }
 
-template <typename T>
-module::Probe_latency<T>* Reporter_probe
+module::Probe_throughput* Reporter_probe
+::create_probe_throughput(const std::string &name,
+	                        const std::string &unit,
+	                        const size_t data_size,
+	                        const double factor,
+                          const std::ios_base::fmtflags ff,
+                          const size_t precision)
+{
+	this->create_probe_checks(name);
+	auto probe = new module::Probe_throughput(data_size, name, factor, *this, this->n_frames);
+	this->head                 .push_back(0);
+	this->tail                 .push_back(0);
+	this->buffer               .push_back(std::vector<std::vector<int8_t>>(this->n_frames * 100,
+	                                      std::vector<int8_t>(1 * B_from_datatype(probe->get_datatype()))));
+	this->datatypes            .push_back(probe->get_datatype());
+	this->stream_flags         .push_back(ff);
+	this->precisions           .push_back(precision);
+	this->datasizes            .push_back(1);
+	this->cols_groups[0].second.push_back(std::make_pair(name, unit));
+	this->name_to_col[name] = this->buffer.size() -1;
+	this->col_to_name[this->buffer.size() -1] = name;
+	return probe;
+}
+
+module::Probe_latency* Reporter_probe
 ::create_probe_latency(const std::string &name,
-                       const size_t socket_size,
                        const std::ios_base::fmtflags ff,
                        const size_t precision)
 {
 	this->create_probe_checks(name);
-	auto probe = new module::Probe_latency<T>(socket_size, name, *this, this->n_frames);
+	auto probe = new module::Probe_latency(name, *this, this->n_frames);
 	this->head                 .push_back(0);
 	this->tail                 .push_back(0);
 	this->buffer               .push_back(std::vector<std::vector<int8_t>>(this->n_frames * 100,
@@ -237,15 +270,13 @@ module::Probe_latency<T>* Reporter_probe
 	return probe;
 }
 
-template <typename T>
-module::Probe_time<T>* Reporter_probe
+module::Probe_time* Reporter_probe
 ::create_probe_time(const std::string &name,
-                    const size_t socket_size,
                     const std::ios_base::fmtflags ff,
                     const size_t precision)
 {
 	this->create_probe_checks(name);
-	auto probe = new module::Probe_time<T>(socket_size, name, *this, this->n_frames);
+	auto probe = new module::Probe_time(name, *this, this->n_frames);
 	this->head                 .push_back(0);
 	this->tail                 .push_back(0);
 	this->buffer               .push_back(std::vector<std::vector<int8_t>>(this->n_frames * 100,
@@ -260,15 +291,13 @@ module::Probe_time<T>* Reporter_probe
 	return probe;
 }
 
-template <typename T>
-module::Probe_timestamp<T>* Reporter_probe
+module::Probe_timestamp* Reporter_probe
 ::create_probe_timestamp(const std::string &name,
-                         const size_t socket_size,
                          const std::ios_base::fmtflags ff,
                          const size_t precision)
 {
 	this->create_probe_checks(name);
-	auto probe = new module::Probe_timestamp<T>(socket_size, name, *this, this->n_frames);
+	auto probe = new module::Probe_timestamp(name, *this, this->n_frames);
 	this->head                 .push_back(0);
 	this->tail                 .push_back(0);
 	this->buffer               .push_back(std::vector<std::vector<int8_t>>(this->n_frames * 100,
@@ -277,22 +306,42 @@ module::Probe_timestamp<T>* Reporter_probe
 	this->stream_flags         .push_back(ff);
 	this->precisions           .push_back(precision);
 	this->datasizes            .push_back(1);
-	this->cols_groups[0].second.push_back(std::make_pair(name, "(sec)"));
+	this->cols_groups[0].second.push_back(std::make_pair(name, "(us)"));
 	this->name_to_col[name] = this->buffer.size() -1;
 	this->col_to_name[this->buffer.size() -1] = name;
 	return probe;
 }
 
-template <typename T>
-module::Probe_occurrence<T>* Reporter_probe
+module::Probe_timestamp* Reporter_probe
+::create_probe_timestamp(const std::string &name,
+                         const uint64_t mod,
+                         const std::ios_base::fmtflags ff,
+                         const size_t precision)
+{
+	this->create_probe_checks(name);
+	auto probe = new module::Probe_timestamp(name, mod, *this, this->n_frames);
+	this->head                 .push_back(0);
+	this->tail                 .push_back(0);
+	this->buffer               .push_back(std::vector<std::vector<int8_t>>(this->n_frames * 100,
+	                                      std::vector<int8_t>(1 * B_from_datatype(probe->get_datatype()))));
+	this->datatypes            .push_back(probe->get_datatype());
+	this->stream_flags         .push_back(ff);
+	this->precisions           .push_back(precision);
+	this->datasizes            .push_back(1);
+	this->cols_groups[0].second.push_back(std::make_pair(name, "(us)"));
+	this->name_to_col[name] = this->buffer.size() -1;
+	this->col_to_name[this->buffer.size() -1] = name;
+	return probe;
+}
+
+module::Probe_occurrence* Reporter_probe
 ::create_probe_occurrence(const std::string &name,
                           const std::string &unit,
-                          const size_t socket_size,
                           const std::ios_base::fmtflags ff,
                           const size_t precision)
 {
 	this->create_probe_checks(name);
-	auto probe = new module::Probe_occurrence<T>(socket_size, name, *this, this->n_frames);
+	auto probe = new module::Probe_occurrence(name, *this, this->n_frames);
 	this->head                 .push_back(0);
 	this->tail                 .push_back(0);
 	this->buffer               .push_back(std::vector<std::vector<int8_t>>(this->n_frames * 100,
@@ -320,59 +369,5 @@ template aff3ct::module::Probe_value<uint64_t>* aff3ct::tools::Reporter_probe::c
 template aff3ct::module::Probe_value<float   >* aff3ct::tools::Reporter_probe::create_probe_value<float   >(const std::string&, const std::string&, const size_t, const std::ios_base::fmtflags, const size_t);
 template aff3ct::module::Probe_value<double  >* aff3ct::tools::Reporter_probe::create_probe_value<double  >(const std::string&, const std::string&, const size_t, const std::ios_base::fmtflags, const size_t);
 
-template aff3ct::module::Probe_throughput<int8_t  >* aff3ct::tools::Reporter_probe::create_probe_throughput<int8_t  >(const std::string&, const size_t, const std::ios_base::fmtflags, const size_t);
-template aff3ct::module::Probe_throughput<uint8_t >* aff3ct::tools::Reporter_probe::create_probe_throughput<uint8_t >(const std::string&, const size_t, const std::ios_base::fmtflags, const size_t);
-template aff3ct::module::Probe_throughput<int16_t >* aff3ct::tools::Reporter_probe::create_probe_throughput<int16_t >(const std::string&, const size_t, const std::ios_base::fmtflags, const size_t);
-template aff3ct::module::Probe_throughput<uint16_t>* aff3ct::tools::Reporter_probe::create_probe_throughput<uint16_t>(const std::string&, const size_t, const std::ios_base::fmtflags, const size_t);
-template aff3ct::module::Probe_throughput<int32_t >* aff3ct::tools::Reporter_probe::create_probe_throughput<int32_t >(const std::string&, const size_t, const std::ios_base::fmtflags, const size_t);
-template aff3ct::module::Probe_throughput<uint32_t>* aff3ct::tools::Reporter_probe::create_probe_throughput<uint32_t>(const std::string&, const size_t, const std::ios_base::fmtflags, const size_t);
-template aff3ct::module::Probe_throughput<int64_t >* aff3ct::tools::Reporter_probe::create_probe_throughput<int64_t >(const std::string&, const size_t, const std::ios_base::fmtflags, const size_t);
-template aff3ct::module::Probe_throughput<uint64_t>* aff3ct::tools::Reporter_probe::create_probe_throughput<uint64_t>(const std::string&, const size_t, const std::ios_base::fmtflags, const size_t);
-template aff3ct::module::Probe_throughput<float   >* aff3ct::tools::Reporter_probe::create_probe_throughput<float   >(const std::string&, const size_t, const std::ios_base::fmtflags, const size_t);
-template aff3ct::module::Probe_throughput<double  >* aff3ct::tools::Reporter_probe::create_probe_throughput<double  >(const std::string&, const size_t, const std::ios_base::fmtflags, const size_t);
-
-template aff3ct::module::Probe_latency<int8_t  >* aff3ct::tools::Reporter_probe::create_probe_latency<int8_t  >(const std::string&, const size_t, const std::ios_base::fmtflags, const size_t);
-template aff3ct::module::Probe_latency<uint8_t >* aff3ct::tools::Reporter_probe::create_probe_latency<uint8_t >(const std::string&, const size_t, const std::ios_base::fmtflags, const size_t);
-template aff3ct::module::Probe_latency<int16_t >* aff3ct::tools::Reporter_probe::create_probe_latency<int16_t >(const std::string&, const size_t, const std::ios_base::fmtflags, const size_t);
-template aff3ct::module::Probe_latency<uint16_t>* aff3ct::tools::Reporter_probe::create_probe_latency<uint16_t>(const std::string&, const size_t, const std::ios_base::fmtflags, const size_t);
-template aff3ct::module::Probe_latency<int32_t >* aff3ct::tools::Reporter_probe::create_probe_latency<int32_t >(const std::string&, const size_t, const std::ios_base::fmtflags, const size_t);
-template aff3ct::module::Probe_latency<uint32_t>* aff3ct::tools::Reporter_probe::create_probe_latency<uint32_t>(const std::string&, const size_t, const std::ios_base::fmtflags, const size_t);
-template aff3ct::module::Probe_latency<int64_t >* aff3ct::tools::Reporter_probe::create_probe_latency<int64_t >(const std::string&, const size_t, const std::ios_base::fmtflags, const size_t);
-template aff3ct::module::Probe_latency<uint64_t>* aff3ct::tools::Reporter_probe::create_probe_latency<uint64_t>(const std::string&, const size_t, const std::ios_base::fmtflags, const size_t);
-template aff3ct::module::Probe_latency<float   >* aff3ct::tools::Reporter_probe::create_probe_latency<float   >(const std::string&, const size_t, const std::ios_base::fmtflags, const size_t);
-template aff3ct::module::Probe_latency<double  >* aff3ct::tools::Reporter_probe::create_probe_latency<double  >(const std::string&, const size_t, const std::ios_base::fmtflags, const size_t);
-
-template aff3ct::module::Probe_time<int8_t  >* aff3ct::tools::Reporter_probe::create_probe_time<int8_t  >(const std::string&, const size_t, const std::ios_base::fmtflags, const size_t);
-template aff3ct::module::Probe_time<uint8_t >* aff3ct::tools::Reporter_probe::create_probe_time<uint8_t >(const std::string&, const size_t, const std::ios_base::fmtflags, const size_t);
-template aff3ct::module::Probe_time<int16_t >* aff3ct::tools::Reporter_probe::create_probe_time<int16_t >(const std::string&, const size_t, const std::ios_base::fmtflags, const size_t);
-template aff3ct::module::Probe_time<uint16_t>* aff3ct::tools::Reporter_probe::create_probe_time<uint16_t>(const std::string&, const size_t, const std::ios_base::fmtflags, const size_t);
-template aff3ct::module::Probe_time<int32_t >* aff3ct::tools::Reporter_probe::create_probe_time<int32_t >(const std::string&, const size_t, const std::ios_base::fmtflags, const size_t);
-template aff3ct::module::Probe_time<uint32_t>* aff3ct::tools::Reporter_probe::create_probe_time<uint32_t>(const std::string&, const size_t, const std::ios_base::fmtflags, const size_t);
-template aff3ct::module::Probe_time<int64_t >* aff3ct::tools::Reporter_probe::create_probe_time<int64_t >(const std::string&, const size_t, const std::ios_base::fmtflags, const size_t);
-template aff3ct::module::Probe_time<uint64_t>* aff3ct::tools::Reporter_probe::create_probe_time<uint64_t>(const std::string&, const size_t, const std::ios_base::fmtflags, const size_t);
-template aff3ct::module::Probe_time<float   >* aff3ct::tools::Reporter_probe::create_probe_time<float   >(const std::string&, const size_t, const std::ios_base::fmtflags, const size_t);
-template aff3ct::module::Probe_time<double  >* aff3ct::tools::Reporter_probe::create_probe_time<double  >(const std::string&, const size_t, const std::ios_base::fmtflags, const size_t);
-
-template aff3ct::module::Probe_timestamp<int8_t  >* aff3ct::tools::Reporter_probe::create_probe_timestamp<int8_t  >(const std::string&, const size_t, const std::ios_base::fmtflags, const size_t);
-template aff3ct::module::Probe_timestamp<uint8_t >* aff3ct::tools::Reporter_probe::create_probe_timestamp<uint8_t >(const std::string&, const size_t, const std::ios_base::fmtflags, const size_t);
-template aff3ct::module::Probe_timestamp<int16_t >* aff3ct::tools::Reporter_probe::create_probe_timestamp<int16_t >(const std::string&, const size_t, const std::ios_base::fmtflags, const size_t);
-template aff3ct::module::Probe_timestamp<uint16_t>* aff3ct::tools::Reporter_probe::create_probe_timestamp<uint16_t>(const std::string&, const size_t, const std::ios_base::fmtflags, const size_t);
-template aff3ct::module::Probe_timestamp<int32_t >* aff3ct::tools::Reporter_probe::create_probe_timestamp<int32_t >(const std::string&, const size_t, const std::ios_base::fmtflags, const size_t);
-template aff3ct::module::Probe_timestamp<uint32_t>* aff3ct::tools::Reporter_probe::create_probe_timestamp<uint32_t>(const std::string&, const size_t, const std::ios_base::fmtflags, const size_t);
-template aff3ct::module::Probe_timestamp<int64_t >* aff3ct::tools::Reporter_probe::create_probe_timestamp<int64_t >(const std::string&, const size_t, const std::ios_base::fmtflags, const size_t);
-template aff3ct::module::Probe_timestamp<uint64_t>* aff3ct::tools::Reporter_probe::create_probe_timestamp<uint64_t>(const std::string&, const size_t, const std::ios_base::fmtflags, const size_t);
-template aff3ct::module::Probe_timestamp<float   >* aff3ct::tools::Reporter_probe::create_probe_timestamp<float   >(const std::string&, const size_t, const std::ios_base::fmtflags, const size_t);
-template aff3ct::module::Probe_timestamp<double  >* aff3ct::tools::Reporter_probe::create_probe_timestamp<double  >(const std::string&, const size_t, const std::ios_base::fmtflags, const size_t);
-
-template aff3ct::module::Probe_occurrence<int8_t  >* aff3ct::tools::Reporter_probe::create_probe_occurrence<int8_t  >(const std::string&, const std::string&, const size_t, const std::ios_base::fmtflags, const size_t);
-template aff3ct::module::Probe_occurrence<uint8_t >* aff3ct::tools::Reporter_probe::create_probe_occurrence<uint8_t >(const std::string&, const std::string&, const size_t, const std::ios_base::fmtflags, const size_t);
-template aff3ct::module::Probe_occurrence<int16_t >* aff3ct::tools::Reporter_probe::create_probe_occurrence<int16_t >(const std::string&, const std::string&, const size_t, const std::ios_base::fmtflags, const size_t);
-template aff3ct::module::Probe_occurrence<uint16_t>* aff3ct::tools::Reporter_probe::create_probe_occurrence<uint16_t>(const std::string&, const std::string&, const size_t, const std::ios_base::fmtflags, const size_t);
-template aff3ct::module::Probe_occurrence<int32_t >* aff3ct::tools::Reporter_probe::create_probe_occurrence<int32_t >(const std::string&, const std::string&, const size_t, const std::ios_base::fmtflags, const size_t);
-template aff3ct::module::Probe_occurrence<uint32_t>* aff3ct::tools::Reporter_probe::create_probe_occurrence<uint32_t>(const std::string&, const std::string&, const size_t, const std::ios_base::fmtflags, const size_t);
-template aff3ct::module::Probe_occurrence<int64_t >* aff3ct::tools::Reporter_probe::create_probe_occurrence<int64_t >(const std::string&, const std::string&, const size_t, const std::ios_base::fmtflags, const size_t);
-template aff3ct::module::Probe_occurrence<uint64_t>* aff3ct::tools::Reporter_probe::create_probe_occurrence<uint64_t>(const std::string&, const std::string&, const size_t, const std::ios_base::fmtflags, const size_t);
-template aff3ct::module::Probe_occurrence<float   >* aff3ct::tools::Reporter_probe::create_probe_occurrence<float   >(const std::string&, const std::string&, const size_t, const std::ios_base::fmtflags, const size_t);
-template aff3ct::module::Probe_occurrence<double  >* aff3ct::tools::Reporter_probe::create_probe_occurrence<double  >(const std::string&, const std::string&, const size_t, const std::ios_base::fmtflags, const size_t);
 // ==================================================================================== explicit template instantiation
 

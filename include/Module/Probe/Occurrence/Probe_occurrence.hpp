@@ -16,14 +16,13 @@ namespace aff3ct
 {
 namespace module
 {
-template <typename T>
-class Probe_occurrence : public Probe<T>
+class Probe_occurrence : public Probe<uint8_t>
 {
 protected:
 	int64_t occurrences;
 
 public:
-	Probe_occurrence(const int size, const std::string &col_name, tools::Reporter_probe& reporter, const int n_frames = 1);
+	Probe_occurrence(const std::string &col_name, tools::Reporter_probe& reporter, const int n_frames = 1);
 
 	virtual ~Probe_occurrence() = default;
 
@@ -34,7 +33,7 @@ public:
 	int64_t get_occurrences() const;
 
 protected:
-	virtual void _probe(const T *in, const size_t frame_id);
+	virtual void _probe(const uint8_t *in, const size_t frame_id);
 };
 }
 }

@@ -19,6 +19,15 @@ template <typename T>
 runtime::Socket& Probe<T>
 ::operator[](const prb::sck::probe s)
 {
+	assert((*this)[prb::tsk::probe].get_n_input_sockets() == 1);
+	return Module::operator[]((int)prb::tsk::probe)[(int)s];
+}
+
+template <typename T>
+runtime::Socket& Probe<T>
+::operator[](const prb::sck::probe_noin s)
+{
+	assert((*this)[prb::tsk::probe].get_n_input_sockets() == 0);
 	return Module::operator[]((int)prb::tsk::probe)[(int)s];
 }
 
@@ -32,22 +41,20 @@ Probe<T>
 	this->set_short_name(name);
 	AProbe::set_n_frames(n_frames);
 
-	if (size <= 0)
+	if (size < 0)
 	{
 		std::stringstream message;
-		message << "'size' has to be greater than 0 ('size' = " << size << ").";
+		message << "'size' has to be greater or equal to 0 ('size' = " << size << ").";
 		throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
 	}
 
 	auto &p1 = this->create_task("probe");
-	auto p1s_in = this->template create_socket_in<T>(p1, "in", this->size);
+	auto p1s_in = (size > 0) ? (int)this->template create_socket_in<T>(p1, "in", this->size) : (int)-1;
 	this->create_codelet(p1, [p1s_in](Module &m, runtime::Task &t, const size_t frame_id) -> int
 	{
 		auto &prb = static_cast<Probe<T>&>(m);
-
-		prb._probe(static_cast<const T*>(t[p1s_in].get_dataptr()),
-		           frame_id);
-
+		const T* in = (p1s_in != -1) ? static_cast<const T*>(t[p1s_in].get_dataptr()) : nullptr;
+		prb._probe(in, frame_id);
 		return runtime::status_t::SUCCESS;
 	});
 }
@@ -70,6 +77,14 @@ template <class AT>
 void Probe<T>
 ::probe(const std::vector<T,AT>& in, const int frame_id, const bool managed_memory)
 {
+	if ((*this)[prb::tsk::probe].get_n_input_sockets() != 1)
+	{
+		std::stringstream message;
+		message << "The number of input sockets has to be equal to 1 ('get_n_input_sockets()' = "
+		        << (*this)[prb::tsk::probe].get_n_input_sockets() << ").";
+		throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
+	}
+
 	(*this)[prb::sck::probe::in].bind(in);
 	(*this)[prb::tsk::probe].exec(frame_id, managed_memory);
 }
@@ -78,7 +93,30 @@ template <typename T>
 void Probe<T>
 ::probe(const T *in, const int frame_id, const bool managed_memory)
 {
+	if ((*this)[prb::tsk::probe].get_n_input_sockets() != 1)
+	{
+		std::stringstream message;
+		message << "The number of input sockets has to be equal to 1 ('get_n_input_sockets()' = "
+		        << (*this)[prb::tsk::probe].get_n_input_sockets() << ").";
+		throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
+	}
+
 	(*this)[prb::sck::probe::in].bind(in);
+	(*this)[prb::tsk::probe].exec(frame_id, managed_memory);
+}
+
+template <typename T>
+void Probe<T>
+::probe(const int frame_id, const bool managed_memory)
+{
+	if ((*this)[prb::tsk::probe].get_n_input_sockets() != 0)
+	{
+		std::stringstream message;
+		message << "The number of input sockets has to be equal to 0 ('get_n_input_sockets()' = "
+		        << (*this)[prb::tsk::probe].get_n_input_sockets() << ").";
+		throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
+	}
+
 	(*this)[prb::tsk::probe].exec(frame_id, managed_memory);
 }
 

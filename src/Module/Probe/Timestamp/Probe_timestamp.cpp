@@ -6,43 +6,38 @@
 using namespace aff3ct;
 using namespace aff3ct::module;
 
-template <typename T>
-Probe_timestamp<T>
-::Probe_timestamp(const int size, const std::string &col_name, tools::Reporter_probe& reporter, const int n_frames)
-: Probe<T>(size, col_name, reporter, n_frames)
+Probe_timestamp
+::Probe_timestamp(const std::string &col_name, const uint64_t mod, tools::Reporter_probe& reporter, const int n_frames)
+: Probe<uint8_t>(0, col_name, reporter, n_frames), mod(mod)
 {
 	const std::string name = "Probe_timestamp<" + col_name + ">";
 	this->set_name(name);
 	this->set_single_wave(true);
 }
 
-template <typename T>
-void Probe_timestamp<T>
-::_probe(const T *in, const size_t frame_id)
+Probe_timestamp
+::Probe_timestamp(const std::string &col_name, tools::Reporter_probe& reporter, const int n_frames)
+: Probe_timestamp(col_name, 0, reporter, n_frames)
 {
-	auto unix_timestamp = std::chrono::seconds(std::time(NULL));
-	int64_t unix_timestamp_count = (int64_t)unix_timestamp.count();
+}
+
+void Probe_timestamp
+::_probe(const uint8_t *in, const size_t frame_id)
+{
+	std::chrono::microseconds us = std::chrono::duration_cast<std::chrono::microseconds>(
+	    // std::chrono::system_clock::now().time_since_epoch()
+	    std::chrono::steady_clock::now().time_since_epoch()
+	);
+
+	uint64_t unix_timestamp_count = mod ? (uint64_t)us.count() % mod : (uint64_t)us.count();
 
 	for (size_t f = 0; f < this->get_n_frames(); f++)
 		this->reporter.probe(this->col_name, (void*)&unix_timestamp_count, frame_id);
 }
 
-template <typename T>
-std::type_index Probe_timestamp<T>
+
+std::type_index Probe_timestamp
 ::get_datatype() const
 {
-	return typeid(int64_t);
+	return typeid(uint64_t);
 }
-
-// ==================================================================================== explicit template instantiation
-template class aff3ct::module::Probe_timestamp<int8_t>;
-template class aff3ct::module::Probe_timestamp<uint8_t>;
-template class aff3ct::module::Probe_timestamp<int16_t>;
-template class aff3ct::module::Probe_timestamp<uint16_t>;
-template class aff3ct::module::Probe_timestamp<int32_t>;
-template class aff3ct::module::Probe_timestamp<uint32_t>;
-template class aff3ct::module::Probe_timestamp<int64_t>;
-template class aff3ct::module::Probe_timestamp<uint64_t>;
-template class aff3ct::module::Probe_timestamp<float>;
-template class aff3ct::module::Probe_timestamp<double>;
-// ==================================================================================== explicit template instantiation

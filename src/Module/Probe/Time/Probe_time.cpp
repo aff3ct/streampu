@@ -3,10 +3,9 @@
 using namespace aff3ct;
 using namespace aff3ct::module;
 
-template <typename T>
-Probe_time<T>
-::Probe_time(const int size, const std::string &col_name, tools::Reporter_probe& reporter, const int n_frames)
-: Probe<T>(size, col_name, reporter, n_frames),
+Probe_time
+::Probe_time(const std::string &col_name, tools::Reporter_probe& reporter, const int n_frames)
+: Probe<uint8_t>(0, col_name, reporter, n_frames),
   t_start(std::chrono::steady_clock::now())
 {
 	const std::string name = "Probe_time<" + col_name + ">";
@@ -14,9 +13,8 @@ Probe_time<T>
 	this->set_single_wave(true);
 }
 
-template <typename T>
-void Probe_time<T>
-::_probe(const T *in, const size_t frame_id)
+void Probe_time
+::_probe(const uint8_t *in, const size_t frame_id)
 {
 	auto t_stop = std::chrono::steady_clock::now();
 	auto time_duration = (double)std::chrono::duration_cast<std::chrono::microseconds>(t_stop - this->t_start).count();
@@ -26,29 +24,14 @@ void Probe_time<T>
 		this->reporter.probe(this->col_name, (void*)&time_duration_sec, frame_id);
 }
 
-template <typename T>
-std::type_index Probe_time<T>
+std::type_index Probe_time
 ::get_datatype() const
 {
 	return typeid(double);
 }
 
-template <typename T>
-void Probe_time<T>
+void Probe_time
 ::reset()
 {
 	this->t_start = std::chrono::steady_clock::now();
 }
-
-// ==================================================================================== explicit template instantiation
-template class aff3ct::module::Probe_time<int8_t>;
-template class aff3ct::module::Probe_time<uint8_t>;
-template class aff3ct::module::Probe_time<int16_t>;
-template class aff3ct::module::Probe_time<uint16_t>;
-template class aff3ct::module::Probe_time<int32_t>;
-template class aff3ct::module::Probe_time<uint32_t>;
-template class aff3ct::module::Probe_time<int64_t>;
-template class aff3ct::module::Probe_time<uint64_t>;
-template class aff3ct::module::Probe_time<float>;
-template class aff3ct::module::Probe_time<double>;
-// ==================================================================================== explicit template instantiation

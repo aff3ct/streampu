@@ -16,15 +16,19 @@ namespace aff3ct
 {
 namespace module
 {
-template <typename T>
-class Probe_throughput : public Probe<T>
+class Probe_throughput : public Probe<uint8_t>
 {
 protected:
 	std::chrono::time_point<std::chrono::steady_clock> t_start;
-	double mbps;
+	size_t data_size;
+	double thr;
+	double factor;
 
 public:
-	Probe_throughput(const int size, const std::string &col_name, tools::Reporter_probe& reporter, const int n_frames = 1);
+	Probe_throughput(const size_t data_size, const std::string &col_name, tools::Reporter_probe& reporter,
+	                 const int n_frames = 1);
+	Probe_throughput(const size_t data_size, const std::string &col_name, const double factor,
+	                 tools::Reporter_probe& reporter, const int n_frames = 1);
 
 	virtual ~Probe_throughput() = default;
 
@@ -33,7 +37,7 @@ public:
 	virtual void reset();
 
 protected:
-	virtual void _probe(const T *in, const size_t frame_id);
+	virtual void _probe(const uint8_t *in, const size_t frame_id);
 };
 }
 }

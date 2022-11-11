@@ -10,6 +10,13 @@ Probe_value<T>
 {
 	const std::string name = "Probe_value<" + col_name + ">";
 	this->set_name(name);
+
+	if (size <= 0)
+	{
+		std::stringstream message;
+		message << "'size' has to be greater than 0 ('size' = " << size << ").";
+		throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
+	}
 }
 
 template <typename T>

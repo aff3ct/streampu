@@ -16,14 +16,13 @@ namespace aff3ct
 {
 namespace module
 {
-template <typename T>
-class Probe_latency : public Probe<T>
+class Probe_latency : public Probe<uint8_t>
 {
 protected:
 	std::chrono::time_point<std::chrono::steady_clock> t_start;
 
 public:
-	Probe_latency(const int size, const std::string &col_name, tools::Reporter_probe& reporter, const int n_frames = 1);
+	Probe_latency(const std::string &col_name, tools::Reporter_probe& reporter, const int n_frames = 1);
 
 	virtual ~Probe_latency() = default;
 
@@ -32,7 +31,7 @@ public:
 	virtual void reset();
 
 protected:
-	virtual void _probe(const T *in, const size_t frame_id);
+	virtual void _probe(const uint8_t *in, const size_t frame_id);
 };
 }
 }

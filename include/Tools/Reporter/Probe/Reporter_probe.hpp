@@ -21,11 +21,11 @@ namespace aff3ct
 namespace module
 {
 	template <typename T> class Probe_value;
-	template <typename T> class Probe_throughput;
-	template <typename T> class Probe_latency;
-	template <typename T> class Probe_time;
-	template <typename T> class Probe_timestamp;
-	template <typename T> class Probe_occurrence;
+	class Probe_throughput;
+	class Probe_latency;
+	class Probe_time;
+	class Probe_timestamp;
+	class Probe_occurrence;
 }
 namespace tools
 {
@@ -65,38 +65,39 @@ public:
 	                                           const std::ios_base::fmtflags ff = std::ios_base::scientific,
 	                                           const size_t precision = 3);
 
-	template <typename T>
-	module::Probe_throughput<T>* create_probe_throughput(const std::string &name,
-	                                                     const size_t socket_size = 1,
-	                                                     const std::ios_base::fmtflags ff = std::ios_base::dec | std::ios_base::fixed,
-	                                                     const size_t precision = 3);
+	module::Probe_throughput* create_probe_throughput_mbps(const std::string &name,
+	                                                       const size_t data_size = 1,
+	                                                       const std::ios_base::fmtflags ff = std::ios_base::dec | std::ios_base::fixed,
+	                                                       const size_t precision = 3);
 
-	template <typename T>
-	module::Probe_latency<T>* create_probe_latency(const std::string &name,
-	                                               const size_t socket_size = 1,
-	                                               const std::ios_base::fmtflags ff = std::ios_base::scientific,
-	                                               const size_t precision = 3);
+	module::Probe_throughput* create_probe_throughput(const std::string &name,
+	                                                  const std::string &unit = "",
+	                                                  const size_t data_size = 1,
+	                                                  const double factor = 1.,
+	                                                  const std::ios_base::fmtflags ff = std::ios_base::dec | std::ios_base::fixed,
+	                                                  const size_t precision = 3);
 
-	template <typename T>
-	module::Probe_time<T>* create_probe_time(const std::string &name,
-	                                         const size_t socket_size = 1,
-	                                         const std::ios_base::fmtflags ff = std::ios_base::dec | std::ios_base::fixed,
-	                                         const size_t precision = 2);
+	module::Probe_latency* create_probe_latency(const std::string &name,
+	                                            const std::ios_base::fmtflags ff = std::ios_base::scientific,
+	                                            const size_t precision = 3);
 
-	template <typename T>
-	module::Probe_timestamp<T>* create_probe_timestamp(const std::string &name,
-	                                                   const size_t socket_size = 1,
-	                                                   const std::ios_base::fmtflags ff = std::ios_base::scientific,
-	                                                   const size_t precision = 2);
+	module::Probe_time* create_probe_time(const std::string &name,
+	                                      const std::ios_base::fmtflags ff = std::ios_base::dec | std::ios_base::fixed,
+	                                      const size_t precision = 2);
 
-	template <typename T>
-	module::Probe_occurrence<T>* create_probe_occurrence(const std::string &name,
-	                                                     const std::string &unit = "",
-	                                                     const size_t socket_size = 1,
-	                                                     const std::ios_base::fmtflags ff = std::ios_base::scientific,
-	                                                     const size_t precision = 3);
+	module::Probe_timestamp* create_probe_timestamp(const std::string &name,
+	                                                const std::ios_base::fmtflags ff = std::ios_base::scientific,
+	                                                const size_t precision = 2);
 
+	module::Probe_timestamp* create_probe_timestamp(const std::string &name,
+	                                                const uint64_t mod,
+	                                                const std::ios_base::fmtflags ff = std::ios_base::scientific,
+	                                                const size_t precision = 2);
 
+	module::Probe_occurrence* create_probe_occurrence(const std::string &name,
+	                                                  const std::string &unit = "",
+	                                                  const std::ios_base::fmtflags ff = std::ios_base::scientific,
+	                                                  const size_t precision = 3);
 
 	virtual void probe(const std::string &name, const void *data, const size_t frame_id);
 
