@@ -23,6 +23,7 @@ int main(int argc, char** argv)
 		{"step-by-step", no_argument, NULL, 'b'},
 		{"debug", no_argument, NULL, 'g'},
 		{"subseq", no_argument, NULL, 'u'},
+		{"verbose", no_argument, NULL, 'v'},
 		{"help", no_argument, NULL, 'h'},
 		{0}};
 
@@ -36,8 +37,8 @@ int main(int argc, char** argv)
 	bool print_stats = false;
 	bool step_by_step = false;
 	bool debug = false;
-	bool verbose = false;
 	bool subseq = false;
+	bool verbose = false;
 
 	while (1)
 	{
@@ -121,7 +122,6 @@ int main(int argc, char** argv)
 				std::cout << "  -v, --verbose         "
 				          << "Enable verbose mode                                                   "
 				          << "[" << (verbose ? "true" : "false") << "]" << std::endl;
-
 				std::cout << "  -h, --help            "
 				          << "This help                                                             "
 				          << "[false]" << std::endl;
@@ -149,23 +149,12 @@ int main(int argc, char** argv)
 	std::cout << "#   - step_by_step   = " << (step_by_step ? "true" : "false") << std::endl;
 	std::cout << "#   - debug          = " << (debug ? "true" : "false") << std::endl;
 	std::cout << "#   - subseq         = " << (subseq ? "true" : "false") << std::endl;
+	std::cout << "#   - verbose        = " << (verbose ? "true" : "false") << std::endl;
 	std::cout << "#" << std::endl;
 
 	// modules creation
 	module::Initializer<uint8_t> initializer(data_length);
 	module::Finalizer  <uint8_t> finalizer  (data_length);
-
-	if (verbose)
-	{
-		std::cout << "Initializer information:" << std::endl;
-		std::cout << "------------------------" << std::endl;
-		aff3ct::tools::help(initializer);
-		std::cout << std::endl;
-		std::cout << "Finalizer information:" << std::endl;
-		std::cout << "------------------------" << std::endl;
-		aff3ct::tools::help(finalizer);
-		std::cout << std::endl;
-	}
 
 	std::vector<std::shared_ptr<module::Incrementer<uint8_t>>> incs(6);
 	for (size_t s = 0; s < incs.size(); s++)
@@ -226,6 +215,17 @@ int main(int argc, char** argv)
 		tsk->set_debug_limit(16         ); // display only the 16 first bits if the debug mode is enabled
 		tsk->set_stats      (print_stats); // enable the statistics
 		tsk->set_fast       (true       ); // enable the fast mode (= disable the useless verifs in the tasks)
+	}
+
+	if (verbose)
+	{
+		std::cout << std::endl;
+		std::cout << "Helper information:" << std::endl;
+		std::cout << "-------------------" << std::endl;
+		aff3ct::tools::help(initializer);
+		for (size_t s = 0; s < incs.size(); s++)
+			aff3ct::tools::help(*incs[s]);
+		aff3ct::tools::help(finalizer);
 	}
 
 	std::atomic<unsigned int> counter(0);
