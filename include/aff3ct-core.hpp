@@ -105,6 +105,9 @@
 #ifndef SOURCE_USER_HPP_
 #include <Module/Source/User/Source_user.hpp>
 #endif
+#ifndef STATELESS_HPP_
+#include <Module/Stateless/Stateless.hpp>
+#endif
 #ifndef SUBSEQUENCE_HPP_
 #include <Module/Subsequence/Subsequence.hpp>
 #endif
