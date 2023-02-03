@@ -9,8 +9,9 @@ using namespace aff3ct::module;
 
 template <typename B>
 Source_user<B>
-::Source_user(const int max_data_size, const std::string &filename, const int start_idx)
-: Source<B>(max_data_size), source(), src_counter(start_idx)
+::Source_user(const int max_data_size, const std::string &filename, const bool auto_reset, const int start_idx)
+: Source<B>(max_data_size), source(), next_frame_idx(start_idx), src_counter(0), auto_reset(auto_reset),
+  start_idx(start_idx), done(false)
 {
 	const std::string name = "Source_user";
 	this->set_name(name);
@@ -64,7 +65,14 @@ Source_user<B>
 	else
 		throw tools::invalid_argument(__FILE__, __LINE__, __func__, "Can't open '" + filename + "' file.");
 
-	src_counter %= (int)source.size();
+	this->next_frame_idx %= (int)source.size();
+}
+
+template <typename B>
+Source_user<B>
+::Source_user(const int max_data_size, const std::string &filename, const int start_idx)
+: Source_user<B>(max_data_size, filename, true, start_idx)
+{
 }
 
 template <typename B>
@@ -78,13 +86,35 @@ Source_user<B>* Source_user<B>
 
 template <typename B>
 void Source_user<B>
+::reset()
+{
+	this->next_frame_idx = this->start_idx;
+	this->src_counter = 0;
+	this->done = false;
+}
+
+template <typename B>
+bool Source_user<B>
+::is_done() const
+{
+	return this->done;
+}
+
+template <typename B>
+void Source_user<B>
 ::_generate(B *out_data, const size_t frame_id)
 {
-	std::copy(this->source[this->src_counter].begin(),
-	          this->source[this->src_counter].end  (),
+	std::copy(this->source[this->next_frame_idx].begin(),
+	          this->source[this->next_frame_idx].end  (),
 	          out_data);
 
-	this->src_counter = (this->src_counter +1) % (int)this->source.size();
+	this->next_frame_idx = (this->next_frame_idx +1) % (int)this->source.size();
+
+	if (this->auto_reset == false) {
+		this->src_counter = (this->src_counter +1) % (int)this->source.size();
+		if (this->src_counter == 0)
+			this->done = true;
+	}
 }
 
 // ==================================================================================== explicit template instantiation
