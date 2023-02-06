@@ -95,11 +95,11 @@ public:
 	                                                const std::ios_base::fmtflags ff = std::ios_base::scientific,
 	                                                const size_t precision = 2);
 
-	module::Probe_timestamp* create_probe_timestamp(const std::string &name,
-	                                                const uint64_t mod,
-	                                                const size_t buffer_size = 100,
-	                                                const std::ios_base::fmtflags ff = std::ios_base::scientific,
-	                                                const size_t precision = 2);
+	module::Probe_timestamp* create_probe_timestamp_mod(const std::string &name,
+	                                                    const uint64_t mod,
+	                                                    const size_t buffer_size = 100,
+	                                                    const std::ios_base::fmtflags ff = std::ios_base::scientific,
+	                                                    const size_t precision = 2);
 
 	module::Probe_occurrence* create_probe_occurrence(const std::string &name,
 	                                                  const std::string &unit = "",

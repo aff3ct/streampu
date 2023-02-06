@@ -319,11 +319,11 @@ module::Probe_timestamp* Reporter_probe
 }
 
 module::Probe_timestamp* Reporter_probe
-::create_probe_timestamp(const std::string &name,
-                         const uint64_t mod,
-                         const size_t buffer_size,
-                         const std::ios_base::fmtflags ff,
-                         const size_t precision)
+::create_probe_timestamp_mod(const std::string &name,
+                             const uint64_t mod,
+                             const size_t buffer_size,
+                             const std::ios_base::fmtflags ff,
+                             const size_t precision)
 {
 	this->create_probe_checks(name);
 	auto probe = new module::Probe_timestamp(name, mod, *this, this->n_frames);
