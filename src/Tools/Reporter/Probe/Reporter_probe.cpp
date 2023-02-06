@@ -183,8 +183,8 @@ template <typename T>
 module::Probe_value<T>* Reporter_probe
 ::create_probe_value(const std::string &name,
                      const std::string &unit,
-                     const size_t socket_size,
                      const size_t buffer_size,
+                     const size_t socket_size,
                      const std::ios_base::fmtflags ff,
                      const size_t precision)
 {

@@ -61,8 +61,8 @@ public:
 	template <typename T>
 	module::Probe_value<T>* create_probe_value(const std::string &name,
 	                                           const std::string &unit = "",
-	                                           const size_t socket_size = 1,
 	                                           const size_t buffer_size = 100,
+	                                           const size_t socket_size = 1,
 	                                           const std::ios_base::fmtflags ff = std::ios_base::scientific,
 	                                           const size_t precision = 3);
 
