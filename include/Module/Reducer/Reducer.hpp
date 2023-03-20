@@ -2,8 +2,8 @@
  * \file
  * \brief Class module::Reducer.
  */
-#ifndef INCREMENTER_HPP_
-#define INCREMENTER_HPP_
+#ifndef REDUCER_HPP_
+#define REDUCER_HPP_
 
 #include <cstdint>
 #include <vector>
@@ -72,4 +72,4 @@ template <typename TI, typename TO = TI, tools::proto_bop<TI, TO> BOP = tools::b
 #include "Module/Reducer/Reducer.hxx"
 #endif
 
-#endif /* INCREMENTER_HPP_ */
+#endif /* REDUCER_HPP_ */

@@ -72,7 +72,7 @@
 #ifndef PROBE_VALUE_HPP_
 #include <Module/Probe/Value/Probe_value.hpp>
 #endif
-#ifndef INCREMENTER_HPP_
+#ifndef REDUCER_HPP_
 #include <Module/Reducer/Reducer.hpp>
 #endif
 #ifndef RELAYER_HPP_
