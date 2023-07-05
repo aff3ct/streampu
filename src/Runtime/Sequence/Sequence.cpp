@@ -1959,7 +1959,7 @@ Sub_sequence* Sequence
 {
 	std::function<Sub_sequence*(tools::Digraph_node<Sub_sequence>*,
 	              std::vector<tools::Digraph_node<Sub_sequence>*>&)> get_last_subsequence_recursive =
-		[&get_last_subsequence_recursive](tools::Digraph_node<Sub_sequence>* cur_node,
+		[&get_last_subsequence_recursive, &tid](tools::Digraph_node<Sub_sequence>* cur_node,
 		                                  std::vector<tools::Digraph_node<Sub_sequence>*> &already_parsed_nodes) -> Sub_sequence*
 		{
 			if (cur_node != nullptr &&
@@ -1968,16 +1968,25 @@ Sub_sequence* Sequence
 			              cur_node) == already_parsed_nodes.end())
 			{
 				already_parsed_nodes.push_back(cur_node);
+				if (!cur_node->get_children().size())
+					return cur_node->get_contents();
 				Sub_sequence* last_ss = nullptr;
-				for (auto c : cur_node->get_children())
-					last_ss = get_last_subsequence_recursive(c, already_parsed_nodes);
-				return last_ss ? last_ss : cur_node->get_contents();
+				for (auto c : cur_node->get_children()) {
+					Sub_sequence* last_branch_ss = nullptr;
+					last_branch_ss = get_last_subsequence_recursive(c, already_parsed_nodes);
+					if(last_ss && last_branch_ss && last_ss != last_branch_ss) {
+						std::stringstream message;
+						message << "found multiple candidates for last subsequence, this shouldn't be possible. ("
+						        << "tid" << " = " << tid << ", "
+								<< "last_ss.id" << " = " << last_ss->id << ", "
+								<< "last_branch_ss.id" << " = " << last_branch_ss->id << ")";
+						throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
+					}
+					last_ss = last_branch_ss ? last_branch_ss : last_ss;
+				}
+				return last_ss;
 			}
-			else
-			{
-				// should never happen
-				return nullptr;
-			}
+			return nullptr;
 		};
 
 	std::vector<tools::Digraph_node<Sub_sequence>*> already_parsed_nodes;
@@ -1987,9 +1996,9 @@ Sub_sequence* Sequence
 void Sequence
 ::update_tasks_id(const size_t tid)
 {
-	std::function<void(tools::Digraph_node<Sub_sequence>*, size_t&,
+	std::function<void(tools::Digraph_node<Sub_sequence>*,
 		               std::vector<tools::Digraph_node<Sub_sequence>*> &)> update_tasks_id_recursive =
-		[&update_tasks_id_recursive](tools::Digraph_node<Sub_sequence>* cur_node, size_t& taid,
+		[&update_tasks_id_recursive](tools::Digraph_node<Sub_sequence>* cur_node,
 		                             std::vector<tools::Digraph_node<Sub_sequence>*> &already_parsed_nodes)
 		{
 			if (cur_node != nullptr &&
@@ -2000,17 +2009,15 @@ void Sequence
 				already_parsed_nodes.push_back(cur_node);
 				Sub_sequence* ss = cur_node->get_contents();
 				ss->tasks_id.resize(ss->tasks.size());
-				std::iota(ss->tasks_id.begin(), ss->tasks_id.end(), taid);
-				taid += ss->tasks_id.size();
+				std::iota(ss->tasks_id.begin(), ss->tasks_id.end(), ss->tasks_id.front());
 
 				for (auto c : cur_node->get_children())
-					update_tasks_id_recursive(c, taid, already_parsed_nodes);
+					update_tasks_id_recursive(c, already_parsed_nodes);
 			}
 		};
 
-	size_t taid = 0;
 	std::vector<tools::Digraph_node<Sub_sequence>*> already_parsed_nodes;
-	return update_tasks_id_recursive(this->sequences[tid], taid, already_parsed_nodes);
+	return update_tasks_id_recursive(this->sequences[tid], already_parsed_nodes);
 }
 
 std::vector<runtime::Task*> Sequence
