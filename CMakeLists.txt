@@ -115,7 +115,6 @@ if(AFF3CT_CORE_TESTS)
                                                         POSITION_INDEPENDENT_CODE ON) # set -fpie
     list(APPEND aff3ct_core_tests_list aff3ct-core-test-simple-chain)
     list(APPEND aff3ct_core_targets_list aff3ct-core-test-simple-chain)
-
     add_executable(aff3ct-core-test-for-loop $<TARGET_OBJECTS:aff3ct-core-obj>
                                                  ${CMAKE_CURRENT_SOURCE_DIR}/tests/for_loop.cpp)
     set_target_properties(aff3ct-core-test-for-loop PROPERTIES
@@ -153,8 +152,18 @@ if(AFF3CT_CORE_TESTS)
     set_target_properties(aff3ct-core-test-simple-pipeline PROPERTIES
                                                            OUTPUT_NAME test-simple-pipeline
                                                            POSITION_INDEPENDENT_CODE ON) # set -fpie
-    # list(APPEND aff3ct_core_tests_list aff3ct-core-test-simple-pipeline)
+    list(APPEND aff3ct_core_tests_list aff3ct-core-test-simple-pipeline)
     list(APPEND aff3ct_core_targets_list aff3ct-core-test-simple-pipeline)
+    ###======================================================================================================###
+    list(APPEND aff3ct_core_targets_list aff3ct-core-test-nest-loops-pipeline)
+    add_executable(aff3ct-core-test-nest-loops-pipeline $<TARGET_OBJECTS:aff3ct-core-obj>
+                                                    ${CMAKE_CURRENT_SOURCE_DIR}/tests/ctrl_flw/nested_loops_pipeline.cpp)
+    set_target_properties(aff3ct-core-test-nest-loops-pipeline PROPERTIES
+                                                           OUTPUT_NAME test-nested-loops-pipeline
+                                                           POSITION_INDEPENDENT_CODE ON) # set -fpie
+    #list(APPEND aff3ct_core_tests_list aff3ct-core-test-fizzbuzz)
+    list(APPEND aff3ct_core_targets_list aff3ct-core-test-nest-loops-pipeline)
+    ###======================================================================================================###
 endif()
 
 # ---------------------------------------------------------------------------------------------------------------------
