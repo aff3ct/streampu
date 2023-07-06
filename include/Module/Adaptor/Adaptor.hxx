@@ -30,7 +30,8 @@ Adaptor
   last(new std::vector<std::atomic<uint64_t>>(1000)),
   waiting_canceled(new std::atomic<bool>(false)),
   no_copy_pull(false),
-  no_copy_push(false)
+  no_copy_push(false),
+  forward_vector({})
 {
 	const std::string name = "Adaptor";
 	this->set_name(name);
@@ -82,7 +83,8 @@ Adaptor
   last(new std::vector<std::atomic<uint64_t>>(1000)),
   waiting_canceled(new std::atomic<bool>(false)),
   no_copy_pull(false),
-  no_copy_push(false)
+  no_copy_push(false),
+  forward_vector({})
 {
 	const std::string name = "Adaptor";
 	this->set_name(name);

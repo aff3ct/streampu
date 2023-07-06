@@ -58,8 +58,8 @@ int main(int argc, char** argv)
 	size_t n_threads = std::thread::hardware_concurrency();
 	size_t n_inter_frames = 1;
 	size_t sleep_time_us = 5;
-	size_t data_length = 2048;
-	size_t buffer_size = 16;
+	size_t data_length =512;
+	size_t buffer_size =5;
 	std::string dot_filepath;
 	std::string in_filepath;
 	std::string out_filepath = "file.out";
@@ -206,7 +206,7 @@ int main(int argc, char** argv)
 	module::Source_user_binary<uint8_t> source(data_length, in_filepath, auto_reset);
 	module::Sink_user_binary<uint8_t> sink(data_length, out_filepath);
 
-	std::vector<std::shared_ptr<module::Relayer<uint8_t>>> rlys(6);
+	std::vector<std::shared_ptr<module::Relayer<uint8_t>>> rlys(5);
 	for (size_t s = 0; s < rlys.size(); s++)
 	{
 		rlys[s].reset(new module::Relayer<uint8_t>(data_length));

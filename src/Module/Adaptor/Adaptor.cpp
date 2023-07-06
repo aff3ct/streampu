@@ -142,3 +142,9 @@ void Adaptor
 			}
 	}
 }
+
+void Adaptor
+::set_forward_vector(std::vector<runtime::Socket*>& forward_vector)
+{
+		this->forward_vector.push_back(forward_vector);
+}

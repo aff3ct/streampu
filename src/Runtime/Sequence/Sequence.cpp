@@ -8,6 +8,7 @@
 #include <exception>
 #include <algorithm>
 
+
 #include "Tools/Display/rang_format/rang_format.h"
 #include "Tools/Thread_pinning/Thread_pinning.hpp"
 #include "Tools/Exception/exception.hpp"
@@ -403,9 +404,12 @@ std::vector<std::vector<runtime::Task*>> Sequence
 				tasks_per_threads[tid].insert(tasks_per_threads[tid].end(),
 				                              cur_ss->get_c()->tasks.begin(),
 				                              cur_ss->get_c()->tasks.end());
-
-				for (auto c : cur_ss->get_children())
-					get_tasks_recursive(c, tid, already_parsed_nodes);
+				/*for (auto task : cur_ss->get_c()->tasks)
+					if (std::find(tasks_per_threads[tid].begin(),
+			              tasks_per_threads[tid].end(),
+			              task) == tasks_per_threads[tid].end())
+						  tasks_per_threads[tid].push_back(task);*/
+				
 			}
 		};
 
@@ -1011,7 +1015,7 @@ tools::Digraph_node<SS>* Sequence
 
 			for (auto &s : current_task.sockets)
 			{
-				if (current_task.get_socket_type(*s) == socket_t::SOUT)
+				if (current_task.get_socket_type(*s) == socket_t::SOUT || current_task.get_socket_type(*s) == socket_t::SINOUT)
 				{
 					auto bss = s->get_bound_sockets();
 					for (auto bs : bss)
@@ -1070,14 +1074,14 @@ tools::Digraph_node<SS>* Sequence
 	}
 	else // --------------------------------------------------------------------------------------------- STANDARD CASE
 	{
-		cur_subseq->get_c()->tasks.push_back(&current_task);
+		cur_subseq->get_c()->tasks.push_back(&current_task);  
 		cur_subseq->get_c()->tasks_id.push_back(taid++);
 
 		if (std::find(lasts.begin(), lasts.end(), &current_task) == lasts.end())
 		{
 			for (auto &s : current_task.sockets)
 			{
-				if (current_task.get_socket_type(*s) == socket_t::SOUT)
+				if (current_task.get_socket_type(*s) == socket_t::SOUT || current_task.get_socket_type(*s) == socket_t::SINOUT)
 				{
 					auto bss = s->get_bound_sockets();
 					for (auto &bs : bss)
@@ -1094,7 +1098,7 @@ tools::Digraph_node<SS>* Sequence
 								                                                    in_sockets_feed[&t] = 1;
 								bool t_is_select = dynamic_cast<const module::Switcher*>(&(t.get_module())) &&
 								                   t.get_name() == "select";
-								if ((!t_is_select && in_sockets_feed[&t] >= t.get_n_input_sockets() - t.get_n_static_input_sockets()) ||
+								if ((!t_is_select && in_sockets_feed[&t] >= (t.get_n_input_sockets() + t.get_n_inout_sockets()) - t.get_n_static_input_sockets()) ||
 								    ( t_is_select && t.is_last_input_socket(*bs)))
 								{
 									is_last = false;
@@ -1130,7 +1134,7 @@ tools::Digraph_node<SS>* Sequence
 						}
 					}
 				}
-				else if (current_task.get_socket_type(*s) == socket_t::SIN)
+				else if (current_task.get_socket_type(*s) == socket_t::SIN || current_task.get_socket_type(*s) == socket_t::SINOUT)
 				{
 					if (s->get_bound_sockets().size() > 1)
 					{
@@ -1184,6 +1188,7 @@ void Sequence
 	std::vector<const tools::Digraph_node<SS>*> already_parsed_nodes;
 	collect_modules_list(sequence, already_parsed_nodes);
 
+	// On utilise un set pour éviter de dupliquer le même module plusieurs fois 
 	std::vector<MO*> modules_vec;
 	for (auto m : modules_set)
 		modules_vec.push_back(m);
@@ -1286,7 +1291,7 @@ void Sequence
 				// replicate the sockets binding
 				for (size_t s_id = 0; s_id < t_ref->sockets.size(); s_id++)
 				{
-					if (t_ref->get_socket_type(*t_ref->sockets[s_id]) == socket_t::SIN)
+					if (t_ref->get_socket_type(*t_ref->sockets[s_id]) == socket_t::SIN || t_ref->get_socket_type(*t_ref->sockets[s_id]) == socket_t::SINOUT) // Modif : Ajout du support pour les INOUT
 					{
 						const runtime::Socket* s_ref_out = nullptr;
 						try { s_ref_out = &t_ref->sockets[s_id]->get_bound_socket(); } catch (...) {}
@@ -1602,12 +1607,47 @@ void Sequence
 	stream << "}" << std::endl;
 }
 
+
+void Sequence
+::explore_thread_rec(Socket* socket, std::vector<runtime::Socket*>& liste_fwd)
+{
+	auto bound = socket->get_bound_sockets();
+	for (auto explore_bound : bound)
+	{
+		if (find(liste_fwd.begin(),liste_fwd.end(),explore_bound)==liste_fwd.end() && explore_bound->get_type()!= socket_t::SOUT){
+			liste_fwd.push_back(explore_bound);
+		}
+		if (explore_bound->get_type() == socket_t::SINOUT)
+			explore_thread_rec(explore_bound,liste_fwd);
+	}
+}
+
+void Sequence
+::explore_thread_rec_inverse(Socket* socket, std::vector<runtime::Socket*>& liste_fwd)
+{
+
+		auto bound = &socket->get_bound_socket();
+
+
+		
+		if (find(liste_fwd.begin(),liste_fwd.end(),bound)==liste_fwd.end() ){
+				liste_fwd.push_back(bound);
+		}
+		
+		if (bound->get_type() == socket_t::SINOUT){
+				explore_thread_rec(bound,liste_fwd);
+				explore_thread_rec_inverse(bound,liste_fwd);
+		}	
+	
+
+}
+
 void Sequence
 ::gen_processes(const bool no_copy_mode)
 {
 	std::function<void(            tools::Digraph_node<Sub_sequence>*,
 	                   std::vector<tools::Digraph_node<Sub_sequence>*>&)> gen_processes_recursive =
-		[&gen_processes_recursive, no_copy_mode](            tools::Digraph_node<Sub_sequence>   *cur_node,
+		[&gen_processes_recursive, no_copy_mode,this](            tools::Digraph_node<Sub_sequence>   *cur_node,
 		                                         std::vector<tools::Digraph_node<Sub_sequence>*> &already_parsed_nodes)
 		{
 			if (cur_node != nullptr &&
@@ -1652,7 +1692,7 @@ void Sequence
 								contents->rebind_dataptrs[rebind_id].push_back(dataptrs);
 							}
 						}
-
+ 
 						modified_tasks[select_task] = [contents, select_task, switcher, rebind_id]() -> const int*
 						{
 							select_task->exec();
@@ -1720,55 +1760,70 @@ void Sequence
 						auto pull_task = task;
 						auto adp_pull = dynamic_cast<module::Adaptor*>(&pull_task->get_module());
 						adp_pull->set_no_copy_pull(true);
+
+						
 						const auto rebind_id = contents->rebind_sockets.size();
 						contents->rebind_sockets.resize(rebind_id +1);
 						contents->rebind_dataptrs.resize(rebind_id +1);
-
-						for (size_t s = 0; s < pull_task->sockets.size() -1; s++)
-						{
-							if (pull_task->get_socket_type(*pull_task->sockets[s]) == socket_t::SOUT)
+						
+						
+						
+							for (size_t s = 0; s < pull_task->sockets.size() -1; s++)
 							{
-								std::vector<runtime::Socket*> bound_sockets;
-								std::vector<void*> dataptrs;
-
-								bound_sockets.push_back(pull_task->sockets[s].get());
-								dataptrs.push_back(pull_task->sockets[s]->get_dataptr());
-
-								auto bs = pull_task->sockets[s]->get_bound_sockets();
-								bound_sockets.insert(bound_sockets.end(), bs.begin(), bs.end());
-								for (auto sck : bs)
-									dataptrs.push_back(sck->get_dataptr());
-
-								contents->rebind_sockets[rebind_id].push_back(bound_sockets);
-								contents->rebind_dataptrs[rebind_id].push_back(dataptrs);
-							}
-						}
-
-						modified_tasks[pull_task] = [contents, pull_task, adp_pull, rebind_id]() -> const int*
-						{
-							// active or passive waiting here
-							pull_task->exec();
-							const int* status = (int*)pull_task->sockets.back()->get_dataptr();
-
-							// rebind input sockets on the fly
-							for (size_t sin_id = 0; sin_id < contents->rebind_sockets[rebind_id].size(); sin_id++)
-							{
-								if (contents->rebind_sockets[rebind_id][sin_id].size() > 1)
+								
+								if (pull_task->get_socket_type(*pull_task->sockets[s]) == socket_t::SOUT)
 								{
-									// we start to 1 because the rebinding of the 'pull_task' is made in the
-									// 'pull_task->exec()' call (this way the debug mode is still working)
-									auto swap_buff = contents->rebind_sockets[rebind_id][sin_id][1]->get_dataptr();
-									auto buff = adp_pull->get_filled_buffer(sin_id, swap_buff);
-									contents->rebind_sockets[rebind_id][sin_id][1]->dataptr = buff;
-									// for the next tasks the same buffer 'buff' is required, an easy mistake is to re-swap
-									// and the data will be false, this is why we just bind 'buff'
-									for (size_t ta = 2; ta < contents->rebind_sockets[rebind_id][sin_id].size(); ta++)
-										contents->rebind_sockets[rebind_id][sin_id][ta]->dataptr = buff;
+									std::vector<runtime::Socket*> bound_sockets;
+									std::vector<void*> dataptrs;
+
+									bound_sockets.push_back(pull_task->sockets[s].get());
+									for (auto socket : pull_task->sockets[s]->get_bound_sockets())
+									{
+											bound_sockets.push_back(socket);
+											if (socket->get_type() == socket_t::SINOUT)
+												this->explore_thread_rec(socket, bound_sockets);
+										
+									}
+
+									for (auto sck : bound_sockets)
+										dataptrs.push_back(sck->get_dataptr());
+
+									contents->rebind_sockets[rebind_id].push_back(bound_sockets);
+									contents->rebind_dataptrs[rebind_id].push_back(dataptrs);
 								}
 							}
-							adp_pull->wake_up_pusher();
-							return status;
-						};
+
+								// Partie du rebind 
+								modified_tasks[pull_task] = [contents, pull_task, adp_pull, rebind_id]() -> const int*
+							{
+								// active or passive waiting here
+								pull_task->exec();
+								const int* status = (int*)pull_task->sockets.back()->get_dataptr();
+								// rebind input sockets on the fly
+								for (size_t sin_id = 0; sin_id < contents->rebind_sockets[rebind_id].size(); sin_id++)
+								{
+									if (contents->rebind_sockets[rebind_id][sin_id].size() > 1)
+									{
+
+										// we start to 1 because the rebinding of the 'pull_task' is made in the
+										// 'pull_task->exec()' call (this way the debug mode is still working)
+										auto swap_buff = contents->rebind_sockets[rebind_id][sin_id][1]->get_dataptr();
+										auto buff = adp_pull->get_filled_buffer(sin_id, swap_buff);
+										contents->rebind_sockets[rebind_id][sin_id][1]->dataptr = buff;
+									
+										// for the next tasks the same buffer 'buff' is required, an easy mistake is to re-swap
+										// and the data will be false, this is why we just bind 'buff'
+										for (size_t ta = 2; ta < contents->rebind_sockets[rebind_id][sin_id].size(); ta++){
+											contents->rebind_sockets[rebind_id][sin_id][ta]->dataptr = buff;
+										}
+									}
+								}
+								adp_pull->wake_up_pusher();
+								return status;
+							};
+						
+
+						
 					}
 
 					if (dynamic_cast<module::Adaptor*>(&task->get_module()) &&
@@ -1784,24 +1839,24 @@ void Sequence
 						for (size_t s = 0; s < push_task->sockets.size() -1; s++)
 							if (push_task->get_socket_type(*push_task->sockets[s]) == socket_t::SIN)
 							{
+								
 								std::vector<runtime::Socket*> bound_sockets;
 								std::vector<void*> dataptrs;
 
 								bound_sockets.push_back(push_task->sockets[s].get());
-								dataptrs.push_back(push_task->sockets[s]->get_dataptr());
-
-								auto bound_socket = &push_task->sockets[s]->get_bound_socket();
+								
+								auto bound_socket = &(push_task->sockets[s]->get_bound_socket());
 								bound_sockets.push_back(bound_socket);
-								dataptrs.push_back(bound_socket->get_dataptr());
+								this->explore_thread_rec(bound_socket,bound_sockets);
 
-								auto &bs = bound_socket->get_bound_sockets();
-								for (size_t s = 0; s < bs.size(); s++)
-									if (&bs[s]->get_task() != push_task)
-									{
-										bound_sockets.push_back(bs[s]);
-										dataptrs.push_back(bs[s]->get_dataptr());
-									}
-
+								// Si la socket est FWD il faut faire une backward exploration
+								if (bound_socket->get_type() == socket_t::SINOUT)
+									this->explore_thread_rec_inverse(bound_socket,bound_sockets);
+								
+								
+								for (auto sck : bound_sockets)
+										dataptrs.push_back(sck->get_dataptr());
+										
 								contents->rebind_sockets[rebind_id].push_back(bound_sockets);
 								contents->rebind_dataptrs[rebind_id].push_back(dataptrs);
 							}
@@ -1825,6 +1880,7 @@ void Sequence
 									contents->rebind_sockets[rebind_id][sout_id][ta]->dataptr = buff;
 							}
 							adp_push->wake_up_puller();
+	
 							return status;
 						};
 					}

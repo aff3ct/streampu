@@ -1,3 +1,4 @@
+
 #include <iostream>
 #include <cstdlib>
 #include <memory>
@@ -31,7 +32,7 @@ int main(int argc, char** argv)
 	size_t n_inter_frames = 1;
 	size_t sleep_time_us = 5;
 	size_t data_length = 2048;
-	size_t n_exec = 100000;
+	size_t n_exec = 1;
 	std::string dot_filepath;
 	bool no_copy_mode = true;
 	bool print_stats = false;
@@ -156,7 +157,7 @@ int main(int argc, char** argv)
 	module::Initializer<uint8_t> initializer(data_length);
 	module::Finalizer  <uint8_t> finalizer  (data_length);
 
-	std::vector<std::shared_ptr<module::Incrementer<uint8_t>>> incs(6);
+	std::vector<std::shared_ptr<module::Incrementer<uint8_t>>> incs(20);
 	for (size_t s = 0; s < incs.size(); s++)
 	{
 		incs[s].reset(new module::Incrementer<uint8_t>(data_length));

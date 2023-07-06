@@ -60,6 +60,9 @@ protected:
 	bool no_copy_pull;
 	bool no_copy_push;
 
+
+public: 
+	std::vector<std::vector<runtime::Socket*>> forward_vector; // On aura un vecteur par socket out du pull !
 public:
 	inline size_t get_n_elmts(const size_t sid = 0) const;
 	inline size_t get_n_bytes(const size_t sid = 0) const;
@@ -69,6 +72,7 @@ public:
 	virtual ~Adaptor();
 	virtual Adaptor* clone() const;
 	virtual void set_n_frames(const size_t n_frames);
+	void set_forward_vector(std::vector<runtime::Socket*>& forward_vector);
 
 protected:
 	inline Adaptor(const size_t n_elmts,

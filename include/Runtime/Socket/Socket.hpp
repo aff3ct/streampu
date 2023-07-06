@@ -41,8 +41,8 @@ protected:
 	size_t               databytes;
 	bool                 fast;
 	void*                dataptr;
-	std::vector<Socket*> bound_sockets;
-	Socket*              bound_socket;
+	std::vector<Socket*> bound_sockets; // Une sortie pouvant être bind sur plusieurs entrée utilise ce veteur 
+	Socket*              bound_socket; // Une entrée étant bind seulement à une sortie utilise ce vecteur 
 	socket_t             type;
 
 public:
@@ -63,6 +63,8 @@ public:
 	inline const Socket&               get_bound_socket   () const;
 	inline       Socket&               get_bound_socket   ();
 	inline socket_t                    get_type           () const;
+
+	// Question : Est-ce qu'on doit utiliser un vecteur spécial pour les sockets inout ? Ou utiliser  
 
 	inline void set_fast(const bool fast);
 

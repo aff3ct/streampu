@@ -35,6 +35,11 @@ public:
 	inline size_t create_socket_out(runtime::Task& task, const std::string &name, const size_t n_elmts);
 	size_t create_socket_out(runtime::Task& task, const std::string &name, const size_t n_elmts, const std::type_index& datatype);
 
+	// Ajout de la création des sockets FWD pour les modules stateless 
+	template <typename T>
+	inline size_t create_socket_inout(runtime::Task& task, const std::string &name, const size_t n_elmts);
+	size_t create_socket_inout(runtime::Task& task, const std::string &name, const size_t n_elmts, const std::type_index& datatype);
+
 	void create_codelet(runtime::Task& task, std::function<int(Module &m, runtime::Task &t, const size_t frame_id)> codelet);
 	void register_timer(runtime::Task& task, const std::string &key);
 	virtual void set_n_frames_per_wave(const size_t n_frames_per_wave);

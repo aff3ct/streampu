@@ -153,6 +153,7 @@ void Socket
 void Socket
 ::bind(Socket &s_out, const int priority)
 {
+
 	if (!is_fast())
 	{
 		if (s_out.datatype != this->datatype)
@@ -191,15 +192,15 @@ void Socket
 		if (s_out.dataptr == nullptr)
 		{
 			std::stringstream message;
-			message << "'s_out.dataptr' can't be NULL.";
+			message << "'s_out.dataptr' can't be NULL." ;
 			throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
 		}
 	}
 
-	if (this->bound_socket == &s_out)
+	if (this->bound_socket == &s_out) // Si on on veut re-bind sur la même socket => On la retire !
 		this->unbind(s_out);
 
-	if (this->bound_socket != nullptr)
+	if (this->bound_socket != nullptr && this->get_type() == socket_t::SIN)
 	{
 		std::stringstream message;
 		message << "This socket is already connected ("
@@ -219,7 +220,7 @@ void Socket
 		throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
 	}
 
-	this->bound_socket = &s_out;
+	this->bound_socket = &s_out; 
 
 	if (std::find(s_out.bound_sockets.begin(), s_out.bound_sockets.end(), this) != s_out.bound_sockets.end())
 	{
@@ -254,7 +255,7 @@ template <typename T>
 void Socket
 ::operator=(const void *array)
 {
-	if (this->get_type() == socket_t::SIN)
+	if (this->get_type() == socket_t::SIN || this->get_type() == socket_t::SINOUT )  
 		this->bind(array);
 	else
 	{
@@ -274,7 +275,7 @@ template <typename T>
 void Socket
 ::operator=(void *array)
 {
-	if (this->get_type() == socket_t::SIN)
+	if (this->get_type() == socket_t::SIN || this->get_type() == socket_t::SINOUT)
 		this->bind(array);
 	else
 	{
@@ -294,7 +295,7 @@ template <typename T>
 void Socket
 ::operator=(const T *array)
 {
-	if (this->get_type() == socket_t::SIN)
+	if (this->get_type() == socket_t::SIN || this->get_type() == socket_t::SINOUT)
 		this->bind(array);
 	else
 	{
@@ -314,7 +315,7 @@ template <typename T>
 void Socket
 ::operator=(T *array)
 {
-	if (this->get_type() == socket_t::SIN)
+	if (this->get_type() == socket_t::SIN || this->get_type() == socket_t::SINOUT)
 		this->bind(array);
 	else
 	{
@@ -334,7 +335,7 @@ template <typename T, class A>
 void Socket
 ::operator=(const std::vector<T,A> &vector)
 {
-	if (this->get_type() == socket_t::SIN)
+	if (this->get_type() == socket_t::SIN || this->get_type() == socket_t::SINOUT)
 		this->bind(vector);
 	else
 	{
@@ -354,7 +355,7 @@ template <typename T, class A>
 void Socket
 ::operator=(std::vector<T,A> &vector)
 {
-	if (this->get_type() == socket_t::SIN)
+	if (this->get_type() == socket_t::SIN || this->get_type() == socket_t::SINOUT)
 		this->bind(vector);
 	else
 	{
@@ -373,9 +374,13 @@ void Socket
 void Socket
 ::operator=(Socket &s)
 {
-	if (s.get_type() == socket_t::SOUT && this->get_type() == socket_t::SIN)
+	if ((s.get_type() == socket_t::SOUT || s.get_type() == socket_t::SINOUT) && (this->get_type() == socket_t::SIN || this->get_type() == socket_t::SINOUT))
 		this->bind(s);
-	else if (s.get_type() == socket_t::SIN && this->get_type() == socket_t::SOUT)
+	else if ((s.get_type() == socket_t::SIN || s.get_type() == socket_t::SINOUT ) && (this->get_type() == socket_t::SOUT || this->get_type() == socket_t::SINOUT ))
+		s.bind(*this);
+	else if (s.get_type() == socket_t::SINOUT && this->get_type() == socket_t::SINOUT) // Ajout du cas de bind des INOUT avec INOUT
+		this->bind(s);
+	else if (this->get_type() == socket_t::SINOUT && s.get_type() == socket_t::SINOUT) // Ajout du cas de bind des INOUT avec INOUT
 		s.bind(*this);
 	else
 	{
@@ -399,7 +404,7 @@ void Socket
 void Socket
 ::operator=(Task &t)
 {
-	if (this->get_type() == socket_t::SOUT)
+	if (this->get_type() == socket_t::SOUT || this->get_type() == socket_t::SINOUT)
 		t.bind(*this);
 	else
 	{
@@ -540,6 +545,7 @@ size_t Socket
 
 	if (this->bound_socket != &s_out)
 	{
+
 		std::stringstream message;
 		message << "This socket is connected to a different socket than 's_out' ("
 		        << "'bound_socket->databytes'"        << " = " << this->bound_socket->databytes              << ", "

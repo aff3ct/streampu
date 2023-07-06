@@ -102,7 +102,7 @@ void Adaptor_1_to_n
 		{
 			adp.wait_pull();
 			// for debug mode coherence
-			for (size_t s = 0; s < t.sockets.size() -1; s++)
+			for (size_t s = 0; s < t.sockets.size() -1; s++) // Adaptor pull has only OUT sockets
 				t.sockets[s]->bind(adp.get_filled_buffer(s));
 		}
 		else

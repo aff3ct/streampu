@@ -33,7 +33,7 @@ enum status_t : int { SUCCESS = 0,
                       FAILURE_STOP = -1,
                       UNKNOWN = -2 };
 
-enum class socket_t : uint8_t { SIN, SOUT };
+enum class socket_t : uint8_t { SIN, SOUT, SINOUT }; // Modif : Ajout du type inout pour les sockets
 
 static std::unordered_map<int,std::string> status_t_to_string = {{                              0, "SUCCESS"     },
                                                                  {                              1, "FAILURE"     },
@@ -63,9 +63,10 @@ protected:
 	std::function<int(module::Module &m, Task& t, const size_t frame_id)> codelet;
 	size_t n_input_sockets;
 	size_t n_output_sockets;
+	size_t n_inout_sockets; // Modif : Ajout du nombre de sockets inout de la tache ! 
 
 	std::vector<int> status;
-	std::vector<std::vector<uint8_t>> out_buffers;
+	std::vector<std::vector<uint8_t>> out_buffers; // On peut avoir un nombre de buffer de sortie qui dépend du nombre de sockets out_put
 
 	// stats
 	uint32_t                 n_calls;
@@ -88,8 +89,9 @@ protected:
 	std::vector<std::vector<int8_t >> sockets_data;
 
 public:
-	std::shared_ptr<Socket> fake_input_socket;
-	std::vector<std::shared_ptr<Socket>> sockets;
+	std::shared_ptr<Socket> fake_input_socket; // Création d'une fake input (Pas intéressant pour le moment !)
+	std::vector<std::shared_ptr<Socket>> sockets;	// Un vecteur qui save les sockets ajouté à la tache (On peut avoir plusieurs output pour une tache)
+	bool is_last_fwd; // Dérnière tâche fwd de l'étage !
 
 	Task(      module::Module &module,
 	     const std::string &name,
@@ -137,6 +139,7 @@ public:
 
 	size_t get_n_input_sockets() const;
 	size_t get_n_output_sockets() const;
+	size_t get_n_inout_sockets() const;
 	size_t get_n_static_input_sockets() const;
 
 	const std::vector<int>& exec(const int frame_id = -1, const bool managed_memory = true);
@@ -170,6 +173,11 @@ protected:
 	size_t create_socket_out(const std::string &name, const size_t n_elmts, const bool hack_status = false);
 	size_t create_socket_out(const std::string &name, const size_t n_elmts, const std::type_index& datatype,
 	                         const bool hack_status = false);
+
+	// Modif : Ajout de créateur de task pour les inout
+	template <typename T>
+	size_t create_socket_inout(const std::string &name, const size_t n_elmts);
+	size_t create_socket_inout(const std::string &name, const size_t n_elmts, const std::type_index& datatype); 
 
 	void create_codelet(std::function<int(module::Module &m, Task& t, const size_t frame_id)> &codelet);
 

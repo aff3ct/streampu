@@ -230,6 +230,9 @@ protected:
 	                            std::function<bool()> &stop_condition,
 	                            tools::Digraph_node<Sub_sequence>* sequence);
 
+	void explore_thread_rec(Socket* socket, std::vector<runtime::Socket*>& liste_fwd); 
+	void explore_thread_rec_inverse(Socket* socket, std::vector<runtime::Socket*>& liste_fwd); 
+
 	void gen_processes(const bool no_copy_mode = false);
 	void reset_no_copy_mode();
 

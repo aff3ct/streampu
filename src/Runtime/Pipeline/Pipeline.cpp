@@ -401,6 +401,7 @@ void Pipeline
 
 	this->create_adaptors(synchro_buffer_sizes, synchro_active_waiting);
 	this->bind_adaptors();
+	//this->create_fwd_matrix();
 }
 
 void Pipeline
@@ -429,7 +430,7 @@ void Pipeline
 				{
 					auto sck = tsk->sockets[sck_id];
 					// if the current socket is an output socket type
-					if (tsk->get_socket_type(*sck) == socket_t::SOUT)
+					if (tsk->get_socket_type(*sck) == socket_t::SOUT || tsk->get_socket_type(*sck) == socket_t::SINOUT) // Modif : Ajout du support pour les sockets INOUT
 					{
 						// for all the bounded sockets to the current socket
 						for (auto bsck : sck->get_bound_sockets())
@@ -472,7 +473,7 @@ void Pipeline
 				{
 					auto sck = tsk->sockets[sck_id];
 					// if the current socket is an input socket type
-					if (tsk->get_socket_type(*sck) == socket_t::SIN)
+					if (tsk->get_socket_type(*sck) == socket_t::SIN || tsk->get_socket_type(*sck) == socket_t::SINOUT) // Modif : Ajout du support pour les sockets INOUT
 					{
 						runtime::Socket* bsck = nullptr;
 						try
@@ -921,6 +922,66 @@ void Pipeline
 		this->bound_adaptors = false;
 	}
 }
+/*void Pipeline
+::explore_thread_rec(Socket* socket, std::vector<runtime::Socket*>& liste_fwd)
+{
+	auto bound = socket->get_bound_sockets();
+	for (auto explore_bound : bound)
+	{
+		if (find(liste_fwd.begin(),liste_fwd.end(),explore_bound)==liste_fwd.end() && explore_bound->get_type()!= socket_t::SOUT){
+			liste_fwd.push_back(explore_bound);
+		}
+		if (explore_bound->get_type() == socket_t::SINOUT)
+			explore_thread_rec(explore_bound,liste_fwd);
+	}
+}*/
+
+/*void Pipeline
+::create_fwd_matrix()
+{
+	std::vector<runtime::Socket*> liste_fwd = {};
+
+	// Il faut parcourir les étages et vérifier les étages sur dupliqués
+
+	for (auto stage : this->get_stages()){
+
+		if (stage->get_tasks_per_threads()[0][0]->get_name() != "pull_n")
+			continue;
+			
+		
+		// Sinon on est sur l'étage dupliqué 
+		for (size_t i=0; i < stage->get_n_threads() ; ++i)
+		{
+			// Clear le vecteur pour chaque nouveau thread 
+			liste_fwd.clear(); 
+			// on récupère la tâche pull 
+			auto pull_task = stage->get_tasks_per_threads()[i][0]; 
+			auto adp_pull = dynamic_cast<module::Adaptor*>(&pull_task->get_module());
+
+			// On se calque les socket de type output de pull_n 
+			for (auto socket_pull : pull_task->sockets)
+			{
+				if (socket_pull.get()->get_type() == socket_t::SOUT)
+				{
+					liste_fwd.push_back(socket_pull.get()); // On fait en sorte de push la sockt de pull aussi !
+					for (auto socket : socket_pull.get()->get_bound_sockets())
+					{
+						if (socket->get_type() != socket_t::SOUT)
+						{
+							liste_fwd.push_back(socket);
+							if (socket->get_type() == socket_t::SINOUT)
+								explore_thread_rec(socket, liste_fwd);
+							adp_pull->set_forward_vector(liste_fwd);
+						}
+					}
+				}
+			}
+		}
+		
+		
+	}
+
+}*/
 
 void Pipeline
 ::exec(const std::vector<std::function<bool(const std::vector<const int*>&)>> &stop_conditions)

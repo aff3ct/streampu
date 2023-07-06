@@ -48,7 +48,7 @@ void Subsequence
 	auto &firsts = sequence.get_firsts_tasks()[0];
 	for (auto &first : firsts) for (auto &s : first->sockets)
 	{
-		if (first->get_socket_type(*s) == runtime::socket_t::SIN)
+		if (first->get_socket_type(*s) == runtime::socket_t::SIN) // On peut avoir un FWD en début de seq
 		{
 			if (s->get_datatype() == typeid(int8_t ))
 				this->template create_socket_in<int8_t >(p, s->get_name(), s->get_n_elmts() / this->get_n_frames());
@@ -75,7 +75,8 @@ void Subsequence
 	auto &lasts  = sequence.get_lasts_tasks()[0];
 	for (auto &last : lasts) for (auto &s : last->sockets)
 	{
-		if (last->get_socket_type(*s) == runtime::socket_t::SOUT && s->get_name() != "status")
+		// On peut avoir des sockets FWD en bout de séquence 
+		if ((last->get_socket_type(*s) == runtime::socket_t::SOUT) && s->get_name() != "status")
 		{
 			if (s->get_datatype() == typeid(int8_t ))
 				this->template create_socket_out<int8_t >(p, s->get_name(), s->get_n_elmts() / this->get_n_frames());
@@ -103,7 +104,7 @@ void Subsequence
 	size_t sid = 0;
 	for (auto &last : lasts) for (auto &s : last->sockets)
 	{
-		if (last->get_socket_type(*s) == runtime::socket_t::SOUT && s->get_name() != "status")
+		if ((last->get_socket_type(*s) == runtime::socket_t::SOUT) && s->get_name() != "status")
 		{
 			while (p.get_socket_type(*p.sockets[sid]) != runtime::socket_t::SOUT) sid++;
 			p.sockets[sid++]->bind(*s);

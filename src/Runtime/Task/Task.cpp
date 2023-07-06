@@ -32,6 +32,7 @@ Task
   	{ throw tools::unimplemented_error(__FILE__, __LINE__, __func__); return 0; }),
   n_input_sockets(0),
   n_output_sockets(0),
+  n_inout_sockets(0), // Modif : initialisation du nombre de inout ! 
   status(module.get_n_waves()),
   n_calls(0),
   duration_total(std::chrono::nanoseconds(0)),
@@ -227,9 +228,9 @@ void Task
 
 	// do not use 'this->status' because the dataptr can have been changed by the 'tools::Sequence' when using the no
 	// copy mode
-	int* status = (int*)this->sockets.back()->get_dataptr();
+	int* status = (int*)this->sockets.back()->get_dataptr(); // On récupère le pointeur de données de la dernière socket (socket status)
 	for (size_t w = 0; w < n_waves; w++)
-		status[w] = (int)status_t::UNKNOWN;
+		status[w] = (int)status_t::UNKNOWN; 
 
 	if ((managed_memory == false && frame_id >= 0)        ||
 		(frame_id == -1 && n_frames_per_wave == n_frames) ||
@@ -534,8 +535,9 @@ Socket& Task
 			message << "Creating new sockets after the 'status' socket is forbidden.";
 			throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
 		}
+	// Partie importante pour la création de la socket 
 
-	auto s = std::make_shared<Socket>(*this, name, typeid(T), n_elmts * sizeof(T), type, this->is_fast());
+	auto s = std::make_shared<Socket>(*this, name, typeid(T), n_elmts * sizeof(T), type, this->is_fast()); // Création de la socket après toute les vérifs
 
 	sockets.push_back(std::move(s));
 
@@ -596,7 +598,7 @@ size_t Task
 	if (is_autoalloc())
 	{
 		out_buffers.push_back(std::vector<uint8_t>(s.get_databytes()));
-		s.dataptr = out_buffers.back().data();
+		s.dataptr = out_buffers.back().data(); // Allocation de la mémoire !
 	}
 
 	return socket_type.size() -1;
@@ -624,6 +626,44 @@ size_t Task
 	}
 }
 
+//============================== Modif : Implémentation des créateur de socket inout ===========================================
+
+template <typename T>
+size_t Task
+::create_socket_inout(const std::string &name, const size_t n_elmts)
+{
+	auto &s = create_socket<T>(name, n_elmts, socket_t::SINOUT);
+	socket_type.push_back(socket_t::SINOUT);
+	last_input_socket = &s; // Si on considère la socket inout comme une in => on doit la save !
+
+	this->set_no_input_socket(false);
+	this->n_inout_sockets++;
+
+	return socket_type.size() -1;
+}
+
+size_t Task
+::create_socket_inout(const std::string &name, const size_t n_elmts, const std::type_index& datatype)
+{
+	     if (datatype == typeid(int8_t  )) return this->template create_socket_inout<int8_t  >(name, n_elmts);
+	else if (datatype == typeid(uint8_t )) return this->template create_socket_inout<uint8_t >(name, n_elmts);
+	else if (datatype == typeid(int16_t )) return this->template create_socket_inout<int16_t >(name, n_elmts);
+	else if (datatype == typeid(uint16_t)) return this->template create_socket_inout<uint16_t>(name, n_elmts);
+	else if (datatype == typeid(int32_t )) return this->template create_socket_inout<int32_t >(name, n_elmts);
+	else if (datatype == typeid(uint32_t)) return this->template create_socket_inout<uint32_t>(name, n_elmts);
+	else if (datatype == typeid(int64_t )) return this->template create_socket_inout<int64_t >(name, n_elmts);
+	else if (datatype == typeid(uint64_t)) return this->template create_socket_inout<uint64_t>(name, n_elmts);
+	else if (datatype == typeid(float   )) return this->template create_socket_inout<float   >(name, n_elmts);
+	else if (datatype == typeid(double  )) return this->template create_socket_inout<double  >(name, n_elmts);
+	else
+	{
+		std::stringstream message;
+		message << "This should never happen.";
+		throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
+	}
+}
+
+// ======================== Reprise du code normal de affect============================================================
 void Task
 ::create_codelet(std::function<int(module::Module &m, Task& t, const size_t frame_id)> &codelet)
 {
@@ -781,6 +821,13 @@ size_t Task
 	return this->n_output_sockets;
 }
 
+// Modif : ajout d'un getter sur le nombre de sockets inout 
+size_t Task
+::get_n_inout_sockets() const
+{
+	return this->n_inout_sockets;
+}
+
 void Task
 ::register_timer(const std::string &name)
 {
@@ -827,7 +874,7 @@ Task* Task
 			else
 				dataptr = (void*)t->out_buffers[out_buffers_counter++].data();
 		}
-		else if (this->get_socket_type(*s) == socket_t::SIN)
+		else if (this->get_socket_type(*s) == socket_t::SIN || this->get_socket_type(*s) == socket_t::SINOUT)
 			dataptr = s->get_dataptr();
 
 		auto s_new = std::shared_ptr<Socket>(new Socket(*t,
@@ -839,7 +886,7 @@ Task* Task
 		                                                dataptr));
 		t->sockets.push_back(s_new);
 
-		if (t->get_socket_type(*s_new) == socket_t::SIN)
+		if (t->get_socket_type(*s_new) == socket_t::SIN || t->get_socket_type(*s_new) == socket_t::SINOUT)
 			t->last_input_socket = s_new.get();
 	}
 
@@ -861,7 +908,7 @@ void Task
 void Task
 ::bind(Socket &s_out, const int priority)
 {
-	if (this->is_no_input_socket())
+	if (this->is_no_input_socket()) // On s'occupe de créer la socket initializer et donc utiliser la fake_socket !
 	{
 		this->fake_input_socket.reset(new Socket(*this,
 		                                         "fake",
@@ -952,4 +999,16 @@ template size_t Task::create_socket_out<int64_t >(const std::string&, const size
 template size_t Task::create_socket_out<uint64_t>(const std::string&, const size_t, const bool);
 template size_t Task::create_socket_out<float   >(const std::string&, const size_t, const bool);
 template size_t Task::create_socket_out<double  >(const std::string&, const size_t, const bool);
+
+// Modif : Ajout des templates pour inout 
+template size_t Task::create_socket_inout<int8_t  >(const std::string&, const size_t);
+template size_t Task::create_socket_inout<uint8_t >(const std::string&, const size_t);
+template size_t Task::create_socket_inout<int16_t >(const std::string&, const size_t);
+template size_t Task::create_socket_inout<uint16_t>(const std::string&, const size_t);
+template size_t Task::create_socket_inout<int32_t >(const std::string&, const size_t);
+template size_t Task::create_socket_inout<uint32_t>(const std::string&, const size_t);
+template size_t Task::create_socket_inout<int64_t >(const std::string&, const size_t);
+template size_t Task::create_socket_inout<uint64_t>(const std::string&, const size_t);
+template size_t Task::create_socket_inout<float   >(const std::string&, const size_t);
+template size_t Task::create_socket_inout<double  >(const std::string&, const size_t);
 // ==================================================================================== explicit template instantiation
