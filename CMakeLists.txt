@@ -155,12 +155,21 @@ if(AFF3CT_CORE_TESTS)
     #list(APPEND aff3ct_core_tests_list aff3ct-core-test-simple-pipeline)
     list(APPEND aff3ct_core_targets_list aff3ct-core-test-simple-pipeline)
     ###======================================================================================================###
+    list(APPEND aff3ct_core_targets_list aff3ct-core-test-exclusive-paths-pipeline)
+    add_executable(aff3ct-core-test-exclusive-paths-pipeline $<TARGET_OBJECTS:aff3ct-core-obj>
+                                                    ${CMAKE_CURRENT_SOURCE_DIR}/tests/ctrl_flw/exclusive_paths_pipeline.cpp)
+    set_target_properties(aff3ct-core-test-exclusive-paths-pipeline PROPERTIES
+                                                           OUTPUT_NAME test-exclusive-paths-pipeline
+                                                           POSITION_INDEPENDENT_CODE ON) # set -fpie
+    #list(APPEND aff3ct_core_tests_list aff3ct-core-test-nest-loops-pipeline)
+    list(APPEND aff3ct_core_targets_list aff3ct-core-test-exclusive-paths-pipeline)
     list(APPEND aff3ct_core_targets_list aff3ct-core-test-nest-loops-pipeline)
     add_executable(aff3ct-core-test-nest-loops-pipeline $<TARGET_OBJECTS:aff3ct-core-obj>
                                                     ${CMAKE_CURRENT_SOURCE_DIR}/tests/ctrl_flw/nested_loops_pipeline.cpp)
     set_target_properties(aff3ct-core-test-nest-loops-pipeline PROPERTIES
                                                            OUTPUT_NAME test-nested-loops-pipeline
                                                            POSITION_INDEPENDENT_CODE ON) # set -fpie
+    #list(APPEND aff3ct_core_tests_list aff3ct-core-test-nest-loops-pipeline)
     list(APPEND aff3ct_core_targets_list aff3ct-core-test-nest-loops-pipeline)
     ###======================================================================================================###
 endif()
@@ -398,6 +407,16 @@ if(AFF3CT_CORE_TESTS)
     add_test(NAME path1::aff3ct-core-test-exclusive-paths COMMAND aff3ct-core-test-exclusive-paths -e 142 -f 13 -a 1)
     add_test(NAME path2::aff3ct-core-test-exclusive-paths COMMAND aff3ct-core-test-exclusive-paths -e 142 -f 13 -a 2)
     add_test(NAME cyclic::aff3ct-core-test-exclusive-paths COMMAND aff3ct-core-test-exclusive-paths -e 142 -f 13 -y)
+
+    add_test(NAME exclusive-pipeline0::aff3ct-core-test-exclusive-paths-pipeline COMMAND aff3ct-core-test-exclusive-paths -t 1 -q -i ./bin/test-exclusive-paths-pipeline)
+    add_test(NAME exclusive-pipeline1::aff3ct-core-test-exclusive-paths-pipeline COMMAND aff3ct-core-test-exclusive-paths -t 4 -u 1 -i ./bin/test-exclusive-paths-pipeline)
+    add_test(NAME exclusive-pipeline2::aff3ct-core-test-exclusive-paths-pipeline COMMAND aff3ct-core-test-exclusive-paths -t 1 -u 5 -i ./bin/test-exclusive-paths-pipeline)
+    add_test(NAME exclusive-pipeline3::aff3ct-core-test-exclusive-paths-pipeline COMMAND aff3ct-core-test-exclusive-paths -t 8 -u 15 -i ./bin/test-exclusive-paths-pipeline)
+
+    add_test(NAME nested-loops-pipeline0::aff3ct-core-test-nest-loops-pipeline COMMAND aff3ct-core-test-nest-loops-pipeline -e 100 -f 13 -i 20 -j 50 -t 8)
+    add_test(NAME nested-loops-pipeline1::aff3ct-core-test-nest-loops-pipeline COMMAND aff3ct-core-test-nest-loops-pipeline -e 10 -a -i 20 -j 50 -t 1)
+    add_test(NAME nested-loops-pipeline2::aff3ct-core-test-nest-loops-pipeline COMMAND aff3ct-core-test-nest-loops-pipeline -e 200 -i 20 -j 10 -t 2)
+    add_test(NAME nested-loops-pipeline3::aff3ct-core-test-nest-loops-pipeline COMMAND aff3ct-core-test-nest-loops-pipeline -e 200 -f 13)
 
     add_test(NAME sequence0::aff3ct-core-test-simple-pipeline COMMAND aff3ct-core-test-simple-pipeline -q -t 1 -i ./bin/test-simple-pipeline)
     add_test(NAME sequence1::aff3ct-core-test-simple-pipeline COMMAND aff3ct-core-test-simple-pipeline -q -t 1 -i ./bin/test-simple-pipeline -p -g)
