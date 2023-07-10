@@ -1152,14 +1152,20 @@ void Pipeline
 	std::function<void(tools::Digraph_node<Sub_sequence>*,
 	                   const size_t,
 	                   const std::string&,
-	                   std::ostream&)> export_dot_subsequences_recursive =
+	                   std::ostream&,
+					   std::vector<tools::Digraph_node<Sub_sequence>*> &)> export_dot_subsequences_recursive =
 		[&export_dot_subsequences_recursive, this](tools::Digraph_node<Sub_sequence> *cur_node,
 		                                           const size_t sta,
 		                                           const std::string &tab,
-		                                           std::ostream &stream)
+		                                           std::ostream &stream,
+												   std::vector<tools::Digraph_node<Sub_sequence>*> &already_parsed_nodes)
 		{
-			if (cur_node != nullptr)
+			if (cur_node != nullptr &&
+			    std::find(already_parsed_nodes.begin(),
+			              already_parsed_nodes.end(),
+			              cur_node) == already_parsed_nodes.end())
 			{
+				already_parsed_nodes.push_back(cur_node);
 				this->stages[sta]->export_dot_subsequence(cur_node->get_c()->tasks,
 				                                          cur_node->get_c()->tasks_id,
 				                                          cur_node->get_c()->type,
@@ -1168,25 +1174,31 @@ void Pipeline
 				                                          stream);
 
 				for (auto c : cur_node->get_children())
-					export_dot_subsequences_recursive(c, sta, tab, stream);
+					export_dot_subsequences_recursive(c, sta, tab, stream, already_parsed_nodes);
 			}
 		};
 
 	std::function<void(tools::Digraph_node<Sub_sequence>*,
 	                   const size_t,
 	                   const std::string&,
-	                   std::ostream&)> export_dot_connections_recursive =
+	                   std::ostream&,
+					   std::vector<tools::Digraph_node<Sub_sequence>*> &)> export_dot_connections_recursive =
 		[&export_dot_connections_recursive, this](tools::Digraph_node<Sub_sequence> *cur_node,
 		                                          const size_t sta,
 		                                          const std::string &tab,
-		                                          std::ostream &stream)
+		                                          std::ostream &stream,
+												  std::vector<tools::Digraph_node<Sub_sequence>*> &already_parsed_nodes)
 		{
-			if (cur_node != nullptr)
+			if (cur_node != nullptr &&
+						  std::find(already_parsed_nodes.begin(),
+			              already_parsed_nodes.end(),
+			              cur_node) == already_parsed_nodes.end())
 			{
+				already_parsed_nodes.push_back(cur_node);
 				this->stages[sta]->export_dot_connections(cur_node->get_c()->tasks, tab, stream);
 
 				for (auto c : cur_node->get_children())
-					export_dot_connections_recursive(c, sta, tab, stream);
+					export_dot_connections_recursive(c, sta, tab, stream, already_parsed_nodes);
 			}
 		};
 
@@ -1196,10 +1208,11 @@ void Pipeline
 
 	for (size_t sta = 0; sta < this->stages.size(); sta++)
 	{
+		std::vector<tools::Digraph_node<Sub_sequence>*> already_parsed_nodes;
 		const auto n_threads = this->stages[sta]->get_n_threads();
 		stream << tab << "subgraph \"cluster_Stage " << sta << "\" {" << std::endl;
 		stream << tab << tab << "node [style=filled];" << std::endl;
-		export_dot_subsequences_recursive(this->stages[sta]->sequences[0], sta, tab, stream);
+		export_dot_subsequences_recursive(this->stages[sta]->sequences[0], sta, tab, stream, already_parsed_nodes);
 		stream << tab << tab << "label=\"Pipeline stage " << sta << " (" << n_threads << " thread(s))\";" << std::endl;
 		std::string color = "blue";
 		stream << tab << tab << "color=" << color << ";" << std::endl;
@@ -1208,7 +1221,8 @@ void Pipeline
 
 	for (size_t sta = 0; sta < this->stages.size(); sta++)
 	{
-		export_dot_connections_recursive(this->stages[sta]->sequences[0], sta, tab, stream);
+		std::vector<tools::Digraph_node<Sub_sequence>*> already_parsed_nodes;
+		export_dot_connections_recursive(this->stages[sta]->sequences[0], sta, tab, stream, already_parsed_nodes);
 		if (this->bound_adaptors)
 		{
 			if (sta > 0)
