@@ -64,7 +64,6 @@ public:
 	inline       Socket&               get_bound_socket   ();
 	inline socket_t                    get_type           () const;
 
-	// Question : Est-ce qu'on doit utiliser un vecteur spécial pour les sockets inout ? Ou utiliser  
 
 	inline void set_fast(const bool fast);
 

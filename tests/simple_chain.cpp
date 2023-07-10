@@ -157,7 +157,7 @@ int main(int argc, char** argv)
 	module::Initializer<uint8_t> initializer(data_length);
 	module::Finalizer  <uint8_t> finalizer  (data_length);
 
-	std::vector<std::shared_ptr<module::Incrementer<uint8_t>>> incs(20);
+	std::vector<std::shared_ptr<module::Incrementer<uint8_t>>> incs(3);
 	for (size_t s = 0; s < incs.size(); s++)
 	{
 		incs[s].reset(new module::Incrementer<uint8_t>(data_length));

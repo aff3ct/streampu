@@ -404,12 +404,9 @@ std::vector<std::vector<runtime::Task*>> Sequence
 				tasks_per_threads[tid].insert(tasks_per_threads[tid].end(),
 				                              cur_ss->get_c()->tasks.begin(),
 				                              cur_ss->get_c()->tasks.end());
-				/*for (auto task : cur_ss->get_c()->tasks)
-					if (std::find(tasks_per_threads[tid].begin(),
-			              tasks_per_threads[tid].end(),
-			              task) == tasks_per_threads[tid].end())
-						  tasks_per_threads[tid].push_back(task);*/
-				
+				for (auto c : cur_ss->get_children())
+					get_tasks_recursive(c, tid, already_parsed_nodes);
+			
 			}
 		};
 
@@ -2153,7 +2150,7 @@ void Sequence
 		{
 			for (auto sck_out : tsk_out->sockets)
 			{
-				if (tsk_out->get_socket_type(*sck_out) == socket_t::SOUT)
+				if (tsk_out->get_socket_type(*sck_out) == socket_t::SOUT || tsk_out->get_socket_type(*sck_out) == socket_t::SINOUT)
 				{
 					for (auto sck_in : sck_out->get_bound_sockets())
 					{

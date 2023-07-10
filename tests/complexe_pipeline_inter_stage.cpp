@@ -9,6 +9,7 @@
 #include <getopt.h>
 
 #include <aff3ct-core.hpp>
+#include <Module/Incrementer_io/Incrementer_io.hpp>
 using namespace aff3ct;
 using namespace aff3ct::runtime;
 
@@ -168,8 +169,9 @@ int main(int argc, char** argv)
 		std::cout << "Toutes les valeurs sont bonnes " << "Expected : " << unsigned (tab_0[0]) << ", got : " << unsigned (tab_1[0]) <<std::endl;
 		return runtime::status_t::SUCCESS;
 	});
+	/****************************************************************************************************************************/
 
-	// sockets binding pour les incrémentations
+	// sockets binding
 	(*inc_calssique)[module::inc::sck::increment::in] = initializer[module::ini::sck::initialize::out];
 	(*incs[0])[module::inc_io::sck::increment_io::inout] = (*inc_calssique)[module::inc::sck::increment::out];
 	multi_comp["multiply_compare::inout_0"] = initializer[module::ini::sck::initialize::out]; // Bind de la donnée du début avec le multiplicateur !

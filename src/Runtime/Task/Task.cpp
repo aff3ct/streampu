@@ -228,7 +228,7 @@ void Task
 
 	// do not use 'this->status' because the dataptr can have been changed by the 'tools::Sequence' when using the no
 	// copy mode
-	int* status = (int*)this->sockets.back()->get_dataptr(); // On récupère le pointeur de données de la dernière socket (socket status)
+	int* status = (int*)this->sockets.back()->get_dataptr(); 
 	for (size_t w = 0; w < n_waves; w++)
 		status[w] = (int)status_t::UNKNOWN; 
 
@@ -376,7 +376,7 @@ const std::vector<int>& Task
 			for (auto& s : sockets)
 			{
 				auto s_type = get_socket_type(*s);
-				if (s_type == socket_t::SIN)
+				if (s_type == socket_t::SIN || s_type == socket_t::SINOUT)
 				{
 					std::string spaces; for (size_t ss = 0; ss < max_n_chars - s->get_name().size(); ss++) spaces += " ";
 
@@ -634,7 +634,7 @@ size_t Task
 {
 	auto &s = create_socket<T>(name, n_elmts, socket_t::SINOUT);
 	socket_type.push_back(socket_t::SINOUT);
-	last_input_socket = &s; // Si on considère la socket inout comme une in => on doit la save !
+	last_input_socket = &s; 
 
 	this->set_no_input_socket(false);
 	this->n_inout_sockets++;
@@ -680,6 +680,7 @@ void Task
 {
 	size_t s_id = 0;
 	size_t sout_id = 0;
+	
 	for (auto &s : this->sockets)
 	{
 		if (s->get_name() == "status")
@@ -693,9 +694,11 @@ void Task
 		}
 		else
 		{
+			
 			const auto old_databytes = s->get_databytes();
 			const auto new_databytes = (old_databytes / old_n_frames) * new_n_frames;
 			s->set_databytes(new_databytes);
+			
 
 			if (this->is_autoalloc() && this->socket_type[s_id] == socket_t::SOUT)
 			{

@@ -9,6 +9,7 @@
 #include <getopt.h>
 
 #include <aff3ct-core.hpp>
+#include <Module/Relayer_io/Relayer_io.hpp>
 using namespace aff3ct;
 
 std::ifstream::pos_type filesize(const char* filename)

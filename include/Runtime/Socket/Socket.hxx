@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <iterator>
 #include <sstream>
+#include <iostream>
 
 #include "Tools/Exception/exception.hpp"
 #include "Runtime/Socket/Socket.hpp"

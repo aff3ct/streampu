@@ -116,7 +116,6 @@ if(AFF3CT_CORE_TESTS)
     list(APPEND aff3ct_core_tests_list aff3ct-core-test-simple-chain)
     list(APPEND aff3ct_core_targets_list aff3ct-core-test-simple-chain)
     ###=========================================================================================###
-    #Ajout de la simple-chain-test 
     add_executable(aff3ct-core-test-simple-chain-io $<TARGET_OBJECTS:aff3ct-core-obj>
                                                  ${CMAKE_CURRENT_SOURCE_DIR}/tests/simple_chain_io.cpp)
     set_target_properties(aff3ct-core-test-simple-chain-io PROPERTIES
@@ -126,7 +125,6 @@ if(AFF3CT_CORE_TESTS)
     list(APPEND aff3ct_core_targets_list aff3ct-core-test-simple-chain-io)
     ###=========================================================================================###
     ###=========================================================================================###
-    #Ajout de la simple-chain-hybrid-test 
     add_executable(aff3ct-core-test-simple-chain-hybride $<TARGET_OBJECTS:aff3ct-core-obj>
                                                  ${CMAKE_CURRENT_SOURCE_DIR}/tests/simple_chain_hybride.cpp)
     set_target_properties(aff3ct-core-test-simple-chain-hybride PROPERTIES
@@ -188,6 +186,7 @@ if(AFF3CT_CORE_TESTS)
     set_target_properties(aff3ct-core-test-simple-pipeline_full_io PROPERTIES
                                                            OUTPUT_NAME test-simple-pipeline_full_io
                                                            POSITION_INDEPENDENT_CODE ON) # set -fpie
+    list(APPEND aff3ct_core_tests_list aff3ct-core-test-simple-pipeline_full_io)
     list(APPEND aff3ct_core_targets_list aff3ct-core-test-simple-pipeline_full_io)
     ###======================================================================================================###
      # Ajout du code pour pipeline_multiple_stage
@@ -196,7 +195,8 @@ if(AFF3CT_CORE_TESTS)
                                                     ${CMAKE_CURRENT_SOURCE_DIR}/tests/simple_pipeline_multiple_stage_io.cpp)
     set_target_properties(aff3ct-core-test-simple-pipeline_multiple_stage PROPERTIES
                                                            OUTPUT_NAME test-simple-pipeline_multiple_stage
-                                                           POSITION_INDEPENDENT_CODE ON) # set -fpie 
+                                                           POSITION_INDEPENDENT_CODE ON) # set -fpie
+    list(APPEND aff3ct_core_tests_list aff3ct-core-test-simple-pipeline_multiple_stage)                                                           
     list(APPEND aff3ct_core_targets_list aff3ct-core-test-simple-pipeline_multiple_stage)
     ###======================================================================================================###
 
@@ -208,7 +208,7 @@ if(AFF3CT_CORE_TESTS)
     set_target_properties(aff3ct-core-test-complexe-pipeline_inter_stage PROPERTIES
                                                            OUTPUT_NAME test-complexe-pipeline_inter_stage
                                                            POSITION_INDEPENDENT_CODE ON) # set -fpie
-    list(APPEND aff3ct_core_tests_list aff3ct-core-test-complexe-pipeline_inter_stage)
+    #list(APPEND aff3ct_core_tests_list aff3ct-core-test-complexe-pipeline_inter_stage)
     list(APPEND aff3ct_core_targets_list aff3ct-core-test-complexe-pipeline_inter_stage)
     ###======================================================================================================###
 
@@ -220,7 +220,7 @@ if(AFF3CT_CORE_TESTS)
     set_target_properties(aff3ct-core-test-simple-pipeline_double_chain PROPERTIES
                                                            OUTPUT_NAME test-simple-pipeline_double_chain
                                                            POSITION_INDEPENDENT_CODE ON) # set -fpie
-    list(APPEND aff3ct_core_tests_list aff3ct-core-test-simple-pipeline_double_chain)
+    #list(APPEND aff3ct_core_tests_list aff3ct-core-test-simple-pipeline_double_chain)
     list(APPEND aff3ct_core_targets_list aff3ct-core-test-simple-pipeline_double_chain)
     ###======================================================================================================###
 
@@ -470,4 +470,12 @@ if(AFF3CT_CORE_TESTS)
     add_test(NAME pipeline3::aff3ct-core-test-simple-pipeline COMMAND aff3ct-core-test-simple-pipeline -i ./bin/test-simple-pipeline -u 1)
     add_test(NAME pipeline4::aff3ct-core-test-simple-pipeline COMMAND aff3ct-core-test-simple-pipeline -i ./bin/test-simple-pipeline -u 1024)
     add_test(NAME pipeline5::aff3ct-core-test-simple-pipeline COMMAND aff3ct-core-test-simple-pipeline -i ./bin/test-simple-pipeline -u 128 -o graph.dot)
+
+    add_test(NAME pipeline0::aff3ct-core-test-complexe-pipeline_inter_stage COMMAND aff3ct-core-test-simple-pipeline)
+    add_test(NAME pipeline1::aff3ct-core-test-complexe-pipeline_inter_stage COMMAND aff3ct-core-test-simple-pipeline -u 1)
+    add_test(NAME pipeline2::aff3ct-core-test-complexe-pipeline_inter_stage COMMAND aff3ct-core-test-simple-pipeline -u 1024 -f 10)
+    
+    add_test(NAME pipeline0::aff3ct-core-test-simple-pipeline_double_chain COMMAND aff3ct-core-test-simple-pipeline_double_chain)
+    add_test(NAME pipeline1::aff3ct-core-test-simple-pipeline_double_chain COMMAND aff3ct-core-test-simple-pipeline_double_chain -u 1)
+
 endif()

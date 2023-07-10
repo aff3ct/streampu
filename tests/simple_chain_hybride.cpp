@@ -8,6 +8,7 @@
 #include <getopt.h>
 
 #include <aff3ct-core.hpp>
+#include <Module/Incrementer_io/Incrementer_io.hpp>
 using namespace aff3ct;
 using namespace aff3ct::runtime;
 

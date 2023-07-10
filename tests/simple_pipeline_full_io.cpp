@@ -9,6 +9,7 @@
 #include <getopt.h>
 
 #include <aff3ct-core.hpp>
+#include <Module/Relayer_io/Relayer_io.hpp>
 using namespace aff3ct;
 using namespace aff3ct::runtime;
 
@@ -273,6 +274,7 @@ int main(int argc, char** argv)
 		auto elapsed_time = duration.count() / 1000.f / 1000.f;
 		std::cout << "Sequence elapsed time: " << elapsed_time << " ms" << std::endl;
 	}
+	else 
 	{
 		pipeline_chain.reset(new runtime::Pipeline(
 		                     source[module::src::tsk::generate], // first task of the sequence

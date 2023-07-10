@@ -8,6 +8,7 @@
 #include <getopt.h>
 
 #include <aff3ct-core.hpp>
+#include <Module/Incrementer_io/Incrementer_io.hpp>
 using namespace aff3ct;
 using namespace aff3ct::runtime;
 
@@ -158,7 +159,7 @@ int main(int argc, char** argv)
 	module::Initializer<uint8_t> initializer(data_length);
 	module::Finalizer  <uint8_t> finalizer  (data_length);
 
-	std::vector<std::shared_ptr<module::Incrementer_io<uint8_t>>> incs(20);
+	std::vector<std::shared_ptr<module::Incrementer_io<uint8_t>>> incs(3);
 	for (size_t s = 0; s < incs.size(); s++)
 	{
 		incs[s].reset(new module::Incrementer_io<uint8_t>(data_length));
@@ -179,18 +180,18 @@ int main(int argc, char** argv)
 	}
 	else // Partie non-intéressante pour le moment !
 	{
-		/*for (size_t s = 0; s < incs.size() -1; s++)
+		for (size_t s = 0; s < incs.size() -1; s++)
 			(*incs[s+1])[module::inc_io::sck::increment_io::inout] = (*incs[s])[module::inc_io::sck::increment_io::inout];
 
 		partial_sequence.reset(new runtime::Sequence((*incs[0])[module::inc_io::tsk::increment_io],
 		                                             (*incs[incs.size() -1])[module::inc_io::tsk::increment_io]));
 		subsequence.reset(new module::Subsequence(*partial_sequence));
 		(*subsequence)[module::ssq::tsk::exec    ][ 0] = initializer   [module::ini::sck::initialize::out];
-		finalizer     [module::fin::sck::finalize::in] = (*subsequence)[module::ssq::tsk::exec      ][  1];*/
+		finalizer     [module::fin::sck::finalize::in] = (*subsequence)[module::ssq::tsk::exec      ][  1];
 	}
 
 	runtime::Sequence sequence_chain(initializer[module::ini::tsk::initialize], n_threads);
-	sequence_chain.set_n_frames(n_inter_frames);
+	sequence_chain.set_n_frames(n_inter_frames); 
 	sequence_chain.set_no_copy_mode(no_copy_mode);
 
 	auto tid = 0;
