@@ -23,19 +23,21 @@ bool compare_files(const std::string& filename1, const std::string& filename2)
 	std::ifstream file2(filename2); //This is the sink
 	std::istreambuf_iterator<char> begin1(file1);
 	std::istreambuf_iterator<char> begin2(file2);
-	int i=0;
+	int char_count=1;
+	char expected, actual;
 	while(!(begin1 == std::istreambuf_iterator<char>()) && !(begin2 == std::istreambuf_iterator<char>())) {
-		if(i % 2 && std::isalpha(*begin1) && !(*begin2 == std::tolower(*begin1))){
-			std::cout << "Expected :" << *begin1 << " but got " << *begin2 << " at char " << i << std::endl; 
-			return false;
+		actual = *begin2;
+		if(std::isalpha(*begin1)) {
+			expected = std::isupper(*begin1) ? std::tolower(*begin1) : std::toupper(*begin1);
+			if(actual != expected){
+				std::cout << "Expected : '" << expected << "' but got '" << actual << "' at char " << char_count << std::endl; 
+				return false;
+			}
 		}
-		else if(!(i % 2) && std::isalpha(*begin1) && !(*begin2 == std::toupper(*begin1))){
-			std::cout << "Expected :" << *begin1 << " but got " << *begin2 << " at char " << i << std::endl; 
-			return false;
-		}
-		++begin2;
-		++begin1;
-		i++;
+
+		begin2++;
+		begin1++;
+		char_count++;
 	}
 
 	return std::equal(begin1, std::istreambuf_iterator<char>(), begin2); //Second argument is end-of-range iterator
@@ -232,22 +234,28 @@ int main(int argc, char** argv)
 	relayer_sel.set_ns(sleep_time_us * 1000);
 
 	// Stateless tasks
-	int alt=0; //TODO, make it a proper module
 	data_length = 8; //WIP
     alternator.create_task("alternate");
+	auto s_in_alt = alternator.create_socket_in<uint8_t>(alternator("alternate"), "in", data_length);
     auto s_path = alternator.create_socket_out<int8_t>(alternator("alternate"), "path", 1);
-    alternator.create_codelet(alternator("alternate"), [&alt, s_path](module::Module &m, runtime::Task &t, const size_t frame_id){
-		*(uint8_t*)(t[s_path].get_dataptr()) = (alt++)%2;
+    alternator.create_codelet(alternator("alternate"), [s_in_alt, s_path, &pack](module::Module &m, runtime::Task &t, const size_t frame_id){
+		uint8_t packed = pack((uint8_t*)(t[s_in_alt].get_dataptr()));
+		if(packed >= 97 && packed <= 122) {
+			*(uint8_t*)(t[s_path].get_dataptr()) = 0;
+		}
+		else {
+			*(uint8_t*)(t[s_path].get_dataptr()) = 1;
+		}
         return 0;
     });
 
     uppercaser.create_task("upcase");
-    auto s_in_up = uppercaser.create_socket_in<uint8_t>(uppercaser("upcase"), "s_in", data_length);
-	auto s_out_up = uppercaser.create_socket_out<uint8_t>(uppercaser("upcase"), "s_out", data_length);
+    auto s_in_up = uppercaser.create_socket_in<uint8_t>(uppercaser("upcase"), "in", data_length);
+	auto s_out_up = uppercaser.create_socket_out<uint8_t>(uppercaser("upcase"), "out", data_length);
     uppercaser.create_codelet(uppercaser("upcase"), [s_in_up, s_out_up, &data_length, &pack, &unpack](module::Module &m, runtime::Task &t, const size_t frame_id){
 		*(long*)(t[s_out_up].get_dataptr()) = *(long*)(t[s_in_up].get_dataptr());
 		uint8_t packed = pack((uint8_t*)(t[s_in_up].get_dataptr()));
-		if(packed > 97 && packed < 122) {
+		if(packed >= 97 && packed <= 122) {
 			uint8_t* unpacked = unpack(packed-32);
 			for(size_t i=0; i < 8; i++) {
 				((uint8_t*)(t[s_out_up].get_dataptr()))[i] = unsigned(unpacked[i]); 	
@@ -257,12 +265,12 @@ int main(int argc, char** argv)
     });
 
     lowercaser.create_task("lowcase");
-    auto s_in_low = lowercaser.create_socket_in<uint8_t>(lowercaser("lowcase"), "s_in_low", data_length);
-	auto s_out_low = lowercaser.create_socket_out<uint8_t>(lowercaser("lowcase"), "s_out_low", data_length);
+    auto s_in_low = lowercaser.create_socket_in<uint8_t>(lowercaser("lowcase"), "in", data_length);
+	auto s_out_low = lowercaser.create_socket_out<uint8_t>(lowercaser("lowcase"), "out", data_length);
     lowercaser.create_codelet(lowercaser("lowcase"), [s_in_low, s_out_low, &pack, &unpack](module::Module &m, runtime::Task &t, const size_t frame_id){
 		*(long*)(t[s_out_low].get_dataptr()) = *(long*)(t[s_in_low].get_dataptr());
 		uint8_t packed = pack((uint8_t*)(t[s_in_low].get_dataptr()));
-		if(!(packed < 65 || packed > 90)) {	
+		if(packed >= 65 && packed <= 90) {	
 			uint8_t* unpacked = unpack(packed+32);
 			for(size_t i=0; i < 8; i++) {
 				((uint8_t*)(t[s_out_low].get_dataptr()))[i] = unsigned(unpacked[i]); 	
@@ -273,7 +281,7 @@ int main(int argc, char** argv)
 
 	// sockets binding
 	relayer_com[module::rly::sck::relay::in] = source[module::src::sck::generate::out_data];
-	alternator("alternate") = source[module::src::sck::generate::status];
+	alternator("alternate")[s_in_alt] = source[module::src::sck::generate::out_data];
 
 	switcher[module::swi::tsk::commute][0] = relayer_com[module::rly::sck::relay::out];
 	switcher[module::swi::tsk::commute][1] = alternator("alternate")[s_path];
