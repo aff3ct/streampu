@@ -483,11 +483,11 @@ if(AFF3CT_CORE_TESTS)
 
     add_test(NAME pipeline0::aff3ct-core-test-simple-pipeline-inter-stage COMMAND aff3ct-core-test-simple-pipeline-inter-stage -i ./bin/test-simple-pipeline)
     add_test(NAME pipeline1::aff3ct-core-test-simple-pipeline-inter-stage COMMAND aff3ct-core-test-simple-pipeline-inter-stage -q -t 1 -i ./bin/test-simple-pipeline -p -g)
-    add_test(NAME pipeline2::aff3ct-core-test-simple-pipeline-inter-stage COMMAND aff3ct-core-test-simple-pipeline-inter-stage -i ./bin/test-simple-pipeline -u S)
+    add_test(NAME pipeline2::aff3ct-core-test-simple-pipeline-inter-stage COMMAND aff3ct-core-test-simple-pipeline-inter-stage -i ./bin/test-simple-pipeline -u 1)
 
     
     
     add_test(NAME pipeline0::aff3ct-core-test-simple-pipeline-double-chain COMMAND aff3ct-core-test-simple-pipeline-double-chain)
-    add_test(NAME pipeline1::aff3ct-core-test-simple-pipeline-double-chain COMMAND aff3ct-core-test-simple-pipeline-double-chain -u S)
+    add_test(NAME pipeline1::aff3ct-core-test-simple-pipeline-double-chain COMMAND aff3ct-core-test-simple-pipeline-double-chain -u 1024)
 
 endif()
