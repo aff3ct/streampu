@@ -472,7 +472,7 @@ if(AFF3CT_CORE_TESTS)
     add_test(NAME pipeline1::aff3ct-core-test-simple-pipeline-full-fwd COMMAND aff3ct-core-test-simple-pipeline-full-fwd -i ./bin/test-simple-pipeline -p)
     add_test(NAME pipeline2::aff3ct-core-test-simple-pipeline-full-fwd COMMAND aff3ct-core-test-simple-pipeline-full-fwd -i ./bin/test-simple-pipeline -w)
     add_test(NAME pipeline3::aff3ct-core-test-simple-pipeline-full-fwd COMMAND aff3ct-core-test-simple-pipeline-full-fwd -i ./bin/test-simple-pipeline -u 1)
-    add_test(NAME pipeline4::aff3ct-core-test-simple-pipeline-full-fwd COMMAND aff3ct-core-test-simple-pipeline-full-fwd-full-fwd -i ./bin/test-simple-pipeline -u 1024)
+    add_test(NAME pipeline4::aff3ct-core-test-simple-pipeline-full-fwd COMMAND aff3ct-core-test-simple-pipeline-full-fwd -i ./bin/test-simple-pipeline -u 1024)
 
 
     add_test(NAME pipeline1::aff3ct-core-test-simple-pipeline-multiple-stage COMMAND aff3ct-core-test-simple-pipeline-multiple-stage -i ./bin/test-simple-pipeline -p)
