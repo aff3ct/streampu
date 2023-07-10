@@ -39,11 +39,11 @@
 #ifndef FINALIZER_HPP_
 #include <Module/Finalizer/Finalizer.hpp>
 #endif
-#ifndef INCREMENTER_HPP_
-#include <Module/Incrementer/Incrementer.hpp>
-#endif
 #ifndef INCREMENTERFWD_HPP_
 #include <Module/Incrementer/Incrementer_fwd.hpp>
+#endif
+#ifndef INCREMENTER_HPP_
+#include <Module/Incrementer/Incrementer.hpp>
 #endif
 #ifndef INITIALIZER_HPP_
 #include <Module/Initializer/Initializer.hpp>
@@ -78,7 +78,7 @@
 #ifndef REDUCER_HPP_
 #include <Module/Reducer/Reducer.hpp>
 #endif
-#ifndef RELAYERIO_HPP_
+#ifndef RELAYERFWD_HPP_
 #include <Module/Relayer/Relayer_fwd.hpp>
 #endif
 #ifndef RELAYER_HPP_
