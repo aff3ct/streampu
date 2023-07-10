@@ -32,7 +32,7 @@ Task
   	{ throw tools::unimplemented_error(__FILE__, __LINE__, __func__); return 0; }),
   n_input_sockets(0),
   n_output_sockets(0),
-  n_inout_sockets(0), // Modif : initialisation du nombre de inout ! 
+  n_fwd_sockets(0), 
   status(module.get_n_waves()),
   n_calls(0),
   duration_total(std::chrono::nanoseconds(0)),
@@ -376,7 +376,7 @@ const std::vector<int>& Task
 			for (auto& s : sockets)
 			{
 				auto s_type = get_socket_type(*s);
-				if (s_type == socket_t::SIN || s_type == socket_t::SINOUT)
+				if (s_type == socket_t::SIN || s_type == socket_t::SFWD)
 				{
 					std::string spaces; for (size_t ss = 0; ss < max_n_chars - s->get_name().size(); ss++) spaces += " ";
 
@@ -626,35 +626,34 @@ size_t Task
 	}
 }
 
-//============================== Modif : Implémentation des créateur de socket inout ===========================================
 
 template <typename T>
 size_t Task
-::create_socket_inout(const std::string &name, const size_t n_elmts)
+::create_socket_fwd(const std::string &name, const size_t n_elmts)
 {
-	auto &s = create_socket<T>(name, n_elmts, socket_t::SINOUT);
-	socket_type.push_back(socket_t::SINOUT);
+	auto &s = create_socket<T>(name, n_elmts, socket_t::SFWD);
+	socket_type.push_back(socket_t::SFWD);
 	last_input_socket = &s; 
 
 	this->set_no_input_socket(false);
-	this->n_inout_sockets++;
+	this->n_fwd_sockets++;
 
 	return socket_type.size() -1;
 }
 
 size_t Task
-::create_socket_inout(const std::string &name, const size_t n_elmts, const std::type_index& datatype)
+::create_socket_fwd(const std::string &name, const size_t n_elmts, const std::type_index& datatype)
 {
-	     if (datatype == typeid(int8_t  )) return this->template create_socket_inout<int8_t  >(name, n_elmts);
-	else if (datatype == typeid(uint8_t )) return this->template create_socket_inout<uint8_t >(name, n_elmts);
-	else if (datatype == typeid(int16_t )) return this->template create_socket_inout<int16_t >(name, n_elmts);
-	else if (datatype == typeid(uint16_t)) return this->template create_socket_inout<uint16_t>(name, n_elmts);
-	else if (datatype == typeid(int32_t )) return this->template create_socket_inout<int32_t >(name, n_elmts);
-	else if (datatype == typeid(uint32_t)) return this->template create_socket_inout<uint32_t>(name, n_elmts);
-	else if (datatype == typeid(int64_t )) return this->template create_socket_inout<int64_t >(name, n_elmts);
-	else if (datatype == typeid(uint64_t)) return this->template create_socket_inout<uint64_t>(name, n_elmts);
-	else if (datatype == typeid(float   )) return this->template create_socket_inout<float   >(name, n_elmts);
-	else if (datatype == typeid(double  )) return this->template create_socket_inout<double  >(name, n_elmts);
+	     if (datatype == typeid(int8_t  )) return this->template create_socket_fwd<int8_t  >(name, n_elmts);
+	else if (datatype == typeid(uint8_t )) return this->template create_socket_fwd<uint8_t >(name, n_elmts);
+	else if (datatype == typeid(int16_t )) return this->template create_socket_fwd<int16_t >(name, n_elmts);
+	else if (datatype == typeid(uint16_t)) return this->template create_socket_fwd<uint16_t>(name, n_elmts);
+	else if (datatype == typeid(int32_t )) return this->template create_socket_fwd<int32_t >(name, n_elmts);
+	else if (datatype == typeid(uint32_t)) return this->template create_socket_fwd<uint32_t>(name, n_elmts);
+	else if (datatype == typeid(int64_t )) return this->template create_socket_fwd<int64_t >(name, n_elmts);
+	else if (datatype == typeid(uint64_t)) return this->template create_socket_fwd<uint64_t>(name, n_elmts);
+	else if (datatype == typeid(float   )) return this->template create_socket_fwd<float   >(name, n_elmts);
+	else if (datatype == typeid(double  )) return this->template create_socket_fwd<double  >(name, n_elmts);
 	else
 	{
 		std::stringstream message;
@@ -824,11 +823,11 @@ size_t Task
 	return this->n_output_sockets;
 }
 
-// Modif : ajout d'un getter sur le nombre de sockets inout 
+
 size_t Task
-::get_n_inout_sockets() const
+::get_n_fwd_sockets() const
 {
-	return this->n_inout_sockets;
+	return this->n_fwd_sockets;
 }
 
 void Task
@@ -877,7 +876,7 @@ Task* Task
 			else
 				dataptr = (void*)t->out_buffers[out_buffers_counter++].data();
 		}
-		else if (this->get_socket_type(*s) == socket_t::SIN || this->get_socket_type(*s) == socket_t::SINOUT)
+		else if (this->get_socket_type(*s) == socket_t::SIN || this->get_socket_type(*s) == socket_t::SFWD)
 			dataptr = s->get_dataptr();
 
 		auto s_new = std::shared_ptr<Socket>(new Socket(*t,
@@ -889,7 +888,7 @@ Task* Task
 		                                                dataptr));
 		t->sockets.push_back(s_new);
 
-		if (t->get_socket_type(*s_new) == socket_t::SIN || t->get_socket_type(*s_new) == socket_t::SINOUT)
+		if (t->get_socket_type(*s_new) == socket_t::SIN || t->get_socket_type(*s_new) == socket_t::SFWD)
 			t->last_input_socket = s_new.get();
 	}
 
@@ -1003,15 +1002,15 @@ template size_t Task::create_socket_out<uint64_t>(const std::string&, const size
 template size_t Task::create_socket_out<float   >(const std::string&, const size_t, const bool);
 template size_t Task::create_socket_out<double  >(const std::string&, const size_t, const bool);
 
-// Modif : Ajout des templates pour inout 
-template size_t Task::create_socket_inout<int8_t  >(const std::string&, const size_t);
-template size_t Task::create_socket_inout<uint8_t >(const std::string&, const size_t);
-template size_t Task::create_socket_inout<int16_t >(const std::string&, const size_t);
-template size_t Task::create_socket_inout<uint16_t>(const std::string&, const size_t);
-template size_t Task::create_socket_inout<int32_t >(const std::string&, const size_t);
-template size_t Task::create_socket_inout<uint32_t>(const std::string&, const size_t);
-template size_t Task::create_socket_inout<int64_t >(const std::string&, const size_t);
-template size_t Task::create_socket_inout<uint64_t>(const std::string&, const size_t);
-template size_t Task::create_socket_inout<float   >(const std::string&, const size_t);
-template size_t Task::create_socket_inout<double  >(const std::string&, const size_t);
+
+template size_t Task::create_socket_fwd<int8_t  >(const std::string&, const size_t);
+template size_t Task::create_socket_fwd<uint8_t >(const std::string&, const size_t);
+template size_t Task::create_socket_fwd<int16_t >(const std::string&, const size_t);
+template size_t Task::create_socket_fwd<uint16_t>(const std::string&, const size_t);
+template size_t Task::create_socket_fwd<int32_t >(const std::string&, const size_t);
+template size_t Task::create_socket_fwd<uint32_t>(const std::string&, const size_t);
+template size_t Task::create_socket_fwd<int64_t >(const std::string&, const size_t);
+template size_t Task::create_socket_fwd<uint64_t>(const std::string&, const size_t);
+template size_t Task::create_socket_fwd<float   >(const std::string&, const size_t);
+template size_t Task::create_socket_fwd<double  >(const std::string&, const size_t);
 // ==================================================================================== explicit template instantiation

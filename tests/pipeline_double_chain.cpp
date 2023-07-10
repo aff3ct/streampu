@@ -9,7 +9,7 @@
 #include <getopt.h>
 
 #include <aff3ct-core.hpp>
-#include <Module/Incrementer_io/Incrementer_io.hpp>
+#include <Module/Incrementer/Incrementer_fwd.hpp>
 using namespace aff3ct;
 using namespace aff3ct::runtime;
 
@@ -142,12 +142,12 @@ int main(int argc, char** argv)
 	module::Initializer<uint8_t> initializer(data_length);
 	module::Finalizer  <uint8_t> finalizer  (data_length);
 
-	std::vector<std::shared_ptr<module::Incrementer_io<uint8_t>>> incs_io(5);
-	for (size_t s = 0; s < incs_io.size(); s++)
+	std::vector<std::shared_ptr<module::Incrementer_fwd<uint8_t>>> incs_fwd(5);
+	for (size_t s = 0; s < incs_fwd.size(); s++)
 	{
-		incs_io[s].reset(new module::Incrementer_io<uint8_t>(data_length));
-		incs_io[s]->set_ns(sleep_time_us * 1000);
-		incs_io[s]->set_custom_name("Inc_io" + std::to_string(s));
+		incs_fwd[s].reset(new module::Incrementer_fwd<uint8_t>(data_length));
+		incs_fwd[s]->set_ns(sleep_time_us * 1000);
+		incs_fwd[s]->set_custom_name("Inc_fwd" + std::to_string(s));
 	}
 
     std::vector<std::shared_ptr<module::Incrementer<uint8_t>>> incs(5);
@@ -160,11 +160,11 @@ int main(int argc, char** argv)
 
 
 	// sockets binding 
-	(*incs_io[0])[module::inc_io::sck::increment_io::inout] = initializer[module::ini::sck::initialize::out];
+	(*incs_fwd[0])[module::inc_fwd::sck::increment_fwd::fwd] = initializer[module::ini::sck::initialize::out];
     (*incs[0])[module::inc::sck::increment::in] = initializer[module::ini::sck::initialize::out];
-		for (size_t s = 0; s < incs_io.size() -1; s++)
+		for (size_t s = 0; s < incs_fwd.size() -1; s++)
         {
-			(*incs_io[s+1])[module::inc_io::sck::increment_io::inout] = (*incs_io[s])[module::inc_io::sck::increment_io::inout];
+			(*incs_fwd[s+1])[module::inc_fwd::sck::increment_fwd::fwd] = (*incs_fwd[s])[module::inc_fwd::sck::increment_fwd::fwd];
             (*incs[s+1])[module::inc::sck::increment::in] = (*incs[s])[module::inc::sck::increment::out];
         }
     
@@ -179,8 +179,8 @@ int main(int argc, char** argv)
 		                       { { &initializer[module::ini::tsk::initialize] },   // first tasks of stage 0
 		                         { &initializer[module::ini::tsk::initialize] } }, // last  tasks of stage 0
 		                       // pipeline stage 1
-		                       { { &(*incs_io[0])[module::inc_io::tsk::increment_io],&(*incs[0])[module::inc::tsk::increment] },   // first tasks of stage 1
-		                         { &(*incs_io[incs_io.size()-1])[module::inc_io::tsk::increment_io], &(*incs[incs.size()-1])[module::inc::tsk::increment]} }, // last  tasks of stage 1
+		                       { { &(*incs_fwd[0])[module::inc_fwd::tsk::increment_fwd],&(*incs[0])[module::inc::tsk::increment] },   // first tasks of stage 1
+		                         { &(*incs_fwd[incs_fwd.size()-1])[module::inc_fwd::tsk::increment_fwd], &(*incs[incs.size()-1])[module::inc::tsk::increment]} }, // last  tasks of stage 1
 		                       // pipeline stage 2
 		                       { {& finalizer[module::fin::tsk::finalize] },   // first tasks of stage 2
 		                         {                                     } }, // last  tasks of stage 2
@@ -246,7 +246,7 @@ int main(int argc, char** argv)
 			for (size_t d = 0; d < final_data.size(); d++)
 			{
 
-				auto expected = (int)(incs_io.size()+incs.size());
+				auto expected = (int)(incs_fwd.size()+incs.size());
 				expected = expected % 256;
 				if (final_data[d] != expected)
 				{
@@ -274,11 +274,11 @@ int main(int argc, char** argv)
 
 	
 	(*incs[0])[module::inc::sck::increment::in].unbind(initializer[module::ini::sck::initialize::out]);
-	(*incs_io[0])[module::inc_io::sck::increment_io::inout].unbind(initializer[module::ini::sck::initialize::out]);
+	(*incs_fwd[0])[module::inc_fwd::sck::increment_fwd::fwd].unbind(initializer[module::ini::sck::initialize::out]);
 
-	for (size_t s = 0; s < incs_io.size() -1; s++)
+	for (size_t s = 0; s < incs_fwd.size() -1; s++)
     {
-		(*incs_io[s+1])[module::inc_io::sck::increment_io::inout].unbind((*incs_io[s])[module::inc_io::sck::increment_io::inout]);
+		(*incs_fwd[s+1])[module::inc_fwd::sck::increment_fwd::fwd].unbind((*incs_fwd[s])[module::inc_fwd::sck::increment_fwd::fwd]);
         (*incs[s+1])[module::inc::sck::increment::in].unbind((*incs[s])[module::inc::sck::increment::out]);
     }
 	finalizer[module::fin::sck::finalize::in].unbind((*incs[incs.size()-1])[module::inc::sck::increment::out]);

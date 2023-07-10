@@ -85,13 +85,13 @@ inline size_t Module
 {
 	return task.template create_socket_out<T>(name, n_elmts * this->n_frames);
 }
-// Modif : La fonction de création d'une socket inout 
+
 
 template <typename T>
 inline size_t Module
-::create_socket_inout(runtime::Task& task, const std::string &name, const size_t n_elmts)
+::create_socket_fwd(runtime::Task& task, const std::string &name, const size_t n_elmts)
 {
-	return task.template create_socket_inout<T>(name, n_elmts * this->n_frames);
+	return task.template create_socket_fwd<T>(name, n_elmts * this->n_frames);
 }
 
 size_t Module

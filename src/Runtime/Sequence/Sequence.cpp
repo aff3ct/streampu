@@ -1012,7 +1012,7 @@ tools::Digraph_node<SS>* Sequence
 
 			for (auto &s : current_task.sockets)
 			{
-				if (current_task.get_socket_type(*s) == socket_t::SOUT || current_task.get_socket_type(*s) == socket_t::SINOUT)
+				if (current_task.get_socket_type(*s) == socket_t::SOUT || current_task.get_socket_type(*s) == socket_t::SFWD)
 				{
 					auto bss = s->get_bound_sockets();
 					for (auto bs : bss)
@@ -1078,7 +1078,7 @@ tools::Digraph_node<SS>* Sequence
 		{
 			for (auto &s : current_task.sockets)
 			{
-				if (current_task.get_socket_type(*s) == socket_t::SOUT || current_task.get_socket_type(*s) == socket_t::SINOUT)
+				if (current_task.get_socket_type(*s) == socket_t::SOUT || current_task.get_socket_type(*s) == socket_t::SFWD)
 				{
 					auto bss = s->get_bound_sockets();
 					for (auto &bs : bss)
@@ -1095,7 +1095,7 @@ tools::Digraph_node<SS>* Sequence
 								                                                    in_sockets_feed[&t] = 1;
 								bool t_is_select = dynamic_cast<const module::Switcher*>(&(t.get_module())) &&
 								                   t.get_name() == "select";
-								if ((!t_is_select && in_sockets_feed[&t] >= (t.get_n_input_sockets() + t.get_n_inout_sockets()) - t.get_n_static_input_sockets()) ||
+								if ((!t_is_select && in_sockets_feed[&t] >= (t.get_n_input_sockets() + t.get_n_fwd_sockets()) - t.get_n_static_input_sockets()) ||
 								    ( t_is_select && t.is_last_input_socket(*bs)))
 								{
 									is_last = false;
@@ -1131,7 +1131,7 @@ tools::Digraph_node<SS>* Sequence
 						}
 					}
 				}
-				else if (current_task.get_socket_type(*s) == socket_t::SIN || current_task.get_socket_type(*s) == socket_t::SINOUT)
+				else if (current_task.get_socket_type(*s) == socket_t::SIN || current_task.get_socket_type(*s) == socket_t::SFWD)
 				{
 					if (s->get_bound_sockets().size() > 1)
 					{
@@ -1288,7 +1288,7 @@ void Sequence
 				// replicate the sockets binding
 				for (size_t s_id = 0; s_id < t_ref->sockets.size(); s_id++)
 				{
-					if (t_ref->get_socket_type(*t_ref->sockets[s_id]) == socket_t::SIN || t_ref->get_socket_type(*t_ref->sockets[s_id]) == socket_t::SINOUT) // Modif : Ajout du support pour les INOUT
+					if (t_ref->get_socket_type(*t_ref->sockets[s_id]) == socket_t::SIN || t_ref->get_socket_type(*t_ref->sockets[s_id]) == socket_t::SFWD) 
 					{
 						const runtime::Socket* s_ref_out = nullptr;
 						try { s_ref_out = &t_ref->sockets[s_id]->get_bound_socket(); } catch (...) {}
@@ -1614,7 +1614,7 @@ void Sequence
 		if (find(liste_fwd.begin(),liste_fwd.end(),explore_bound)==liste_fwd.end() && explore_bound->get_type()!= socket_t::SOUT){
 			liste_fwd.push_back(explore_bound);
 		}
-		if (explore_bound->get_type() == socket_t::SINOUT)
+		if (explore_bound->get_type() == socket_t::SFWD)
 			explore_thread_rec(explore_bound,liste_fwd);
 	}
 }
@@ -1631,7 +1631,7 @@ void Sequence
 				liste_fwd.push_back(bound);
 		}
 		
-		if (bound->get_type() == socket_t::SINOUT){
+		if (bound->get_type() == socket_t::SFWD){
 				explore_thread_rec(bound,liste_fwd);
 				explore_thread_rec_inverse(bound,liste_fwd);
 		}	
@@ -1777,7 +1777,7 @@ void Sequence
 									for (auto socket : pull_task->sockets[s]->get_bound_sockets())
 									{
 											bound_sockets.push_back(socket);
-											if (socket->get_type() == socket_t::SINOUT)
+											if (socket->get_type() == socket_t::SFWD)
 												this->explore_thread_rec(socket, bound_sockets);
 										
 									}
@@ -1847,7 +1847,7 @@ void Sequence
 								this->explore_thread_rec(bound_socket,bound_sockets);
 
 								// Si la socket est FWD il faut faire une backward exploration
-								if (bound_socket->get_type() == socket_t::SINOUT)
+								if (bound_socket->get_type() == socket_t::SFWD)
 									this->explore_thread_rec_inverse(bound_socket,bound_sockets);
 								
 								
@@ -2150,7 +2150,7 @@ void Sequence
 		{
 			for (auto sck_out : tsk_out->sockets)
 			{
-				if (tsk_out->get_socket_type(*sck_out) == socket_t::SOUT || tsk_out->get_socket_type(*sck_out) == socket_t::SINOUT)
+				if (tsk_out->get_socket_type(*sck_out) == socket_t::SOUT || tsk_out->get_socket_type(*sck_out) == socket_t::SFWD)
 				{
 					for (auto sck_in : sck_out->get_bound_sockets())
 					{

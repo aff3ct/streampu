@@ -22,9 +22,9 @@ size_t Stateless
 // Socket FWD
 template <typename T>
 size_t Stateless
-::create_socket_inout(runtime::Task& task, const std::string &name, const size_t n_elmts)
+::create_socket_fwd(runtime::Task& task, const std::string &name, const size_t n_elmts)
 {
-	return Module::create_socket_inout<T>(task, name, n_elmts);
+	return Module::create_socket_fwd<T>(task, name, n_elmts);
 }
 
 }

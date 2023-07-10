@@ -41,8 +41,8 @@ protected:
 	size_t               databytes;
 	bool                 fast;
 	void*                dataptr;
-	std::vector<Socket*> bound_sockets; // Une sortie pouvant être bind sur plusieurs entrée utilise ce veteur 
-	Socket*              bound_socket; // Une entrée étant bind seulement à une sortie utilise ce vecteur 
+	std::vector<Socket*> bound_sockets; 
+	Socket*              bound_socket;
 	socket_t             type;
 
 public:

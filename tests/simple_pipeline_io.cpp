@@ -9,7 +9,7 @@
 #include <getopt.h>
 
 #include <aff3ct-core.hpp>
-#include <Module/Relayer_io/Relayer_io.hpp>
+#include <Module/Relayer/Relayer_fwd.hpp>
 using namespace aff3ct;
 
 std::ifstream::pos_type filesize(const char* filename)
@@ -216,32 +216,32 @@ int main(int argc, char** argv)
 		rlys[s]->set_custom_name("Relayer" + std::to_string(s));
 	}
 
-    // Création de 18 modules relay_io pour le passage de la donnée en mode IO
-    std::vector<std::shared_ptr<module::Relayer_io<uint8_t>>> rlys_io(18);
-	for (size_t s = 0; s < rlys_io.size(); s++)
+    // Création de 18 modules relay_fwd pour le passage de la donnée en mode fwd
+    std::vector<std::shared_ptr<module::Relayer_fwd<uint8_t>>> rlys_fwd(18);
+	for (size_t s = 0; s < rlys_fwd.size(); s++)
 	{
-		rlys_io[s].reset(new module::Relayer_io<uint8_t>(data_length));
-		rlys_io[s]->set_ns(sleep_time_us * 1000);
-		rlys_io[s]->set_custom_name("Relayer_io" + std::to_string(s));
+		rlys_fwd[s].reset(new module::Relayer_fwd<uint8_t>(data_length));
+		rlys_fwd[s]->set_ns(sleep_time_us * 1000);
+		rlys_fwd[s]->set_custom_name("Relayer_fwd" + std::to_string(s));
 	}
 
 	// sockets binding
 	(*rlys[0])[module::rly::sck::relay::in] = source[module::src::sck::generate::out_data]; // Bind du premier relay avec la source
-    (*rlys_io[0])[module::rly_io::sck::relay_io::inout] = (*rlys[0])[module::rly::sck::relay::out]; // Bind du premier inout avec l'éxtremité source
+    (*rlys_fwd[0])[module::rly_fwd::sck::relay_fwd::fwd] = (*rlys[0])[module::rly::sck::relay::out]; // Bind du premier fwd avec l'éxtremité source
 
 
-	for (size_t s = 0; s < rlys_io.size() -1; s++)
-		(*rlys_io[s+1])[module::rly_io::sck::relay_io::inout] = (*rlys_io[s])[module::rly_io::sck::relay_io::inout]; // Réalisation des bind dans la séquence !
+	for (size_t s = 0; s < rlys_fwd.size() -1; s++)
+		(*rlys_fwd[s+1])[module::rly_fwd::sck::relay_fwd::fwd] = (*rlys_fwd[s])[module::rly_fwd::sck::relay_fwd::fwd]; // Réalisation des bind dans la séquence !
 
-    (*rlys[rlys.size() -1])[module::rly::sck::relay::in] = (*rlys_io[rlys_io.size() -1])[module::rly_io::sck::relay_io::inout]; // Bind du dernier IO avec l'éxtremité IN-OUT
+    (*rlys[rlys.size() -1])[module::rly::sck::relay::in] = (*rlys_fwd[rlys_fwd.size() -1])[module::rly_fwd::sck::relay_fwd::fwd]; // Bind du dernier fwd avec l'éxtremité IN-OUT
 
 	sink[module::snk::sck::send_count::in_data] = (*rlys[rlys.size() -1])[module::rly::sck::relay::out];
 	sink[module::snk::sck::send_count::in_count] = source[module::src::sck::generate::out_count];
 
-	//std::unique_ptr<runtime::Sequence> sequence_chain;
+	std::unique_ptr<runtime::Sequence> sequence_chain;
 	std::unique_ptr<runtime::Pipeline> pipeline_chain;
 
-	/*if (force_sequence)
+	if (force_sequence)
 	{
 		sequence_chain.reset(new runtime::Sequence(source[module::src::tsk::generate], n_threads));
 		sequence_chain->set_n_frames(n_inter_frames);
@@ -275,7 +275,7 @@ int main(int argc, char** argv)
 					for (size_t tid = 0; tid < n_threads; tid++)
 						while (sequence_chain->exec_step(tid));
 				}
-				catch (tools::processing_aborted &) { b do nothing  }
+				catch (tools::processing_aborted &) { /*nothing*/  }
 			}
 			while (!source.is_done());
 		}
@@ -283,8 +283,8 @@ int main(int argc, char** argv)
 
 		auto elapsed_time = duration.count() / 1000.f / 1000.f;
 		std::cout << "Sequence elapsed time: " << elapsed_time << " ms" << std::endl;
-	}*/
-	{
+	}
+	else{
 		pipeline_chain.reset(new runtime::Pipeline(
 		                     source[module::src::tsk::generate], // first task of the sequence
 		                     { // pipeline stage 0
@@ -339,7 +339,7 @@ int main(int argc, char** argv)
 
 	size_t in_filesize = filesize(in_filepath.c_str());
 	size_t n_frames = ((int)std::ceil((float)(in_filesize * 8) / (float)(data_length * n_inter_frames)));
-	auto theoretical_time = (n_frames * ((rlys.size()+rlys_io.size()) * sleep_time_us * 1000) * n_inter_frames) / 1000.f / 1000.f / n_threads;
+	auto theoretical_time = (n_frames * ((rlys.size()+rlys_fwd.size()) * sleep_time_us * 1000) * n_inter_frames) / 1000.f / 1000.f / n_threads;
 	std::cout << "Sequence theoretical time: " << theoretical_time << " ms" << std::endl;
 
 	// verification of the sequence execution
@@ -377,12 +377,12 @@ int main(int argc, char** argv)
 	}
 	(*rlys[0])[module::rly::sck::relay::in].unbind(source[module::src::sck::generate::out_data]); // Unbind de la source et du premier module de l'étage 1
 
-    (*rlys_io[0])[module::rly_io::sck::relay_io::inout].unbind((*rlys[0])[module::rly::sck::relay::out]); // Unbind du premier inout avec le premier module 
+    (*rlys_fwd[0])[module::rly_fwd::sck::relay_fwd::fwd].unbind((*rlys[0])[module::rly::sck::relay::out]); // Unbind du premier fwd avec le premier module 
 
-	for (size_t s = 0; s < rlys_io.size() -1; s++)
-		(*rlys_io[s+1])[module::rly_io::sck::relay_io::inout].unbind((*rlys_io[s])[module::rly_io::sck::relay_io::inout]);
+	for (size_t s = 0; s < rlys_fwd.size() -1; s++)
+		(*rlys_fwd[s+1])[module::rly_fwd::sck::relay_fwd::fwd].unbind((*rlys_fwd[s])[module::rly_fwd::sck::relay_fwd::fwd]);
     
-    (*rlys[rlys.size()-1])[module::rly::sck::relay::in].unbind((*rlys_io[rlys_io.size() -1])[module::rly_io::sck::relay_io::inout]);
+    (*rlys[rlys.size()-1])[module::rly::sck::relay::in].unbind((*rlys_fwd[rlys_fwd.size() -1])[module::rly_fwd::sck::relay_fwd::fwd]);
 
 	sink[module::snk::sck::send_count::in_data].unbind((*rlys[rlys.size()-1])[module::rly::sck::relay::out]);
 	sink[module::snk::sck::send_count::in_count].unbind(source[module::src::sck::generate::out_count]);

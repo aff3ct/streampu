@@ -8,7 +8,7 @@
 #include <getopt.h>
 
 #include <aff3ct-core.hpp>
-#include <Module/Incrementer_io/Incrementer_io.hpp>
+#include <Module/Incrementer/Incrementer_fwd.hpp>
 using namespace aff3ct;
 using namespace aff3ct::runtime;
 
@@ -160,10 +160,10 @@ int main(int argc, char** argv)
 	module::Finalizer  <uint8_t> finalizer  (data_length);
 
     // Définition des module d'incrémentation standard/IO
-	std::vector<std::shared_ptr<module::Incrementer_io<uint8_t>>> incs_io(10);
+	std::vector<std::shared_ptr<module::Incrementer_fwd<uint8_t>>> incs_fwd(10);
     std::vector<std::shared_ptr<module::Incrementer<uint8_t>>> incs(20); 
 	
-    // Initialisation des modules inout_output!
+    // Initialisation des modules fwdt_output!
     for (size_t s = 0; s < incs.size(); s++)
 	{
         incs[s].reset(new module::Incrementer<uint8_t>(data_length));
@@ -173,11 +173,11 @@ int main(int argc, char** argv)
 
 	// Initialisation des modules IO
 
-	 for (size_t s = 0; s < incs_io.size(); s++)
+	 for (size_t s = 0; s < incs_fwd.size(); s++)
 	{
-		incs_io[s].reset(new module::Incrementer_io<uint8_t>(data_length));
-		incs_io[s]->set_ns(sleep_time_us * 1000);
-        incs_io[s]->set_custom_name("Inc_io" + std::to_string(s));
+		incs_fwd[s].reset(new module::Incrementer_fwd<uint8_t>(data_length));
+		incs_fwd[s]->set_ns(sleep_time_us * 1000);
+        incs_fwd[s]->set_custom_name("Inc_fwd" + std::to_string(s));
         
 	}
 
@@ -194,16 +194,16 @@ int main(int argc, char** argv)
 			(*incs[s+1])[module::inc::sck::increment::in] = (*incs[s])[module::inc::sck::increment::out];
 
 		// Réalisation de la connection hybride ! 
-		(*incs_io[0])[module::inc_io::sck::increment_io::inout] =  (*incs[s])[module::inc::sck::increment::out]; 
+		(*incs_fwd[0])[module::inc_fwd::sck::increment_fwd::fwd] =  (*incs[s])[module::inc::sck::increment::out]; 
 		
-		// Bind des IO entre elle 
-		size_t s_io =0;
-		for (s_io; s_io < incs_io.size() -1; ++s_io)
-			(*incs_io[s_io+1])[module::inc_io::sck::increment_io::inout] = (*incs_io[s_io])[module::inc_io::sck::increment_io::inout];
+		// Bind des fwd entre elle 
+		size_t s_fwd =0;
+		for (s_fwd; s_fwd < incs_fwd.size() -1; ++s_fwd)
+			(*incs_fwd[s_fwd+1])[module::inc_fwd::sck::increment_fwd::fwd] = (*incs_fwd[s_fwd])[module::inc_fwd::sck::increment_fwd::fwd];
 		
 		// Réalisation de la seconde connection
 		s++;
-		(*incs[s])[module::inc::sck::increment::in] = (*incs_io[s_io])[module::inc_io::sck::increment_io::inout];
+		(*incs[s])[module::inc::sck::increment::in] = (*incs_fwd[s_fwd])[module::inc_fwd::sck::increment_fwd::fwd];
 
 		// Réalisation de la seconde interconnection ! 
 		for (s; s < incs.size() - 1; ++s)
@@ -216,7 +216,7 @@ int main(int argc, char** argv)
 	else
 	{
 		/*for (size_t s = 0; s < incs.size() -1; s++)
-			(*incs[s+1])[module::inc_io::sck::increment_io::inout] = (*incs[s])[module::inc_io::sck::increment_io::inout];
+			(*incs[s+1])[module::inc_io::sck::increment_io::fwd] = (*incs[s])[module::inc_io::sck::increment_io::fwd];
 
 		partial_sequence.reset(new runtime::Sequence((*incs[0])[module::inc_io::tsk::increment_io],
 		                                             (*incs[incs.size() -1])[module::inc_io::tsk::increment_io]));
@@ -277,12 +277,12 @@ int main(int argc, char** argv)
 		for(size_t j=incs.size()/2+1; j<sequence_chain.get_tasks_per_threads()[i].size(); ++j ){
 			auto task = sequence_chain.get_tasks_per_threads()[i][j];
 
-			// Si la tâche ne contient pas de socket inout => pas la peine de continuer à verifier les autres tâche qui viennent après
+			// Si la tâche ne contient pas de socket fwd => pas la peine de continuer à verifier les autres tâche qui viennent après
 			// L'hypothèse est vrai dans le cas où le parcours respecte l'ordre du bind
-			if (task->get_n_inout_sockets() == 0)
+			if (task->get_n_fwd_sockets() == 0)
 				break;
 			for (auto socket : task->sockets){
-				if (socket.get()->get_type() == socket_t::SINOUT){
+				if (socket.get()->get_type() == socket_t::SFWD){
 					liste_fwd.push_back(socket.get());
 				}
 			}
@@ -333,7 +333,7 @@ int main(int argc, char** argv)
 			const auto &final_data = cur_finalizer->get_final_data()[f];
 			for (size_t d = 0; d < final_data.size(); d++)
 			{
-				auto expected = (int)(incs.size()+incs_io.size() + (tid * n_inter_frames +f));
+				auto expected = (int)(incs.size()+incs_fwd.size() + (tid * n_inter_frames +f));
 				expected = expected % 256;
 				if (final_data[d] != expected)
 				{
@@ -372,7 +372,7 @@ int main(int argc, char** argv)
 	else
 	{
 		/*for (size_t s = 0; s < incs.size() -1; s++)
-			(*incs[s+1])[module::inc_io::sck::increment_io::inout].unbind((*incs[s])[module::inc_io::sck::increment_io::inout]);
+			(*incs[s+1])[module::inc_fwd::sck::increment_fwd::fwd].unbind((*incs[s])[module::inc_fwd::sck::increment_fwd::fwd]);
 		(*subsequence)[module::ssq::tsk::exec    ][ 0].unbind(initializer   [module::ini::sck::initialize::out]);
 		finalizer     [module::fin::sck::finalize::in].unbind((*subsequence)[module::ssq::tsk::exec      ][  1]);*/
 	}
