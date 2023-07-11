@@ -250,6 +250,8 @@ void Task
 
 		if (frame_id > 0 && managed_memory == true && n_frames_per_wave > 1)
 		{
+
+			// We don't have to check for forward because it shares the same dataptr as the input sockets
 			const size_t w = (frame_id % n_frames) / n_frames_per_wave;
 			const size_t w_pos = frame_id % n_frames_per_wave;
 
@@ -662,7 +664,6 @@ size_t Task
 	}
 }
 
-// ======================== Reprise du code normal de affect============================================================
 void Task
 ::create_codelet(std::function<int(module::Module &m, Task& t, const size_t frame_id)> &codelet)
 {

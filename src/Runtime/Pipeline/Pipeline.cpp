@@ -429,7 +429,7 @@ void Pipeline
 				for (size_t sck_id = 0; sck_id < tsk->sockets.size(); sck_id++)
 				{
 					auto sck = tsk->sockets[sck_id];
-					// if the current socket is an output socket type
+					// if the current socket is an output or forward socket type
 					if (tsk->get_socket_type(*sck) == socket_t::SOUT || tsk->get_socket_type(*sck) == socket_t::SFWD)
 					{
 						// for all the bounded sockets to the current socket
@@ -472,7 +472,7 @@ void Pipeline
 				for (size_t sck_id = 0; sck_id < tsk->sockets.size(); sck_id++)
 				{
 					auto sck = tsk->sockets[sck_id];
-					// if the current socket is an input socket type
+					// if the current socket is an input or forward socket type
 					if (tsk->get_socket_type(*sck) == socket_t::SIN || tsk->get_socket_type(*sck) == socket_t::SFWD)
 					{
 						runtime::Socket* bsck = nullptr;

@@ -1471,6 +1471,7 @@ void Sequence
 					static_input = s->get_dataptr() != nullptr && s->bound_socket == nullptr;
 					break;
 				case socket_t::SOUT: stype = "out[" + std::to_string(sid) + "]"; break;
+				case socket_t::SFWD: stype = "fwd[" + std::to_string(sid) + "]"; break;
 				default: stype = "unkn"; break;
 			}
 
@@ -1518,7 +1519,7 @@ void Sequence
 	{
 		for (auto &s : t->sockets)
 		{
-			if (t->get_socket_type(*s) == socket_t::SOUT)
+			if (t->get_socket_type(*s) == socket_t::SOUT || t->get_socket_type(*s) == socket_t::SFWD)
 			{
 				auto &bss = s->get_bound_sockets();
 				size_t id = 0;

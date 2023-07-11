@@ -261,7 +261,7 @@ void Socket
 	else
 	{
 		std::stringstream message;
-		message << "Current socket have to be an input socket ("
+		message << "Current socket have to be an input or forward socket ("
 		        << "'datatype'"           << " = " << type_to_string[this->datatype] << ", "
 		        << "'name'"               << " = " << get_name()                     << ", "
 		        << "'task.name'"          << " = " << task.get_name()                << ", "
@@ -281,7 +281,7 @@ void Socket
 	else
 	{
 		std::stringstream message;
-		message << "Current socket have to be an input socket ("
+		message << "Current socket have to be an input or forward socket ("
 		        << "'datatype'"           << " = " << type_to_string[this->datatype] << ", "
 		        << "'name'"               << " = " << get_name()                     << ", "
 		        << "'task.name'"          << " = " << task.get_name()                << ", "
@@ -301,7 +301,7 @@ void Socket
 	else
 	{
 		std::stringstream message;
-		message << "Current socket have to be an input socket ("
+		message << "Current socket have to be an input or forward socket ("
 		        << "'datatype'"           << " = " << type_to_string[this->datatype] << ", "
 		        << "'name'"               << " = " << get_name()                     << ", "
 		        << "'task.name'"          << " = " << task.get_name()                << ", "
@@ -321,7 +321,7 @@ void Socket
 	else
 	{
 		std::stringstream message;
-		message << "Current socket have to be an input socket ("
+		message << "Current socket have to be an input or forward socket ("
 		        << "'datatype'"           << " = " << type_to_string[this->datatype] << ", "
 		        << "'name'"               << " = " << get_name()                     << ", "
 		        << "'task.name'"          << " = " << task.get_name()                << ", "
@@ -341,7 +341,7 @@ void Socket
 	else
 	{
 		std::stringstream message;
-		message << "Current socket have to be an input socket ("
+		message << "Current socket have to be an input or forward socket ("
 		        << "'datatype'"           << " = " << type_to_string[this->datatype] << ", "
 		        << "'name'"               << " = " << get_name()                     << ", "
 		        << "'task.name'"          << " = " << task.get_name()                << ", "
@@ -361,7 +361,7 @@ void Socket
 	else
 	{
 		std::stringstream message;
-		message << "Current socket have to be an input socket ("
+		message << "Current socket have to be an input or forward socket ("
 		        << "'datatype'"           << " = " << type_to_string[this->datatype] << ", "
 		        << "'name'"               << " = " << get_name()                     << ", "
 		        << "'task.name'"          << " = " << task.get_name()                << ", "
