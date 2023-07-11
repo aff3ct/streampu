@@ -2077,69 +2077,87 @@ void Sequence
 }
 
 void Sequence
+::_set_n_frames_unbind(std::vector<std::pair<runtime::Socket*, runtime::Socket*>> &unbind_sockets,
+                       std::vector<std::pair<runtime::Task*,   runtime::Socket*>> &unbind_tasks)
+{
+	std::function<void(const std::vector<runtime::Task*>, runtime::Task*)> unbind_sockets_recursive =
+	[&unbind_sockets, &unbind_tasks, &unbind_sockets_recursive](const std::vector<runtime::Task*> possessed_tsks,
+	                                                            runtime::Task* tsk_out)
+	{
+		for (auto sck_out : tsk_out->sockets)
+		{
+			if (tsk_out->get_socket_type(*sck_out) == socket_t::SOUT)
+			{
+				for (auto sck_in : sck_out->get_bound_sockets())
+				{
+					auto tsk_in = &sck_in->get_task();
+					// if the task of the current input socket is in the tasks of the sequence
+					if (std::find(possessed_tsks.begin(), possessed_tsks.end(), tsk_in) != possessed_tsks.end())
+					{
+						if (tsk_in->is_no_input_socket())
+						{
+							tsk_in->unbind(*sck_out);
+							unbind_tasks.push_back(std::make_pair(tsk_in, sck_out.get()));
+						}
+						else
+						{
+							sck_in->unbind(*sck_out);
+							// memorize the unbinds to rebind after!
+							unbind_sockets.push_back(std::make_pair(sck_in, sck_out.get()));
+						}
+						// do the same operation recursively on the current "tsk_in"
+						unbind_sockets_recursive(possessed_tsks, tsk_in);
+					}
+				}
+			}
+		}
+	};
+
+	auto tsks_per_threads = this->get_tasks_per_threads();
+	for (size_t t = 0; t < this->get_n_threads(); t++)
+		for (auto &tsk : this->firsts_tasks[t])
+			unbind_sockets_recursive(tsks_per_threads[t], tsk);
+}
+
+void Sequence
+::_set_n_frames(const size_t n_frames)
+{
+	if (n_frames <= 0)
+	{
+		std::stringstream message;
+		message << "'n_frames' has to be greater than 0 ('n_frames' = " << n_frames << ").";
+		throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
+	}
+
+	// set_n_frames for all the modules (be aware that this operation can fail)
+	for (auto &mm : this->all_modules)
+		for (auto &m : mm)
+			m->set_n_frames(n_frames);
+}
+
+void Sequence
+::_set_n_frames_rebind(const std::vector<std::pair<runtime::Socket*, runtime::Socket*>> &unbind_sockets,
+                       const std::vector<std::pair<runtime::Task*,   runtime::Socket*>> &unbind_tasks)
+{
+	// rebind the sockets
+	for (auto &u : unbind_sockets)
+		u.first->bind(*u.second);
+
+	// rebind the tasks
+	for (auto &u : unbind_tasks)
+		u.first->bind(*u.second);
+}
+
+void Sequence
 ::set_n_frames(const size_t n_frames)
 {
 	const auto old_n_frames = this->get_n_frames();
 	if (old_n_frames != n_frames)
 	{
-		if (n_frames <= 0)
-		{
-			std::stringstream message;
-			message << "'n_frames' has to be greater than 0 ('n_frames' = " << n_frames << ").";
-			throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
-		}
-
 		std::vector<std::pair<runtime::Socket*, runtime::Socket*>> unbind_sockets;
 		std::vector<std::pair<runtime::Task*, runtime::Socket*>> unbind_tasks;
-		std::function<void(const std::vector<runtime::Task*>, runtime::Task*)> unbind_sockets_recursive =
-		[&unbind_sockets, &unbind_tasks, &unbind_sockets_recursive](const std::vector<runtime::Task*> possessed_tsks,
-		                                                            runtime::Task* tsk_out)
-		{
-			for (auto sck_out : tsk_out->sockets)
-			{
-				if (tsk_out->get_socket_type(*sck_out) == socket_t::SOUT)
-				{
-					for (auto sck_in : sck_out->get_bound_sockets())
-					{
-						auto tsk_in = &sck_in->get_task();
-						// if the task of the current input socket is in the tasks of the sequence
-						if (std::find(possessed_tsks.begin(), possessed_tsks.end(), tsk_in) != possessed_tsks.end())
-						{
-							if (tsk_in->is_no_input_socket())
-							{
-								tsk_in->unbind(*sck_out);
-								unbind_tasks.push_back(std::make_pair(tsk_in, sck_out.get()));
-							}
-							else
-							{
-								sck_in->unbind(*sck_out);
-								// memorize the unbinds to rebind after!
-								unbind_sockets.push_back(std::make_pair(sck_in, sck_out.get()));
-							}
-							// do the same operation recursively on the current "tsk_in"
-							unbind_sockets_recursive(possessed_tsks, tsk_in);
-						}
-					}
-				}
-			}
-		};
-
-		auto tsks_per_threads = this->get_tasks_per_threads();
-		for (size_t t = 0; t < this->get_n_threads(); t++)
-			for (auto &tsk : this->firsts_tasks[t])
-				unbind_sockets_recursive(tsks_per_threads[t], tsk);
-
-		// set_n_frames for all the modules (be aware that this operation can fail)
-		for (auto &mm : this->all_modules)
-			for (auto &m : mm)
-				m->set_n_frames(n_frames);
-
-		// rebind the sockets
-		for (auto &u : unbind_sockets)
-			u.first->bind(*u.second);
-
-		// rebind the tasks
-		for (auto &u : unbind_tasks)
-			u.first->bind(*u.second);
+		this->_set_n_frames_unbind(unbind_sockets, unbind_tasks);
+		this->_set_n_frames(n_frames);
+		this->_set_n_frames_rebind(unbind_sockets, unbind_tasks);
 	}
 }
