@@ -1,69 +1,58 @@
 
 ## Socket
-
-Sockets are used to communicate data between [tasks](module & task.md) . There is 3 diffrent types of sockets
-		
-		- Socket_IN : Getting input data.
-		- Socket_OUT : Send ouput data.
-		- Socket_Forward : Both In and Out socket, it gets input data and transmits output.
-
-Sockets are used to communicate data between [tasks](Task.md). There are 3 different types of sockets
-
+Sockets are used to communicate data between [tasks](module & task.md). There are 3 different types of sockets : 
 - Socket_IN : Getting input data.
-
 - Socket_OUT : Send output data.
-- 
 - Socket_Forward : Both In and Out socket, it gets input data and transmits output.
 
-```cpp
-void  bind(Socket  &s_out, const  int  priority  =  -1)
-```
- This function is used to connect sockets with each other, it can be called by an input or forward socket and take as parameter an output or forward socket. The function get caller `dataptr` and make it point to `s_out dataptr`.
-
-```cpp
-void  unbind(Socket  &s_out, const  int  priority  =  -1)
-```
- This function is used to disconnect sockets with each other, the `s_out` must be binded to the caller socket. 
-
-
-  
-
+Sockets are used to communicate data between [tasks](module&task.md). There are 3 different types of sockets :
+- Socket_IN : Getting input data.
+- Socket_OUT : Send output data.
+- Socket_Forward : Both In and Out socket, it gets data and forward it. 
 ### Attributes
-
-  
-
-`socket_t type :` Used for to define the type of the socket.
-
-`std::string name` : Custom name for socket.
-
-`std::type_index datatype` : Type of data exchanged.
-
-`void* dataptr` : Pointer to the data of the socket.
-
-`std::vector<Socket*> bound_sockets` : Used for both output and forward sockets, it saves the bound sockets to the current one. This vector is empty for input socket.
-
-`Socket* bound_socket` : Used for both input and forward sockets, it saves the unique socket bound to the current one. This pointer is null for output socket.
-
-  
+```cpp
+socket_t type;
+```
+Used for to define the type of the socket.
+```cpp
+std::string name;
+```
+Custom name for socket.
+```cpp
+std::type_index datatype
+```
+Type of data exchanged.
+```cpp
+void* dataptr
+```
+Pointer to the data of the socket.
+```cpp
+std::vector<Socket*> bound_sockets;
+```
+It saves the `input or forward` bound sockets to the current `output or forward` socket. This vector is empty for the input socket.
+```cpp
+Socket* bound_socket;
+```
+It saves the `output or forward` unique bound socket to the current `input or forward` socket. This pointer is empty for the output socket.
 
 ### Methods
-
 The most important methods of the socket class are the bind and unbind functions.
+
+```cpp
+void  bind(Socket  &s_out, const  int  priority = -1)
+```
+
+This function is used to connect sockets with each other, it can be called by an input or forward socket and take as parameter an output or forward socket. The function get caller `dataptr` and make it point to `s_out dataptr`. The socket can be bound this way : 
+
+ - `In->Out`				
+ - `In->FWD` 						Changer par un dessin de graphe !!!
+ - `FWD<->FWD`
+ - `FWD->OUT`
+
 
   
 
 ```cpp
-
-void  bind(Socket  &s_out, const  int  priority = -1)
-
+void  unbind(Socket  &s_out, const  int  priority = -1);
 ```
-
-This function is used to connect sockets with each other, it can be called by an input or forward socket and take as parameter an output or forward socket. The function get caller `dataptr` and make it point to `s_out dataptr`.
-
-```cpp
-
-void  unbind(Socket  &s_out, const  int  priority = -1)
-
-```
-
 This function is used to disconnect sockets with each other, the `s_out` must be bound to the caller socket.
