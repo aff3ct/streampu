@@ -5,10 +5,6 @@ Sockets are used to communicate data between [tasks](module & task.md). There ar
 - Socket_OUT : Send output data.
 - Socket_Forward : Both In and Out socket, it gets input data and transmits output.
 
-Sockets are used to communicate data between [tasks](module&task.md). There are 3 different types of sockets :
-- Socket_IN : Getting input data.
-- Socket_OUT : Send output data.
-- Socket_Forward : Both In and Out socket, it gets data and forward it. 
 ### Attributes
 ```cpp
 socket_t type;
