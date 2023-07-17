@@ -1,5 +1,13 @@
 
 ## Socket
+<<<<<<< HEAD
+=======
+Sockets are used to communicate data between [tasks](module & task.md) . There is 3 diffrent types of sockets
+		
+		- Socket_IN : Getting input data.
+		- Socket_OUT : Send ouput data.
+		- Socket_Forward : Both In and Out socket, it gets input data and transmits output.
+>>>>>>> 287d61925210fb7a6c3bbe5ef81ab530fa70664c
 
 Sockets are used to communicate data between [tasks](Task.md). There are 3 different types of sockets
 
@@ -7,7 +15,19 @@ Sockets are used to communicate data between [tasks](Task.md). There are 3 diffe
 
 - Socket_OUT : Send output data.
 
+<<<<<<< HEAD
 - Socket_Forward : Both In and Out socket, it gets input data and transmits output.
+=======
+```cpp
+void  bind(Socket  &s_out, const  int  priority  =  -1)
+```
+ This function is used to connect sockets with each other, it can be called by an input or forward socket and take as parameter an output or forward socket. The function get caller `dataptr` and make it point to `s_out dataptr`.
+
+```cpp
+void  unbind(Socket  &s_out, const  int  priority  =  -1)
+```
+ This function is used to disconnect sockets with each other, the `s_out` must be binded to the caller socket. 
+>>>>>>> 287d61925210fb7a6c3bbe5ef81ab530fa70664c
 
   
 
@@ -31,7 +51,7 @@ Sockets are used to communicate data between [tasks](Task.md). There are 3 diffe
 
 ### Methods
 
-The most important functions of the socket class are the bind and unbind functions.
+The most important methods of the socket class are the bind and unbind functions.
 
   
 
