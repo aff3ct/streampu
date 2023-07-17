@@ -505,8 +505,13 @@ if(AFF3CT_CORE_TESTS)
     add_test(NAME pipeline2::aff3ct-core-test-simple-pipeline-inter-stage COMMAND aff3ct-core-test-simple-pipeline-inter-stage -i ./bin/test-simple-pipeline -u 1)
 
     
-    
     add_test(NAME pipeline0::aff3ct-core-test-simple-pipeline-double-chain COMMAND aff3ct-core-test-simple-pipeline-double-chain)
     add_test(NAME pipeline1::aff3ct-core-test-simple-pipeline-double-chain COMMAND aff3ct-core-test-simple-pipeline-double-chain -u 1024)
 
+    #Simple pipeline example 
+    add_test(NAME pipeline0::aff3ct-core-test-generic-pipeline COMMAND aff3ct-core-test-generic-pipeline -i ./bin/test-simple-pipeline -n "(3)" -t "(3)" -r "(SIO)")
+    #simple pipeline FWD example 
+    add_test(NAME pipeline1::aff3ct-core-test-generic-pipeline COMMAND aff3ct-core-test-generic-pipeline -i ./bin/test-simple-pipeline -n "(3)" -t "(3)" -r "(SFWD)")
+    #multiple stages pipeline 
+    add_test(NAME pipeline2::aff3ct-core-test-generic-pipeline COMMAND aff3ct-core-test-generic-pipeline -i ./bin/test-simple-pipeline -n "(3,4,8)" -t "(3,1,5)" -r "(SFWD,SFWD,SIO)")
 endif()

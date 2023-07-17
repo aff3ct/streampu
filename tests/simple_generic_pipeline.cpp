@@ -11,6 +11,9 @@
 #include <aff3ct-core.hpp>
 using namespace aff3ct;
 
+// Error message variable
+std::stringstream message;
+
 std::ifstream::pos_type filesize(const char* filename)
 {
 	std::ifstream in(filename, std::ifstream::ate | std::ifstream::binary);
@@ -35,10 +38,42 @@ bool compare_files(const std::string& filename1, const std::string& filename2)
 	return std::equal(begin1, std::istreambuf_iterator<char>(), begin2); //Second argument is end-of-range iterator
 }
 
+// Functions to parse arguments 
+
+void parse_int_string( std::string& vector_param, std::vector<size_t>& vector)
+{
+	for (size_t i=0;i < vector_param.size(); ++i)
+	{
+		if(vector_param[i] != '(' && vector_param[i] != ',' && vector_param[i] != ')')
+		{
+           vector.push_back(atoi(&vector_param[i]));
+        }
+    }
+}
+
+void parse_socket_type(std::string& socket_type_stage_param, std::vector<std::string>& socket_type_stage)
+{
+	size_t i=0;
+    std::string tmp;
+    while (i < socket_type_stage_param.size())
+	{
+        if(socket_type_stage_param[i] == '(')
+            tmp.clear();
+        else if (socket_type_stage_param[i] == ',' || socket_type_stage_param[i] == ')'){
+            socket_type_stage.push_back(tmp);
+            tmp.clear();
+        }
+        else
+            tmp.push_back(socket_type_stage_param[i]);
+
+        i++;     
+    }
+}
+
 int main(int argc, char** argv)
 {
 	option longopts[] = {
-		{"n-threads", required_argument, NULL, 't'},
+		{"n-threads per stage", required_argument, NULL, 't'},
 		{"n-inter-frames", required_argument, NULL, 'f'},
 		{"sleep-time", required_argument, NULL, 's'},
 		{"data-length", required_argument, NULL, 'd'},
@@ -53,12 +88,11 @@ int main(int argc, char** argv)
 		{"force-sequence", no_argument, NULL, 'q'},
 		{"active-waiting", no_argument, NULL, 'w'},
 		{"help", no_argument, NULL, 'h'},
-        {"number of stages", no_argument, NULL, 'e'},
-        {"number of tasks for each stage (vector)", no_argument, NULL, 'n'},
-        {"relayer socket type on each stage (vector)", no_argument, NULL, 'r'},
+        {"stages-task-number", no_argument, NULL, 'n'},
+        {"sockets-type", no_argument, NULL, 'r'},
 		{0}};
 
-	size_t n_threads = std::thread::hardware_concurrency();
+	std::string n_threads_param; std::vector<size_t> n_threads;
 	size_t n_inter_frames = 1;
 	size_t sleep_time_us = 5;
 	size_t data_length =512;
@@ -72,23 +106,22 @@ int main(int argc, char** argv)
 	bool debug = false;
 	bool force_sequence = false;
 	bool active_waiting = false;
-    size_t number_stage = 3; 
+    size_t stages_number = 0; 
     std::string task_per_stage_param; std::vector<size_t> task_per_stage;
     std::string socket_type_stage_param; std::vector<std::string> socket_type_stage;
 
-    size_t i = 0;
-    std::string tmp;
-
 	while (1)
 	{
-		const int opt = getopt_long(argc, argv, "t:f:s:d:u:o:i:j:n:r:cpbgqwhe", longopts, 0);
-        
+		const int opt = getopt_long(argc, argv, "t:f:s:d:u:o:i:j:n:r:cpbgqwh", longopts, 0);
 		if (opt == -1)
 			break;
 		switch (opt)
 		{
 			case 't':
-				n_threads = atoi(optarg);
+				n_threads_param = std::string(optarg);
+				parse_int_string(n_threads_param,n_threads);
+				// Add two threads for source and sink
+				n_threads.push_back(1);n_threads.insert(n_threads.begin(),1);
 				break;
 			case 'f':
 				n_inter_frames = atoi(optarg);
@@ -129,43 +162,21 @@ int main(int argc, char** argv)
 			case 'q':
 				force_sequence = true;
 				break;
-            case 'e':
-			    number_stage = atoi(optarg);
-			    break;
             case 'n':
 				task_per_stage_param = std::string(optarg);
-                i=0;
-                while (i < task_per_stage_param.size()){
-                    if(task_per_stage_param[i] != '(' || task_per_stage_param[i] != ',' || task_per_stage_param[i] != ')'){
-                        task_per_stage.push_back(atoi(&task_per_stage_param[i]));
-						std::cout << atoi(&task_per_stage_param[i]) <<std::endl;
-                    }
-                    i++;
-                }
+                parse_int_string(task_per_stage_param,task_per_stage);
+				
 				break;
             case 'r':
 				socket_type_stage_param = std::string(optarg);
-                i=0;
-                while (i < socket_type_stage_param.size()){
-                    if(socket_type_stage_param[i] == '(')
-                        tmp.clear();
-                    else if (socket_type_stage_param[i] == ',' || socket_type_stage_param[i] == ')'){
-                        socket_type_stage.push_back(tmp);
-                        tmp.clear();
-                    }
-                    else
-                        tmp.push_back(socket_type_stage_param[i]);
-                    
-                    i++;     
-                }
-               
+				parse_socket_type(socket_type_stage_param,socket_type_stage);
 				break;
 			case 'h':
 				std::cout << "usage: " << argv[0] << " [options]" << std::endl;
 				std::cout << std::endl;
 				std::cout << "  -t, --n-threads       "
-				          << "Number of threads to run in parallel                                  "
-				          << "[" << n_threads << "]" << std::endl;
+				          << "Number of threads to run in parallel for each stage                   "
+				         "[" << (n_threads_param.empty() ? "empty" : "\"" + n_threads_param + "\"") << "]" << std::endl;
 				std::cout << "  -f, --n-inter-frames  "
 				          << "Number of frames to process in one task                               "
 				          << "[" << n_inter_frames << "]" << std::endl;
@@ -205,6 +216,12 @@ int main(int argc, char** argv)
 				std::cout << "  -w, --active-waiting  "
 				          << "Enable active waiting in the pipeline synchronizations                "
 				          << "[" << (active_waiting ? "true" : "false") << "]" << std::endl;
+				std::cout << "  -n, --stages-task-number "
+				          << "The number of tasks on each stage of the pipelin						"
+				          << "[" << (task_per_stage_param.empty() ? "empty" : "\"" + task_per_stage_param + "\"") << "]" << std::endl;
+				std::cout << "  -r, --sockets-type "
+				          << "The socket type of tasks on each stage (SFWD or SIO) 				    "
+				          << "[" << (socket_type_stage_param.empty() ? "empty" : "\"" + socket_type_stage_param + "\"") << "]" << std::endl;
 				std::cout << "  -h, --help            "
 				          << "This help                                                             "
 				          << "[false]" << std::endl;
@@ -215,13 +232,16 @@ int main(int argc, char** argv)
 		}
 	}
 
+
 	std::cout << "####################################" << std::endl;
-	std::cout << "# Micro-benchmark: Simple pipeline #" << std::endl;
+	std::cout << "# Micro-benchmark: Generic pipeline #" << std::endl;
 	std::cout << "####################################" << std::endl;
 	std::cout << "#" << std::endl;
 
 	std::cout << "# Command line arguments:" << std::endl;
-	std::cout << "#   - n_threads      = " << n_threads << std::endl;
+	std::cout << "#   - n_threads      = " << (n_threads_param.empty() ? "[empty]" : n_threads_param.c_str()) << std::endl;
+	std::cout << "#   - task_per_stage = " << (task_per_stage_param.empty() ? "[empty]" : task_per_stage_param.c_str()) << std::endl;
+	std::cout << "#   - sockets_per_stage = " << (socket_type_stage_param.empty() ? "[empty]" : socket_type_stage_param.c_str()) << std::endl;
 	std::cout << "#   - n_inter_frames = " << n_inter_frames << std::endl;
 	std::cout << "#   - sleep_time_us  = " << sleep_time_us << std::endl;
 	std::cout << "#   - data_length    = " << data_length << std::endl;
@@ -242,36 +262,132 @@ int main(int argc, char** argv)
 	if (!force_sequence && step_by_step)
 		std::clog << rang::tag::warning << "'step_by_step' is not available with pipeline" << std::endl;
 
-    /*---------------------------------------------------------------------------------------------------*/
-    for (int i=0;i<task_per_stage.size();i++)
-        std::cout << task_per_stage[i] << "\t" << socket_type_stage[i] << std::endl;
-    /*---------------------------------------------------------------------------------------------------*/
+	// Get the stage number
+	stages_number = task_per_stage.size();
+	// Parametre checking 
+	if(stages_number != (n_threads.size()-2) || stages_number != socket_type_stage.size()){
+		message << "Number of stages is incoherent";
+		throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
+	}
 
 	// modules creation
 	const bool auto_reset = false;
 	module::Source_user_binary<uint8_t> source(data_length, in_filepath, auto_reset);
 	module::Sink_user_binary<uint8_t> sink(data_length, out_filepath);
 
-	std::vector<std::shared_ptr<module::Relayer<uint8_t>>> rlys(5);
-	for (size_t s = 0; s < rlys.size(); s++)
-	{
-		rlys[s].reset(new module::Relayer<uint8_t>(data_length));
-		rlys[s]->set_ns(sleep_time_us * 1000);
-		rlys[s]->set_custom_name("Relayer" + std::to_string(s));
-	}
+	// Relayers creation + checking sockets type
+	std::vector<std::vector<std::shared_ptr<module::Relayer<uint8_t>>>> rlys;
+	std::vector<std::vector<std::shared_ptr<module::Relayer_fwd<uint8_t>>>> rlys_fwd;
 
-	// sockets binding
-	(*rlys[0])[module::rly::sck::relay::in] = source[module::src::sck::generate::out_data];
-	for (size_t s = 0; s < rlys.size() -1; s++)
-		(*rlys[s+1])[module::rly::sck::relay::in] = (*rlys[s])[module::rly::sck::relay::out];
-	sink[module::snk::sck::send_count::in_data] = (*rlys[rlys.size()-1])[module::rly::sck::relay::out];
+
+	for (size_t i=0 ;i < stages_number; ++i){
+		if(socket_type_stage[i] == "SIO"){
+			std::vector<std::shared_ptr<module::Relayer<uint8_t>>> rlys_tmp(task_per_stage[i]);
+			for (size_t s = 0; s < rlys_tmp.size(); s++)
+			{
+				rlys_tmp[s].reset(new module::Relayer<uint8_t>(data_length));
+				rlys_tmp[s]->set_ns(sleep_time_us * 1000);
+				rlys_tmp[s]->set_custom_name("Relayer" + std::to_string(s));
+			}
+			rlys.push_back(rlys_tmp);
+		}
+		else if (socket_type_stage[i] == "SFWD"){
+			std::vector<std::shared_ptr<module::Relayer_fwd<uint8_t>>> rlys_fwd_tmp(task_per_stage[i]);
+			for (size_t s = 0; s < rlys_fwd_tmp.size(); s++)
+			{
+				rlys_fwd_tmp[s].reset(new module::Relayer_fwd<uint8_t>(data_length));
+				rlys_fwd_tmp[s]->set_ns(sleep_time_us * 1000);
+				rlys_fwd_tmp[s]->set_custom_name("Relayer_Fwd" + std::to_string(s));
+			}
+			rlys_fwd.push_back(rlys_fwd_tmp);
+		}
+		else{
+			message << "Invalid socket Type, it should be SFWD or SIO";
+			throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
+		}
+	}
+	// Tasks binding
+
+	size_t current_fwd=0,current_io=0;
+	size_t current_stage = 0;
+	while(current_stage < stages_number)
+	{	
+		if (current_stage==0)
+		{
+			if(socket_type_stage[current_stage] == "SFWD"){
+				
+				(*rlys_fwd[current_fwd][0])[module::rly_fwd::sck::relay_fwd::fwd] = source[module::src::sck::generate::out_data];  
+				// Binding in stage 
+				for (size_t s = 0; s < rlys_fwd[current_fwd].size()-1 ; ++s){
+					(*rlys_fwd[current_fwd][s+1])[module::rly_fwd::sck::relay_fwd::fwd] = (*rlys_fwd[current_fwd][s])[module::rly_fwd::sck::relay_fwd::fwd];
+				}
+				current_fwd++;
+				
+			}
+			else{
+				(*rlys[current_io][0])[module::rly::sck::relay::in] = source[module::src::sck::generate::out_data];
+				// Binding in stage 
+				for (size_t s = 0; s <rlys[current_io].size() -1; ++s)
+					(*rlys[current_io][s+1])[module::rly::sck::relay::in] = (*rlys[current_io][s])[module::rly::sck::relay::out];
+				current_io++;
+			}
+		}
+		
+	 	else {
+			/// The current socket is IO type 
+			if(socket_type_stage[current_stage] == "SIO"){
+				if(socket_type_stage[current_stage-1] == "SIO"){
+					(*rlys[current_io][0])[module::rly::sck::relay::in] = (*rlys[current_io - 1][rlys[current_io - 1].size()-1])[module::rly::sck::relay::out];
+				}
+				else{
+					(*rlys[current_io][0])[module::rly::sck::relay::in] =(*rlys_fwd[current_fwd-1][rlys_fwd[current_fwd-1].size()-1])[module::rly_fwd::sck::relay_fwd::fwd];
+				}
+
+				// In stage binding 
+				for (size_t s = 0; s <rlys[current_io].size()-1; ++s){
+					(*rlys[current_io][s+1])[module::rly::sck::relay::in] = (*rlys[current_io][s])[module::rly::sck::relay::out];
+					}
+				
+				current_io++;
+			}
+			else // The current socket is FWD type
+			{
+
+				if(socket_type_stage[current_stage-1] == "SIO"){
+					(*rlys_fwd[current_fwd][0])[module::rly_fwd::sck::relay_fwd::fwd] =  (*rlys[current_io - 1][rlys[current_io - 1].size()-1])[module::rly::sck::relay::out];
+				}
+				else{
+					(*rlys_fwd[current_fwd][0])[module::rly_fwd::sck::relay_fwd::fwd] = (*rlys_fwd[current_fwd-1][rlys_fwd[current_fwd-1].size()-1])[module::rly_fwd::sck::relay_fwd::fwd];
+				}
+
+				// In stage binding 
+				for (size_t s = 0; s < rlys_fwd[current_fwd].size()-1 ; ++s)
+					(*rlys_fwd[current_fwd][s+1])[module::rly_fwd::sck::relay_fwd::fwd] = (*rlys_fwd[current_fwd][s])[module::rly_fwd::sck::relay_fwd::fwd];	
+				current_fwd ++;
+			}
+		}
+		
+		current_stage++;
+	}
+	
+
+	// The last stage 
+	if(socket_type_stage[current_stage -1 ] == "SIO"){
+		sink[module::snk::sck::send_count::in_data] = (*rlys[current_io-1][rlys[current_io-1].size()-1])[module::rly::sck::relay::out];
+	}else{
+		sink[module::snk::sck::send_count::in_data] = (*rlys_fwd[current_fwd-1][rlys_fwd[current_fwd-1].size()-1])[module::rly_fwd::sck::relay_fwd::fwd];
+	}	
+
 	sink[module::snk::sck::send_count::in_count] = source[module::src::sck::generate::out_count];
 
+	/*Program run */
 	std::unique_ptr<runtime::Sequence> sequence_chain;
 	std::unique_ptr<runtime::Pipeline> pipeline_chain;
+
+	// The sequence is executed correctly 
 	if (force_sequence)
 	{
-		sequence_chain.reset(new runtime::Sequence(source[module::src::tsk::generate], n_threads));
+		sequence_chain.reset(new runtime::Sequence(source[module::src::tsk::generate], 1));
 		sequence_chain->set_n_frames(n_inter_frames);
 		sequence_chain->set_no_copy_mode(no_copy_mode);
 
@@ -300,7 +416,7 @@ int main(int argc, char** argv)
 			{
 				try
 				{
-					for (size_t tid = 0; tid < n_threads; tid++)
+					for (size_t tid = 0; tid < 1; tid++)
 						while (sequence_chain->exec_step(tid));
 				}
 				catch (tools::processing_aborted &) { /* do nothing */ }
@@ -314,31 +430,45 @@ int main(int argc, char** argv)
 	}
 	else
 	{
+		
+		// Task vector creation 
+		std::vector<std::pair<std::vector<runtime::Task*>, std::vector<runtime::Task*>>> stage_creat ; 
+		current_fwd = 0;current_io = 0; 
+
+		// First Stage contains only the generate task
+		stage_creat.push_back({ { &source[module::src::tsk::generate] }, { &source[module::src::tsk::generate] } });
+		
+		for (size_t s=0; s< stages_number ; ++s){
+			if (socket_type_stage[s] == "SIO"){
+				stage_creat.push_back({{(&(*rlys[current_io][0])[module::rly::tsk::relay])},{(&(*rlys[current_io][rlys[current_io].size()-1])[module::rly::tsk::relay])}});	
+				current_io++;
+			}else {
+				stage_creat.push_back({{(&(*rlys_fwd[current_fwd][0])[module::rly_fwd::tsk::relay_fwd])},{(&(*rlys_fwd[current_fwd][rlys_fwd[current_fwd].size()-1])[module::rly_fwd::tsk::relay_fwd])}});
+				current_fwd++;
+			}
+		}
+
+		// Last stage creation 	
+		stage_creat.push_back({ { &sink[module::snk::tsk::send_count] },{}}); // last  tasks of stage 2)
+
+	
+		
+		// Buffer vector 
+		std::vector<size_t> pool_buff ;
+		for (size_t i =0;i<stages_number +1 ; ++i)
+			pool_buff.push_back(buffer_size);
+		// Waiting vector
+		std::vector<bool> wait_vect ;
+		for (size_t i =0;i<stages_number +1 ; ++i)
+			wait_vect.push_back(active_waiting);
+		
 		pipeline_chain.reset(new runtime::Pipeline(
 		                     source[module::src::tsk::generate], // first task of the sequence
-		                     { // pipeline stage 0
-		                       { { &source[module::src::tsk::generate] },   // first tasks of stage 0
-		                         { &source[module::src::tsk::generate] } }, // last  tasks of stage 0
-		                       // pipeline stage 1
-		                       { { &(*rlys[             0])[module::rly::tsk::relay] },   // first tasks of stage 1
-		                         { &(*rlys[rlys.size() -1])[module::rly::tsk::relay] } }, // last  tasks of stage 1
-		                       // pipeline stage 2
-		                       { { &sink[module::snk::tsk::send_count] },   // first tasks of stage 2
-		                         {                                     } }, // last  tasks of stage 2
-		                     },
-		                     {
-		                       1,                         // number of threads in the stage 0
-		                       n_threads ? n_threads : 1, // number of threads in the stage 1
-		                       1                          // number of threads in the stage 2
-		                     },
-		                     {
-		                       buffer_size, // synchronization buffer size between stages 0 and 1
-		                       buffer_size, // synchronization buffer size between stages 1 and 2
-		                     },
-		                     {
-		                       active_waiting, // type of waiting between stages 0 and 1 (true = active, false = passive)
-		                       active_waiting, // type of waiting between stages 1 and 2 (true = active, false = passive)
-		                     }));
+		                     stage_creat,
+		                     n_threads,
+		                     pool_buff,
+		                     wait_vect
+							 ));
 		pipeline_chain->set_n_frames(n_inter_frames);
 
 		if (!dot_filepath.empty())
@@ -367,7 +497,7 @@ int main(int argc, char** argv)
 
 	size_t in_filesize = filesize(in_filepath.c_str());
 	size_t n_frames = ((int)std::ceil((float)(in_filesize * 8) / (float)(data_length * n_inter_frames)));
-	auto theoretical_time = (n_frames * (rlys.size() * sleep_time_us * 1000) * n_inter_frames) / 1000.f / 1000.f / n_threads;
+	auto theoretical_time = (n_frames * ((rlys.size() + rlys_fwd.size() )* sleep_time_us * 1000) * n_inter_frames) / 1000.f / 1000.f;
 	std::cout << "Sequence theoretical time: " << theoretical_time << " ms" << std::endl;
 
 	// verification of the sequence execution
@@ -403,11 +533,77 @@ int main(int argc, char** argv)
 		pipeline_chain->set_n_frames(1);
 		pipeline_chain->unbind_adaptors();
 	}
-	(*rlys[0])[module::rly::sck::relay::in].unbind(source[module::src::sck::generate::out_data]);
-	for (size_t s = 0; s < rlys.size() -1; s++)
-		(*rlys[s+1])[module::rly::sck::relay::in].unbind((*rlys[s])[module::rly::sck::relay::out]);
-	sink[module::snk::sck::send_count::in_data].unbind((*rlys[rlys.size()-1])[module::rly::sck::relay::out]);
-	sink[module::snk::sck::send_count::in_count].unbind(source[module::src::sck::generate::out_count]);
 
+	current_fwd=0,current_io=0;current_stage = 0;
+	while(current_stage < stages_number)
+	{	
+		if (current_stage==0)
+		{
+			if(socket_type_stage[current_stage] == "SFWD"){
+				
+				(*rlys_fwd[current_fwd][0])[module::rly_fwd::sck::relay_fwd::fwd].unbind(source[module::src::sck::generate::out_data]);  
+				// Binding in stage 
+				for (size_t s = 0; s < rlys_fwd[current_fwd].size()-1 ; ++s){
+					(*rlys_fwd[current_fwd][s+1])[module::rly_fwd::sck::relay_fwd::fwd].unbind((*rlys_fwd[current_fwd][s])[module::rly_fwd::sck::relay_fwd::fwd]);
+				}
+				current_fwd++;
+				
+			}
+			else{
+				(*rlys[current_io][0])[module::rly::sck::relay::in].unbind(source[module::src::sck::generate::out_data]);
+				// Binding in stage 
+				for (size_t s = 0; s <rlys[current_io].size() -1; ++s)
+					(*rlys[current_io][s+1])[module::rly::sck::relay::in].unbind((*rlys[current_io][s])[module::rly::sck::relay::out]);
+				current_io++;
+			}
+		}
+		
+	 	else {
+			/// The current socket is IO type 
+			if(socket_type_stage[current_stage] == "SIO"){
+				if(socket_type_stage[current_stage-1] == "SIO"){
+					(*rlys[current_io][0])[module::rly::sck::relay::in].unbind((*rlys[current_io - 1][rlys[current_io - 1].size()-1])[module::rly::sck::relay::out]);
+				}
+				else{
+					(*rlys[current_io][0])[module::rly::sck::relay::in].unbind((*rlys_fwd[current_fwd-1][rlys_fwd[current_fwd-1].size()-1])[module::rly_fwd::sck::relay_fwd::fwd]);
+				}
+
+				// In stage unbinding 
+				for (size_t s = 0; s <rlys[current_io].size()-1; ++s){
+					(*rlys[current_io][s+1])[module::rly::sck::relay::in].unbind((*rlys[current_io][s])[module::rly::sck::relay::out]);
+					}
+				
+				current_io++;
+			}
+			else // The current socket is FWD type
+			{
+
+				if(socket_type_stage[current_stage-1] == "SIO"){
+					(*rlys_fwd[current_fwd][0])[module::rly_fwd::sck::relay_fwd::fwd].unbind((*rlys[current_io - 1][rlys[current_io - 1].size()-1])[module::rly::sck::relay::out]);
+				}
+				else{
+					(*rlys_fwd[current_fwd][0])[module::rly_fwd::sck::relay_fwd::fwd].unbind((*rlys_fwd[current_fwd-1][rlys_fwd[current_fwd-1].size()-1])[module::rly_fwd::sck::relay_fwd::fwd]);
+				}
+
+				// In stage Unbinding 
+				for (size_t s = 0; s < rlys_fwd[current_fwd].size()-1 ; ++s)
+					(*rlys_fwd[current_fwd][s+1])[module::rly_fwd::sck::relay_fwd::fwd].unbind((*rlys_fwd[current_fwd][s])[module::rly_fwd::sck::relay_fwd::fwd]);	
+				current_fwd ++;
+			}
+		}
+		
+		current_stage++;
+	}
+	
+
+	// The last stage 
+	if(socket_type_stage[current_stage -1 ] == "SIO"){
+		sink[module::snk::sck::send_count::in_data].unbind((*rlys[current_io-1][rlys[current_io-1].size()-1])[module::rly::sck::relay::out]);
+	}else{
+		sink[module::snk::sck::send_count::in_data].unbind((*rlys_fwd[current_fwd-1][rlys_fwd[current_fwd-1].size()-1])[module::rly_fwd::sck::relay_fwd::fwd]);
+	}	
+
+	sink[module::snk::sck::send_count::in_count].unbind(source[module::src::sck::generate::out_count]);
+	
 	return test_results;
 }
