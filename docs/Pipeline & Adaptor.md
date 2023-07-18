@@ -9,7 +9,7 @@ Pipeline is a mechanism offered by `AFF3CT-core` to execute a [Sequence](Sequenc
 
 ![Image non affichée !](./assets/sequence_to_pipeline-1.png)
 
-  
+
 
 ### Attributes
 
