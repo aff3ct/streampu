@@ -1,18 +1,26 @@
+  
 
 ## Socket
-Sockets are used to communicate data between [tasks](module & task.md). There are 3 different types of sockets : 
+
+Sockets are used to communicate data between [tasks](module & task.md). There are 3 different types of sockets :
+
 - Socket_IN : Getting input data.
+
 - Socket_OUT : Send output data.
+
 - Socket_Forward : Both In and Out socket, it gets input data and transmits output.
 
 ### Attributes
+
 ```cpp
 socket_t type;
 ```
+
 Used for to define the type of the socket.
 ```cpp
 std::string name;
 ```
+
 Custom name for socket.
 ```cpp
 std::type_index datatype
@@ -37,18 +45,38 @@ The most important methods of the socket class are the bind and unbind functions
 ```cpp
 void  bind(Socket  &s_out, const  int  priority = -1)
 ```
+This function is used to connect sockets with each other, it can be called by an input or forward socket and take as parameter an output or forward socket. The function get caller `dataptr` and make it point to `s_out dataptr`. The sockets can be bound this way :
 
-This function is used to connect sockets with each other, it can be called by an input or forward socket and take as parameter an output or forward socket. The function get caller `dataptr` and make it point to `s_out dataptr`. The socket can be bound this way : 
-
- - `In->Out`				
- - `In->FWD` 						Changer par un dessin de graphe !!!
- - `FWD<->FWD`
- - `FWD->OUT`
-
-
-  
+```mermaid
+  graph TD;
+      A(OUT)-->B(IN);
+      g(FWD)-->h(IN);
+      E(OUT)-->F(FWD);
+      C(FWD)-->D(FWD);
+```
 
 ```cpp
 void  unbind(Socket  &s_out, const  int  priority = -1);
 ```
 This function is used to disconnect sockets with each other, the `s_out` must be bound to the caller socket.
+
+### Using Forward or Input/Output sockets
+We have to pay attention during the choice of the socket type for our task, using a `SIO (Input/Output)` or `SFWD(Forward)` is very important for the application data coherency and performance. 
+#### The differences to know about the sockets
+
+ The most important point is the `dataptr attribute`, it's the pointer to the memory space where the data used by the task is stored. 
+ 
+ - In the case of the `SIO`, the input and the output sockets have their own `dataptr`. The input socket receives the pointer from its bound socket and the output has its own allocated memory space, the data received and computed by the task are written to the output memory space. The initial data are not modified in this case.
+ 
+ - In the case of the `SFWD`, the forward socket receives its `dataptr` from the bound socket like the input. But unlike the `SIO` case, the computed data are overwritten on the given memory space, so that the initial data are modified and lost. All the tasks with `SFWD` consecutively bound to each other share the same memory space.
+
+```mermaid
+  graph LR;
+      A(FWD)-->B(FWD); A(FWD)-.->K{MEM};
+      B(FWD)-->C(FWD); B(FWD)-.->K{MEM};
+      C(FWD)-->F(FWD); C(FWD)-.->K{MEM};
+	    F(FWD)-.->K{MEM};
+```
+
+
+

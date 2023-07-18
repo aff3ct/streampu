@@ -7,9 +7,7 @@ Pipeline is a mechanism offered by `AFF3CT-core` to execute a [Sequence](Sequenc
 
   
 
-  
-
-![Image non affichée !](/images/pipeline_interstage_fwd.pdf  "Test insertion image")
+![Image non affichée !](./assets/sequence_to_pipeline-1.png)
 
   
 
@@ -42,19 +40,12 @@ Vector of tuple (input, output, priority) for the created adaptors, priority is 
 ```cpp
 
 void  init(const  std::vector<TA*> &firsts,
-
 		   const  std::vector<TA*> &lasts,
-
 		   const  std::vector<std::tuple<std::vector<TA*>, std::vector<TA*>, std::vector<TA*>>> &sep_stages = {},
-
 		   const  std::vector<size_t> &n_threads = {},
-
 		   const  std::vector<size_t> &synchro_buffer_sizes = {},
-
 		   const  std::vector<bool> &synchro_active_waiting = {},
-
 		   const  std::vector<bool> &thread_pinning = {},
-
            const  std::vector<std::vector<size_t>> &puids = {} 
           );
 ```
@@ -71,13 +62,15 @@ This function builds the pipeline given :
 
 - The number of buffers between stages.
 
+- The type of waiting for the adaptor tasks. 
+
   
 
 ```cpp
 void  create_adaptors(const  std::vector<size_t> &synchro_buffer_sizes = {},
 const  std::vector<bool> &synchro_active_waiting = {});
 ```
-This function creates the adaptor tasks that are added between every stage to transmit data from the stage $S$ to stage $S+1$.  AFF3CT don't support two multithreaded stages following each other.
+This function creates the adaptor tasks that are added between every stage to transmit data from the stage $S$ to stage $S+1$. AFF3CT doesn't support two multithreaded stages following each other.
 
 ```cpp
 void  _bind_adaptors(const  bool  bind_adaptors = true);
@@ -88,7 +81,7 @@ Adaptor module tasks need to be bound to each task in the two consecutive stages
 
   
 
-Adaptors are special modules added by the application when creating a pipeline. As said before, the adaptors are bound to edge tasks between each two consecutive stages. The purpose of adaptors is to synchronize data exchange between each stage. We have 4 tasks performed by adaptor :
+Adaptors are special modules added by the application when creating a pipeline. As said before, the adaptors are bound to edge tasks between each two consecutive stages. The purpose of adaptors is to synchronize data exchange between each stage using preallocated buffer pools. We have 4 tasks performed by adaptor :
 
   
 
