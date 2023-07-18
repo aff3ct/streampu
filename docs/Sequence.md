@@ -1,4 +1,4 @@
-## Sequence
+# Sequence
 
 
 Sequence is  a set of task bounded following a specific order of execution. 
@@ -7,11 +7,11 @@ Sequence is  a set of task bounded following a specific order of execution.
 
 Before going through sequence attributes and methods, you have to read about the  [sub-sequences](Sub-sequence.md).
 
-### Attributes 
+## Attributes 
 ```cpp 
 size_t  n_threads;
 ``` 
-Thread number executing the sequence.
+- Thread number executing the sequence.
 
 ```cpp
 std::vector<tools::Digraph_node<Sub_sequence>*>  sequences;
@@ -32,7 +32,7 @@ std::vector<std::vector<module::Module*>>  all_modules;
 Vector of modules contained within the sequence. 
 
 
-###  Methods
+##  Methods
 
 ```cpp
 void  gen_processes(const  bool  no_copy_mode  =  false);
@@ -46,12 +46,12 @@ This function is the most important of the sequence class, its main purpose is t
 ```cpp
 void explore_thread_rec(Socket* socket, std::vector<runtime::Socket*>& liste_fwd);
 ```
-The function called by `gen_processes` to get all the bound sockets to the modified one, this call is performed once at sequence build.
+The function called by `gen_processes` to get all the bound sockets (children) to the modified one, this call is performed once at sequence build.
 
 ```cpp
 void explore_thread_rec_reverse(Socket* socket, std::vector<runtime::Socket*>& liste_fwd)
 ```
-The function does the same thing as the previous one, but in the other sense. This function is introduced to support `forward socket` on the fly binding because all the tasks share the same `dataptr`.
+The function does the same thing as the previous one, but in the other sense (parents). This function is introduced to support `forward socket` runtime rebinding, because all the tasks share the same `dataptr`.
 
 
 

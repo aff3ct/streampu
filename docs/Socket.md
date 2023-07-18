@@ -4,11 +4,16 @@
 
 Sockets are used to communicate data between [tasks](module & task.md). There are 3 different types of sockets :
 
-- Socket_IN : Getting input data.
+- `Socket_IN` : Getting input data.
 
-- Socket_OUT : Send output data.
+- `Socket_OUT` : Send output data.
 
-- Socket_Forward : Both In and Out socket, it gets input data and transmits output.
+- `Socket_Forward` : Both In and Out socket, it gets input data and transmits output.
+
+A task can have either `input & output` sockets or `forward` socket.
+
+![Task with sockets!](./assets/task_example-1.png)
+
 
 ### Attributes
 
@@ -47,13 +52,7 @@ void  bind(Socket  &s_out, const  int  priority = -1)
 ```
 This function is used to connect sockets with each other, it can be called by an input or forward socket and take as parameter an output or forward socket. The function get caller `dataptr` and make it point to `s_out dataptr`. The sockets can be bound this way :
 
-```mermaid
-  graph TD;
-      A(OUT)-->B(IN);
-      g(FWD)-->h(IN);
-      E(OUT)-->F(FWD);
-      C(FWD)-->D(FWD);
-```
+![Task with sockets!](./assets/bind_permission.png)
 
 ```cpp
 void  unbind(Socket  &s_out, const  int  priority = -1);
