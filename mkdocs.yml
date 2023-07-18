@@ -1,3 +1,31 @@
 site_name: AFF3CT-CORE
 site_url: https://affec3ct-core-siteplaceholder.com/
-theme: readthedocs
+theme:
+  features:
+    - content.code.copy
+
+  name: material
+  palette:
+    scheme: slate
+    primary: black
+    secondary: black
+    hljs_style: monokai
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - admonition
+  - pymdownx.details
+  - attr_list
+  - md_in_html
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.tabbed:
+      alternate_style: true
