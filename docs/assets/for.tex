@@ -8,66 +8,66 @@
     %%%%%%%%%%%%%%%%%%
     %% create tasks %%
     %%%%%%%%%%%%%%%%%%
-    %     options                          id   coords label               sin sout sfwd attributes
-    %     -------                          --   ------ -----               --- ---- ---- ----------
-    \task                                  {t1} {0, 0} {$t_1$}             {0} {2}  {0}  {};
-    \task [right=1.0cm of t1]              {t2} {}     {$t_2$}             {1} {0}  {1}  {};
-    \task [right=1.0cm of t2]              {t3} {}     {$t_3$}             {1} {1}  {0}  {"sckn"};
-    \task [right=1.0cm of t3]              {t4} {}     {big task\\($t_4$)} {2} {3}  {0}  {"seq","sckn"};
-    \task [right=1.0cm of t4]              {t5} {}     {$t_5$}             {2} {1}  {0}  {"seq"};
-    \task [below=2.5cm of t5, xshift=-2cm] {t6} {}     {$t_6$}             {2} {3}  {0}  {"rev","sckn"};
-    \task [left =1.0cm of t6]              {t7} {}     {$t_7$}             {1} {0}  {2}  {"rev","sckn"};
-    \task [left =1.0cm of t7]              {t8} {}     {$t_8$}             {2} {0}  {0}  {"rev"};
+    %
+    % Note:
+    %   `\select` & `\commute` are special control flow tasks, there is no need
+    %   to set the number of sockets for this type of task. Instead the number
+    %   of exclusive paths has to be given.
+    %
+    %        options                              id    coords label                          sin sout sfwd attributes
+    %        -------                              --    ------ -----                          --- ---- ---- ----------
+    \task                                         {t1}  {1, 0} {$t_1$}                        {0} {1}  {0}  {"seq"};
+    \task    [right=1.00cm of t1]                 {t2}  {}     {$t_2$}                        {1} {1}  {0}  {"seq"};
+    \task    [right=1.00cm of t2]                 {t3}  {}     {$t_3$}                        {1} {1}  {0}  {"seq"};
+    \select  [right=1.50cm of t3]                 {t4}  {}     {select\\($t_4)$}              {2}           {};
+    \task    [right=1.00cm of t4, yshift=-2.50cm] {t5}  {}     {evaluate\\condition\\($t_5$)} {1} {1}  {0}  {"seq"};
+    \commute [right=1.00cm of t5, yshift=+2.50cm] {t6}  {}     {commute\\($t_6$)}             {2}           {};
+    \task    [above=1.00cm of t6, xshift=+0.35cm] {t7}  {}     {$t_7$}                        {1} {1}  {0}  {"rev", "seq"};
+    \task    [left =1.00cm of t7]                 {t8}  {}     {$t_8$}                        {1} {1}  {0}  {"rev", "seq"};
+    \task    [left =1.00cm of t8]                 {t9}  {}     {$t_9$}                        {1} {1}  {0}  {"rev", "seq"};
+    \task    [left =1.00cm of t9]                 {t10} {}     {$t_{10}$}                     {1} {1}  {0}  {"rev", "seq"};
+    \task    [right=1.75cm of t6]                 {t11} {}     {$t_{11}$}                     {1} {1}  {0}  {"seq"};
+    \task    [right=1.00cm of t11]                {t12} {}     {$t_{12}$}                     {1} {0}  {0}  {"seq"};
 
-    %%%%%%%%%%%%%%%%%%%%%
-    %% clone the tasks %%
-    %%%%%%%%%%%%%%%%%%%%%
-    %      options  task ids          n clones
-    %      -------  --------          --------
-    \clone []       {"t1","t2","t3"} {1}
-    \clone []       {"t6","t7","t8"} {3}
+    % cosmetics, just for fun ;-)
+    \merge   [shift={(07.95, -1.3)}, scale=0.4] {Paired-1}
+    \diverge [shift={(13.75, -1.3)}, scale=0.4] {Paired-1}
 
     %%%%%%%%%%%%%%%%%%%%
     %% create modules %%
     %%%%%%%%%%%%%%%%%%%%
-    %       options      task ids         id   label
-    %       -------      --------         --   -----
-    \module              {"t1"}           {m1} {$M_1$};
-    \module              {"t2"}           {m2} {$M_2$};
-    \module [very thick] {"t3","t4","t5"} {m3} {$\bm{M_3$}};
+    %     options      task ids    id   label
+    %     -------      --------    --   -----
+    \module [very thick] {"t4","t6"} {m1} {\textbf{Switcher}};
 
     %%%%%%%%%%%%%%%%
     %% bind tasks %%
     %%%%%%%%%%%%%%%%
-    %     options start id path                        end id
-    %     ------- -------- ----                        ------
-    \draw [bind]  (t1_so1)                          -- (t2_si2);
-    \draw [bind]  (t1_so2)                          -- (t2_si1);
-    \draw [bind]  (t2_so1)                          -- (t3_si1);
-    \draw [bind]  (t2_so1) -|++ (0.50,1) --++ (2,0) |- (t4_si1);
-    \draw [bind]  (t3_so1) --++ (0.50,0)            |- (t4_si2);
-    \draw [bind]  (t4_so1) --++ (0.50,0)            |- (t5_si1);
-    \draw [bind]  (t4_so3) --++ (0.50,0)            |- (t5_si2);
-    \draw [bind]  (t4_so2) --++ (0.65,0)            |- (t6_si1);
-    \draw [bind]  (t5_so1) --++ (0.50,0)            |- (t6_si2);
-    \draw [bind]  (t6_so1)                          -- (t7_si1);
-    \draw [bind]  (t6_so2)                          -- (t7_si2);
-    \draw [bind]  (t6_so3)                          -- (t7_si3);
-    \draw [bind]  (t7_so1)                          -- (t8_si1);
-    \draw [bind]  (t7_so2)                          -- (t8_si2);
+    %     options                   start id  path             end id
+    %     -------                   --------  ----             ------
+    \draw [bind]                    (t1_so1)                -- (t2_si1);
+    \draw [bind]                    (t2_so1)                -- (t3_si1);
+    \draw [bind,densely dashdotted] (t3_so1)  --++ (0.50,0) |- (t4_si2);
+    \draw [bind,densely dashdotted] (t10_so1) --++ (-0.7,0) |- (t4_si1);
+    \draw [bind]                    (t4_so1)  --++ (0.50,0) |- (t5_si1);
+    \draw [bind]                    (t4_so1)  --++ (0.50,0) |- (t6_si1);
+    \draw [bind]                    (t5_so1)  --++ (0.50,0) |- (t6_si2);
+    \draw [bind,densely dashdotted] (t6_so1)  --++ (0.75,0) |- (t7_si1);
+    \draw [bind,densely dashdotted] (t6_so2)  --++ (0.75,0) |- (t11_si1);
+    \draw [bind]                    (t7_so1)                -- (t8_si1);
+    \draw [bind]                    (t8_so1)                -- (t9_si1);
+    \draw [bind]                    (t9_so1)                -- (t10_si1);
+    \draw [bind]                    (t11_so1)               -- (t12_si1);
 
     %%%%%%%%%%%%%%%%%%%
     %% create stages %%
     %%%%%%%%%%%%%%%%%%%
-    %      options                                       object ids       id   label     n threads
-    %      -------                                       ----------       --   -----     ---------
-    \stage [minimum height=3.00cm]                       {"m1","m2","t3"} {s1} {Stage 1} {2}
-    \stage [minimum width=4.50cm, minimum height=3.00cm] {"t4","t5"}      {s2} {Stage 2} {1}
-    \stage [minimum width=5.75cm, minimum height=2.75cm] {"t6","t7","t8"} {s3} {Stage 3} {4}
+    %      options                                    object ids                       id   label     n threads
+    %      -------                                    ----------                       --   -----     ---------
 
     %%%%%%%%%%%%%%%%%%%%%
     %% draw the legend %%
     %%%%%%%%%%%%%%%%%%%%%
-    \legend [shift={(-1.0,1.5)}]
+    \legend [shift={(0.0,3.5)}]
   \end{tikzpicture}
 \end{document}
