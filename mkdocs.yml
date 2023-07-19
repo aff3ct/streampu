@@ -1,6 +1,7 @@
 site_name: AFF3CT-CORE
 site_url: https://affec3ct-core-siteplaceholder.com/
 theme:
+  logo: assets/diagram-project-solid.svg
   features:
     - toc.integrate
     - navigation.top
@@ -9,17 +10,30 @@ theme:
     - content.tabs.link
     - content.code.annotation
     - content.code.copy
-
   name: material
   palette:
     scheme: default
     primary: black
     secondary: black
     hljs_style: monokai   
+  palette: 
+
+    # Palette toggle for light mode
+    - scheme: default
+      toggle:
+        icon: material/brightness-7 
+        name: Switch to dark mode
+
+    # Palette toggle for dark mode
+    - scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
 
   language: en
 
   
+repo_url: https://gitlab.lip6.fr/sog/aff3ct-core
 
 
 markdown_extensions:
@@ -58,7 +72,6 @@ extra_javascript:
 nav:
   - Home: 
     - index.md
-    - overview.md
   - Elementary Componenets:
       - Socket.md
       - module & task.md

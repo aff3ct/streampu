@@ -1,17 +1,10 @@
-# Welcome to MkDocs
+# AFF3CT-core
 
-For full documentation visit [mkdocs.org](https://www.mkdocs.org).
+`AFF3CT-core` is a Domain-Specific Embedded Language *(DSEL)* for streaming applications written in C++. In this document, we try to explain the working of basics elements of the language :
+		
 
-## Commands
-
-* `mkdocs new [dir-name]` - Create a new project.
-* `mkdocs serve` - Start the live-reloading docs server.
-* `mkdocs build` - Build the documentation site.
-* `mkdocs -h` - Print help message and exit.
-
-## Project layout
-
-    mkdocs.yml    # The configuration file.
-    docs/
-        index.md  # The documentation homepage.
-        ...       # Other markdown pages, images and other files.
+ - ## [Sockets](Socket.md)
+ - ## [Tasks & modules](module & task.md)
+ - ## [Sequences & Subsequences](Sequence & Subsequence.md)
+ - ## [Pipeline](Pipeline & Adaptor.md)
+ - ## [Control flow](Switcher.md)
