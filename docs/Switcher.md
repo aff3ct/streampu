@@ -94,6 +94,6 @@ Any task bound to its input sockets will be considered in a different *exclusive
 <a name="Examples"><a/>
 
 === "while loop"
-    ![for_loop](./assets/ctrl_for.png)
+    ![for_loop](./assets/for.svg)
 === "switch-case"
-    ![switch](./assets/ctrl_switch.png)
+    ![switch](./assets/switch.svg)
