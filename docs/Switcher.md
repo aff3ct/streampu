@@ -1,4 +1,3 @@
-## Overview
 
 A switcher is a control flow [module](./module%20%26%20task.md) used to break sequences into *exclusive paths* through its two tasks,
 [Select](#Select) and [Commute](#Commute).  
@@ -8,11 +7,11 @@ A switcher is a control flow [module](./module%20%26%20task.md) used to break se
 <a name="Path">
 </a>
 ```cpp
-size_t path
+size_t path;
 ```
 The *exclusive path* to take when the commute task is reached. Read on the [ctrl socket](#Commute) of commute each time it is executed, set to `n_data_sockets - 1` prior to the first execution.
 ```cpp
-const size_t n_data_sockets
+const size_t n_data_sockets;
 ```
 The number of data sockets for the commute and select tasks (not the total, but the *individual* number).  
 ```cpp
@@ -21,7 +20,7 @@ const std::type_index datatype_select;
 ```
 The type of data conveyed by the data sockets of each task.
 ```cpp
-const size_t n_elmts_commute
+const size_t n_elmts_commute;
 const size_t n_elmts_select;
 ```
 The number of elements conveyed by each data sockets.  

@@ -47,7 +47,8 @@ markdown_extensions:
 plugins: 
   - search
 
-
+extra_css:
+  - css/extra.css
 
 extra_javascript:
   - javascripts/mathjax.js

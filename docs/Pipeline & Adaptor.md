@@ -14,14 +14,14 @@ Pipelines is a feature offered by `AFF3CT-core` allowing the breaking of a [sequ
 ### Attributes
 
 ```cpp 
-Sequence original_sequence
+Sequence original_sequence;
 ``` 
 The original sequence from which the pipeline was created.
 
 
 <a name="Stage"></a>
 ```cpp 
-std::vector<std::shared_ptr<Sequence>> stages 
+std::vector<std::shared_ptr<Sequence>> stages; 
 ``` 
 Vector of the different stages in the pipeline. Each stage is a [sequence](Sequence%20%26%20Subsequence.md) in and of itself.
 
@@ -29,12 +29,12 @@ Vector of the different stages in the pipeline. Each stage is a [sequence](Seque
 
 ```cpp
 std::vector<std::pair<std::tuple<runtime::Socket*, size_t, size_t, size_t,size_t>,
-			std::tuple<runtime::Socket*, size_t, size_t, size_t>>> sck_orphan_binds :
+			std::tuple<runtime::Socket*, size_t, size_t, size_t>>> sck_orphan_binds;
 ```
 Vector of [sockets](Socket.md) with broken connections due to the pipeline stages creation (hence "orphan").  
 These sockets will be bound later to special modules called [adaptors](#Adaptor) to make bridges between the stages.
 ```cpp
-std::vector<std::tuple<runtime::Socket*, runtime::Socket*, size_t>> adaptors_binds
+std::vector<std::tuple<runtime::Socket*, runtime::Socket*, size_t>> adaptors_binds;
 ```
 Vector of tuple (`input`, `output`, `priority`) of the created adaptors, `priority` is used to order the tuples.
 
@@ -79,7 +79,7 @@ This function creates the adaptor tasks that are added between every stages to t
 void  _bind_adaptors(const  bool  bind_adaptors = true);
 ```
 
-Adaptor module tasks (pull and push) need to be bound to each task in the two consecutive stages, the target sockets to bind are stored in the vector`sck_orphan_binds.`
+Adaptor module tasks `pull & push` need to be bound to each task in the two consecutive stages, the target sockets to bind are stored in the vector`sck_orphan_binds.`
 
 <a name="Adaptor"></a>
 ## Adaptor
@@ -99,11 +99,11 @@ Adaptors are special modules inserted between stages when creating a pipeline an
 
 ### Attributes
 ```cpp
-const  size_t buffer_size
+const  size_t buffer_size;
 ```
 The interstage buffer pool size.
 ```cpp
-std::shared_ptr<std::vector<std::vector<std::vector<int8_t*>>>> buffer
+std::shared_ptr<std::vector<std::vector<std::vector<int8_t*>>>> buffer;
 ```
 Pointers to each buffer of the interstage pool.
 

@@ -4,11 +4,11 @@
 
 Sockets are used to communicate data between [tasks](module & task.md). There are 3 different types of sockets :
 
-- `Socket_IN` : Read input data.
+- `Socket_IN` : read input data.
 
-- `Socket_OUT` : Write output data.
+- `Socket_OUT` : write output data.
 
-- `Socket_Forward` : A combination of In and Out sockets, both reading and writing data.
+- `Socket_Forward` : a combination of In and Out sockets, both reading and writing data.
 
 A task can have either `input & output` sockets or a `forward` socket, or both.
 
@@ -22,18 +22,17 @@ A task can have either `input & output` sockets or a `forward` socket, or both.
 ```cpp
 socket_t type;
 ```
-
-Used for to define the type of the socket `IN`, `OUT` or `FWD`.
+Define the socket type `IN`, `OUT` or `FWD`.
 ```cpp
 std::string name;
 ```
 Custom name for the socket.
 ```cpp
-std::type_index datatype
+std::type_index datatype;
 ```
 The type of data exchanged.
 ```cpp
-void* dataptr
+void* dataptr;
 ```
 Pointer to the data of the socket.
 ```cpp
@@ -43,12 +42,12 @@ The `input` or `forward` sockets bound to this socket. Only relevant for `output
 ```cpp
 Socket* bound_socket;
 ```
-The `output` or `forward` socket bound to this socket. Only relevant for `input` or `forward` sockets.
+The unique `output` or `forward` socket bound to this socket. Only relevant for `input` or `forward` sockets.
 ### Methods
 The most important methods of the socket class are the bind and unbind functions.
 
 ```cpp
-void  bind(Socket  &s_out, const  int  priority = -1)
+void  bind(Socket  &s_out, const  int  priority = -1);
 ```
 This function is used to connect sockets with each other, it can be called by an input or forward socket and takes as parameter an output or forward socket. The function gets the caller's `dataptr` and redirects it to `s_out dataptr`.  
 ??? success "Valid bindings"
@@ -60,14 +59,14 @@ void  unbind(Socket  &s_out, const  int  priority = -1);
 This function is used to disconnect sockets from each other, the `s_out` must be bound to the caller socket.
 
 ## When to use forward
-We have to pay attention during the choice of the socket type for our task, using a `SIO (Input/Output)` or `SFWD(Forward)` is very important for the application data coherency and performance. 
+We have to pay attention during the choice of the socket type for our task, using a `SIO` or `SFWD` is very important for the application data coherency and performance. 
 ### The differences to know about the sockets
 
  The most important point is the `dataptr` attribute, it's the pointer to the memory space where the data used by the task is stored. 
  
  - In the case of the `SIO`, the input and the output sockets have their own `dataptr`. The `input` socket receives the pointer from its bound socket and the `output` has its own allocated memory space, the data received and computed by the task are written to the `output` memory space. The initial data is not modified in this case, there are no *side effects*.
  
- - In the case of the `SFWD`, the forward socket receives its `dataptr` from the bound socket like an `input`. But unlike the `SIO` case, the computed data is written directly on the provided memory space, thus overwritting it (and potentially losing important information), there are *side effects*. All the tasks with `SFWD` consecutively bound to each other share the same memory space.
+ - In the case of the `SFWD`, the forward socket receives its `dataptr` from the bound socket like an `input`. But unlike the `SIO` case, the computed data is written directly on the provided memory space, thus overwritting it (and potentially losing important information), there are *side effects*. All the tasks with `SFWD` consecutively bound to each other share the same memory space, updating the `dataptr` of a `SFWD` needs to update all the pointers of the forward bound sockets recursively.
 
 ```mermaid
   graph LR;
