@@ -10,10 +10,11 @@ Sockets are used to communicate data between [tasks](module & task.md). There ar
 
 - `Socket_Forward` : A combination of In and Out sockets, both reading and writing data.
 
-A task can have either `input & output` sockets or a `forward` socket. They are mutually exclusive.  
-A single `output` can be bound to multiple `input` sockets, but an `input` can only read from a single `output` socket. `forward` sockets only bind to a single socket of any type.
+A task can have either `input & output` sockets or a `forward` socket, or both.
 
-![Task with sockets!](./assets/task_example-1.png)
+
+
+![Task with sockets!](./assets/task_sockets.svg)
 
 
 ### Attributes
@@ -51,7 +52,7 @@ void  bind(Socket  &s_out, const  int  priority = -1)
 ```
 This function is used to connect sockets with each other, it can be called by an input or forward socket and takes as parameter an output or forward socket. The function gets the caller's `dataptr` and redirects it to `s_out dataptr`.  
 ??? success "Valid bindings"
-    ![Task with sockets!](./assets/bind_permission.png)
+    ![Task with sockets!](./assets/bind_permission.svg)
 
 ```cpp
 void  unbind(Socket  &s_out, const  int  priority = -1);

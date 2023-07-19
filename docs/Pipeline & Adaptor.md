@@ -7,7 +7,7 @@ Pipelines is a feature offered by `AFF3CT-core` allowing the breaking of a [sequ
 
   
 
-![Image non affichée !](./assets/sequence_to_pipeline-1.png)
+![Image non affichée !](./assets/sequence_to_pipeline.svg)
 
 
 
