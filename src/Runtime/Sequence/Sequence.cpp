@@ -912,7 +912,7 @@ tools::Digraph_node<SS>* Sequence
 								                                                    in_sockets_feed[&t] = 1;
 								bool t_is_select = dynamic_cast<const module::Switcher*>(&(t.get_module())) &&
 								                   t.get_name() == "select";
-								if ((!t_is_select && in_sockets_feed[&t] >= t.get_n_input_sockets() - t.get_n_static_input_sockets()) ||
+								if ((!t_is_select && in_sockets_feed[&t] >= (t.get_n_input_sockets() + t.get_n_fwd_sockets()) - t.get_n_static_input_sockets()) ||
 								    ( t_is_select && t.is_last_input_socket(*bs)))
 								{
 									is_last = false;
@@ -965,7 +965,7 @@ tools::Digraph_node<SS>* Sequence
 							                                                    in_sockets_feed[&t] = 1;
 							bool t_is_select = dynamic_cast<const module::Switcher*>(&(t.get_module())) &&
 							                   t.get_name() == "select";
-							if ((!t_is_select && in_sockets_feed[&t] >= t.get_n_input_sockets() - t.get_n_static_input_sockets()) ||
+							if ((!t_is_select && in_sockets_feed[&t] >= (t.get_n_input_sockets() + t.get_n_fwd_sockets()) - t.get_n_static_input_sockets()) ||
 							    ( t_is_select && t.is_last_input_socket(*bs)))
 							{
 								is_last = false;
@@ -1030,7 +1030,7 @@ tools::Digraph_node<SS>* Sequence
 								bool t_is_select = dynamic_cast<const module::Switcher*>(&(t.get_module())) &&
 								                   t.get_name() == "select";
 
-								if ((!t_is_select && in_sockets_feed[&t] >= t.get_n_input_sockets() - t.get_n_static_input_sockets()) ||
+								if ((!t_is_select && in_sockets_feed[&t] >= (t.get_n_input_sockets() + t.get_n_fwd_sockets()) - t.get_n_static_input_sockets()) ||
 								    ( t_is_select && t.is_last_input_socket(*bs)))
 								{
 									is_last = false;
@@ -1096,7 +1096,7 @@ tools::Digraph_node<SS>* Sequence
 								bool t_is_select = dynamic_cast<const module::Switcher*>(&(t.get_module())) &&
 								                   t.get_name() == "select";
 								if ((!t_is_select && in_sockets_feed[&t] >= (t.get_n_input_sockets() + t.get_n_fwd_sockets()) - t.get_n_static_input_sockets()) ||
-								    ( t_is_select && t.is_last_input_socket(*bs)))
+								    (t_is_select && t.is_last_input_socket(*bs)))
 								{
 									is_last = false;
 									last_subseq = Sequence::init_recursive<SS,TA>(task_subseq[&t].first,
@@ -1131,7 +1131,7 @@ tools::Digraph_node<SS>* Sequence
 						}
 					}
 				}
-				else if (current_task.get_socket_type(*s) == socket_t::SIN || current_task.get_socket_type(*s) == socket_t::SFWD)
+				else if (current_task.get_socket_type(*s) == socket_t::SIN)
 				{
 					if (s->get_bound_sockets().size() > 1)
 					{
@@ -1681,9 +1681,14 @@ void Sequence
 								std::vector<runtime::Socket*> bound_sockets;
 								std::vector<void*> dataptrs;
 
-								auto bs = select_task->sockets[s]->get_bound_sockets();
-								bound_sockets.insert(bound_sockets.end(), bs.begin(), bs.end());
-								for (auto sck : bs)
+								for (auto socket : select_task->sockets[s]->get_bound_sockets())
+								{
+									bound_sockets.push_back(socket);
+									if (socket->get_type() == socket_t::SFWD)
+										this->explore_thread_rec(socket, bound_sockets);	
+								}
+
+								for (auto sck : bound_sockets)
 									dataptrs.push_back(sck->get_dataptr());
 
 								contents->rebind_sockets[rebind_id].push_back(bound_sockets);
@@ -1726,10 +1731,14 @@ void Sequence
 							{
 								std::vector<runtime::Socket*> bound_sockets;
 								std::vector<void*> dataptrs;
+								for (auto socket : commute_task->sockets[s]->get_bound_sockets())
+								{
+									bound_sockets.push_back(socket);
+									if (socket->get_type() == socket_t::SFWD)
+										this->explore_thread_rec(socket, bound_sockets);
+								}
 
-								auto bs = commute_task->sockets[s]->get_bound_sockets();
-								bound_sockets.insert(bound_sockets.end(), bs.begin(), bs.end());
-								for (auto sck : bs)
+								for (auto sck : bound_sockets)
 									dataptrs.push_back(sck->get_dataptr());
 
 								contents->rebind_sockets[rebind_id].push_back(bound_sockets);

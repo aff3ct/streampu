@@ -401,7 +401,6 @@ void Pipeline
 
 	this->create_adaptors(synchro_buffer_sizes, synchro_active_waiting);
 	this->bind_adaptors();
-	//this->create_fwd_matrix();
 }
 
 void Pipeline

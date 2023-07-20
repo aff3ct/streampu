@@ -68,7 +68,8 @@
         "numbers": "cpp",
         "semaphore": "cpp",
         "stop_token": "cpp",
-        "__nullptr": "cpp"
+        "__nullptr": "cpp",
+        "__functional_base": "cpp"
     },
     "cmake.configureOnOpen": true
 }
