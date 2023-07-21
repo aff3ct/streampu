@@ -354,14 +354,22 @@ void Pipeline
 		const bool stage_thread_pinning = thread_pinning.size() ? thread_pinning[s] : false;
 		const std::vector<size_t> stage_puids =  puids.size() ? puids[s] : std::vector<size_t>();
 		const bool stage_tasks_inplace = /*tasks_inplace.size() ? tasks_inplace[s] :*/ true;
-
-		this->stages[s].reset(create_sequence<TA>(stage_firsts,
-		                                          stage_lasts,
-		                                          stage_exclusions,
-		                                          stage_n_threads,
-		                                          stage_thread_pinning,
-		                                          stage_puids,
-		                                          stage_tasks_inplace));
+		try{
+			this->stages[s].reset(create_sequence<TA>(stage_firsts,
+													stage_lasts,
+													stage_exclusions,
+													stage_n_threads,
+													stage_thread_pinning,
+													stage_puids,
+													stage_tasks_inplace));
+		}
+		catch(const tools::control_flow_error& e)
+		{
+			std::stringstream message;
+			message << "Invalid control flow error on stage " << s << " (perhaps a switcher's tasks were separated between different stages)." << std::endl
+			        << e.what();
+			throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
+		}
 		this->stages[s]->is_part_of_pipeline = true;
 	}
 
