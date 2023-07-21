@@ -156,6 +156,9 @@
 #ifndef CANNOT_ALLOCATE_HPP_
 #include <Tools/Exception/cannot_allocate/cannot_allocate.hpp>
 #endif
+#ifndef CONTROL_FLOW_ERROR_HPP_
+#include <Tools/Exception/control_flow_error/control_flow_error.hpp>
+#endif
 #ifndef DOMAIN_ERROR_HPP_
 #include <Tools/Exception/domain_error/domain_error.hpp>
 #endif

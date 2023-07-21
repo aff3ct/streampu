@@ -2228,8 +2228,8 @@ void Sequence
 							}
 						}
 						std::stringstream message;
-						message << ctrl_task_first->get_name() << " has no valid path to " << ctrl_task_second->get_name() << ".";
-						throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
+						message << ctrl_task_first->get_name() << " is missing a path to " << ctrl_task_second->get_name() << ".";
+						throw tools::control_flow_error(__FILE__, __LINE__, __func__, message.str());
 					}
 				}
 			}

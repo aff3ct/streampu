@@ -47,6 +47,7 @@ public:
 
 // include specific exceptions
 #include "Tools/Exception/cannot_allocate/cannot_allocate.hpp"
+#include "Tools/Exception/control_flow_error/control_flow_error.hpp"
 #include "Tools/Exception/domain_error/domain_error.hpp"
 #include "Tools/Exception/invalid_argument/invalid_argument.hpp"
 #include "Tools/Exception/length_error/length_error.hpp"
