@@ -302,6 +302,7 @@ void Sequence
 	}
 
 	this->n_tasks = taid;
+	this->check_ctrl_flw(root);
 	this->_init<SS>(root);
 	this->update_firsts_and_lasts_tasks();
 	this->gen_processes();
@@ -2128,4 +2129,112 @@ void Sequence
 		for (auto &u : unbind_tasks)
 			u.first->bind(*u.second);
 	}
+}
+
+template<class SS>
+void Sequence
+::check_ctrl_flw(tools::Digraph_node<SS>* root)
+{
+	std::cout << "Checking ctrl flw" << std::endl;
+	std::function<void(tools::Digraph_node<SS>*,
+	              std::vector<tools::Digraph_node<SS>*>&)> check_control_flow_parity =
+		[&check_control_flow_parity](tools::Digraph_node<SS>* cur_node,
+		                             std::vector<tools::Digraph_node<SS>*> already_parsed_nodes) -> void
+		{
+			std::cout << "Recursion" << std::endl;
+			if (cur_node != nullptr &&
+			    std::find(already_parsed_nodes.begin(),
+			              already_parsed_nodes.end(),
+			              cur_node) == already_parsed_nodes.end() &&
+				cur_node->get_children().size())
+			{
+				already_parsed_nodes.push_back(cur_node);
+				for (auto c : cur_node->get_children()) {
+					check_control_flow_parity(c, already_parsed_nodes);
+				}
+			}
+			else
+			{
+				already_parsed_nodes.push_back(cur_node);
+				for(size_t i=0; i < already_parsed_nodes.size(); i++)
+				{
+					std::cout << "node[" << i << "] : ";
+					if(already_parsed_nodes[i]->get_c() == nullptr)
+					{
+						std::cout << "No tasks";
+					}
+					else
+					{
+						for(auto t : already_parsed_nodes[i]->get_c()->tasks)
+						{
+							std::cout << t->get_name() << " ";
+						}
+					}
+					std::cout << std::endl;
+				}
+				std::vector<module::Module*> parsed_switcher; 
+				for(size_t i=0; i < already_parsed_nodes.size(); i++) {
+					std::cout << "Current node : " << already_parsed_nodes[i]->get_c()->id;
+					if(   already_parsed_nodes[i]->get_c() == nullptr
+					  ||!(already_parsed_nodes[i]->get_c()->type == subseq_t::COMMUTE 
+					  ||  already_parsed_nodes[i]->get_c()->type == subseq_t::SELECT)
+					)
+					{
+						std::cout << std::endl;
+						continue;
+					}	
+					std::cout << " CTRL-NODE";
+					std::cout << std::endl;
+					const runtime::Task *ctrl_task_first = nullptr;
+					const runtime::Task *ctrl_task_second = nullptr;
+					for(auto t : already_parsed_nodes[i]->get_c()->tasks) {
+						if(t->get_name() == "select" || t->get_name() == "commute") {
+							ctrl_task_first = t;
+							break;
+						}
+					}
+					subseq_t expected_type = ctrl_task_first->get_name() == "select" ? subseq_t::COMMUTE : subseq_t::SELECT;
+					if(std::find(parsed_switcher.begin(),
+			        	parsed_switcher.end(),
+			        	&(ctrl_task_first->get_module())) != parsed_switcher.end())
+						continue;
+					size_t j;
+					std::cout << "Looking for match" << std::endl;
+ 					for(j=i; j < already_parsed_nodes.size() && ctrl_task_second == nullptr; j++) {
+						std::cout << "Checking node : " << i;
+						if(already_parsed_nodes[j]->get_c() == nullptr || already_parsed_nodes[j]->get_c()->type != expected_type)
+						{
+							std::cout << " [Invalid node type]" << std::endl;
+							continue;
+						}
+						for(auto t : already_parsed_nodes[j]->get_c()->tasks) {
+							if((t->get_name() == "select" || t->get_name() == "commute") && &(ctrl_task_first->get_module()) == &(t->get_module())) {
+								std::cout << " [Matching node found]" << std::endl;
+								parsed_switcher.push_back(&(t->get_module()));
+								ctrl_task_second = t;
+								break;
+							}
+						}
+					}
+					if(ctrl_task_second == nullptr || j >= already_parsed_nodes.size())
+					{
+						for(auto t : ctrl_task_first->get_module().tasks)
+						{
+							if((ctrl_task_first->get_name() == "select" && t->get_name() == "commute") 
+							|| (ctrl_task_first->get_name() == "commute" && t->get_name() == "select"))
+							{
+								ctrl_task_second = t.get();
+								break;
+							}
+						}
+						std::stringstream message;
+						message << ctrl_task_first->get_name() << " has no valid path to " << ctrl_task_second->get_name() << ".";
+						throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
+					}
+				}
+			}
+		};
+
+	std::vector<tools::Digraph_node<SS>*> already_parsed_nodes;
+	return check_control_flow_parity(root, already_parsed_nodes);
 }
