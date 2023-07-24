@@ -179,31 +179,6 @@ if(AFF3CT_CORE_TESTS)
     list(APPEND aff3ct_core_targets_list aff3ct-core-test-simple-pipeline)
     
 
-    add_executable(aff3ct-core-test-simple-pipeline-fwd $<TARGET_OBJECTS:aff3ct-core-obj>
-                                                    ${CMAKE_CURRENT_SOURCE_DIR}/tests/simple_pipeline_io.cpp)
-    set_target_properties(aff3ct-core-test-simple-pipeline-fwd PROPERTIES
-                                                           OUTPUT_NAME test-simple-pipeline-fwd
-                                                           POSITION_INDEPENDENT_CODE ON) # set -fpie
-    list(APPEND aff3ct_core_targets_list aff3ct-core-test-simple-pipeline-fwd)
-  
-
-    add_executable(aff3ct-core-test-simple-pipeline-full-fwd $<TARGET_OBJECTS:aff3ct-core-obj>
-                                                    ${CMAKE_CURRENT_SOURCE_DIR}/tests/simple_pipeline_full_io.cpp)
-    set_target_properties(aff3ct-core-test-simple-pipeline-full-fwd PROPERTIES
-                                                           OUTPUT_NAME test-simple-pipeline-full-fwd
-                                                           POSITION_INDEPENDENT_CODE ON) # set -fpie
-    list(APPEND aff3ct_core_targets_list aff3ct-core-test-simple-pipeline-full-fwd)
-  
-
-    add_executable(aff3ct-core-test-simple-pipeline-multiple-stage $<TARGET_OBJECTS:aff3ct-core-obj>
-                                                    ${CMAKE_CURRENT_SOURCE_DIR}/tests/simple_pipeline_multiple_stage_io.cpp)
-    set_target_properties(aff3ct-core-test-simple-pipeline-multiple-stage PROPERTIES
-                                                           OUTPUT_NAME test-simple-pipeline-multiple-stage
-                                                           POSITION_INDEPENDENT_CODE ON) # set -fpie                                                        
-    list(APPEND aff3ct_core_targets_list aff3ct-core-test-simple-pipeline-multiple-stage)
-   
-
-
     add_executable(aff3ct-core-test-simple-pipeline-inter-stage $<TARGET_OBJECTS:aff3ct-core-obj>
                                                     ${CMAKE_CURRENT_SOURCE_DIR}/tests/complexe_pipeline_inter_stage.cpp)
     set_target_properties(aff3ct-core-test-simple-pipeline-inter-stage PROPERTIES
@@ -211,7 +186,6 @@ if(AFF3CT_CORE_TESTS)
                                                            POSITION_INDEPENDENT_CODE ON) # set -fpie
     list(APPEND aff3ct_core_targets_list aff3ct-core-test-simple-pipeline-inter-stage)
    
-
     
     add_executable(aff3ct-core-test-simple-pipeline-double-chain $<TARGET_OBJECTS:aff3ct-core-obj>
                                                     ${CMAKE_CURRENT_SOURCE_DIR}/tests/pipeline_double_chain.cpp)
@@ -485,20 +459,7 @@ if(AFF3CT_CORE_TESTS)
     add_test(NAME pipeline3::aff3ct-core-test-simple-pipeline COMMAND aff3ct-core-test-simple-pipeline -i ./bin/test-simple-pipeline -u 1)
     add_test(NAME pipeline4::aff3ct-core-test-simple-pipeline COMMAND aff3ct-core-test-simple-pipeline -i ./bin/test-simple-pipeline -u 1024)
     add_test(NAME pipeline5::aff3ct-core-test-simple-pipeline COMMAND aff3ct-core-test-simple-pipeline -i ./bin/test-simple-pipeline -u 128 -o graph.dot)
-
-
-    add_test(NAME pipeline0::aff3ct-core-test-simple-pipeline-full-fwd COMMAND aff3ct-core-test-simple-pipeline-full-fwd -i ./bin/test-simple-pipeline)
-    add_test(NAME pipeline1::aff3ct-core-test-simple-pipeline-full-fwd COMMAND aff3ct-core-test-simple-pipeline-full-fwd -i ./bin/test-simple-pipeline -p)
-    add_test(NAME pipeline2::aff3ct-core-test-simple-pipeline-full-fwd COMMAND aff3ct-core-test-simple-pipeline-full-fwd -i ./bin/test-simple-pipeline -w)
-    add_test(NAME pipeline3::aff3ct-core-test-simple-pipeline-full-fwd COMMAND aff3ct-core-test-simple-pipeline-full-fwd -i ./bin/test-simple-pipeline -u 1)
-    add_test(NAME pipeline4::aff3ct-core-test-simple-pipeline-full-fwd COMMAND aff3ct-core-test-simple-pipeline-full-fwd -i ./bin/test-simple-pipeline -u 1024)
-
-
-    add_test(NAME pipeline1::aff3ct-core-test-simple-pipeline-multiple-stage COMMAND aff3ct-core-test-simple-pipeline-multiple-stage -i ./bin/test-simple-pipeline -p)
-    add_test(NAME pipeline2::aff3ct-core-test-simple-pipeline-multiple-stage COMMAND aff3ct-core-test-simple-pipeline-multiple-stage -i ./bin/test-simple-pipeline -w)
-    add_test(NAME pipeline3::aff3ct-core-test-simple-pipeline-multiple-stage COMMAND aff3ct-core-test-simple-pipeline-multiple-stage -i ./bin/test-simple-pipeline -u 1)
-    add_test(NAME pipeline4::aff3ct-core-test-simple-pipeline-multiple-stage COMMAND aff3ct-core-test-simple-pipeline-multiple-stage -i ./bin/test-simple-pipeline -u 1024)
-
+   
 
     add_test(NAME pipeline0::aff3ct-core-test-simple-pipeline-inter-stage COMMAND aff3ct-core-test-simple-pipeline-inter-stage -i ./bin/test-simple-pipeline)
     add_test(NAME pipeline1::aff3ct-core-test-simple-pipeline-inter-stage COMMAND aff3ct-core-test-simple-pipeline-inter-stage -q -t 1 -i ./bin/test-simple-pipeline -p -g)
@@ -509,9 +470,22 @@ if(AFF3CT_CORE_TESTS)
     add_test(NAME pipeline1::aff3ct-core-test-simple-pipeline-double-chain COMMAND aff3ct-core-test-simple-pipeline-double-chain -u 1024)
 
     #Simple pipeline example 
-    add_test(NAME pipeline0::aff3ct-core-test-generic-pipeline COMMAND aff3ct-core-test-generic-pipeline -i ./bin/test-simple-pipeline -n "(3)" -t "(3)" -r "(SIO)")
+    add_test(NAME pipeline0::aff3ct-core-test-generic-pipeline COMMAND aff3ct-core-test-generic-pipeline -i ./bin/test-simple-pipeline -n "(3)" -t "(3)" -r "((SIO,SIO,SIO))")
     #simple pipeline FWD example 
-    add_test(NAME pipeline1::aff3ct-core-test-generic-pipeline COMMAND aff3ct-core-test-generic-pipeline -i ./bin/test-simple-pipeline -n "(3)" -t "(3)" -r "(SFWD)")
-    #multiple stages pipeline 
-    add_test(NAME pipeline2::aff3ct-core-test-generic-pipeline COMMAND aff3ct-core-test-generic-pipeline -i ./bin/test-simple-pipeline -n "(3,4,8)" -t "(3,1,5)" -r "(SFWD,SFWD,SIO)")
+    add_test(NAME pipeline1::aff3ct-core-test-generic-pipeline COMMAND aff3ct-core-test-generic-pipeline -i ./bin/test-simple-pipeline -n "(3)" -t "(3)" -r "((SFWD,SFWD,SFWD))")
+    add_test(NAME pipeline2::aff3ct-core-test-generic-pipeline COMMAND aff3ct-core-test-generic-pipeline -i ./bin/test-simple-pipeline -n "(3)" -t "(3)" -r "((SFWD,SFWD,SFWD))" -p)
+    add_test(NAME pipeline3::aff3ct-core-test-generic-pipeline COMMAND aff3ct-core-test-generic-pipeline -i ./bin/test-simple-pipeline -n "(3)" -t "(3)" -r "((SFWD,SFWD,SFWD))" -w)
+    add_test(NAME pipeline4::aff3ct-core-test-generic-pipeline COMMAND aff3ct-core-test-generic-pipeline -i ./bin/test-simple-pipeline -n "(3)" -t "(3)" -r "((SFWD,SFWD,SFWD))" -u 1)
+    add_test(NAME pipeline5::aff3ct-core-test-generic-pipeline COMMAND aff3ct-core-test-generic-pipeline -i ./bin/test-simple-pipeline -n "(3)" -t "(3)" -r "((SFWD,SFWD,SFWD))" -u 1024)
+    #simple pipeline hybrid
+    add_test(NAME pipeline6::aff3ct-core-test-generic-pipeline COMMAND aff3ct-core-test-generic-pipeline -i ./bin/test-simple-pipeline -n "(4)" -t "(3)" -r "((SFWD,SIO,SFWD,SIO))")
+    add_test(NAME pipeline7::aff3ct-core-test-generic-pipeline COMMAND aff3ct-core-test-generic-pipeline -i ./bin/test-simple-pipeline -n "(4)" -t "(3)" -r "((SFWD,SIO,SFWD,SIO))" -u 1024)
+    #pipeline multiple stages
+    add_test(NAME pipeline8::aff3ct-core-test-generic-pipeline COMMAND aff3ct-core-test-generic-pipeline -i ./bin/test-simple-pipeline -n "(4,1,2)" -t "(3,1,3)" -r "((SFWD,SIO,SFWD,SIO),(SFWD),(SIO,SIO))")
+    add_test(NAME pipeline9::aff3ct-core-test-generic-pipeline COMMAND aff3ct-core-test-generic-pipeline -i ./bin/test-simple-pipeline -n "(4,1,2)" -t "(3,1,3)" -r "((SFWD,SIO,SFWD,SIO),(SFWD),(SIO,SIO))" -p)
+    add_test(NAME pipeline10::aff3ct-core-test-generic-pipeline COMMAND aff3ct-core-test-generic-pipeline -i ./bin/test-simple-pipeline -n "(4,1,2)" -t "(3,1,3)" -r "((SFWD,SIO,SFWD,SIO),(SFWD),(SIO,SIO))" -w)
+    add_test(NAME pipeline11::aff3ct-core-test-generic-pipeline COMMAND aff3ct-core-test-generic-pipeline -i ./bin/test-simple-pipeline -n "(4,1,2)" -t "(3,1,3)" -r "((SFWD,SIO,SFWD,SIO),(SFWD),(SIO,SIO))" -u 1)
+    add_test(NAME pipeline12::aff3ct-core-test-generic-pipeline COMMAND aff3ct-core-test-generic-pipeline -i ./bin/test-simple-pipeline -n "(4,1,2)" -t "(3,1,3)" -r "((SFWD,SIO,SFWD,SIO),(SFWD),(SIO,SIO))" -u 1024)
+    #pipeline with socket type per stage 
+    add_test(NAME pipeline13::aff3ct-core-test-generic-pipeline COMMAND aff3ct-core-test-generic-pipeline -i ./bin/test-simple-pipeline -n "(4,1,2)" -t "(3,1,3)" -R "(SFWD,SIO,SFWD)")
 endif()
