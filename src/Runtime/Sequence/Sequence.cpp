@@ -406,7 +406,7 @@ std::vector<std::vector<runtime::Task*>> Sequence
 				                              cur_ss->get_c()->tasks.end());
 				for (auto c : cur_ss->get_children())
 					get_tasks_recursive(c, tid, already_parsed_nodes);
-			
+
 			}
 		};
 
@@ -1071,7 +1071,7 @@ tools::Digraph_node<SS>* Sequence
 	}
 	else // --------------------------------------------------------------------------------------------- STANDARD CASE
 	{
-		cur_subseq->get_c()->tasks.push_back(&current_task);  
+		cur_subseq->get_c()->tasks.push_back(&current_task);
 		cur_subseq->get_c()->tasks_id.push_back(taid++);
 
 		if (std::find(lasts.begin(), lasts.end(), &current_task) == lasts.end())
@@ -1167,7 +1167,7 @@ void Sequence
 ::duplicate(const tools::Digraph_node<SS> *sequence)
 {
 	std::set<MO*> modules_set;
-
+	std::vector<const runtime::Task*> tsks_vec; // get a vector of tasks included in the tasks graph
 	std::function<void(const tools::Digraph_node<SS>*, std::vector<const tools::Digraph_node<SS>*> &)> collect_modules_list;
 	collect_modules_list = [&](const tools::Digraph_node<SS> *node, std::vector<const tools::Digraph_node<SS>*> &already_parsed_nodes)
 	{
@@ -1175,6 +1175,7 @@ void Sequence
 		    std::find(already_parsed_nodes.begin(), already_parsed_nodes.end(), node) == already_parsed_nodes.end())
 		{
 			already_parsed_nodes.push_back(node);
+			tsks_vec.insert(tsks_vec.end(), node->get_c()->tasks.begin(), node->get_c()->tasks.end());
 			if (node->get_c())
 				for (auto ta : node->get_c()->tasks)
 					modules_set.insert(&ta->get_module());
@@ -1287,7 +1288,7 @@ void Sequence
 				// replicate the sockets binding
 				for (size_t s_id = 0; s_id < t_ref->sockets.size(); s_id++)
 				{
-					if (t_ref->get_socket_type(*t_ref->sockets[s_id]) == socket_t::SIN || t_ref->get_socket_type(*t_ref->sockets[s_id]) == socket_t::SFWD) 
+					if (t_ref->get_socket_type(*t_ref->sockets[s_id]) == socket_t::SIN || t_ref->get_socket_type(*t_ref->sockets[s_id]) == socket_t::SFWD)
 					{
 						const runtime::Socket* s_ref_out = nullptr;
 						try { s_ref_out = &t_ref->sockets[s_id]->get_bound_socket(); } catch (...) {}
@@ -1296,9 +1297,11 @@ void Sequence
 							auto &t_ref_out = s_ref_out->get_task();
 							auto &m_ref_out = t_ref_out.get_module();
 
+							// check if `t_ref_out` is included in the tasks graph
+							auto t_in_seq = std::find(tsks_vec.begin(), tsks_vec.end(), &t_ref_out) != tsks_vec.end();
 							auto m_id_out = get_module_id(modules_vec, m_ref_out);
 
-							if (m_id_out != -1)
+							if (t_in_seq && m_id_out != -1)
 							{
 								auto t_id_out = get_task_id(m_ref_out.tasks, t_ref_out);
 								auto s_id_out = get_socket_id(t_ref_out.sockets, *s_ref_out);
@@ -1326,9 +1329,11 @@ void Sequence
 						auto &t_ref_out = s_ref_out->get_task();
 						auto &m_ref_out = t_ref_out.get_module();
 
+						// check if `t_ref_out` is included in the tasks graph
+						auto t_in_seq = std::find(tsks_vec.begin(), tsks_vec.end(), &t_ref_out) != tsks_vec.end();
 						auto m_id_out = get_module_id(modules_vec, m_ref_out);
 
-						if (m_id_out != -1)
+						if (t_in_seq && m_id_out != -1)
 						{
 							auto t_id_out = get_task_id(m_ref_out.tasks, t_ref_out);
 							auto s_id_out = get_socket_id(t_ref_out.sockets, *s_ref_out);
@@ -1629,7 +1634,7 @@ void Sequence
 		if (bound->get_type() == socket_t::SFWD){
 			explore_thread_rec(bound,liste_fwd);
 			explore_thread_rec_inverse(bound,liste_fwd);
-		}	
+		}
 }
 
 void Sequence
@@ -1677,7 +1682,7 @@ void Sequence
 								{
 									bound_sockets.push_back(socket);
 									if (socket->get_type() == socket_t::SFWD)
-										this->explore_thread_rec(socket, bound_sockets);	
+										this->explore_thread_rec(socket, bound_sockets);
 								}
 								for (auto sck : bound_sockets)
 									dataptrs.push_back(sck->get_dataptr());
@@ -1686,7 +1691,7 @@ void Sequence
 								contents->rebind_dataptrs[rebind_id].push_back(dataptrs);
 							}
 						}
- 
+
 						modified_tasks[select_task] = [contents, select_task, switcher, rebind_id]() -> const int*
 						{
 							select_task->exec();
@@ -1758,16 +1763,16 @@ void Sequence
 						auto adp_pull = dynamic_cast<module::Adaptor*>(&pull_task->get_module());
 						adp_pull->set_no_copy_pull(true);
 
-						
+
 						const auto rebind_id = contents->rebind_sockets.size();
 						contents->rebind_sockets.resize(rebind_id +1);
 						contents->rebind_dataptrs.resize(rebind_id +1);
-						
-						
-						
+
+
+
 							for (size_t s = 0; s < pull_task->sockets.size() -1; s++)
 							{
-								
+
 								if (pull_task->get_socket_type(*pull_task->sockets[s]) == socket_t::SOUT)
 								{
 									std::vector<runtime::Socket*> bound_sockets;
@@ -1779,7 +1784,7 @@ void Sequence
 										bound_sockets.push_back(socket);
 										if (socket->get_type() == socket_t::SFWD)
 											this->explore_thread_rec(socket, bound_sockets);
-										
+
 									}
 
 									for (auto sck : bound_sockets)
@@ -1790,7 +1795,7 @@ void Sequence
 								}
 							}
 
-								// Partie du rebind 
+								// Partie du rebind
 								modified_tasks[pull_task] = [contents, pull_task, adp_pull, rebind_id]() -> const int*
 							{
 								// active or passive waiting here
@@ -1807,7 +1812,7 @@ void Sequence
 										auto swap_buff = contents->rebind_sockets[rebind_id][sin_id][1]->get_dataptr();
 										auto buff = adp_pull->get_filled_buffer(sin_id, swap_buff);
 										contents->rebind_sockets[rebind_id][sin_id][1]->dataptr = buff;
-									
+
 										// for the next tasks the same buffer 'buff' is required, an easy mistake is to re-swap
 										// and the data will be false, this is why we just bind 'buff'
 										for (size_t ta = 2; ta < contents->rebind_sockets[rebind_id][sin_id].size(); ta++){
@@ -1817,7 +1822,7 @@ void Sequence
 								}
 								adp_pull->wake_up_pusher();
 								return status;
-							};						
+							};
 					}
 
 					if (dynamic_cast<module::Adaptor*>(&task->get_module()) &&
@@ -1833,12 +1838,12 @@ void Sequence
 						for (size_t s = 0; s < push_task->sockets.size() -1; s++)
 							if (push_task->get_socket_type(*push_task->sockets[s]) == socket_t::SIN)
 							{
-								
+
 								std::vector<runtime::Socket*> bound_sockets;
 								std::vector<void*> dataptrs;
 
 								bound_sockets.push_back(push_task->sockets[s].get());
-								
+
 								auto bound_socket = &(push_task->sockets[s]->get_bound_socket());
 								bound_sockets.push_back(bound_socket);
 								this->explore_thread_rec(bound_socket,bound_sockets);
@@ -1846,11 +1851,11 @@ void Sequence
 								// Si la socket est FWD il faut faire une backward exploration
 								if (bound_socket->get_type() == socket_t::SFWD)
 									this->explore_thread_rec_inverse(bound_socket,bound_sockets);
-								
-								
+
+
 								for (auto sck : bound_sockets)
 										dataptrs.push_back(sck->get_dataptr());
-										
+
 								contents->rebind_sockets[rebind_id].push_back(bound_sockets);
 								contents->rebind_dataptrs[rebind_id].push_back(dataptrs);
 							}
@@ -1874,7 +1879,7 @@ void Sequence
 									contents->rebind_sockets[rebind_id][sout_id][ta]->dataptr = buff;
 							}
 							adp_push->wake_up_puller();
-	
+
 							return status;
 						};
 					}
@@ -2127,69 +2132,87 @@ void Sequence
 }
 
 void Sequence
+::_set_n_frames_unbind(std::vector<std::pair<runtime::Socket*, runtime::Socket*>> &unbind_sockets,
+                       std::vector<std::pair<runtime::Task*,   runtime::Socket*>> &unbind_tasks)
+{
+	std::function<void(const std::vector<runtime::Task*>, runtime::Task*)> unbind_sockets_recursive =
+	[&unbind_sockets, &unbind_tasks, &unbind_sockets_recursive](const std::vector<runtime::Task*> possessed_tsks,
+	                                                            runtime::Task* tsk_out)
+	{
+		for (auto sck_out : tsk_out->sockets)
+		{
+			if (tsk_out->get_socket_type(*sck_out) == socket_t::SOUT || tsk_out->get_socket_type(*sck_out) == socket_t::SFWD)
+			{
+				for (auto sck_in : sck_out->get_bound_sockets())
+				{
+					auto tsk_in = &sck_in->get_task();
+					// if the task of the current input socket is in the tasks of the sequence
+					if (std::find(possessed_tsks.begin(), possessed_tsks.end(), tsk_in) != possessed_tsks.end())
+					{
+						if (tsk_in->is_no_input_socket())
+						{
+							tsk_in->unbind(*sck_out);
+							unbind_tasks.push_back(std::make_pair(tsk_in, sck_out.get()));
+						}
+						else
+						{
+							sck_in->unbind(*sck_out);
+							// memorize the unbinds to rebind after!
+							unbind_sockets.push_back(std::make_pair(sck_in, sck_out.get()));
+						}
+						// do the same operation recursively on the current "tsk_in"
+						unbind_sockets_recursive(possessed_tsks, tsk_in);
+					}
+				}
+			}
+		}
+	};
+
+	auto tsks_per_threads = this->get_tasks_per_threads();
+	for (size_t t = 0; t < this->get_n_threads(); t++)
+		for (auto &tsk : this->firsts_tasks[t])
+			unbind_sockets_recursive(tsks_per_threads[t], tsk);
+}
+
+void Sequence
+::_set_n_frames(const size_t n_frames)
+{
+	if (n_frames <= 0)
+	{
+		std::stringstream message;
+		message << "'n_frames' has to be greater than 0 ('n_frames' = " << n_frames << ").";
+		throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
+	}
+
+	// set_n_frames for all the modules (be aware that this operation can fail)
+	for (auto &mm : this->all_modules)
+		for (auto &m : mm)
+			m->set_n_frames(n_frames);
+}
+
+void Sequence
+::_set_n_frames_rebind(const std::vector<std::pair<runtime::Socket*, runtime::Socket*>> &unbind_sockets,
+                       const std::vector<std::pair<runtime::Task*,   runtime::Socket*>> &unbind_tasks)
+{
+	// rebind the sockets
+	for (auto &u : unbind_sockets)
+		u.first->bind(*u.second);
+
+	// rebind the tasks
+	for (auto &u : unbind_tasks)
+		u.first->bind(*u.second);
+}
+
+void Sequence
 ::set_n_frames(const size_t n_frames)
 {
 	const auto old_n_frames = this->get_n_frames();
 	if (old_n_frames != n_frames)
 	{
-		if (n_frames <= 0)
-		{
-			std::stringstream message;
-			message << "'n_frames' has to be greater than 0 ('n_frames' = " << n_frames << ").";
-			throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
-		}
-
 		std::vector<std::pair<runtime::Socket*, runtime::Socket*>> unbind_sockets;
 		std::vector<std::pair<runtime::Task*, runtime::Socket*>> unbind_tasks;
-		std::function<void(const std::vector<runtime::Task*>, runtime::Task*)> unbind_sockets_recursive =
-		[&unbind_sockets, &unbind_tasks, &unbind_sockets_recursive](const std::vector<runtime::Task*> possessed_tsks,
-		                                                            runtime::Task* tsk_out)
-		{
-			for (auto sck_out : tsk_out->sockets)
-			{
-				if (tsk_out->get_socket_type(*sck_out) == socket_t::SOUT || tsk_out->get_socket_type(*sck_out) == socket_t::SFWD)
-				{
-					for (auto sck_in : sck_out->get_bound_sockets())
-					{
-						auto tsk_in = &sck_in->get_task();
-						// if the task of the current input socket is in the tasks of the sequence
-						if (std::find(possessed_tsks.begin(), possessed_tsks.end(), tsk_in) != possessed_tsks.end())
-						{
-							if (tsk_in->is_no_input_socket())
-							{
-								tsk_in->unbind(*sck_out);
-								unbind_tasks.push_back(std::make_pair(tsk_in, sck_out.get()));
-							}
-							else
-							{
-								sck_in->unbind(*sck_out);
-								// memorize the unbinds to rebind after!
-								unbind_sockets.push_back(std::make_pair(sck_in, sck_out.get()));
-							}
-							// do the same operation recursively on the current "tsk_in"
-							unbind_sockets_recursive(possessed_tsks, tsk_in);
-						}
-					}
-				}
-			}
-		};
-
-		auto tsks_per_threads = this->get_tasks_per_threads();
-		for (size_t t = 0; t < this->get_n_threads(); t++)
-			for (auto &tsk : this->firsts_tasks[t])
-				unbind_sockets_recursive(tsks_per_threads[t], tsk);
-
-		// set_n_frames for all the modules (be aware that this operation can fail)
-		for (auto &mm : this->all_modules)
-			for (auto &m : mm)
-				m->set_n_frames(n_frames);
-
-		// rebind the sockets
-		for (auto &u : unbind_sockets)
-			u.first->bind(*u.second);
-
-		// rebind the tasks
-		for (auto &u : unbind_tasks)
-			u.first->bind(*u.second);
+		this->_set_n_frames_unbind(unbind_sockets, unbind_tasks);
+		this->_set_n_frames(n_frames);
+		this->_set_n_frames_rebind(unbind_sockets, unbind_tasks);
 	}
 }
