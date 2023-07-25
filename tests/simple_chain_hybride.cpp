@@ -190,7 +190,7 @@ int main(int argc, char** argv)
 		(*incs[0])[module::inc::sck::increment::in] = initializer[module::ini::sck::initialize::out]; // Création de l'initialize et bind à la première socket !
 		 // On bind la moitié des input/output entre elle !
 		size_t s = 0;
-		for (s; s < incs.size()/2 - 1; ++s)
+		for (; s < incs.size()/2 - 1; ++s)
 			(*incs[s+1])[module::inc::sck::increment::in] = (*incs[s])[module::inc::sck::increment::out];
 
 		// Réalisation de la connection hybride ! 
@@ -198,7 +198,7 @@ int main(int argc, char** argv)
 		
 		// Bind des fwd entre elle 
 		size_t s_fwd =0;
-		for (s_fwd; s_fwd < incs_fwd.size() -1; ++s_fwd)
+		for (; s_fwd < incs_fwd.size() -1; ++s_fwd)
 			(*incs_fwd[s_fwd+1])[module::inc_fwd::sck::increment_fwd::fwd] = (*incs_fwd[s_fwd])[module::inc_fwd::sck::increment_fwd::fwd];
 		
 		// Réalisation de la seconde connection
@@ -206,7 +206,7 @@ int main(int argc, char** argv)
 		(*incs[s])[module::inc::sck::increment::in] = (*incs_fwd[s_fwd])[module::inc_fwd::sck::increment_fwd::fwd];
 
 		// Réalisation de la seconde interconnection ! 
-		for (s; s < incs.size() - 1; ++s)
+		for (; s < incs.size() - 1; ++s)
 			(*incs[s+1])[module::inc::sck::increment::in] = (*incs[s])[module::inc::sck::increment::out];
 
 

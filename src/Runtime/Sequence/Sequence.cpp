@@ -1185,7 +1185,6 @@ void Sequence
 	std::vector<const tools::Digraph_node<SS>*> already_parsed_nodes;
 	collect_modules_list(sequence, already_parsed_nodes);
 
-	// On utilise un set pour éviter de dupliquer le même module plusieurs fois 
 	std::vector<MO*> modules_vec;
 	for (auto m : modules_set)
 		modules_vec.push_back(m);
@@ -1623,21 +1622,14 @@ void Sequence
 void Sequence
 ::explore_thread_rec_inverse(Socket* socket, std::vector<runtime::Socket*>& liste_fwd)
 {
-
 		auto bound = &socket->get_bound_socket();
-
-
-		
 		if (find(liste_fwd.begin(),liste_fwd.end(),bound)==liste_fwd.end() ){
-				liste_fwd.push_back(bound);
+			liste_fwd.push_back(bound);
 		}
-		
 		if (bound->get_type() == socket_t::SFWD){
-				explore_thread_rec(bound,liste_fwd);
-				explore_thread_rec_inverse(bound,liste_fwd);
+			explore_thread_rec(bound,liste_fwd);
+			explore_thread_rec_inverse(bound,liste_fwd);
 		}	
-	
-
 }
 
 void Sequence
@@ -1687,7 +1679,6 @@ void Sequence
 									if (socket->get_type() == socket_t::SFWD)
 										this->explore_thread_rec(socket, bound_sockets);	
 								}
-
 								for (auto sck : bound_sockets)
 									dataptrs.push_back(sck->get_dataptr());
 
@@ -1737,7 +1728,6 @@ void Sequence
 									if (socket->get_type() == socket_t::SFWD)
 										this->explore_thread_rec(socket, bound_sockets);
 								}
-
 								for (auto sck : bound_sockets)
 									dataptrs.push_back(sck->get_dataptr());
 
@@ -1786,9 +1776,9 @@ void Sequence
 									bound_sockets.push_back(pull_task->sockets[s].get());
 									for (auto socket : pull_task->sockets[s]->get_bound_sockets())
 									{
-											bound_sockets.push_back(socket);
-											if (socket->get_type() == socket_t::SFWD)
-												this->explore_thread_rec(socket, bound_sockets);
+										bound_sockets.push_back(socket);
+										if (socket->get_type() == socket_t::SFWD)
+											this->explore_thread_rec(socket, bound_sockets);
 										
 									}
 
@@ -1827,10 +1817,7 @@ void Sequence
 								}
 								adp_pull->wake_up_pusher();
 								return status;
-							};
-						
-
-						
+							};						
 					}
 
 					if (dynamic_cast<module::Adaptor*>(&task->get_module()) &&
