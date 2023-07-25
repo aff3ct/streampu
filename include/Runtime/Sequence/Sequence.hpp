@@ -243,6 +243,12 @@ protected:
 
 	void update_firsts_and_lasts_tasks();
 
+	void _set_n_frames_unbind(std::vector<std::pair<runtime::Socket*, runtime::Socket*>> &unbind_sockets,
+                              std::vector<std::pair<runtime::Task*,   runtime::Socket*>> &unbind_tasks);
+	void _set_n_frames(const size_t n_frames);
+	void _set_n_frames_rebind(const std::vector<std::pair<runtime::Socket*, runtime::Socket*>> &unbind_sockets,
+                              const std::vector<std::pair<runtime::Task*,   runtime::Socket*>> &unbind_tasks);
+
 private:
 	template <class SS, class TA>
 	void init(const std::vector<TA*> &firsts, const std::vector<TA*> &lasts, const std::vector<TA*> &exclusions);
