@@ -73,8 +73,10 @@ nav:
   - Home: 
     - index.md
   - Elementary Componenets:
-      - Socket.md
       - module & task.md
+      - Socket.md
       - Sequence & Subsequence.md
       - Pipeline & Adaptor.md
       - Switcher.md
+  - New features : 
+      - Forward socket.md

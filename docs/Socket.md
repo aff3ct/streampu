@@ -50,8 +50,10 @@ The most important methods of the socket class are the bind and unbind functions
 void  bind(Socket  &s_out, const  int  priority = -1);
 ```
 This function is used to connect sockets with each other, it can be called by an input or forward socket and takes as parameter an output or forward socket. The function gets the caller's `dataptr` and redirects it to `s_out dataptr`.  
-??? success "Valid bindings"
-    ![Task with sockets!](./assets/bind_permission.svg)
+=== "Valid bindings"
+    ![Valid bind](./assets/bind_permission.svg)
+=== "Invalid bindings"
+    ![Invalid bind](./assets/invalide_bind.svg)
 
 ```cpp
 void  unbind(Socket  &s_out, const  int  priority = -1);

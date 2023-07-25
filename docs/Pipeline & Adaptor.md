@@ -130,12 +130,12 @@ Get a pointer to the first filled buffer in the pool (at index first).
 ```cpp
 virtual  void*  get_empty_buffer(const  size_t  sid, void*  swap_buffer) =  0;
 ```
-Get a pointer to the first empty  buffer in the pool, and replace that buffer with a new one pointed by `swap_bufer `. 
+Get a pointer to the first empty  buffer in the pool, and replace that buffer with a new one pointed by `swap_buffer `parameter. 
 
 ```cpp
 virtual  void*  get_filled_buffer(const  size_t  sid, void*  swap_buffer) =  0;
 ```
-Get a pointer to the first filled  buffer in the pool, and replace that buffer with a new one pointed by `swap_bufer `.
+Get a pointer to the first filled  buffer in the pool, and replace that buffer with a new one pointed by `swap_buffer `parameter.
 
 ```cpp
 virtual  void  wake_up_pusher() =  0;
