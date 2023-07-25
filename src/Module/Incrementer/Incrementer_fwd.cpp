@@ -1,6 +1,5 @@
 #include <chrono>
 #include <sstream>
-#include<iostream>
 
 #include "Module/Incrementer/Incrementer_fwd.hpp"
 
@@ -24,12 +23,11 @@ Incrementer_fwd<T>
 	}
 
 	auto &p = this->create_task("increment");
-	auto ps_fwd  = this->template create_socket_fwd <T>(p, "fwd",  this->n_elmts);
+	auto ps_fwd  = this->template create_socket_fwd <T>(p, "fwd", this->n_elmts);
 	this->create_codelet(p, [ps_fwd](Module &m, runtime::Task &t, const size_t frame_id) -> int
 	{
 		auto &inc = static_cast<Incrementer_fwd&>(m);
-		inc._increment_fwd(static_cast<      T*>(t[ps_fwd].get_dataptr()),
-		               frame_id);
+		inc._increment_fwd(static_cast<T*>(t[ps_fwd].get_dataptr()), frame_id);
 		return runtime::status_t::SUCCESS;
 	});
 }
@@ -71,7 +69,6 @@ void Incrementer_fwd<T>
 	(*this)[inc_fwd::sck::increment_fwd::fwd ].bind(fwd );
 	(*this)[inc_fwd::tsk::increment_fwd].exec(frame_id, managed_memory);
 }
-
 
 template <typename T>
 void Incrementer_fwd<T>

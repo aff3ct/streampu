@@ -66,7 +66,7 @@ protected:
 	size_t n_fwd_sockets; 
 
 	std::vector<int> status;
-	std::vector<std::vector<uint8_t>> out_buffers; 
+	std::vector<std::vector<uint8_t>> out_buffers;
 
 	// stats
 	uint32_t                 n_calls;
@@ -89,8 +89,8 @@ protected:
 	std::vector<std::vector<int8_t >> sockets_data;
 
 public:
-	std::shared_ptr<Socket> fake_input_socket; 
-	std::vector<std::shared_ptr<Socket>> sockets;	
+	std::shared_ptr<Socket> fake_input_socket;
+	std::vector<std::shared_ptr<Socket>> sockets;
 
 	Task(      module::Module &module,
 	     const std::string &name,
@@ -172,7 +172,6 @@ protected:
 	size_t create_socket_out(const std::string &name, const size_t n_elmts, const bool hack_status = false);
 	size_t create_socket_out(const std::string &name, const size_t n_elmts, const std::type_index& datatype,
 	                         const bool hack_status = false);
-
 
 	template <typename T>
 	size_t create_socket_fwd(const std::string &name, const size_t n_elmts);

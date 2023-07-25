@@ -1,4 +1,5 @@
 #include <sstream>
+#include <cstdint>
 
 #include "Tools/Exception/exception.hpp"
 #include "Tools/compute_bytes.h"

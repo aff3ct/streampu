@@ -1,6 +1,5 @@
 #include <chrono>
 #include <sstream>
-#include<iostream>
 
 #include "Module/Incrementer/Incrementer.hpp"
 
@@ -74,7 +73,6 @@ void Incrementer<T>
 	(*this)[inc::sck::increment::out].bind(out);
 	(*this)[inc::tsk::increment].exec(frame_id, managed_memory);
 }
-
 
 template <typename T>
 void Incrementer<T>

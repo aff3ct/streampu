@@ -20,8 +20,6 @@ namespace runtime
 {
 class Pipeline : public tools::Interface_get_set_n_frames
 {
-
-
 protected:
 	Sequence original_sequence;
 	std::vector<std::shared_ptr<Sequence>> stages;
@@ -44,7 +42,6 @@ protected:
 	bool bound_adaptors;
 	bool auto_stop;
 	
-
 public:
 	// Pipeline(const runtime::Task &first,
 	//          const std::vector<std::pair<std::vector<const runtime::Task*>, std::vector<const runtime::Task*>>> &sep_stages = {},

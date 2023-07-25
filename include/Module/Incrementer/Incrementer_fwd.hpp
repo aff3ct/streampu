@@ -21,7 +21,7 @@ namespace module
 
 		namespace sck
 		{
-			enum class increment_fwd : size_t {fwd,status };
+			enum class increment_fwd : size_t { fwd, status };
 		}
 	}
 
@@ -29,7 +29,7 @@ template <typename T = int>
 class Incrementer_fwd : public Module
 {
 public:
-	inline runtime::Task&   operator[](const inc_fwd::tsk            t);
+	inline runtime::Task&   operator[](const inc_fwd::tsk                t);
 	inline runtime::Socket& operator[](const inc_fwd::sck::increment_fwd s);
 
 protected:

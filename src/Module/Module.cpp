@@ -192,7 +192,7 @@ runtime::Task& Module
 }
 
 void Module
-::create_codelet(runtime::Task& task, std::function<int(Module &m, runtime::Task &t, const size_t frame_id)> codelet) // Définit le code de la fonction à éxecuter !
+::create_codelet(runtime::Task& task, std::function<int(Module &m, runtime::Task &t, const size_t frame_id)> codelet)
 {
 	task.create_codelet(codelet);
 }
@@ -209,7 +209,6 @@ size_t Module
 	return task.create_socket_out(name, n_elmts * this->n_frames, datatype);
 }
 
-// Modif : Création d'une fonction pour ajout des sockets in-out 
 size_t Module
 ::create_socket_fwd(runtime::Task& task, const std::string &name, const size_t n_elmts, const std::type_index& datatype)
 {

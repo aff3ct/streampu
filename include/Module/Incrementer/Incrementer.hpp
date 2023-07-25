@@ -52,7 +52,6 @@ public:
 
 	void increment(const T *in, T *out, const int frame_id = -1, const bool managed_memory = true);
 
-
 protected:
 	virtual void _increment(const T *in, T *out, const size_t frame_id);
 };

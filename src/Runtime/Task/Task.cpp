@@ -228,9 +228,9 @@ void Task
 
 	// do not use 'this->status' because the dataptr can have been changed by the 'tools::Sequence' when using the no
 	// copy mode
-	int* status = (int*)this->sockets.back()->get_dataptr(); 
+	int* status = (int*)this->sockets.back()->get_dataptr();
 	for (size_t w = 0; w < n_waves; w++)
-		status[w] = (int)status_t::UNKNOWN; 
+		status[w] = (int)status_t::UNKNOWN;
 
 	if ((managed_memory == false && frame_id >= 0)        ||
 		(frame_id == -1 && n_frames_per_wave == n_frames) ||
@@ -250,7 +250,6 @@ void Task
 
 		if (frame_id > 0 && managed_memory == true && n_frames_per_wave > 1)
 		{
-
 			// We don't have to check for forward because it shares the same dataptr as the input sockets
 			const size_t w = (frame_id % n_frames) / n_frames_per_wave;
 			const size_t w_pos = frame_id % n_frames_per_wave;
@@ -537,9 +536,8 @@ Socket& Task
 			message << "Creating new sockets after the 'status' socket is forbidden.";
 			throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
 		}
-	// Partie importante pour la création de la socket 
 
-	auto s = std::make_shared<Socket>(*this, name, typeid(T), n_elmts * sizeof(T), type, this->is_fast()); // Création de la socket après toute les vérifs
+	auto s = std::make_shared<Socket>(*this, name, typeid(T), n_elmts * sizeof(T), type, this->is_fast());
 
 	sockets.push_back(std::move(s));
 
@@ -628,7 +626,6 @@ size_t Task
 	}
 }
 
-
 template <typename T>
 size_t Task
 ::create_socket_fwd(const std::string &name, const size_t n_elmts)
@@ -680,7 +677,6 @@ void Task
 {
 	size_t s_id = 0;
 	size_t sout_id = 0;
-	
 	for (auto &s : this->sockets)
 	{
 		if (s->get_name() == "status")
@@ -694,12 +690,10 @@ void Task
 		}
 		else
 		{
-			
 			const auto old_databytes = s->get_databytes();
 			const auto new_databytes = (old_databytes / old_n_frames) * new_n_frames;
 			s->set_databytes(new_databytes);
 			
-
 			if (this->is_autoalloc() && this->socket_type[s_id] == socket_t::SOUT)
 			{
 				this->out_buffers[sout_id].resize(new_databytes);
@@ -824,7 +818,6 @@ size_t Task
 	return this->n_output_sockets;
 }
 
-
 size_t Task
 ::get_n_fwd_sockets() const
 {
@@ -911,7 +904,7 @@ void Task
 void Task
 ::bind(Socket &s_out, const int priority)
 {
-	if (this->is_no_input_socket()) // On s'occupe de créer la socket initializer et donc utiliser la fake_socket !
+	if (this->is_no_input_socket())
 	{
 		this->fake_input_socket.reset(new Socket(*this,
 		                                         "fake",

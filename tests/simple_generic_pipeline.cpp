@@ -124,8 +124,8 @@ int main(int argc, char** argv)
 	std::string n_threads_param; std::vector<size_t> n_threads;
 	size_t n_inter_frames = 1;
 	size_t sleep_time_us = 5;
-	size_t data_length =512;
-	size_t buffer_size =5;
+	size_t data_length =2048;
+	size_t buffer_size =16;
 	std::string dot_filepath;
 	std::string in_filepath;
 	std::string out_filepath = "file.out";
@@ -269,24 +269,22 @@ int main(int argc, char** argv)
 		}
 	}
 
-	// Checking for errors 
-	// Checking for sockets type 
+	// Checking for errors  
 	if (!socket_type_stage.empty() && !socket_type_task.empty()){
 		message << "You have to select only one parameter for socket type "; 
 		throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
 	}
 
 	// Constructing the socket type vector in case of stage socket 
-
 	for (size_t i = 0; i<socket_type_stage.size();++i){
 		socket_type_task.push_back({});
 		for (size_t j=0; j<task_per_stage[i];++j)
 			socket_type_task[i].push_back(socket_type_stage[i]);
 	}
 
-
 	// Get the stage number
 	stages_number = task_per_stage.size();
+
 	// Parametre checking 
 	if(stages_number != (n_threads.size()-2) || stages_number != socket_type_task.size()){
 		message << "Number of stages is incoherent";
@@ -300,7 +298,6 @@ int main(int argc, char** argv)
 			throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
 		}
 	}
-
 
 	std::cout << "####################################" << std::endl;
 	std::cout << "# Micro-benchmark: Generic pipeline #" << std::endl;
@@ -331,13 +328,11 @@ int main(int argc, char** argv)
 	if (!force_sequence && step_by_step)
 		std::clog << rang::tag::warning << "'step_by_step' is not available with pipeline" << std::endl;
 
-
 	// modules creation
 	const bool auto_reset = false;
 	module::Source_user_binary<uint8_t> source(data_length, in_filepath, auto_reset);
 	module::Sink_user_binary<uint8_t> sink(data_length, out_filepath);
 
-	
 	// Task creation
 	std::vector<std::shared_ptr<module::Module>> rlys(std::accumulate(task_per_stage.begin(), task_per_stage.end(), 0));
 	size_t tas = 0;
@@ -363,7 +358,6 @@ int main(int argc, char** argv)
 		}	
 	}
 	
-
 	// Task binding 
 	// First task to bind to the initializer
 	tas= 0;
@@ -373,8 +367,6 @@ int main(int argc, char** argv)
 		(*dynamic_cast<module::Relayer<uint8_t>*>(rlys[tas].get()))[module::rly::sck::relay::in] = source[module::src::sck::generate::out_data];
 	} 
 
-	
-	
 	// Binding tasks between them
 	for (size_t i =0 ; i < socket_type_task.size();++i){
 		for (size_t j=0; j<socket_type_task[i].size()-1;++j){	
@@ -430,9 +422,6 @@ int main(int argc, char** argv)
 		}
 	sink[module::snk::sck::send_count::in_count] = source[module::src::sck::generate::out_count];
 
-	
-
-	/*Program run */
 	std::unique_ptr<runtime::Sequence> sequence_chain;
 	std::unique_ptr<runtime::Pipeline> pipeline_chain;
 
@@ -511,18 +500,15 @@ int main(int argc, char** argv)
 			tas += socket_type_task[i].size();
 			
 		}
-		
-		
 
 		// Last stage creation 	with the sink
 		stage_creat.push_back({{&sink[module::snk::tsk::send_count]},{}}); 
 
-	
-		
 		// Buffer vector 
 		std::vector<size_t> pool_buff ;
 		for (size_t i =0;i<stages_number +1 ; ++i)
 			pool_buff.push_back(buffer_size);
+
 		// Waiting vector
 		std::vector<bool> wait_vect ;
 		for (size_t i =0;i<stages_number +1 ; ++i)
@@ -657,7 +643,7 @@ int main(int argc, char** argv)
 		sink[module::snk::sck::send_count::in_data].unbind((*dynamic_cast<module::Relayer_fwd<uint8_t>*>(rlys[tas].get()))[module::rly_fwd::sck::relay_fwd::fwd]);
 	}else{
 		sink[module::snk::sck::send_count::in_data].unbind((*dynamic_cast<module::Relayer<uint8_t>*>(rlys[tas].get()))[module::rly::sck::relay::out]);
-		}
+	}
 
 	sink[module::snk::sck::send_count::in_count].unbind(source[module::src::sck::generate::out_count]);
 	

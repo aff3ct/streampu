@@ -59,7 +59,7 @@ void Adaptor
 	}
 
 	this->waiting_canceled.reset(new std::atomic<bool>(m.waiting_canceled->load()));
-}	
+}
 
 void Adaptor
 ::send_cancel_signal()
@@ -142,5 +142,3 @@ void Adaptor
 			}
 	}
 }
-
-

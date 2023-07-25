@@ -41,7 +41,7 @@ protected:
 	size_t               databytes;
 	bool                 fast;
 	void*                dataptr;
-	std::vector<Socket*> bound_sockets; 
+	std::vector<Socket*> bound_sockets;
 	Socket*              bound_socket;
 	socket_t             type;
 
@@ -63,7 +63,6 @@ public:
 	inline const Socket&               get_bound_socket   () const;
 	inline       Socket&               get_bound_socket   ();
 	inline socket_t                    get_type           () const;
-
 
 	inline void set_fast(const bool fast);
 

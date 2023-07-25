@@ -46,8 +46,8 @@ public:
 
 	template <class A = std::allocator<T>>
 	void relay_fwd(std::vector<T,A>& fwd,
-	           const int frame_id = -1,
-	           const bool managed_memory = true);
+	               const int frame_id = -1,
+	               const bool managed_memory = true);
 
 	void relay_fwd(T *fwd, const int frame_id = -1, const bool managed_memory = true);
 

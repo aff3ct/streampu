@@ -27,8 +27,7 @@ Relayer_fwd<T>
 	this->create_codelet(p, [ps_fwd](Module &m, runtime::Task &t, const size_t frame_id) -> int
 	{
 		auto &rly_fwd = static_cast<Relayer_fwd&>(m);
-		rly_fwd._relay_fwd(static_cast<T*>(t[ps_fwd].get_dataptr()),
-		              frame_id);
+		rly_fwd._relay_fwd(static_cast<T*>(t[ps_fwd].get_dataptr()), frame_id);
 		return runtime::status_t::SUCCESS;
 	});
 }
@@ -79,7 +78,7 @@ void Relayer_fwd<T>
 	if (this->ns)
 		t_start = std::chrono::steady_clock::now();
 
-	//std::copy(in, in + this->n_elmts, out);
+		// do nothing
 
 	if (this->ns)
 	{

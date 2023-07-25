@@ -922,7 +922,6 @@ void Pipeline
 	}
 }
 
-
 void Pipeline
 ::exec(const std::vector<std::function<bool(const std::vector<const int*>&)>> &stop_conditions)
 {

@@ -35,7 +35,7 @@ public:
 	inline size_t create_socket_out(runtime::Task& task, const std::string &name, const size_t n_elmts);
 	size_t create_socket_out(runtime::Task& task, const std::string &name, const size_t n_elmts, const std::type_index& datatype);
 
-	// Ajout de la création des sockets FWD pour les modules stateless 
+	// Add FWD support for Stateless modules 
 	template <typename T>
 	inline size_t create_socket_fwd(runtime::Task& task, const std::string &name, const size_t n_elmts);
 	size_t create_socket_fwd(runtime::Task& task, const std::string &name, const size_t n_elmts, const std::type_index& datatype);

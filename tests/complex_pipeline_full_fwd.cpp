@@ -9,7 +9,6 @@
 #include <getopt.h>
 
 #include <aff3ct-core.hpp>
-#include <Module/Incrementer/Incrementer_fwd.hpp>
 using namespace aff3ct;
 using namespace aff3ct::runtime;
 
@@ -130,7 +129,6 @@ int main(int argc, char** argv)
 	std::cout << "#   - active_waiting = " << (active_waiting ? "true" : "false") << std::endl;
 	std::cout << "#" << std::endl;
 
-	
 	module::Initializer<uint8_t> initializer(data_length);
 	module::Finalizer  <uint8_t> finalizer  (data_length);
 
@@ -151,14 +149,13 @@ int main(int argc, char** argv)
 		rlys_fwd[s]->set_custom_name("Relayer_fwd" + std::to_string(s));
 	}
 
-	
 	/****************************************************************************************************************************/
 	// StateLess module used only for the test
 	module::Stateless comp;
 	comp.set_name("comparator");
 	auto& task_comp = comp.create_task("compare");
-	auto sock_0 = comp.create_socket_fwd<uint8_t>(task_comp,"fwd_0",data_length);
-	auto sock_1 = comp.create_socket_fwd<uint8_t>(task_comp,"fwd_1",data_length);
+	auto sock_0 = comp.create_socket_fwd<uint8_t>(task_comp, "fwd_0", data_length);
+	auto sock_1 = comp.create_socket_fwd<uint8_t>(task_comp, "fwd_1", data_length);
 	
 	comp.create_codelet(task_comp,[sock_0, sock_1,data_length,incs_fwd](module::Module &m, runtime::Task &t, const size_t frame_id) -> int
 	{
@@ -166,10 +163,10 @@ int main(int argc, char** argv)
 		auto tab_1 = (uint8_t*)(t[sock_1].get_dataptr()); 
 		for (size_t i=0;i<data_length;i++)
 			if(tab_0[i] != tab_1[i]){
-				std::cout << "Les valuers sont différentes => " << " Tab_0 : " << unsigned (tab_0[i]) <<  ", Tab_1 : " << unsigned (tab_1[i]) << std::endl;
+				std::cout << "Found different values => " << " Tab_0 : " << unsigned (tab_0[i]) <<  ", Tab_1 : " << unsigned (tab_1[i]) << std::endl;
 				return runtime::status_t::FAILURE;
 			}
-		std::cout << "Toutes les valeurs sont bonnes " << "Expected : " << unsigned (tab_0[0]) << ", got : " << unsigned (tab_1[0]) <<std::endl;
+		std::cout << "All the values are correct " << "Expected : " << unsigned (tab_0[0]) << ", got : " << unsigned (tab_1[0]) <<std::endl;
 		return runtime::status_t::SUCCESS;
 	});
 	/****************************************************************************************************************************/
@@ -182,49 +179,46 @@ int main(int argc, char** argv)
 	comp["compare::fwd_0"] = (*rlys_fwd[1])[module::rly_fwd::sck::relay_fwd::fwd];
     comp["compare::fwd_1"] =  (*incs_fwd[1])[module::inc_fwd::sck::increment_fwd::fwd];
 	finalizer[module::fin::sck::finalize::in] = comp["compare::fwd_1"];
-
-	
  
 	std::unique_ptr<runtime::Pipeline> pipeline_chain;
 
-	
-		pipeline_chain.reset(new runtime::Pipeline(
-		                     initializer[module::ini::tsk::initialize], // first task of the sequence
-		                     {  // pipeline stage 0
-		                       { { &initializer[module::ini::tsk::initialize] },   // first tasks of stage 0
-		                         { &(*rlys_fwd[0])[module::rly_fwd::tsk::relay_fwd] } }, // last  tasks of stage 0
-		                        // pipeline stage 1
-		                       { { &(*incs_fwd[0])[module::inc_fwd::tsk::increment_fwd] },   // first tasks of stage 1
-		                         { &(*incs_fwd[0])[module::inc_fwd::tsk::increment_fwd] } }, // last  tasks of stage 1
-								// pipeline stage 3
-								{ {&(*rlys_fwd[1])[module::rly_fwd::tsk::relay_fwd] },        // first tasks of stage 2
-		                         { &(*rlys_fwd[1])[module::rly_fwd::tsk::relay_fwd]} },       // last  tasks of stage 2
-		                        // pipeline stage 3
-		                       { {&(*incs_fwd[1])[module::inc_fwd::tsk::increment_fwd] },     // first tasks of stage 3
-		                         { &(*incs_fwd[1])[module::inc_fwd::tsk::increment_fwd] } },  // last  tasks of stage 3
-                               { {&task_comp },                                               // first tasks of stage 4
-		                         { & finalizer[module::fin::tsk::finalize] } },               // last  tasks of stage 4
-                             },
-		                     {
-		                       1,											// number of threads in the stage 0
-		                       n_threads ? n_threads : 1,					// number of threads in the stage 1
-							   1,											// number of threads in the stage 2
-                               n_threads ? n_threads : 1,					// number of threads in the stage 3
-		                       1                       						// number of threads in the stage 4
-		                     },
-		                     {
-		                       buffer_size, // synchronizatfwdn buffer size between stages 0 and 1
-		                       buffer_size, // synchronization buffer size between stages 1 and 2
-                               buffer_size, // synchronization buffer size between stages 2 and 3
-							   buffer_size, // synchronization buffer size between stages 4 and 4
-		                     },
-		                     {
-		                       active_waiting, // type of waiting between stages 0 and 1 (true = active, false = passive)
-		                       active_waiting, // type of waiting between stages 1 and 2 (true = active, false = passive)
-							   active_waiting, // type of waiting between stages 2 and 3 (true = active, false = passive)
-                               active_waiting, // type of waiting between stages 3 and 4 (true = active, false = passive)
-		                     }));
-		pipeline_chain->set_n_frames(n_inter_frames);
+	pipeline_chain.reset(new runtime::Pipeline(
+	                     initializer[module::ini::tsk::initialize], 					// first task of the sequence
+	                     {  // pipeline stage 0
+	                    	{ { &initializer[module::ini::tsk::initialize] },   		// first tasks of stage 0
+	                         { &(*rlys_fwd[0])[module::rly_fwd::tsk::relay_fwd] } }, 	// last  tasks of stage 0
+	                        // pipeline stage 1
+	                    	{ { &(*incs_fwd[0])[module::inc_fwd::tsk::increment_fwd] },  // first tasks of stage 1
+	                         { &(*incs_fwd[0])[module::inc_fwd::tsk::increment_fwd] } }, // last  tasks of stage 1
+							// pipeline stage 3
+							{ {&(*rlys_fwd[1])[module::rly_fwd::tsk::relay_fwd] },       // first tasks of stage 2
+	                         { &(*rlys_fwd[1])[module::rly_fwd::tsk::relay_fwd]} },      // last  tasks of stage 2
+	                        // pipeline stage 3
+	                    	{ {&(*incs_fwd[1])[module::inc_fwd::tsk::increment_fwd] },    // first tasks of stage 3
+	                         { &(*incs_fwd[1])[module::inc_fwd::tsk::increment_fwd] } },  // last  tasks of stage 3
+                        	{ {&task_comp },                                              // first tasks of stage 4
+	                         { & finalizer[module::fin::tsk::finalize] } },               // last  tasks of stage 4
+                         },
+	                     {
+	                       	1,							// number of threads in the stage 0
+	                       	n_threads ? n_threads : 1,	// number of threads in the stage 1
+						   	1,							// number of threads in the stage 2
+                           	n_threads ? n_threads : 1,	// number of threads in the stage 3
+	                       	1                       	// number of threads in the stage 4
+	                     },
+	                     {
+	                       	buffer_size,	// synchronizatfwdn buffer size between stages 0 and 1
+	                       	buffer_size, 	// synchronization buffer size between stages 1 and 2
+                           	buffer_size, 	// synchronization buffer size between stages 2 and 3
+						   	buffer_size, 	// synchronization buffer size between stages 4 and 4
+	                     },
+	                     {
+	                       	active_waiting, 	// type of waiting between stages 0 and 1 (true = active, false = passive)
+	                       	active_waiting, 	// type of waiting between stages 1 and 2 (true = active, false = passive)
+						   	active_waiting, 	// type of waiting between stages 2 and 3 (true = active, false = passive)
+                           	active_waiting, 	// type of waiting between stages 3 and 4 (true = active, false = passive)
+	                     }));
+	pipeline_chain->set_n_frames(n_inter_frames);
 
 	// Getting the input data
 	auto tid = 0;
@@ -289,9 +283,7 @@ int main(int argc, char** argv)
 
 	unsigned int test_results = !tests_passed;
 
-
 	// Sockets unbinding
-
 	pipeline_chain->set_n_frames(1);
 	pipeline_chain->unbind_adaptors();
 
@@ -308,6 +300,4 @@ int main(int argc, char** argv)
 	finalizer[module::fin::sck::finalize::in].unbind(comp["compare::fwd_1"]);
 	
 	return test_results;
-
-	
 }

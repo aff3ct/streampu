@@ -1,7 +1,6 @@
 #include <algorithm>
 #include <iterator>
 #include <sstream>
-#include <iostream>
 
 #include "Tools/Exception/exception.hpp"
 #include "Runtime/Socket/Socket.hpp"
@@ -154,7 +153,6 @@ void Socket
 void Socket
 ::bind(Socket &s_out, const int priority)
 {
-
 	if (!is_fast())
 	{
 		if (s_out.datatype != this->datatype)
@@ -193,12 +191,12 @@ void Socket
 		if (s_out.dataptr == nullptr)
 		{
 			std::stringstream message;
-			message << "'s_out.dataptr' can't be NULL." ;
+			message << "'s_out.dataptr' can't be NULL.";
 			throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
 		}
 	}
 
-	if (this->bound_socket == &s_out) // Si on on veut re-bind sur la même socket => On la retire !
+	if (this->bound_socket == &s_out)
 		this->unbind(s_out);
 
 	if (this->bound_socket != nullptr && this->get_type() == socket_t::SIN)
@@ -221,7 +219,7 @@ void Socket
 		throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
 	}
 
-	this->bound_socket = &s_out; 
+	this->bound_socket = &s_out;
 
 	if (std::find(s_out.bound_sockets.begin(), s_out.bound_sockets.end(), this) != s_out.bound_sockets.end())
 	{
@@ -256,7 +254,7 @@ template <typename T>
 void Socket
 ::operator=(const void *array)
 {
-	if (this->get_type() == socket_t::SIN || this->get_type() == socket_t::SFWD )  
+	if (this->get_type() == socket_t::SIN || this->get_type() == socket_t::SFWD)  
 		this->bind(array);
 	else
 	{
@@ -377,13 +375,11 @@ void Socket
 {
 	if ((s.get_type() == socket_t::SOUT || s.get_type() == socket_t::SFWD) && (this->get_type() == socket_t::SIN || this->get_type() == socket_t::SFWD))
 		this->bind(s);
-	else if ((s.get_type() == socket_t::SIN || s.get_type() == socket_t::SFWD ) && (this->get_type() == socket_t::SOUT || this->get_type() == socket_t::SFWD ))
+	else if ((s.get_type() == socket_t::SIN || s.get_type() == socket_t::SFWD ) && (this->get_type() == socket_t::SOUT || this->get_type() == socket_t::SFWD))
 		s.bind(*this);
 	// Socket forward bind
 	else if (s.get_type() == socket_t::SFWD && this->get_type() == socket_t::SFWD) 
 		this->bind(s);
-	else if (this->get_type() == socket_t::SFWD && s.get_type() == socket_t::SFWD) 
-		s.bind(*this);
 	else
 	{
 		std::stringstream message;
@@ -547,7 +543,6 @@ size_t Socket
 
 	if (this->bound_socket != &s_out)
 	{
-
 		std::stringstream message;
 		message << "This socket is connected to a different socket than 's_out' ("
 		        << "'bound_socket->databytes'"        << " = " << this->bound_socket->databytes              << ", "

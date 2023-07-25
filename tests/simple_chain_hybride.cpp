@@ -8,7 +8,6 @@
 #include <getopt.h>
 
 #include <aff3ct-core.hpp>
-#include <Module/Incrementer/Incrementer_fwd.hpp>
 using namespace aff3ct;
 using namespace aff3ct::runtime;
 
@@ -160,8 +159,8 @@ int main(int argc, char** argv)
 	module::Finalizer  <uint8_t> finalizer  (data_length);
 
     // Définition des module d'incrémentation standard/IO
-	std::vector<std::shared_ptr<module::Incrementer_fwd<uint8_t>>> incs_fwd(10);
-    std::vector<std::shared_ptr<module::Incrementer<uint8_t>>> incs(20); 
+	std::vector<std::shared_ptr<module::Incrementer_fwd<uint8_t>>> incs_fwd(6);
+    std::vector<std::shared_ptr<module::Incrementer<uint8_t>>> incs(6); 
 	
     // Initialisation des modules fwdt_output!
     for (size_t s = 0; s < incs.size(); s++)
@@ -209,22 +208,9 @@ int main(int argc, char** argv)
 		for (; s < incs.size() - 1; ++s)
 			(*incs[s+1])[module::inc::sck::increment::in] = (*incs[s])[module::inc::sck::increment::out];
 
-
 		finalizer[module::fin::sck::finalize::in] = (*incs[incs.size()-1])[module::inc::sck::increment::out]; // Connection à la socket finalizer !
 	}
-    // Code à ne pas modifier pour le moment car pas intéressant !
-	else
-	{
-		/*for (size_t s = 0; s < incs.size() -1; s++)
-			(*incs[s+1])[module::inc_io::sck::increment_io::fwd] = (*incs[s])[module::inc_io::sck::increment_io::fwd];
-
-		partial_sequence.reset(new runtime::Sequence((*incs[0])[module::inc_io::tsk::increment_io],
-		                                             (*incs[incs.size() -1])[module::inc_io::tsk::increment_io]));
-		subsequence.reset(new module::Subsequence(*partial_sequence));
-		(*subsequence)[module::ssq::tsk::exec    ][ 0] = initializer   [module::ini::sck::initialize::out];
-		finalizer     [module::fin::sck::finalize::in] = (*subsequence)[module::ssq::tsk::exec      ][  1];*/
-	}
-
+   
 	runtime::Sequence sequence_chain(initializer[module::ini::tsk::initialize], n_threads);
 	sequence_chain.set_n_frames(n_inter_frames);
 	sequence_chain.set_no_copy_mode(no_copy_mode);
@@ -265,20 +251,15 @@ int main(int argc, char** argv)
 			aff3ct::tools::help(*incs[s]);
 		aff3ct::tools::help(finalizer);
 	}
-
-		/*----------------------------------------------------------------------------------------------------------------------*/
-	// On essaye de récuprer une matrice de sockets FWD pour l'utiliser dans le pipeline 
+	
 	std::vector<runtime::Socket*> liste_fwd;
 
-	// Il faut parcourir les thrads
-	for (size_t i=0 ; i< sequence_chain.get_tasks_per_threads().size();++i){
-		
-		// Il faut parcourir les tasks de chaque threaed
+	
+	for (size_t i=0 ; i< sequence_chain.get_tasks_per_threads().size();++i){	
+	
 		for(size_t j=incs.size()/2+1; j<sequence_chain.get_tasks_per_threads()[i].size(); ++j ){
 			auto task = sequence_chain.get_tasks_per_threads()[i][j];
 
-			// Si la tâche ne contient pas de socket fwd => pas la peine de continuer à verifier les autres tâche qui viennent après
-			// L'hypothèse est vrai dans le cas où le parcours respecte l'ordre du bind
 			if (task->get_n_fwd_sockets() == 0)
 				break;
 			for (auto socket : task->sockets){
@@ -288,12 +269,6 @@ int main(int argc, char** argv)
 			}
 		}
 	}
-
-
-	std::cout << "Le nombre de FWD trouvé est : " << liste_fwd.size() << std::endl; 
-
-	/*----------------------------------------------------------------------------------------------------------------------*/
-
 
 	std::atomic<unsigned int> counter(0);
 	auto t_start = std::chrono::steady_clock::now();
@@ -369,13 +344,6 @@ int main(int argc, char** argv)
 			(*incs[s+1])[module::inc::sck::increment::in].unbind((*incs[s])[module::inc::sck::increment::out]);
 		finalizer[module::fin::sck::finalize::in].unbind((*incs[incs.size()-1])[module::inc::sck::increment::out]);
 	}
-	else
-	{
-		/*for (size_t s = 0; s < incs.size() -1; s++)
-			(*incs[s+1])[module::inc_fwd::sck::increment_fwd::fwd].unbind((*incs[s])[module::inc_fwd::sck::increment_fwd::fwd]);
-		(*subsequence)[module::ssq::tsk::exec    ][ 0].unbind(initializer   [module::ini::sck::initialize::out]);
-		finalizer     [module::fin::sck::finalize::in].unbind((*subsequence)[module::ssq::tsk::exec      ][  1]);*/
-	}
-
+	
 	return test_results;
 }
