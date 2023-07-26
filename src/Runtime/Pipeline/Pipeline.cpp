@@ -1298,8 +1298,20 @@ void Pipeline
 	this->_unbind_adaptors(false);
 
 	// set the new "n_frames" val in the sequences
-	for (auto &sta : this->stages)
-		sta->set_n_frames(n_frames);
+	std::vector<std::vector<std::pair<runtime::Socket*,runtime::Socket*>>> unbind_sockets(this->stages.size());
+	std::vector<std::vector<std::pair<runtime::Task*,  runtime::Socket*>>> unbind_tasks(this->stages.size());
+	std::vector<bool> skip(this->stages.size());
+	for (size_t s = 0; s < this->stages.size(); s++)
+		skip[s] = this->stages[s]->get_n_frames() == n_frames;
+	for (size_t s = 0; s < this->stages.size(); s++)
+		if (!skip[s])
+			this->stages[s]->_set_n_frames_unbind(unbind_sockets[s], unbind_tasks[s]);
+	for (size_t s = 0; s < this->stages.size(); s++)
+		if (!skip[s])
+			this->stages[s]->_set_n_frames(n_frames);
+	for (size_t s = 0; s < this->stages.size(); s++)
+		if (!skip[s])
+			this->stages[s]->_set_n_frames_rebind(unbind_sockets[s], unbind_tasks[s]);
 
 	// set the new "n_frames" val in the adaptors
 	for (auto &adps : this->adaptors)
