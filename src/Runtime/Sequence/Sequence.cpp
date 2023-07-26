@@ -1769,7 +1769,6 @@ void Sequence
 						auto pull_task = task;
 						auto adp_pull = dynamic_cast<module::Adaptor*>(&pull_task->get_module());
 						adp_pull->set_no_copy_pull(true);
-
 						const auto rebind_id = contents->rebind_sockets.size();
 						contents->rebind_sockets.resize(rebind_id +1);
 						contents->rebind_dataptrs.resize(rebind_id +1);
