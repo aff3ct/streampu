@@ -403,6 +403,7 @@ std::vector<std::vector<runtime::Task*>> Sequence
 				tasks_per_threads[tid].insert(tasks_per_threads[tid].end(),
 				                              cur_ss->get_c()->tasks.begin(),
 				                              cur_ss->get_c()->tasks.end());
+
 				for (auto c : cur_ss->get_children())
 					get_tasks_recursive(c, tid, already_parsed_nodes);
 			}
@@ -1630,7 +1631,8 @@ void Sequence
 		{
 			list_fwd.push_back(bound);
 		}
-		if (bound->get_type() == socket_t::SFWD){
+		if (bound->get_type() == socket_t::SFWD)
+		{
 			explore_thread_rec(bound, list_fwd);
 			explore_thread_rec_reverse(bound, list_fwd);
 		}	
@@ -1726,6 +1728,7 @@ void Sequence
 							{
 								std::vector<runtime::Socket*> bound_sockets;
 								std::vector<void*> dataptrs;
+								
 								for (auto socket : commute_task->sockets[s]->get_bound_sockets())
 								{
 									bound_sockets.push_back(socket);
@@ -1773,15 +1776,16 @@ void Sequence
 								std::vector<runtime::Socket*> bound_sockets;
 								std::vector<void*> dataptrs;
 								bound_sockets.push_back(pull_task->sockets[s].get());
+
 								for (auto socket : pull_task->sockets[s]->get_bound_sockets())
 								{
 									bound_sockets.push_back(socket);
 									if (socket->get_type() == socket_t::SFWD)
-										this->explore_thread_rec(socket, bound_sockets);
-									
+										this->explore_thread_rec(socket, bound_sockets);	
 								}
 								for (auto sck : bound_sockets)
 									dataptrs.push_back(sck->get_dataptr());
+									
 								contents->rebind_sockets[rebind_id].push_back(bound_sockets);
 								contents->rebind_dataptrs[rebind_id].push_back(dataptrs);
 							}

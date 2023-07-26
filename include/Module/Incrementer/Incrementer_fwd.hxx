@@ -30,5 +30,3 @@ void Incrementer_fwd<T>
 
 }
 }
-
-

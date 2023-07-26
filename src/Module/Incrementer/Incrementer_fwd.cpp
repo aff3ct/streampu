@@ -78,7 +78,6 @@ void Incrementer_fwd<T>
 	if (this->ns)
 		t_start = std::chrono::steady_clock::now();
 
-	
 	for (size_t e = 0; e < this->n_elmts; e++)
 		fwd[e] += 1;
 
@@ -102,4 +101,3 @@ template class aff3ct::module::Incrementer_fwd<uint64_t>;
 template class aff3ct::module::Incrementer_fwd<float>;
 template class aff3ct::module::Incrementer_fwd<double>;
 // ==================================================================================== explicit template instantiation
-

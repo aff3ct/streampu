@@ -254,7 +254,7 @@ template <typename T>
 void Socket
 ::operator=(const void *array)
 {
-	if (this->get_type() == socket_t::SIN || this->get_type() == socket_t::SFWD)  
+	if (this->get_type() == socket_t::SIN || this->get_type() == socket_t::SFWD)
 		this->bind(array);
 	else
 	{

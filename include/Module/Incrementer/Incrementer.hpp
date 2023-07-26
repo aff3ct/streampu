@@ -63,4 +63,3 @@ protected:
 #endif
 
 #endif /* INCREMENTER_HPP_ */
-

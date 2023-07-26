@@ -76,7 +76,7 @@ void Subsequence
 	for (auto &last : lasts) for (auto &s : last->sockets)
 	{
 
-		if ((last->get_socket_type(*s) == runtime::socket_t::SOUT) && s->get_name() != "status")
+		if (last->get_socket_type(*s) == runtime::socket_t::SOUT && s->get_name() != "status")
 		{
 			if (s->get_datatype() == typeid(int8_t ))
 				this->template create_socket_out<int8_t >(p, s->get_name(), s->get_n_elmts() / this->get_n_frames());

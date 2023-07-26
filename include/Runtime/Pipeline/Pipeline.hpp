@@ -26,8 +26,6 @@ protected:
 	std::vector<std::pair<std::vector<std::shared_ptr<module::Adaptor>>,
 	                      std::vector<std::shared_ptr<module::Adaptor>>>> adaptors;
 
-	
-
 	//                               sck out addr      stage   tsk id  sck id  unbind_pos
 	std::vector<std::pair<std::tuple<runtime::Socket*, size_t, size_t, size_t, size_t>,
 	//                               sck in addr       stage   tsk id  sck id

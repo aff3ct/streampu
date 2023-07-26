@@ -28,8 +28,8 @@ template <typename T = int>
 class Relayer_fwd : public Module
 {
 public:
-	inline runtime::Task&   operator[](const rly_fwd::tsk        t);
-	inline runtime::Socket& operator[](const rly_fwd::sck::relay_fwd s);
+	inline runtime::Task&   operator[](const rly_fwd::tsk				t);
+	inline runtime::Socket& operator[](const rly_fwd::sck::relay_fwd	s);
 
 protected:
 	const size_t n_elmts;
