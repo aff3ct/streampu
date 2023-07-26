@@ -1785,8 +1785,7 @@ void Sequence
 								contents->rebind_sockets[rebind_id].push_back(bound_sockets);
 								contents->rebind_dataptrs[rebind_id].push_back(dataptrs);
 							}
-						}
-							// Partie du rebind 
+						} 
 							modified_tasks[pull_task] = [contents, pull_task, adp_pull, rebind_id]() -> const int*
 						{
 							// active or passive waiting here
@@ -1833,7 +1832,7 @@ void Sequence
 
 								bound_sockets.push_back(push_task->sockets[s].get());
 								
-								auto bound_socket = &(push_task->sockets[s]->get_bound_socket());
+								auto bound_socket = &push_task->sockets[s]->get_bound_socket();
 								bound_sockets.push_back(bound_socket);
 								this->explore_thread_rec(bound_socket, bound_sockets);
 								

@@ -29,7 +29,7 @@ int main(int argc, char** argv)
 		{"help", no_argument, NULL, 'h'},
 		{0}};
 
-	size_t n_threads = 1;//std::thread::hardware_concurrency();
+	size_t n_threads = std::thread::hardware_concurrency();
 	size_t n_inter_frames = 1;
 	size_t sleep_time_us = 0;
 	size_t data_length = 100000;
@@ -134,9 +134,9 @@ int main(int argc, char** argv)
 		}
 	}
 
-	std::cout << "#################################" << std::endl;
-	std::cout << "# Micro-benchmark: Simple chain #" << std::endl;
-	std::cout << "#################################" << std::endl;
+	std::cout << "#########################################" << std::endl;
+	std::cout << "# Micro-benchmark: Simple chain forward #" << std::endl;
+	std::cout << "#########################################" << std::endl;
 	std::cout << "#" << std::endl;
 
 	std::cout << "# Command line arguments:" << std::endl;
@@ -177,7 +177,7 @@ int main(int argc, char** argv)
 			(*incs[s+1])[module::inc_fwd::sck::increment_fwd::fwd] = (*incs[s])[module::inc_fwd::sck::increment_fwd::fwd];
 		finalizer[module::fin::sck::finalize::in] = (*incs[incs.size()-1])[module::inc_fwd::sck::increment_fwd::fwd];
 	}
-	else // Partie non-intéressante pour le moment !
+	else 
 	{
 		for (size_t s = 0; s < incs.size() -1; s++)
 			(*incs[s+1])[module::inc_fwd::sck::increment_fwd::fwd] = (*incs[s])[module::inc_fwd::sck::increment_fwd::fwd];
@@ -306,10 +306,10 @@ int main(int argc, char** argv)
 	}
 	else
 	{
-		/*for (size_t s = 0; s < incs.size() -1; s++)
+		for (size_t s = 0; s < incs.size() -1; s++)
 			(*incs[s+1])[module::inc_fwd::sck::increment_fwd::fwd].unbind((*incs[s])[module::inc_fwd::sck::increment_fwd::fwd]);
 		(*subsequence)[module::ssq::tsk::exec    ][ 0].unbind(initializer   [module::ini::sck::initialize::out]);
-		finalizer     [module::fin::sck::finalize::in].unbind((*subsequence)[module::ssq::tsk::exec      ][  1]);*/
+		finalizer     [module::fin::sck::finalize::in].unbind((*subsequence)[module::ssq::tsk::exec      ][  1]);
 	}
 
 	return test_results;

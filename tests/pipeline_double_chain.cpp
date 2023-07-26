@@ -136,12 +136,11 @@ int main(int argc, char** argv)
 	std::cout << "#   - active_waiting = " << (active_waiting ? "true" : "false") << std::endl;
 	std::cout << "#" << std::endl;
 
-
 	// modules creation
 	module::Initializer<uint8_t> initializer(data_length);
 	module::Finalizer  <uint8_t> finalizer  (data_length);
 
-	std::vector<std::shared_ptr<module::Incrementer_fwd<uint8_t>>> incs_fwd(5);
+	std::vector<std::shared_ptr<module::Incrementer_fwd<uint8_t>>> incs_fwd(6);
 	for (size_t s = 0; s < incs_fwd.size(); s++)
 	{
 		incs_fwd[s].reset(new module::Incrementer_fwd<uint8_t>(data_length));
@@ -149,7 +148,7 @@ int main(int argc, char** argv)
 		incs_fwd[s]->set_custom_name("Inc_fwd" + std::to_string(s));
 	}
 
-    std::vector<std::shared_ptr<module::Incrementer<uint8_t>>> incs(5);
+    std::vector<std::shared_ptr<module::Incrementer<uint8_t>>> incs(6);
 	for (size_t s = 0; s < incs.size(); s++)
 	{
 		incs[s].reset(new module::Incrementer<uint8_t>(data_length));
@@ -157,10 +156,9 @@ int main(int argc, char** argv)
 		incs[s]->set_custom_name("Inc" + std::to_string(s));
 	}
 
-
 	// sockets binding 
+	(*incs[0])[module::inc::sck::increment::in] = initializer[module::ini::sck::initialize::out];
 	(*incs_fwd[0])[module::inc_fwd::sck::increment_fwd::fwd] = initializer[module::ini::sck::initialize::out];
-    (*incs[0])[module::inc::sck::increment::in] = initializer[module::ini::sck::initialize::out];
 		for (size_t s = 0; s < incs_fwd.size() -1; s++)
         {
 			(*incs_fwd[s+1])[module::inc_fwd::sck::increment_fwd::fwd] = (*incs_fwd[s])[module::inc_fwd::sck::increment_fwd::fwd];
@@ -171,33 +169,32 @@ int main(int argc, char** argv)
 	
 	std::unique_ptr<runtime::Pipeline> pipeline_chain;
 
-	
-		pipeline_chain.reset(new runtime::Pipeline(
-		                     initializer[module::ini::tsk::initialize], // first task of the sequence
-		                     { // pipeline stage 0
-		                       { { &initializer[module::ini::tsk::initialize] },   // first tasks of stage 0
-		                         { &initializer[module::ini::tsk::initialize] } }, // last  tasks of stage 0
-		                       // pipeline stage 1
-		                       { { &(*incs_fwd[0])[module::inc_fwd::tsk::increment_fwd],&(*incs[0])[module::inc::tsk::increment] },   // first tasks of stage 1
-		                         { &(*incs_fwd[incs_fwd.size()-1])[module::inc_fwd::tsk::increment_fwd], &(*incs[incs.size()-1])[module::inc::tsk::increment]} }, // last  tasks of stage 1
-		                       // pipeline stage 2
-		                       { {& finalizer[module::fin::tsk::finalize] },   // first tasks of stage 2
-		                         {                                     } }, // last  tasks of stage 2
-		                     },
-		                     {
-		                       1,                         // number of threads in the stage 0
-		                       14,						// number of threads in the stage 1
-		                       1                          // number of threads in the stage 2
-		                     },
-		                     {
-		                       buffer_size, // synchronization buffer size between stages 0 and 1
-							   buffer_size, // synchronization buffer size between stages 1 and 2
-		                     },
-		                     {
-		                       active_waiting, // type of waiting between stages 0 and 1 (true = active, false = passive)
-							   active_waiting, // type of waiting between stages 1 and 2 (true = active, false = passive)
-		                     }));
-		pipeline_chain->set_n_frames(n_inter_frames);
+	pipeline_chain.reset(new runtime::Pipeline(
+	                     initializer[module::ini::tsk::initialize], 			// first task of the sequence
+	                     { 	// pipeline stage 0
+	                        { { &initializer[module::ini::tsk::initialize] },   // first tasks of stage 0
+	                         { &initializer[module::ini::tsk::initialize] } }, 	// last  tasks of stage 0
+	                      	// pipeline stage 1
+	                        { { &(*incs_fwd[0])[module::inc_fwd::tsk::increment_fwd],&(*incs[0])[module::inc::tsk::increment] },   								// first tasks of stage 1
+	                         { &(*incs_fwd[incs_fwd.size()-1])[module::inc_fwd::tsk::increment_fwd], &(*incs[incs.size()-1])[module::inc::tsk::increment]} },	// last  tasks of stage 1
+	                       	// pipeline stage 2
+	                    	{ {& finalizer[module::fin::tsk::finalize] },		// first tasks of stage 2
+	                       	  {                                     	} },	// last  tasks of stage 2
+	                     },	
+	                     {	
+	                    	1,                       			// number of threads in the stage 0
+	                       	n_threads ? n_threads : 1,			// number of threads in the stage 1
+	                       	1                        			// number of threads in the stage 2
+	                     },
+	                     {
+	                       	buffer_size, // synchronization buffer size between stages 0 and 1
+						   	buffer_size, // synchronization buffer size between stages 1 and 2
+	                     },
+	                     {
+	                       	active_waiting, // type of waiting between stages 0 and 1 (true = active, false = passive)
+						   	active_waiting, // type of waiting between stages 1 and 2 (true = active, false = passive)
+	                     }));
+	pipeline_chain->set_n_frames(n_inter_frames);
 
 	// Getting the input data
 	auto tid = 0;
@@ -210,13 +207,12 @@ int main(int argc, char** argv)
 		tid++;
 	}
 
-
-
 	if (!dot_filepath.empty())
 	{
 		std::ofstream file(dot_filepath);
 		pipeline_chain->export_dot(file);
 	}
+
 	// configuration of the sequence tasks
 	for (auto& mod : pipeline_chain->get_modules<module::Module>(false)) for (auto& tsk : mod->tasks)
 	{
@@ -244,7 +240,6 @@ int main(int argc, char** argv)
 			const auto &final_data = cur_finalizer->get_final_data()[f];
 			for (size_t d = 0; d < final_data.size(); d++)
 			{
-
 				auto expected = (int)(incs_fwd.size()+incs.size());
 				expected = expected % 256;
 				if (final_data[d] != expected)
@@ -266,12 +261,9 @@ int main(int argc, char** argv)
 	unsigned int test_results = !tests_passed;
 
 	// Socket unbinding
-	{
-		pipeline_chain->set_n_frames(1);
-		pipeline_chain->unbind_adaptors();
-	}
+	pipeline_chain->set_n_frames(1);
+	pipeline_chain->unbind_adaptors();
 
-	
 	(*incs[0])[module::inc::sck::increment::in].unbind(initializer[module::ini::sck::initialize::out]);
 	(*incs_fwd[0])[module::inc_fwd::sck::increment_fwd::fwd].unbind(initializer[module::ini::sck::initialize::out]);
 
@@ -283,6 +275,4 @@ int main(int argc, char** argv)
 	finalizer[module::fin::sck::finalize::in].unbind((*incs[incs.size()-1])[module::inc::sck::increment::out]);
 	
 	return test_results;
-
-	
 }

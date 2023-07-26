@@ -132,16 +132,17 @@ int main(int argc, char** argv)
 	module::Initializer<uint8_t> initializer(data_length);
 	module::Finalizer  <uint8_t> finalizer  (data_length);
 
-    // Incrementers creation 
-	std::vector<std::shared_ptr<module::Incrementer_fwd<uint8_t>>> incs_fwd(2);
+    // Incrementers construction
+	std::vector<std::shared_ptr<module::Incrementer_fwd<uint8_t>>> incs_fwd(6);
 	for (size_t s = 0; s < incs_fwd.size(); s++)
 	{
 		incs_fwd[s].reset(new module::Incrementer_fwd<uint8_t>(data_length));
 		incs_fwd[s]->set_ns(sleep_time_us * 1000);
 		incs_fwd[s]->set_custom_name("Inc_fwd" + std::to_string(s));
 	}
-    // Relayers creation 
-    std::vector<std::shared_ptr<module::Relayer_fwd<uint8_t>>> rlys_fwd(2);
+
+    // Relayers construction
+    std::vector<std::shared_ptr<module::Relayer_fwd<uint8_t>>> rlys_fwd(6);
 	for (size_t s = 0; s < rlys_fwd.size(); s++)
 	{
 		rlys_fwd[s].reset(new module::Relayer_fwd<uint8_t>(data_length));
@@ -236,6 +237,7 @@ int main(int argc, char** argv)
 		std::ofstream file(dot_filepath);
 		pipeline_chain->export_dot(file);
 	}
+
 	// configuration of the sequence tasks
 	for (auto& mod : pipeline_chain->get_modules<module::Module>(false)) for (auto& tsk : mod->tasks)
 	{
@@ -293,7 +295,6 @@ int main(int argc, char** argv)
     (*incs_fwd[1])[module::inc_fwd::sck::increment_fwd::fwd].unbind((*rlys_fwd[0])[module::rly_fwd::sck::relay_fwd::fwd]);
     (*rlys_fwd[1])[module::rly_fwd::sck::relay_fwd::fwd].unbind((*incs_fwd[0])[module::inc_fwd::sck::increment_fwd::fwd]);
 
-	
     comp["compare::fwd_1"].unbind( (*incs_fwd[1])[module::inc_fwd::sck::increment_fwd::fwd]);
 	comp["compare::fwd_0"].unbind((*rlys_fwd[1])[module::rly_fwd::sck::relay_fwd::fwd]);
 

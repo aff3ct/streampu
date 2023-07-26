@@ -342,19 +342,15 @@ int main(int argc, char** argv)
 				rlys[tas].reset(new module::Relayer<uint8_t>(data_length));
 				rlys[tas]->set_custom_name("Relayer" + std::to_string(tas));
 				dynamic_cast<module::Relayer<uint8_t>*>(rlys[tas].get())->set_ns(sleep_time_us * 1000);
-			}
-			else if (str == "SFWD"){
+			}else if (str == "SFWD"){
 				rlys[tas].reset(new module::Relayer_fwd<uint8_t>(data_length));
 				rlys[tas]->set_custom_name("Relayer_io" + std::to_string(tas));
 				dynamic_cast<module::Relayer_fwd<uint8_t>*>(rlys[tas].get())->set_ns(sleep_time_us * 1000);
-			}
-			else {
+			}else{
 				message << "Invalid socket Type, it should be SFWD or SIO";
 				throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
 			}
-
 			tas++;
-			
 		}	
 	}
 	
@@ -363,13 +359,14 @@ int main(int argc, char** argv)
 	tas= 0;
 	if (socket_type_task[0][0] == "SFWD"){
 		(*dynamic_cast<module::Relayer_fwd<uint8_t>*>(rlys[tas].get()))[module::rly_fwd::sck::relay_fwd::fwd] = source[module::src::sck::generate::out_data];
-	}else {
+	}else{
 		(*dynamic_cast<module::Relayer<uint8_t>*>(rlys[tas].get()))[module::rly::sck::relay::in] = source[module::src::sck::generate::out_data];
 	} 
 
 	// Binding tasks between them
 	for (size_t i =0 ; i < socket_type_task.size();++i){
-		for (size_t j=0; j<socket_type_task[i].size()-1;++j){	
+		for (size_t j=0; j<socket_type_task[i].size()-1;++j)
+		{	
 			if (socket_type_task[i][j+1] == "SFWD"){
 				if (socket_type_task[i][j] == "SFWD"){
 					(*dynamic_cast<module::Relayer_fwd<uint8_t>*>(rlys[tas+1].get()))[module::rly_fwd::sck::relay_fwd::fwd] = 
@@ -389,9 +386,9 @@ int main(int argc, char** argv)
 			}
 			tas++;		
 		}
-		// We have to bind the last task of stage i to the first one of task i+1
-			if(i<socket_type_task.size()-1){
-					
+			// We have to bind the last task of stage i to the first one of task i+1
+			if(i<socket_type_task.size()-1)
+			{	
 				if (socket_type_task[i+1][0] == "SFWD"){
 					if (socket_type_task[i][socket_type_task[i].size()-1] == "SFWD"){
 						(*dynamic_cast<module::Relayer_fwd<uint8_t>*>(rlys[tas+1].get()))[module::rly_fwd::sck::relay_fwd::fwd] = 
@@ -409,7 +406,6 @@ int main(int argc, char** argv)
 																		(*dynamic_cast<module::Relayer<uint8_t>*>(rlys[tas].get()))[module::rly::sck::relay::out];
 					}		
 				}
-				
 				tas++;
 			}
 	}
@@ -471,7 +467,6 @@ int main(int argc, char** argv)
 	}
 	else
 	{
-		
 		// Task vector creation 
 		std::vector<std::pair<std::vector<runtime::Task*>, std::vector<runtime::Task*>>> stage_creat ; 
 		tas = 0;

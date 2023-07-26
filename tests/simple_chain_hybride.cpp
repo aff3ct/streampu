@@ -24,12 +24,11 @@ int main(int argc, char** argv)
 		{"print-stats", no_argument, NULL, 'p'},
 		{"step-by-step", no_argument, NULL, 'b'},
 		{"debug", no_argument, NULL, 'g'},
-		{"subseq", no_argument, NULL, 'u'},
 		{"verbose", no_argument, NULL, 'v'},
 		{"help", no_argument, NULL, 'h'},
 		{0}};
 
-	size_t n_threads = 1;//std::thread::hardware_concurrency();
+	size_t n_threads = std::thread::hardware_concurrency();
 	size_t n_inter_frames = 1;
 	size_t sleep_time_us = 0;
 	size_t data_length = 1000000;
@@ -39,12 +38,11 @@ int main(int argc, char** argv)
 	bool print_stats = false;
 	bool step_by_step = false;
 	bool debug = false;
-	bool subseq = false;
 	bool verbose = false;
 
 	while (1)
 	{
-		const int opt = getopt_long(argc, argv, "t:f:s:d:e:o:cpbguvh", longopts, 0);
+		const int opt = getopt_long(argc, argv, "t:f:s:d:e:o:cpbgvh", longopts, 0);
 		if (opt == -1)
 			break;
 		switch (opt)
@@ -78,9 +76,6 @@ int main(int argc, char** argv)
 				break;
 			case 'g':
 				debug = true;
-				break;
-			case 'u':
-				subseq = true;
 				break;
 			case 'v':
 				verbose = true;
@@ -118,9 +113,6 @@ int main(int argc, char** argv)
 				std::cout << "  -g, --debug           "
 				          << "Enable task debug mode (print socket data)                            "
 				          << "[" << (debug ? "true" : "false") << "]" << std::endl;
-				std::cout << "  -u, --subseq          "
-				          << "Enable subsequence in the executed sequence                           "
-				          << "[" << (subseq ? "true" : "false") << "]" << std::endl;
 				std::cout << "  -v, --verbose         "
 				          << "Enable verbose mode                                                   "
 				          << "[" << (verbose ? "true" : "false") << "]" << std::endl;
@@ -134,9 +126,9 @@ int main(int argc, char** argv)
 		}
 	}
 
-	std::cout << "#################################" << std::endl;
-	std::cout << "# Micro-benchmark: Simple chain #" << std::endl;
-	std::cout << "#################################" << std::endl;
+	std::cout << "########################################" << std::endl;
+	std::cout << "# Micro-benchmark: Simple chain hybrid #" << std::endl;
+	std::cout << "########################################" << std::endl;
 	std::cout << "#" << std::endl;
 
 	std::cout << "# Command line arguments:" << std::endl;
@@ -150,7 +142,6 @@ int main(int argc, char** argv)
 	std::cout << "#   - print_stats    = " << (print_stats ? "true" : "false") << std::endl;
 	std::cout << "#   - step_by_step   = " << (step_by_step ? "true" : "false") << std::endl;
 	std::cout << "#   - debug          = " << (debug ? "true" : "false") << std::endl;
-	std::cout << "#   - subseq         = " << (subseq ? "true" : "false") << std::endl;
 	std::cout << "#   - verbose        = " << (verbose ? "true" : "false") << std::endl;
 	std::cout << "#" << std::endl;
 
@@ -158,19 +149,15 @@ int main(int argc, char** argv)
 	module::Initializer<uint8_t> initializer(data_length);
 	module::Finalizer  <uint8_t> finalizer  (data_length);
 
-    // Définition des module d'incrémentation standard/IO
 	std::vector<std::shared_ptr<module::Incrementer_fwd<uint8_t>>> incs_fwd(6);
     std::vector<std::shared_ptr<module::Incrementer<uint8_t>>> incs(6); 
 	
-    // Initialisation des modules fwdt_output!
     for (size_t s = 0; s < incs.size(); s++)
 	{
         incs[s].reset(new module::Incrementer<uint8_t>(data_length));
         incs[s]->set_ns(sleep_time_us * 1000);
         incs[s]->set_custom_name("Inc" + std::to_string(s));
 	}
-
-	// Initialisation des modules IO
 
 	 for (size_t s = 0; s < incs_fwd.size(); s++)
 	{
@@ -184,32 +171,24 @@ int main(int argc, char** argv)
 	std::shared_ptr<module::Subsequence> subsequence;
 
 	// sockets binding
-	if (!subseq)
-	{
-		(*incs[0])[module::inc::sck::increment::in] = initializer[module::ini::sck::initialize::out]; // Création de l'initialize et bind à la première socket !
-		 // On bind la moitié des input/output entre elle !
-		size_t s = 0;
-		for (; s < incs.size()/2 - 1; ++s)
-			(*incs[s+1])[module::inc::sck::increment::in] = (*incs[s])[module::inc::sck::increment::out];
-
-		// Réalisation de la connection hybride ! 
-		(*incs_fwd[0])[module::inc_fwd::sck::increment_fwd::fwd] =  (*incs[s])[module::inc::sck::increment::out]; 
-		
-		// Bind des fwd entre elle 
-		size_t s_fwd =0;
-		for (; s_fwd < incs_fwd.size() -1; ++s_fwd)
-			(*incs_fwd[s_fwd+1])[module::inc_fwd::sck::increment_fwd::fwd] = (*incs_fwd[s_fwd])[module::inc_fwd::sck::increment_fwd::fwd];
-		
-		// Réalisation de la seconde connection
-		s++;
-		(*incs[s])[module::inc::sck::increment::in] = (*incs_fwd[s_fwd])[module::inc_fwd::sck::increment_fwd::fwd];
-
-		// Réalisation de la seconde interconnection ! 
-		for (; s < incs.size() - 1; ++s)
-			(*incs[s+1])[module::inc::sck::increment::in] = (*incs[s])[module::inc::sck::increment::out];
-
-		finalizer[module::fin::sck::finalize::in] = (*incs[incs.size()-1])[module::inc::sck::increment::out]; // Connection à la socket finalizer !
-	}
+	(*incs[0])[module::inc::sck::increment::in] = initializer[module::ini::sck::initialize::out]; 
+	
+	size_t s = 0;
+	for (; s < incs.size()/2 - 1; ++s)
+		(*incs[s+1])[module::inc::sck::increment::in] = (*incs[s])[module::inc::sck::increment::out];
+	// Hybrid binding 
+	(*incs_fwd[0])[module::inc_fwd::sck::increment_fwd::fwd] =  (*incs[s])[module::inc::sck::increment::out]; 
+	
+	size_t s_fwd =0;
+	for (; s_fwd < incs_fwd.size() -1; ++s_fwd)
+		(*incs_fwd[s_fwd+1])[module::inc_fwd::sck::increment_fwd::fwd] = (*incs_fwd[s_fwd])[module::inc_fwd::sck::increment_fwd::fwd];
+	
+	s++;
+	(*incs[s])[module::inc::sck::increment::in] = (*incs_fwd[s_fwd])[module::inc_fwd::sck::increment_fwd::fwd];
+	for (; s < incs.size() - 1; ++s)
+		(*incs[s+1])[module::inc::sck::increment::in] = (*incs[s])[module::inc::sck::increment::out];
+	finalizer[module::fin::sck::finalize::in] = (*incs[incs.size()-1])[module::inc::sck::increment::out];
+	
    
 	runtime::Sequence sequence_chain(initializer[module::ini::tsk::initialize], n_threads);
 	sequence_chain.set_n_frames(n_inter_frames);
@@ -254,7 +233,6 @@ int main(int argc, char** argv)
 	
 	std::vector<runtime::Socket*> liste_fwd;
 
-	
 	for (size_t i=0 ; i< sequence_chain.get_tasks_per_threads().size();++i){	
 	
 		for(size_t j=incs.size()/2+1; j<sequence_chain.get_tasks_per_threads()[i].size(); ++j ){
@@ -337,13 +315,12 @@ int main(int argc, char** argv)
 
 	// sockets unbinding
 	sequence_chain.set_n_frames(1);
-	if (!subseq)
-	{
-		(*incs[0])[module::inc::sck::increment::in].unbind(initializer[module::ini::sck::initialize::out]);
-		for (size_t s = 0; s < incs.size()/2 -1; s++)
-			(*incs[s+1])[module::inc::sck::increment::in].unbind((*incs[s])[module::inc::sck::increment::out]);
-		finalizer[module::fin::sck::finalize::in].unbind((*incs[incs.size()-1])[module::inc::sck::increment::out]);
-	}
+	
+	(*incs[0])[module::inc::sck::increment::in].unbind(initializer[module::ini::sck::initialize::out]);
+	for (size_t s = 0; s < incs.size()/2 -1; s++)
+		(*incs[s+1])[module::inc::sck::increment::in].unbind((*incs[s])[module::inc::sck::increment::out]);
+	finalizer[module::fin::sck::finalize::in].unbind((*incs[incs.size()-1])[module::inc::sck::increment::out]);
+	
 	
 	return test_results;
 }

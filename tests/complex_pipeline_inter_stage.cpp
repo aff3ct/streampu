@@ -132,7 +132,7 @@ int main(int argc, char** argv)
 	module::Initializer<uint8_t> initializer(data_length);
 	module::Finalizer  <uint8_t> finalizer  (data_length);
 
-	std::vector<std::shared_ptr<module::Incrementer_fwd<uint8_t>>> incs(5);
+	std::vector<std::shared_ptr<module::Incrementer_fwd<uint8_t>>> incs(6);
 	for (size_t s = 0; s < incs.size(); s++)
 	{
 		incs[s].reset(new module::Incrementer_fwd<uint8_t>(data_length));
@@ -172,7 +172,7 @@ int main(int argc, char** argv)
 	// sockets binding
 	(*inc_calssique)[module::inc::sck::increment::in] = initializer[module::ini::sck::initialize::out];
 	(*incs[0])[module::inc_fwd::sck::increment_fwd::fwd] = (*inc_calssique)[module::inc::sck::increment::out];
-	multi_comp["multiply_compare::fwd_0"] = initializer[module::ini::sck::initialize::out]; // Bind de la donnée du début avec le multiplicateur !
+	multi_comp["multiply_compare::fwd_0"] = initializer[module::ini::sck::initialize::out]; // Bind the initial data to the multiplier
 		for (size_t s = 0; s < incs.size() -1; s++)
 			(*incs[s+1])[module::inc_fwd::sck::increment_fwd::fwd] = (*incs[s])[module::inc_fwd::sck::increment_fwd::fwd];
 	
@@ -185,33 +185,33 @@ int main(int argc, char** argv)
 	pipeline_chain.reset(new runtime::Pipeline(
 	                     initializer[module::ini::tsk::initialize], // first task of the sequence
 	                     {  // pipeline stage 0
-	                       { { &initializer[module::ini::tsk::initialize] },   // first tasks of stage 0
-	                         { &initializer[module::ini::tsk::initialize] } }, // last  tasks of stage 0
+	                       	{ { &initializer[module::ini::tsk::initialize] },   // first tasks of stage 0
+	                         { &initializer[module::ini::tsk::initialize] } }, 	// last  tasks of stage 0
 	                        // pipeline stage 1
-	                       { { &(*inc_calssique)[module::inc::tsk::increment] },   					// first tasks of stage 1
-	                         { &(*incs[incs.size() -1])[module::inc_fwd::tsk::increment_fwd] } },	// last  tasks of stage 1
+	                       	{ { &(*inc_calssique)[module::inc::tsk::increment] },   					// first tasks of stage 1
+	                         { &(*incs[incs.size() -1])[module::inc_fwd::tsk::increment_fwd] } },		// last  tasks of stage 1
 							// pipeline stage 3
 							{ { &task_multi_comp },   // first tasks of stage 2
 	                         { &task_multi_comp} },   // last  tasks of stage 2
 	                        // pipeline stage 3
-	                       { {& finalizer[module::fin::tsk::finalize] }, // first tasks of stage 3
-	                         {                                     } },  // last  tasks of stage 3
+	                       	{ {& finalizer[module::fin::tsk::finalize] }, 	// first tasks of stage 3
+	                         {                                     } },  	// last  tasks of stage 3
 	                     },
 	                     {
-	                       1,											// number of threads in the stage 0
-	                       n_threads ? n_threads : 1,					// number of threads in the stage 1
-						   1,											// number of threads in the stage 2
-	                       1                       						// number of threads in the stage 3
+	                    	1,											// number of threads in the stage 0
+	                       	n_threads ? n_threads : 1,					// number of threads in the stage 1
+						   	1,											// number of threads in the stage 2
+	                       	1                       					// number of threads in the stage 3
 	                     },
 	                     {
-	                       buffer_size, // synchronizatfwdn buffer size between stages 0 and 1
-	                       buffer_size, // synchronization buffer size between stages 1 and 2
-						   buffer_size, // synchronization buffer size between stages 2 and 3
+	                       	buffer_size, // synchronizatfwdn buffer size between stages 0 and 1
+	                       	buffer_size, // synchronization buffer size between stages 1 and 2
+						   	buffer_size, // synchronization buffer size between stages 2 and 3
 	                     },
 	                     {
-	                       active_waiting, // type of waiting between stages 0 and 1 (true = active, false = passive)
-	                       active_waiting, // type of waiting between stages 1 and 2 (true = active, false = passive)
-						   active_waiting, // type of waiting between stages 2 and 3 (true = active, false = passive)
+	                    	active_waiting, // type of waiting between stages 0 and 1 (true = active, false = passive)
+	                      	active_waiting, // type of waiting between stages 1 and 2 (true = active, false = passive)
+						   	active_waiting, // type of waiting between stages 2 and 3 (true = active, false = passive)
 	                     }));
 	pipeline_chain->set_n_frames(n_inter_frames);
 
@@ -231,6 +231,7 @@ int main(int argc, char** argv)
 		std::ofstream file(dot_filepath);
 		pipeline_chain->export_dot(file);
 	}
+	
 	// configuration of the sequence tasks
 	for (auto& mod : pipeline_chain->get_modules<module::Module>(false)) for (auto& tsk : mod->tasks)
 	{
@@ -278,9 +279,7 @@ int main(int argc, char** argv)
 
 	unsigned int test_results = !tests_passed;
 
-
 	// Sockets unbinding
-
 	pipeline_chain->set_n_frames(1);
 	pipeline_chain->unbind_adaptors();
 
@@ -296,5 +295,4 @@ int main(int argc, char** argv)
 	finalizer[module::fin::sck::finalize::in].unbind(multi_comp["multiply_compare::fwd_1"]);
 	
 	return test_results;
-	
 }
