@@ -144,8 +144,8 @@ int main(int argc, char** argv)
 	inc_calssique.reset(new module::Incrementer<uint8_t>(data_length));
 	inc_calssique->set_ns(sleep_time_us * 1000);
 	inc_calssique->set_custom_name("Inc");
-	/****************************************************************************************************************************/
-	// StateLess module used only for the test
+	
+	// Stateless module used only for the test
 	module::Stateless multi_comp;
 	multi_comp.set_name("Multiplier_comparator");
 	auto& task_multi_comp = multi_comp.create_task("multiply_compare");
@@ -156,18 +156,21 @@ int main(int argc, char** argv)
 	{
 		auto tab_0 = static_cast<uint8_t*>(t[sock_0].get_dataptr());
 		auto tab_1 = (uint8_t*)(t[sock_1].get_dataptr()); 
-		for (size_t i=0; i<data_length ;++i){
+		for (size_t i=0; i<data_length ;++i)
+		{
 			tab_0[i] = tab_0[i]*(incs.size()+1)+1;
 		} 
 		for (size_t i=0;i<data_length;i++)
-			if(tab_0[i] != tab_1[i]){
+		{
+			if(tab_0[i] != tab_1[i])
+			{
 				std::cout << "Found different values => " << " Tab_0 : " << unsigned (tab_0[i]) <<  ", Tab_1 : " << unsigned (tab_1[i]) << std::endl;
 				return runtime::status_t::FAILURE;
 			}
+		}
 		std::cout << "All the values are correct " << "Expected : " << unsigned (tab_0[0]) << ", got : " << unsigned (tab_1[0]) <<std::endl;
 		return runtime::status_t::SUCCESS;
 	});
-	/****************************************************************************************************************************/
 
 	// sockets binding
 	(*inc_calssique)[module::inc::sck::increment::in] = initializer[module::ini::sck::initialize::out];

@@ -232,16 +232,18 @@ int main(int argc, char** argv)
 	}
 	
 	std::vector<runtime::Socket*> liste_fwd;
-
-	for (size_t i=0 ; i< sequence_chain.get_tasks_per_threads().size();++i){	
-	
-		for(size_t j=incs.size()/2+1; j<sequence_chain.get_tasks_per_threads()[i].size(); ++j ){
+	for (size_t i=0 ; i< sequence_chain.get_tasks_per_threads().size();++i)
+	{	
+		for(size_t j=incs.size()/2+1; j<sequence_chain.get_tasks_per_threads()[i].size(); ++j)
+		{
 			auto task = sequence_chain.get_tasks_per_threads()[i][j];
 
 			if (task->get_n_fwd_sockets() == 0)
 				break;
-			for (auto socket : task->sockets){
-				if (socket.get()->get_type() == socket_t::SFWD){
+			for (auto socket : task->sockets)
+			{
+				if (socket.get()->get_type() == socket_t::SFWD)
+				{
 					liste_fwd.push_back(socket.get());
 				}
 			}

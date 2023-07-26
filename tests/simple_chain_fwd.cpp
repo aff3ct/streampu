@@ -1,4 +1,3 @@
-
 #include <iostream>
 #include <cstdlib>
 #include <memory>
@@ -31,7 +30,7 @@ int main(int argc, char** argv)
 
 	size_t n_threads = std::thread::hardware_concurrency();
 	size_t n_inter_frames = 1;
-	size_t sleep_time_us = 0;
+	size_t sleep_time_us = 5;
 	size_t data_length = 100000;
 	size_t n_exec = 1;
 	std::string dot_filepath;
@@ -158,7 +157,7 @@ int main(int argc, char** argv)
 	module::Initializer<uint8_t> initializer(data_length);
 	module::Finalizer  <uint8_t> finalizer  (data_length);
 
-	std::vector<std::shared_ptr<module::Incrementer_fwd<uint8_t>>> incs(3);
+	std::vector<std::shared_ptr<module::Incrementer_fwd<uint8_t>>> incs(6);
 	for (size_t s = 0; s < incs.size(); s++)
 	{
 		incs[s].reset(new module::Incrementer_fwd<uint8_t>(data_length));

@@ -150,8 +150,7 @@ int main(int argc, char** argv)
 		rlys_fwd[s]->set_custom_name("Relayer_fwd" + std::to_string(s));
 	}
 
-	/****************************************************************************************************************************/
-	// StateLess module used only for the test
+	// Stateless module used only for the test
 	module::Stateless comp;
 	comp.set_name("comparator");
 	auto& task_comp = comp.create_task("compare");
@@ -163,14 +162,14 @@ int main(int argc, char** argv)
 		auto tab_0 = static_cast<uint8_t*>(t[sock_0].get_dataptr());
 		auto tab_1 = (uint8_t*)(t[sock_1].get_dataptr()); 
 		for (size_t i=0;i<data_length;i++)
-			if(tab_0[i] != tab_1[i]){
+			if(tab_0[i] != tab_1[i])
+			{
 				std::cout << "Found different values => " << " Tab_0 : " << unsigned (tab_0[i]) <<  ", Tab_1 : " << unsigned (tab_1[i]) << std::endl;
 				return runtime::status_t::FAILURE;
 			}
 		std::cout << "All the values are correct " << "Expected : " << unsigned (tab_0[0]) << ", got : " << unsigned (tab_1[0]) <<std::endl;
 		return runtime::status_t::SUCCESS;
 	});
-	/****************************************************************************************************************************/
 
 	// sockets binding
 	(*rlys_fwd[0])[module::rly_fwd::sck::relay_fwd::fwd] = initializer[module::ini::sck::initialize::out];
