@@ -66,7 +66,7 @@ template <typename T>
 void Incrementer_fwd<T>
 ::increment_fwd( T *fwd, const int frame_id, const bool managed_memory)
 {
-	(*this)[inc_fwd::sck::increment_fwd::fwd ].bind(fwd );
+	(*this)[inc_fwd::sck::increment_fwd::fwd ].bind(fwd);
 	(*this)[inc_fwd::tsk::increment_fwd].exec(frame_id, managed_memory);
 }
 

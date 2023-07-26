@@ -598,7 +598,7 @@ size_t Task
 	if (is_autoalloc())
 	{
 		out_buffers.push_back(std::vector<uint8_t>(s.get_databytes()));
-		s.dataptr = out_buffers.back().data(); // Allocation de la mémoire !
+		s.dataptr = out_buffers.back().data(); // memory allocation
 	}
 
 	return socket_type.size() -1;
@@ -693,7 +693,7 @@ void Task
 			const auto old_databytes = s->get_databytes();
 			const auto new_databytes = (old_databytes / old_n_frames) * new_n_frames;
 			s->set_databytes(new_databytes);
-			
+
 			if (this->is_autoalloc() && this->socket_type[s_id] == socket_t::SOUT)
 			{
 				this->out_buffers[sout_id].resize(new_databytes);
@@ -995,7 +995,6 @@ template size_t Task::create_socket_out<int64_t >(const std::string&, const size
 template size_t Task::create_socket_out<uint64_t>(const std::string&, const size_t, const bool);
 template size_t Task::create_socket_out<float   >(const std::string&, const size_t, const bool);
 template size_t Task::create_socket_out<double  >(const std::string&, const size_t, const bool);
-
 
 template size_t Task::create_socket_fwd<int8_t  >(const std::string&, const size_t);
 template size_t Task::create_socket_fwd<uint8_t >(const std::string&, const size_t);

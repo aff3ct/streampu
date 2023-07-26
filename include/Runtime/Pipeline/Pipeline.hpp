@@ -39,7 +39,7 @@ protected:
 
 	bool bound_adaptors;
 	bool auto_stop;
-	
+
 public:
 	// Pipeline(const runtime::Task &first,
 	//          const std::vector<std::pair<std::vector<const runtime::Task*>, std::vector<const runtime::Task*>>> &sep_stages = {},

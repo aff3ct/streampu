@@ -78,7 +78,7 @@ void Relayer_fwd<T>
 	if (this->ns)
 		t_start = std::chrono::steady_clock::now();
 
-		// do nothing
+	// do nothing
 
 	if (this->ns)
 	{

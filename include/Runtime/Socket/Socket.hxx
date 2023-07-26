@@ -263,7 +263,8 @@ void Socket
 		        << "'datatype'"           << " = " << type_to_string[this->datatype] << ", "
 		        << "'name'"               << " = " << get_name()                     << ", "
 		        << "'task.name'"          << " = " << task.get_name()                << ", "
-		        << "'type'"               << " = " << (get_type() == socket_t::SIN ? "SIN" : get_type() == socket_t::SFWD ? "SFWD" : "SOUT") /*<< ", "*/
+		        << "'type'"               << " = "
+		        << (get_type() == socket_t::SIN ? "SIN" : get_type() == socket_t::SFWD ? "SFWD" : "SOUT") /*<< ", "*/
 //		        << "'task.module.name'"   << " = " << task.get_module_name()
 		        << ").";
 		throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
@@ -283,7 +284,8 @@ void Socket
 		        << "'datatype'"           << " = " << type_to_string[this->datatype] << ", "
 		        << "'name'"               << " = " << get_name()                     << ", "
 		        << "'task.name'"          << " = " << task.get_name()                << ", "
-		        << "'type'"               << " = " << (get_type() == socket_t::SIN ? "SIN" : get_type() == socket_t::SFWD ? "SFWD" : "SOUT") /*<< ", "*/
+		        << "'type'"               << " = "
+		        << (get_type() == socket_t::SIN ? "SIN" : get_type() == socket_t::SFWD ? "SFWD" : "SOUT") /*<< ", "*/
 //		        << "'task.module.name'"   << " = " << task.get_module_name()
 		        << ").";
 		throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
@@ -303,7 +305,8 @@ void Socket
 		        << "'datatype'"           << " = " << type_to_string[this->datatype] << ", "
 		        << "'name'"               << " = " << get_name()                     << ", "
 		        << "'task.name'"          << " = " << task.get_name()                << ", "
-		        << "'type'"               << " = " << (get_type() == socket_t::SIN ? "SIN" : get_type() == socket_t::SFWD ? "SFWD" : "SOUT")/*<< ", "*/
+		        << "'type'"               << " = "
+		        << (get_type() == socket_t::SIN ? "SIN" : get_type() == socket_t::SFWD ? "SFWD" : "SOUT")/*<< ", "*/
 //		        << "'task.module.name'"   << " = " << task.get_module_name()
 		        << ").";
 		throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
@@ -323,7 +326,8 @@ void Socket
 		        << "'datatype'"           << " = " << type_to_string[this->datatype] << ", "
 		        << "'name'"               << " = " << get_name()                     << ", "
 		        << "'task.name'"          << " = " << task.get_name()                << ", "
-		        << "'type'"               << " = " << (get_type() == socket_t::SIN ? "SIN" : get_type() == socket_t::SFWD ? "SFWD" : "SOUT") /*<< ", "*/
+		        << "'type'"               << " = "
+		        << (get_type() == socket_t::SIN ? "SIN" : get_type() == socket_t::SFWD ? "SFWD" : "SOUT") /*<< ", "*/
 //		        << "'task.module.name'"   << " = " << task.get_module_name()
 		        << ").";
 		throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
@@ -343,7 +347,8 @@ void Socket
 		        << "'datatype'"           << " = " << type_to_string[this->datatype] << ", "
 		        << "'name'"               << " = " << get_name()                     << ", "
 		        << "'task.name'"          << " = " << task.get_name()                << ", "
-		        << "'type'"               << " = " << (get_type() == socket_t::SIN ? "SIN" : get_type() == socket_t::SFWD ? "SFWD" : "SOUT") /*<< ", "*/
+		        << "'type'"               << " = "
+		        << (get_type() == socket_t::SIN ? "SIN" : get_type() == socket_t::SFWD ? "SFWD" : "SOUT") /*<< ", "*/
 //		        << "'task.module.name'"   << " = " << task.get_module_name()
 		        << ").";
 		throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
@@ -363,7 +368,8 @@ void Socket
 		        << "'datatype'"           << " = " << type_to_string[this->datatype] << ", "
 		        << "'name'"               << " = " << get_name()                     << ", "
 		        << "'task.name'"          << " = " << task.get_name()                << ", "
-		        << "'type'"               << " = " << (get_type() == socket_t::SIN ? "SIN" : get_type() == socket_t::SFWD ? "SFWD" : "SOUT") /*<< ", "*/
+		        << "'type'"               << " = "
+		        << (get_type() == socket_t::SIN ? "SIN" : get_type() == socket_t::SFWD ? "SFWD" : "SOUT") /*<< ", "*/
 //		        << "'task.module.name'"   << " = " << task.get_module_name()
 		        << ").";
 		throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
@@ -373,9 +379,11 @@ void Socket
 void Socket
 ::operator=(Socket &s)
 {
-	if ((s.get_type() == socket_t::SOUT || s.get_type() == socket_t::SFWD) && (this->get_type() == socket_t::SIN || this->get_type() == socket_t::SFWD))
+	if ((s.get_type() == socket_t::SOUT || s.get_type() == socket_t::SFWD) &&
+	    (this->get_type() == socket_t::SIN || this->get_type() == socket_t::SFWD))
 		this->bind(s);
-	else if ((s.get_type() == socket_t::SIN || s.get_type() == socket_t::SFWD ) && (this->get_type() == socket_t::SOUT || this->get_type() == socket_t::SFWD))
+	else if ((s.get_type() == socket_t::SIN || s.get_type() == socket_t::SFWD ) &&
+	         (this->get_type() == socket_t::SOUT || this->get_type() == socket_t::SFWD))
 		s.bind(*this);
 	// Socket forward bind
 	else if (s.get_type() == socket_t::SFWD && this->get_type() == socket_t::SFWD) 
@@ -387,12 +395,14 @@ void Socket
 		        << "'s.datatype'"         << " = " << type_to_string[s.datatype] << ", "
 		        << "'s.name'"             << " = " << s.get_name()               << ", "
 		        << "'s.task.name'"        << " = " << s.task.get_name()          << ", "
-		        << "'s.type'"             << " = " << (s.get_type() == socket_t::SIN ? "SIN" : s.get_type() == socket_t::SFWD ? "SFWD": "SOUT") << ", "
+		        << "'s.type'"             << " = "
+		        << (s.get_type() == socket_t::SIN ? "SIN" : s.get_type() == socket_t::SFWD ? "SFWD": "SOUT") << ", "
 //		        << "'s.task.module.name'" << " = " << s.task.get_module_name()   << ", "
 		        << "'datatype'"           << " = " << type_to_string[this->datatype] << ", "
 		        << "'name'"               << " = " << get_name()                     << ", "
 		        << "'task.name'"          << " = " << task.get_name()                << ", "
-		        << "'type'"               << " = " << (get_type() == socket_t::SIN ? "SIN" : get_type() == socket_t::SFWD ? "SFWD" : "SOUT") /*<< ", "*/
+		        << "'type'"               << " = "
+		        << (get_type() == socket_t::SIN ? "SIN" : get_type() == socket_t::SFWD ? "SFWD" : "SOUT") /*<< ", "*/
 //		        << "'task.module.name'"   << " = " << task.get_module_name()
 		        << ").";
 		throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
@@ -411,7 +421,8 @@ void Socket
 		        << "'datatype'"         << " = " << type_to_string[this->datatype] << ", "
 		        << "'name'"             << " = " << get_name()                     << ", "
 		        << "'task.name'"        << " = " << task.get_name()                << ", "
-		        << "'type'"             << " = " << (get_type() == socket_t::SIN ? "SIN" : get_type() == socket_t::SFWD ? "SFWD" : "SOUT") /*<< ", "*/
+		        << "'type'"             << " = "
+		        << (get_type() == socket_t::SIN ? "SIN" : get_type() == socket_t::SFWD ? "SFWD" : "SOUT") /*<< ", "*/
 //		        << "'task.module.name'" << " = " << task.get_module_name()
 		        << ").";
 		throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
