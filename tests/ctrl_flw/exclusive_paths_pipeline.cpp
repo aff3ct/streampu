@@ -66,7 +66,7 @@ int main(int argc, char** argv)
 	size_t n_threads = std::thread::hardware_concurrency();
 	size_t n_inter_frames = 1;
 	size_t sleep_time_us = 5;
-	size_t data_length = 2048;
+	size_t data_length = 8; //TODO: change pack, upcase and lowcase to support more than a single char at a time
 	size_t buffer_size = 16;
 	std::string dot_filepath;
 	std::string in_filepath;
@@ -80,7 +80,7 @@ int main(int argc, char** argv)
 
 	while (1)
 	{
-		const int opt = getopt_long(argc, argv, "t:f:s:d:u:o:i:j:cpbgqwh", longopts, 0);
+		const int opt = getopt_long(argc, argv, "t:f:s:u:o:i:j:cpbgqwh", longopts, 0);
 		if (opt == -1)
 			break;
 		switch (opt)
@@ -93,9 +93,6 @@ int main(int argc, char** argv)
 				break;
 			case 's':
 				sleep_time_us = atoi(optarg);
-				break;
-			case 'd':
-				data_length = atoi(optarg);
 				break;
 			case 'u':
 				buffer_size = atoi(optarg);
@@ -139,9 +136,6 @@ int main(int argc, char** argv)
 				std::cout << "  -s, --sleep-time      "
 				          << "Sleep time duration in one task (microseconds)                        "
 				          << "[" << sleep_time_us << "]" << std::endl;
-				std::cout << "  -d, --data-length     "
-				          << "Size of data to process in one task (in bytes)                        "
-				          << "[" << data_length << "]" << std::endl;
 				std::cout << "  -u, --buffer-size     "
 				          << "Size of the buffer between the different stages of the pipeline       "
 				          << "[" << data_length << "]" << std::endl;
@@ -191,7 +185,6 @@ int main(int argc, char** argv)
 	std::cout << "#   - n_threads      = " << n_threads << std::endl;
 	std::cout << "#   - n_inter_frames = " << n_inter_frames << std::endl;
 	std::cout << "#   - sleep_time_us  = " << sleep_time_us << std::endl;
-	std::cout << "#   - data_length    = " << data_length << std::endl;
 	std::cout << "#   - buffer_size    = " << buffer_size << std::endl;
 	std::cout << "#   - dot_filepath   = " << (dot_filepath.empty() ? "[empty]" : dot_filepath.c_str()) << std::endl;
 	std::cout << "#   - in_filepath    = " << (in_filepath.empty() ? "[empty]" : in_filepath.c_str()) << std::endl;
@@ -207,6 +200,8 @@ int main(int argc, char** argv)
 		std::clog << rang::tag::warning << "'no_copy_mode' has no effect with pipeline (it is always enable)" << std::endl;
 	if (!force_sequence && step_by_step)
 		std::clog << rang::tag::warning << "'step_by_step' is not available with pipeline" << std::endl;
+	if(force_sequence && n_threads > 1)
+		std::clog << rang::tag::warning << "Sequence mode only supports a single thread (User-Source/Sinks are not clonable)" << std::endl;
 
 	std::function<uint8_t(uint8_t*)> pack = [](uint8_t* unpacked) {
 		uint8_t res = 0;
@@ -234,7 +229,6 @@ int main(int argc, char** argv)
 	relayer_sel.set_ns(sleep_time_us * 1000);
 
 	// Stateless tasks
-	data_length = 8; //WIP
     alternator.create_task("alternate");
 	auto s_in_alt = alternator.create_socket_in<uint8_t>(alternator("alternate"), "in", data_length);
     auto s_path = alternator.create_socket_out<int8_t>(alternator("alternate"), "path", 1);
@@ -338,15 +332,16 @@ int main(int argc, char** argv)
 		auto elapsed_time = duration.count() / 1000.f / 1000.f;
 		std::cout << "Sequence elapsed time: " << elapsed_time << " ms" << std::endl;
 	}
+
 	else
 	{
 		pipeline_chain.reset(new runtime::Pipeline(
 		                     source[module::src::tsk::generate], // first task of the sequence
 		                     { // pipeline stage 0
 		                       { { &source[module::src::tsk::generate] },   // first tasks of stage 0
-		                         { &source[module::src::tsk::generate] } }, // last  tasks of stage 0
+		                         { &relayer_com[module::rly::tsk::relay], &alternator("alternate") } }, // last  tasks of stage 0
 		                       // pipeline stage 1
-		                       { { &relayer_com[module::rly::tsk::relay], &alternator("alternate") },   // first tasks of stage 1
+		                       { { &switcher[module::swi::tsk::commute] },   // first tasks of stage 1
 		                         { &relayer_sel[module::rly::tsk::relay] } }, // last  tasks of stage 1
 		                       // pipeline stage 2
 		                       { { &sink[module::snk::tsk::send_count] },   // first tasks of stage 2
@@ -425,9 +420,24 @@ int main(int argc, char** argv)
 	// sockets unbinding
 	if (force_sequence)
 		sequence_chain->set_n_frames(1);
-	else {
+	else 
+	{
 		pipeline_chain->set_n_frames(1);
 		pipeline_chain->unbind_adaptors();
 	}
+
+	relayer_com[module::rly::sck::relay::in].unbind(source[module::src::sck::generate::out_data]);
+	alternator("alternate")[s_in_alt].unbind(source[module::src::sck::generate::out_data]);
+
+	switcher[module::swi::tsk::commute][0].unbind(relayer_com[module::rly::sck::relay::out]);
+	switcher[module::swi::tsk::commute][1].unbind(alternator("alternate")[s_path]);
+	uppercaser("upcase")[s_in_up].unbind(switcher[module::swi::tsk::commute][2]);
+	lowercaser("lowcase")[s_in_low].unbind(switcher[module::swi::tsk::commute][3]);
+	switcher[module::swi::tsk::select][0].unbind(uppercaser("upcase")[s_out_up]);
+	switcher[module::swi::tsk::select][1].unbind(lowercaser("lowcase")[s_out_low]);
+
+	relayer_sel[module::rly::sck::relay::in].unbind(switcher[module::swi::tsk::select][2]);
+	sink[module::snk::sck::send_count::in_data].unbind(relayer_sel[module::rly::sck::relay::out]);
+	sink[module::snk::sck::send_count::in_count].unbind(source[module::src::sck::generate::out_count]);
 	return test_results;
 }
