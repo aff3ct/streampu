@@ -368,7 +368,7 @@ void Pipeline
 			std::stringstream message;
 			message << "Invalid control flow error on stage " << s << " (perhaps a switcher's tasks were separated between different stages)." << std::endl
 			        << e.what();
-			throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
+			throw tools::control_flow_error(__FILE__, __LINE__, __func__, message.str());
 		}
 		this->stages[s]->is_part_of_pipeline = true;
 	}

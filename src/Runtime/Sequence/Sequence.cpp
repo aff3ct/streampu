@@ -249,19 +249,27 @@ void Sequence
 			throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
 		}
 	}
+	for(auto t : lasts)
+	{
+		if (t->get_name() == "commute")
+		{
+			std::stringstream message;
+			message << "End-of-sequence commutes are not supported.";
+			throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
+		}
+	}
 
 	auto root = new tools::Digraph_node<SS>({}, {}, nullptr, 0);
 	root->set_contents(nullptr);
 	size_t ssid = 0, taid = 0;
-	// Switchers are commute tasks, not modules
 	std::vector<TA*> switchers;
 	std::vector<std::pair<TA*,tools::Digraph_node<SS>*>> selectors;
 	std::vector<TA*> real_lasts;
-
 	this->lasts_tasks_id.clear();
 	this->firsts_tasks_id.clear();
 	auto last_subseq = root;
 	std::map<TA*,unsigned> in_sockets_feed;
+
 	for (auto first : firsts)
 	{
 		std::map<TA*,std::pair<tools::Digraph_node<SS>*,size_t>> task_subseq;
@@ -877,25 +885,25 @@ tools::Digraph_node<SS>* Sequence
 			std::find(switchers.begin(), switchers.end(), &current_task) == switchers.end()) 
 		{
 			switchers.push_back(&current_task);
-			auto node_commutator = new tools::Digraph_node<SS>({cur_subseq}, {}, nullptr, cur_subseq->get_depth() +1);
+			auto node_commute = new tools::Digraph_node<SS>({cur_subseq}, {}, nullptr, cur_subseq->get_depth() +1);
 
-			node_commutator->set_contents(new SS());
-			node_commutator->get_c()->tasks.push_back(&current_task);
-			node_commutator->get_c()->tasks_id.push_back(taid++);
-			node_commutator->get_c()->type = subseq_t::COMMUTE;
-			node_commutator->get_c()->id = ssid++;
+			node_commute->set_contents(new SS());
+			node_commute->get_c()->tasks.push_back(&current_task);
+			node_commute->get_c()->tasks_id.push_back(taid++);
+			node_commute->get_c()->type = subseq_t::COMMUTE;
+			node_commute->get_c()->id = ssid++;
 
-			cur_subseq->add_child(node_commutator);
+			cur_subseq->add_child(node_commute);
 
 			for (size_t sdo = 0; sdo < switcher->get_n_data_sockets(); sdo++)
 			{
-				auto node_commutator_son = new tools::Digraph_node<SS>({node_commutator}, {}, nullptr,
-					node_commutator->get_depth() +1);
+				auto node_commute_son = new tools::Digraph_node<SS>({node_commute}, {}, nullptr,
+					node_commute->get_depth() +1);
 
-				node_commutator_son->set_contents(new SS());
-				node_commutator_son->get_c()->id = ssid++;
+				node_commute_son->set_contents(new SS());
+				node_commute_son->get_c()->id = ssid++;
 
-				node_commutator->add_child(node_commutator_son);
+				node_commute->add_child(node_commute_son);
 
 				auto &bss = (*switcher)[module::swi::tsk::commute].sockets[sdo+2]->get_bound_sockets();
 				for (auto bs : bss)
@@ -906,7 +914,7 @@ tools::Digraph_node<SS>* Sequence
 					if (std::find(exclusions.begin(), exclusions.end(), &t) == exclusions.end())
 					{
 						if (task_subseq.find(&t) == task_subseq.end() || task_subseq[&t].second < ssid)
-							task_subseq[&t] = {node_commutator_son, ssid};
+							task_subseq[&t] = {node_commute_son, ssid};
 
 						in_sockets_feed.find(&t) != in_sockets_feed.end() ? in_sockets_feed[&t]++ :
 																			in_sockets_feed[&t] = 1;
@@ -932,13 +940,13 @@ tools::Digraph_node<SS>* Sequence
 
 							if (!node_selector)
 							{
-								node_selector = new tools::Digraph_node<SS>({node_commutator_son}, {}, nullptr,
-									node_commutator_son->get_depth() +1);
+								node_selector = new tools::Digraph_node<SS>({node_commute_son}, {}, nullptr,
+									node_commute_son->get_depth() +1);
 								selectors.push_back({&t, node_selector});
 							}
 							else
-								node_selector->add_father(node_commutator_son);
-							node_commutator_son->add_child(node_selector);
+								node_selector->add_father(node_commute_son);
+							node_commute_son->add_child(node_selector);
 						}
 					}
 				}
@@ -954,7 +962,7 @@ tools::Digraph_node<SS>* Sequence
 				if (std::find(exclusions.begin(), exclusions.end(), &t) == exclusions.end())
 				{
 					if (task_subseq.find(&t) == task_subseq.end() || task_subseq[&t].second < ssid)
-						task_subseq[&t] = {node_commutator, ssid};
+						task_subseq[&t] = {node_commute, ssid};
 
 					in_sockets_feed.find(&t) != in_sockets_feed.end() ? in_sockets_feed[&t]++ :
 																		in_sockets_feed[&t] = 1;
@@ -1959,7 +1967,8 @@ Sub_sequence* Sequence
 				for (auto c : cur_node->get_children()) {
 					Sub_sequence* last_branch_ss = nullptr;
 					last_branch_ss = get_last_subsequence_recursive(c, already_parsed_nodes);
-					if(last_ss && last_branch_ss && last_ss != last_branch_ss) {
+					if(last_ss && last_branch_ss && last_ss != last_branch_ss) 
+					{
 						std::stringstream message;
 						message << "found multiple candidates for last subsequence, this shouldn't be possible. ("
 						        << "tid" << " = " << tid << ", "
@@ -2158,13 +2167,11 @@ template<class SS>
 void Sequence
 ::check_ctrl_flw(tools::Digraph_node<SS>* root)
 {
-	std::cout << "Checking ctrl flw" << std::endl;
 	std::function<void(tools::Digraph_node<SS>*,
 	              std::vector<tools::Digraph_node<SS>*>&)> check_control_flow_parity =
 		[&check_control_flow_parity](tools::Digraph_node<SS>* cur_node,
 		                             std::vector<tools::Digraph_node<SS>*> already_parsed_nodes) -> void
 		{
-			std::cout << "Recursion" << std::endl;
 			if (cur_node != nullptr &&
 			    std::find(already_parsed_nodes.begin(),
 			              already_parsed_nodes.end(),
@@ -2179,35 +2186,14 @@ void Sequence
 			else
 			{
 				already_parsed_nodes.push_back(cur_node);
-				for(size_t i=0; i < already_parsed_nodes.size(); i++)
-				{
-					std::cout << "node[" << i << "] : ";
-					if(already_parsed_nodes[i]->get_c() == nullptr)
-					{
-						std::cout << "No tasks";
-					}
-					else
-					{
-						for(auto t : already_parsed_nodes[i]->get_c()->tasks)
-						{
-							std::cout << t->get_name() << " ";
-						}
-					}
-					std::cout << std::endl;
-				}
-				std::vector<module::Module*> parsed_switcher; 
+				std::vector<module::Module*> parsed_switchers;
 				for(size_t i=0; i < already_parsed_nodes.size(); i++) {
-					std::cout << "Current node : " << already_parsed_nodes[i]->get_c()->id;
-					if(   already_parsed_nodes[i]->get_c() == nullptr
-					  ||!(already_parsed_nodes[i]->get_c()->type == subseq_t::COMMUTE 
-					  ||  already_parsed_nodes[i]->get_c()->type == subseq_t::SELECT)
-					)
-					{
-						std::cout << std::endl;
+					// This check occurs before dud-nodes are removed by _init, some nodes have no contents and must be accounted for
+					if(already_parsed_nodes[i]->get_c() == nullptr ||
+					 !(already_parsed_nodes[i]->get_c()->type == subseq_t::COMMUTE ||
+					   already_parsed_nodes[i]->get_c()->type == subseq_t::SELECT))
 						continue;
-					}	
-					std::cout << " CTRL-NODE";
-					std::cout << std::endl;
+					// We search for the first switcher task in the path taken : already_parsed_nodes
 					const runtime::Task *ctrl_task_first = nullptr;
 					const runtime::Task *ctrl_task_second = nullptr;
 					for(auto t : already_parsed_nodes[i]->get_c()->tasks) {
@@ -2217,29 +2203,23 @@ void Sequence
 						}
 					}
 					subseq_t expected_type = ctrl_task_first->get_name() == "select" ? subseq_t::COMMUTE : subseq_t::SELECT;
-					if(std::find(parsed_switcher.begin(),
-			        	parsed_switcher.end(),
-			        	&(ctrl_task_first->get_module())) != parsed_switcher.end())
+					if(std::find(parsed_switchers.begin(),
+			        	parsed_switchers.end(),
+			        	&(ctrl_task_first->get_module())) != parsed_switchers.end())
 						continue;
-					size_t j;
-					std::cout << "Looking for match" << std::endl;
- 					for(j=i; j < already_parsed_nodes.size() && ctrl_task_second == nullptr; j++) {
-						std::cout << "Checking node : " << i;
-						if(already_parsed_nodes[j]->get_c() == nullptr || already_parsed_nodes[j]->get_c()->type != expected_type)
-						{
-							std::cout << " [Invalid node type]" << std::endl;
+					// We now search for the second switcher task in the path taken
+ 					for(size_t j=i; j < already_parsed_nodes.size() && ctrl_task_second == nullptr; j++) {
+						if(already_parsed_nodes[j]->get_c()->type != expected_type)
 							continue;
-						}
 						for(auto t : already_parsed_nodes[j]->get_c()->tasks) {
 							if((t->get_name() == "select" || t->get_name() == "commute") && &(ctrl_task_first->get_module()) == &(t->get_module())) {
-								std::cout << " [Matching node found]" << std::endl;
-								parsed_switcher.push_back(&(t->get_module()));
+								parsed_switchers.push_back(&(t->get_module()));
 								ctrl_task_second = t;
 								break;
 							}
 						}
 					}
-					if(ctrl_task_second == nullptr || j >= already_parsed_nodes.size())
+					if(ctrl_task_second == nullptr)
 					{
 						for(auto t : ctrl_task_first->get_module().tasks)
 						{
@@ -2257,7 +2237,6 @@ void Sequence
 				}
 			}
 		};
-
 	std::vector<tools::Digraph_node<SS>*> already_parsed_nodes;
 	return check_control_flow_parity(root, already_parsed_nodes);
 }
