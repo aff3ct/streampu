@@ -53,7 +53,7 @@ This function is used to connect sockets with each other, it can be called by an
 === "Valid bindings"
     ![Valid bind](./assets/bind_permission.svg)
 === "Invalid bindings"
-    ![Invalid bind](./assets/invalide_bind.svg)
+    ![Invalid bind](./assets/invalid_bind.svg)
 
 ```cpp
 void  unbind(Socket  &s_out, const  int  priority = -1);
@@ -68,15 +68,8 @@ We have to pay attention during the choice of the socket type for our task, usin
  
  - In the case of the `SIO`, the input and the output sockets have their own `dataptr`. The `input` socket receives the pointer from its bound socket and the `output` has its own allocated memory space, the data received and computed by the task are written to the `output` memory space. The initial data is not modified in this case, there are no *side effects*.
  
- - In the case of the `SFWD`, the forward socket receives its `dataptr` from the bound socket like an `input`. But unlike the `SIO` case, the computed data is written directly on the provided memory space, thus overwritting it (and potentially losing important information), there are *side effects*. All the tasks with `SFWD` consecutively bound to each other share the same memory space, updating the `dataptr` of a `SFWD` needs to update all the pointers of the forward bound sockets recursively.
+ - In the case of the `SFWD`, the forward socket receives its `dataptr` from the bound socket like an `input`. But unlike the `SIO` case, the computed data is written directly on the provided memory space, thus overwritting it (and potentially losing important information), there are *side effects*.
 
-```mermaid
-  graph LR;
-      A(FWD)-->B(FWD); A(FWD)-.->K{MEM};
-      B(FWD)-->C(FWD); B(FWD)-.->K{MEM};
-      C(FWD)-->F(FWD); C(FWD)-.->K{MEM};
-	    F(FWD)-.->K{MEM};
-```
 
 
 
