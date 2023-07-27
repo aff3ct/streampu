@@ -176,7 +176,7 @@ int main(int argc, char** argv)
 			(*incs[s+1])[module::inc_fwd::sck::increment_fwd::fwd] = (*incs[s])[module::inc_fwd::sck::increment_fwd::fwd];
 		finalizer[module::fin::sck::finalize::in] = (*incs[incs.size()-1])[module::inc_fwd::sck::increment_fwd::fwd];
 	}
-	else 
+	else
 	{
 		for (size_t s = 0; s < incs.size() -1; s++)
 			(*incs[s+1])[module::inc_fwd::sck::increment_fwd::fwd] = (*incs[s])[module::inc_fwd::sck::increment_fwd::fwd];
@@ -189,7 +189,7 @@ int main(int argc, char** argv)
 	}
 
 	runtime::Sequence sequence_chain(initializer[module::ini::tsk::initialize], n_threads);
-	sequence_chain.set_n_frames(n_inter_frames); 
+	sequence_chain.set_n_frames(n_inter_frames);
 	sequence_chain.set_no_copy_mode(no_copy_mode);
 
 	auto tid = 0;
@@ -228,12 +228,12 @@ int main(int argc, char** argv)
 			aff3ct::tools::help(*incs[s]);
 		aff3ct::tools::help(finalizer);
 	}
-	
+
 	std::atomic<unsigned int> counter(0);
 	auto t_start = std::chrono::steady_clock::now();
 	if (!step_by_step)
 	{
-		// execute the sequence (multi-threaded)       
+		// execute the sequence (multi-threaded)
 		sequence_chain.exec([&counter, n_exec]() { return ++counter >= n_exec; });
 	}
 	else
@@ -259,7 +259,7 @@ int main(int argc, char** argv)
 	// verification of the sequence execution
 	bool tests_passed = true;
 	tid = 0;
-	
+
 	for (auto cur_finalizer : sequence_chain.get_cloned_modules<module::Finalizer<uint8_t>>(finalizer))
 	{
 		for (size_t f = 0; f < n_inter_frames; f++)
@@ -279,7 +279,7 @@ int main(int argc, char** argv)
 		}
 		tid++;
 	}
-	
+
 	if (tests_passed)
 		std::cout << "# " << rang::style::bold << rang::fg::green << "Tests passed!" << rang::style::reset << std::endl;
 	else

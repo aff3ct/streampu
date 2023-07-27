@@ -144,22 +144,22 @@ int main(int argc, char** argv)
 	inc_calssique.reset(new module::Incrementer<uint8_t>(data_length));
 	inc_calssique->set_ns(sleep_time_us * 1000);
 	inc_calssique->set_custom_name("Inc");
-	
+
 	// Stateless module used only for the test
 	module::Stateless multi_comp;
 	multi_comp.set_name("Multiplier_comparator");
 	auto& task_multi_comp = multi_comp.create_task("multiply_compare");
 	auto sock_0 = multi_comp.create_socket_fwd<uint8_t>(task_multi_comp,"fwd_0",data_length);
 	auto sock_1 = multi_comp.create_socket_fwd<uint8_t>(task_multi_comp,"fwd_1",data_length);
-	
+
 	multi_comp.create_codelet(task_multi_comp,[sock_0, sock_1,data_length,incs](module::Module &m, runtime::Task &t, const size_t frame_id) -> int
 	{
 		auto tab_0 = static_cast<uint8_t*>(t[sock_0].get_dataptr());
-		auto tab_1 = (uint8_t*)(t[sock_1].get_dataptr()); 
+		auto tab_1 = (uint8_t*)(t[sock_1].get_dataptr());
 		for (size_t i=0; i<data_length ;++i)
 		{
 			tab_0[i] = tab_0[i]*(incs.size()+1)+1;
-		} 
+		}
 		for (size_t i=0;i<data_length;i++)
 		{
 			if(tab_0[i] != tab_1[i])
@@ -175,16 +175,16 @@ int main(int argc, char** argv)
 	// sockets binding
 	(*inc_calssique)[module::inc::sck::increment::in] = initializer[module::ini::sck::initialize::out];
 	(*incs[0])[module::inc_fwd::sck::increment_fwd::fwd] = (*inc_calssique)[module::inc::sck::increment::out];
+
 	multi_comp["multiply_compare::fwd_0"] = initializer[module::ini::sck::initialize::out]; // Bind the initial data to the multiplier
 		for (size_t s = 0; s < incs.size() -1; s++)
 			(*incs[s+1])[module::inc_fwd::sck::increment_fwd::fwd] = (*incs[s])[module::inc_fwd::sck::increment_fwd::fwd];
-	
-	multi_comp["multiply_compare::fwd_1"] = (*incs[incs.size()-1])[module::inc_fwd::sck::increment_fwd::fwd];
-	
-	finalizer[module::fin::sck::finalize::in] = multi_comp["multiply_compare::fwd_1"];
- 
-	std::unique_ptr<runtime::Pipeline> pipeline_chain;
 
+	multi_comp["multiply_compare::fwd_1"] = (*incs[incs.size()-1])[module::inc_fwd::sck::increment_fwd::fwd];
+
+	finalizer[module::fin::sck::finalize::in] = multi_comp["multiply_compare::fwd_1"];
+
+	std::unique_ptr<runtime::Pipeline> pipeline_chain;
 	pipeline_chain.reset(new runtime::Pipeline(
 	                     initializer[module::ini::tsk::initialize], // first task of the sequence
 	                     {  // pipeline stage 0
@@ -193,7 +193,7 @@ int main(int argc, char** argv)
 	                        // pipeline stage 1
 	                       	{ { &(*inc_calssique)[module::inc::tsk::increment] },   					// first tasks of stage 1
 	                         { &(*incs[incs.size() -1])[module::inc_fwd::tsk::increment_fwd] } },		// last  tasks of stage 1
-							// pipeline stage 3
+							// pipeline stage 2
 							{ { &task_multi_comp },   // first tasks of stage 2
 	                         { &task_multi_comp} },   // last  tasks of stage 2
 	                        // pipeline stage 3
@@ -207,7 +207,7 @@ int main(int argc, char** argv)
 	                       	1                       					// number of threads in the stage 3
 	                     },
 	                     {
-	                       	buffer_size, // synchronizatfwdn buffer size between stages 0 and 1
+	                       	buffer_size, // synchronization buffer size between stages 0 and 1
 	                       	buffer_size, // synchronization buffer size between stages 1 and 2
 						   	buffer_size, // synchronization buffer size between stages 2 and 3
 	                     },
@@ -234,7 +234,7 @@ int main(int argc, char** argv)
 		std::ofstream file(dot_filepath);
 		pipeline_chain->export_dot(file);
 	}
-	
+
 	// configuration of the sequence tasks
 	for (auto& mod : pipeline_chain->get_modules<module::Module>(false)) for (auto& tsk : mod->tasks)
 	{
@@ -244,7 +244,7 @@ int main(int argc, char** argv)
 		tsk->set_stats      (print_stats); // enable the statistics
 		tsk->set_fast       (true       ); // enable the fast mode (= disable the useless verifs in the tasks)
 	}
-	
+
 	auto t_start = std::chrono::steady_clock::now();
 	pipeline_chain->exec([](){return true;});
 	std::chrono::nanoseconds duration = std::chrono::steady_clock::now() - t_start;
@@ -254,7 +254,7 @@ int main(int argc, char** argv)
 	// verification of the sequence execution
 	bool tests_passed = true;
 	tid = 0;
-	
+
 	for (auto cur_finalizer : pipeline_chain.get()->get_stages()[pipeline_chain.get()->get_stages().size()-1]->get_cloned_modules<module::Finalizer<uint8_t>>(finalizer))
 	{
 		for (size_t f = 0; f < n_inter_frames; f++)
@@ -274,7 +274,7 @@ int main(int argc, char** argv)
 		}
 		tid++;
 	}
-	
+
 	if (tests_passed)
 		std::cout << "# " << rang::style::bold << rang::fg::green << "Tests passed!" << rang::style::reset << std::endl;
 	else
@@ -292,10 +292,10 @@ int main(int argc, char** argv)
 
 	for (size_t s = 0; s < incs.size() -1; s++)
 		(*incs[s+1])[module::inc_fwd::sck::increment_fwd::fwd].unbind((*incs[s])[module::inc_fwd::sck::increment_fwd::fwd]);
-		
+
 	multi_comp["multiply_compare::fwd_1"].unbind((*incs[incs.size()-1])[module::inc_fwd::sck::increment_fwd::fwd]);
 
 	finalizer[module::fin::sck::finalize::in].unbind(multi_comp["multiply_compare::fwd_1"]);
-	
+
 	return test_results;
 }

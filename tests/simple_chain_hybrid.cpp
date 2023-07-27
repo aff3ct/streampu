@@ -150,8 +150,8 @@ int main(int argc, char** argv)
 	module::Finalizer  <uint8_t> finalizer  (data_length);
 
 	std::vector<std::shared_ptr<module::Incrementer_fwd<uint8_t>>> incs_fwd(6);
-    std::vector<std::shared_ptr<module::Incrementer<uint8_t>>> incs(6); 
-	
+    std::vector<std::shared_ptr<module::Incrementer<uint8_t>>> incs(6);
+
     for (size_t s = 0; s < incs.size(); s++)
 	{
         incs[s].reset(new module::Incrementer<uint8_t>(data_length));
@@ -164,32 +164,31 @@ int main(int argc, char** argv)
 		incs_fwd[s].reset(new module::Incrementer_fwd<uint8_t>(data_length));
 		incs_fwd[s]->set_ns(sleep_time_us * 1000);
         incs_fwd[s]->set_custom_name("Inc_fwd" + std::to_string(s));
-        
+
 	}
 
 	std::shared_ptr<runtime::Sequence> partial_sequence;
 	std::shared_ptr<module::Subsequence> subsequence;
 
 	// sockets binding
-	(*incs[0])[module::inc::sck::increment::in] = initializer[module::ini::sck::initialize::out]; 
-	
+	(*incs[0])[module::inc::sck::increment::in] = initializer[module::ini::sck::initialize::out];
+
 	size_t s = 0;
 	for (; s < incs.size()/2 - 1; ++s)
 		(*incs[s+1])[module::inc::sck::increment::in] = (*incs[s])[module::inc::sck::increment::out];
-	// Hybrid binding 
-	(*incs_fwd[0])[module::inc_fwd::sck::increment_fwd::fwd] =  (*incs[s])[module::inc::sck::increment::out]; 
-	
-	size_t s_fwd =0;
+	// Hybrid binding
+	(*incs_fwd[0])[module::inc_fwd::sck::increment_fwd::fwd] =  (*incs[s])[module::inc::sck::increment::out];
+
+	size_t s_fwd = 0;
 	for (; s_fwd < incs_fwd.size() -1; ++s_fwd)
 		(*incs_fwd[s_fwd+1])[module::inc_fwd::sck::increment_fwd::fwd] = (*incs_fwd[s_fwd])[module::inc_fwd::sck::increment_fwd::fwd];
-	
+
 	s++;
 	(*incs[s])[module::inc::sck::increment::in] = (*incs_fwd[s_fwd])[module::inc_fwd::sck::increment_fwd::fwd];
 	for (; s < incs.size() - 1; ++s)
 		(*incs[s+1])[module::inc::sck::increment::in] = (*incs[s])[module::inc::sck::increment::out];
 	finalizer[module::fin::sck::finalize::in] = (*incs[incs.size()-1])[module::inc::sck::increment::out];
-	
-   
+
 	runtime::Sequence sequence_chain(initializer[module::ini::tsk::initialize], n_threads);
 	sequence_chain.set_n_frames(n_inter_frames);
 	sequence_chain.set_no_copy_mode(no_copy_mode);
@@ -230,14 +229,13 @@ int main(int argc, char** argv)
 			aff3ct::tools::help(*incs[s]);
 		aff3ct::tools::help(finalizer);
 	}
-	
+
 	std::vector<runtime::Socket*> liste_fwd;
 	for (size_t i=0 ; i< sequence_chain.get_tasks_per_threads().size();++i)
-	{	
+	{
 		for(size_t j=incs.size()/2+1; j<sequence_chain.get_tasks_per_threads()[i].size(); ++j)
 		{
 			auto task = sequence_chain.get_tasks_per_threads()[i][j];
-
 			if (task->get_n_fwd_sockets() == 0)
 				break;
 			for (auto socket : task->sockets)
@@ -254,7 +252,7 @@ int main(int argc, char** argv)
 	auto t_start = std::chrono::steady_clock::now();
 	if (!step_by_step)
 	{
-		// execute the sequence (multi-threaded)       
+		// execute the sequence (multi-threaded)
 		sequence_chain.exec([&counter, n_exec]() { return ++counter >= n_exec; });
 	}
 	else
@@ -280,7 +278,7 @@ int main(int argc, char** argv)
 	// verification of the sequence execution
 	bool tests_passed = true;
 	tid = 0;
-	
+
 	for (auto cur_finalizer : sequence_chain.get_cloned_modules<module::Finalizer<uint8_t>>(finalizer))
 	{
 		for (size_t f = 0; f < n_inter_frames; f++)
@@ -300,7 +298,7 @@ int main(int argc, char** argv)
 		}
 		tid++;
 	}
-	
+
 	if (tests_passed)
 		std::cout << "# " << rang::style::bold << rang::fg::green << "Tests passed!" << rang::style::reset << std::endl;
 	else
@@ -317,12 +315,13 @@ int main(int argc, char** argv)
 
 	// sockets unbinding
 	sequence_chain.set_n_frames(1);
-	
+
 	(*incs[0])[module::inc::sck::increment::in].unbind(initializer[module::ini::sck::initialize::out]);
+
 	for (size_t s = 0; s < incs.size()/2 -1; s++)
 		(*incs[s+1])[module::inc::sck::increment::in].unbind((*incs[s])[module::inc::sck::increment::out]);
+
 	finalizer[module::fin::sck::finalize::in].unbind((*incs[incs.size()-1])[module::inc::sck::increment::out]);
-	
-	
+
 	return test_results;
 }

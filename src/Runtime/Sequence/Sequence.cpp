@@ -1735,7 +1735,7 @@ void Sequence
 							{
 								std::vector<runtime::Socket*> bound_sockets;
 								std::vector<void*> dataptrs;
-								
+
 								for (auto socket : commute_task->sockets[s]->get_bound_sockets())
 								{
 									bound_sockets.push_back(socket);
@@ -1845,7 +1845,7 @@ void Sequence
 								auto bound_socket = &push_task->sockets[s]->get_bound_socket();
 								bound_sockets.push_back(bound_socket);
 								explore_thread_rec(bound_socket, bound_sockets);
-								
+
 								// If the socket is FWD, we have to update all the other sockets with a backward
 								// exploration
 								if (bound_socket->get_type() == socket_t::SFWD)

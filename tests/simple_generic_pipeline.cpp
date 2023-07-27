@@ -39,7 +39,7 @@ bool compare_files(const std::string& filename1, const std::string& filename2)
 	return std::equal(begin1, std::istreambuf_iterator<char>(), begin2); //Second argument is end-of-range iterator
 }
 
-// Functions to parse arguments 
+// Functions to parse arguments
 
 void parse_int_string( std::string& vector_param, std::vector<size_t>& vector)
 {
@@ -74,7 +74,7 @@ void parse_socket_type_task(std::string& socket_type_task_param, std::vector<std
 		}else
             tmp.push_back(socket_type_task_param[i]);
 
-        i++;     
+        i++;
     }
 }
 
@@ -92,11 +92,9 @@ void parse_socket_type_stage(std::string& socket_type_stage_param, std::vector<s
         }
         else
             tmp.push_back(socket_type_stage_param[i]);
-
-        i++;     
+        i++;
     }
 }
-
 
 int main(int argc, char** argv)
 {
@@ -135,7 +133,7 @@ int main(int argc, char** argv)
 	bool debug = false;
 	bool force_sequence = false;
 	bool active_waiting = false;
-    size_t stages_number = 0; 
+    size_t stages_number = 0;
     std::string task_per_stage_param; std::vector<size_t> task_per_stage;
 	std::string socket_type_task_param; std::vector<std::vector<std::string>> socket_type_task;
 	std::string socket_type_stage_param; std::vector<std::string> socket_type_stage;
@@ -204,7 +202,6 @@ int main(int argc, char** argv)
 				socket_type_stage_param = std::string(optarg);
 				parse_socket_type_stage(socket_type_stage_param,socket_type_stage);
 				break;
-
 			case 'h':
 				std::cout << "usage: " << argv[0] << " [options]" << std::endl;
 				std::cout << std::endl;
@@ -269,33 +266,33 @@ int main(int argc, char** argv)
 		}
 	}
 
-	// Checking for errors  
+	// Checking for errors
 	if (!socket_type_stage.empty() && !socket_type_task.empty())
 	{
-		message << "You have to select only one parameter for socket type "; 
+		message << "You have to select only one parameter for socket type ";
 		throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
 	}
 
-	// Constructing the socket type vector in case of stage socket 
-	for (size_t i = 0; i<socket_type_stage.size();++i)
+	// Constructing the socket type vector in case of stage socket
+	for (size_t i = 0; i < socket_type_stage.size(); ++i)
 	{
 		socket_type_task.push_back({});
-		for (size_t j=0; j<task_per_stage[i];++j)
+		for (size_t j=0; j < task_per_stage[i]; ++j)
 			socket_type_task[i].push_back(socket_type_stage[i]);
 	}
 
 	// Get the stage number
 	stages_number = task_per_stage.size();
 
-	// Parametre checking 
+	// Parametre checking
 	if(stages_number != (n_threads.size()-2) || stages_number != socket_type_task.size())
 	{
 		message << "Number of stages is incoherent";
 		throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
 	}
-	
-	// Checking for task number and socket type  
-	for (size_t i=0;i<socket_type_task.size();++i)
+
+	// Checking for task number and socket type
+	for (size_t i = 0;i < socket_type_task.size(); ++i)
 	{
 		if (socket_type_task[i].size() != task_per_stage[i])
 		{
@@ -363,10 +360,10 @@ int main(int argc, char** argv)
 				throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
 			}
 			tas++;
-		}	
+		}
 	}
-	
-	// Task binding 
+
+	// Task binding
 	// First task to bind to the initializer
 	tas= 0;
 	if (socket_type_task[0][0] == "SFWD")
@@ -376,24 +373,24 @@ int main(int argc, char** argv)
 	else
 	{
 		(*dynamic_cast<module::Relayer<uint8_t>*>(rlys[tas].get()))[module::rly::sck::relay::in] = source[module::src::sck::generate::out_data];
-	} 
+	}
 
 	// Binding tasks between them
-	for (size_t i =0 ; i < socket_type_task.size();++i)
+	for (size_t i = 0 ; i < socket_type_task.size();++i)
 	{
-		for (size_t j=0; j<socket_type_task[i].size()-1;++j)
-		{	
+		for (size_t j = 0; j < socket_type_task[i].size()-1;++j)
+		{
 			if (socket_type_task[i][j+1] == "SFWD")
 			{
 				if (socket_type_task[i][j] == "SFWD")
 				{
-					(*dynamic_cast<module::Relayer_fwd<uint8_t>*>(rlys[tas+1].get()))[module::rly_fwd::sck::relay_fwd::fwd] = 
-																	(*dynamic_cast<module::Relayer_fwd<uint8_t>*>(rlys[tas].get()))[module::rly_fwd::sck::relay_fwd::fwd];
+					(*dynamic_cast<module::Relayer_fwd<uint8_t>*>(rlys[tas+1].get()))[module::rly_fwd::sck::relay_fwd::fwd] =
+						(*dynamic_cast<module::Relayer_fwd<uint8_t>*>(rlys[tas].get()))[module::rly_fwd::sck::relay_fwd::fwd];
 				}
 				else
 				{
-					(*dynamic_cast<module::Relayer_fwd<uint8_t>*>(rlys[tas+1].get()))[module::rly_fwd::sck::relay_fwd::fwd] = 
-																	(*dynamic_cast<module::Relayer<uint8_t>*>(rlys[tas].get()))[module::rly::sck::relay::out];
+					(*dynamic_cast<module::Relayer_fwd<uint8_t>*>(rlys[tas+1].get()))[module::rly_fwd::sck::relay_fwd::fwd] =
+						(*dynamic_cast<module::Relayer<uint8_t>*>(rlys[tas].get()))[module::rly::sck::relay::out];
 				}
 			}
 			else
@@ -401,30 +398,30 @@ int main(int argc, char** argv)
 				if (socket_type_task[i][j] == "SFWD")
 				{
 					(*dynamic_cast<module::Relayer<uint8_t>*>(rlys[tas+1].get()))[module::rly::sck::relay::in] =
-																	(*dynamic_cast<module::Relayer_fwd<uint8_t>*>(rlys[tas].get()))[module::rly_fwd::sck::relay_fwd::fwd];
+						(*dynamic_cast<module::Relayer_fwd<uint8_t>*>(rlys[tas].get()))[module::rly_fwd::sck::relay_fwd::fwd];
 				}
 				else
 				{
 					(*dynamic_cast<module::Relayer<uint8_t>*>(rlys[tas+1].get()))[module::rly::sck::relay::in] =
-																	(*dynamic_cast<module::Relayer<uint8_t>*>(rlys[tas].get()))[module::rly::sck::relay::out];
-				}		
+						(*dynamic_cast<module::Relayer<uint8_t>*>(rlys[tas].get()))[module::rly::sck::relay::out];
+				}
 			}
-			tas++;		
+			tas++;
 		}
 		// We have to bind the last task of stage i to the first one of task i+1
 		if(i<socket_type_task.size()-1)
-		{	
+		{
 			if (socket_type_task[i+1][0] == "SFWD")
 			{
 				if (socket_type_task[i][socket_type_task[i].size()-1] == "SFWD")
 				{
-					(*dynamic_cast<module::Relayer_fwd<uint8_t>*>(rlys[tas+1].get()))[module::rly_fwd::sck::relay_fwd::fwd] = 
-																	(*dynamic_cast<module::Relayer_fwd<uint8_t>*>(rlys[tas].get()))[module::rly_fwd::sck::relay_fwd::fwd];
+					(*dynamic_cast<module::Relayer_fwd<uint8_t>*>(rlys[tas+1].get()))[module::rly_fwd::sck::relay_fwd::fwd] =
+						(*dynamic_cast<module::Relayer_fwd<uint8_t>*>(rlys[tas].get()))[module::rly_fwd::sck::relay_fwd::fwd];
 				}
 				else
 				{
-					(*dynamic_cast<module::Relayer_fwd<uint8_t>*>(rlys[tas+1].get()))[module::rly_fwd::sck::relay_fwd::fwd] = 
-																	(*dynamic_cast<module::Relayer<uint8_t>*>(rlys[tas].get()))[module::rly::sck::relay::out];
+					(*dynamic_cast<module::Relayer_fwd<uint8_t>*>(rlys[tas+1].get()))[module::rly_fwd::sck::relay_fwd::fwd] =
+						(*dynamic_cast<module::Relayer<uint8_t>*>(rlys[tas].get()))[module::rly::sck::relay::out];
 				}
 			}
 			else
@@ -432,19 +429,19 @@ int main(int argc, char** argv)
 				if (socket_type_task[i][socket_type_task[i].size()-1] == "SFWD")
 				{
 					(*dynamic_cast<module::Relayer<uint8_t>*>(rlys[tas+1].get()))[module::rly::sck::relay::in] =
-																	(*dynamic_cast<module::Relayer_fwd<uint8_t>*>(rlys[tas].get()))[module::rly_fwd::sck::relay_fwd::fwd];
+						(*dynamic_cast<module::Relayer_fwd<uint8_t>*>(rlys[tas].get()))[module::rly_fwd::sck::relay_fwd::fwd];
 				}
 				else
 				{
 					(*dynamic_cast<module::Relayer<uint8_t>*>(rlys[tas+1].get()))[module::rly::sck::relay::in] =
-																	(*dynamic_cast<module::Relayer<uint8_t>*>(rlys[tas].get()))[module::rly::sck::relay::out];
-				}		
+						(*dynamic_cast<module::Relayer<uint8_t>*>(rlys[tas].get()))[module::rly::sck::relay::out];
+				}
 			}
 			tas++;
 		}
 	}
 
-	// Last stage bind 
+	// Last stage bind
 	if (socket_type_task[socket_type_task.size()-1][socket_type_task[socket_type_task.size()-1].size()-1] == "SFWD")
 	{
 		sink[module::snk::sck::send_count::in_data] = (*dynamic_cast<module::Relayer_fwd<uint8_t>*>(rlys[tas].get()))[module::rly_fwd::sck::relay_fwd::fwd];
@@ -453,12 +450,13 @@ int main(int argc, char** argv)
 	{
 		sink[module::snk::sck::send_count::in_data] = (*dynamic_cast<module::Relayer<uint8_t>*>(rlys[tas].get()))[module::rly::sck::relay::out];
 	}
+
 	sink[module::snk::sck::send_count::in_count] = source[module::src::sck::generate::out_count];
 
 	std::unique_ptr<runtime::Sequence> sequence_chain;
 	std::unique_ptr<runtime::Pipeline> pipeline_chain;
 
-	// The sequence is executed correctly 
+	// The sequence is executed correctly
 	if (force_sequence)
 	{
 		sequence_chain.reset(new runtime::Sequence(source[module::src::tsk::generate], 1));
@@ -504,59 +502,54 @@ int main(int argc, char** argv)
 	}
 	else
 	{
-		// Task vector creation 
-		std::vector<std::pair<std::vector<runtime::Task*>, std::vector<runtime::Task*>>> stage_creat ; 
+		// Task vector creation
+		std::vector<std::pair<std::vector<runtime::Task*>, std::vector<runtime::Task*>>> stage_creat;
 		tas = 0;
 
 		// First Stage contains only the generate task
 		stage_creat.push_back({ { &source[module::src::tsk::generate] }, { &source[module::src::tsk::generate] } });
 
-		for (size_t i=0;i< socket_type_task.size();++i)
+		for (size_t i = 0; i < socket_type_task.size(); ++i)
 		{
 			if (socket_type_task[i][0] == "SFWD" && socket_type_task[i][socket_type_task[i].size()-1] == "SFWD")
 			{
 				stage_creat.push_back({{&(*dynamic_cast<module::Relayer_fwd<uint8_t>*>(rlys[tas].get()))[module::rly_fwd::tsk::relay_fwd]},
-									{&(*dynamic_cast<module::Relayer_fwd<uint8_t>*>(rlys[tas+socket_type_task[i].size()-1].get()))[module::rly_fwd::tsk::relay_fwd]}});
-			
+					{&(*dynamic_cast<module::Relayer_fwd<uint8_t>*>(rlys[tas+socket_type_task[i].size()-1].get()))[module::rly_fwd::tsk::relay_fwd]}});
 			}
 			else if(socket_type_task[i][0] == "SFWD" && socket_type_task[i][socket_type_task[i].size()-1] == "SIO")
 			{
 				stage_creat.push_back({{&(*dynamic_cast<module::Relayer_fwd<uint8_t>*>(rlys[tas].get()))[module::rly_fwd::tsk::relay_fwd]},
-									{&(*dynamic_cast<module::Relayer<uint8_t>*>(rlys[tas+socket_type_task[i].size()-1].get()))[module::rly::tsk::relay]}});
-			
+					{&(*dynamic_cast<module::Relayer<uint8_t>*>(rlys[tas+socket_type_task[i].size()-1].get()))[module::rly::tsk::relay]}});
 			}
 			else if (socket_type_task[i][0] == "SIO" && socket_type_task[i][socket_type_task[i].size()-1] == "SFWD")
 			{
 				stage_creat.push_back({{&(*dynamic_cast<module::Relayer<uint8_t>*>(rlys[tas].get()))[module::rly::tsk::relay]},
-									{&(*dynamic_cast<module::Relayer_fwd<uint8_t>*>(rlys[tas+socket_type_task[i].size()-1].get()))[module::rly_fwd::tsk::relay_fwd]}});
-			
+					{&(*dynamic_cast<module::Relayer_fwd<uint8_t>*>(rlys[tas+socket_type_task[i].size()-1].get()))[module::rly_fwd::tsk::relay_fwd]}});
 			}
 			else
 			{
 				stage_creat.push_back({{&(*dynamic_cast<module::Relayer<uint8_t>*>(rlys[tas].get()))[module::rly::tsk::relay]},
-									{&(*dynamic_cast<module::Relayer<uint8_t>*>(rlys[tas+socket_type_task[i].size()-1].get()))[module::rly::tsk::relay]}});
+					{&(*dynamic_cast<module::Relayer<uint8_t>*>(rlys[tas+socket_type_task[i].size()-1].get()))[module::rly::tsk::relay]}});
 			}
-
 			tas += socket_type_task[i].size();
-			
 		}
 
 		// Last stage creation 	with the sink
-		stage_creat.push_back({{&sink[module::snk::tsk::send_count]},{}}); 
+		stage_creat.push_back({{&sink[module::snk::tsk::send_count]},{}});
 
-		// Buffer vector 
+		// Buffer vector
 		std::vector<size_t> pool_buff ;
-		for (size_t i =0;i<stages_number +1 ; ++i)
+		for (size_t i = 0;i < stages_number +1 ; ++i)
 			pool_buff.push_back(buffer_size);
 
 		// Waiting vector
 		std::vector<bool> wait_vect ;
-		for (size_t i =0;i<stages_number +1 ; ++i)
+		for (size_t i = 0;i < stages_number +1 ; ++i)
 			wait_vect.push_back(active_waiting);
-		
+
 		pipeline_chain.reset(new runtime::Pipeline(
 		                     source[module::src::tsk::generate],
-		                     stage_creat, 
+		                     stage_creat,
 		                     n_threads,
 		                     pool_buff,
 		                     wait_vect
@@ -636,23 +629,23 @@ int main(int argc, char** argv)
 	else
 	{
 		(*dynamic_cast<module::Relayer<uint8_t>*>(rlys[tas].get()))[module::rly::sck::relay::in].unbind(source[module::src::sck::generate::out_data]);
-	} 
+	}
 
-	for (size_t i =0 ; i < socket_type_task.size();++i)
+	for (size_t i = 0 ; i < socket_type_task.size(); ++i)
 	{
-		for (size_t j=0; j<socket_type_task[i].size()-1;++j)
-		{	
+		for (size_t j= 0; j < socket_type_task[i].size()-1; ++j)
+		{
 			if (socket_type_task[i][j+1] == "SFWD")
 			{
 				if (socket_type_task[i][j] == "SFWD")
 				{
 					(*dynamic_cast<module::Relayer_fwd<uint8_t>*>(rlys[tas+1].get()))[module::rly_fwd::sck::relay_fwd::fwd]
-																	.unbind((*dynamic_cast<module::Relayer_fwd<uint8_t>*>(rlys[tas].get()))[module::rly_fwd::sck::relay_fwd::fwd]);
+						.unbind((*dynamic_cast<module::Relayer_fwd<uint8_t>*>(rlys[tas].get()))[module::rly_fwd::sck::relay_fwd::fwd]);
 				}
 				else
 				{
-					(*dynamic_cast<module::Relayer_fwd<uint8_t>*>(rlys[tas+1].get()))[module::rly_fwd::sck::relay_fwd::fwd] 
-																	.unbind((*dynamic_cast<module::Relayer<uint8_t>*>(rlys[tas].get()))[module::rly::sck::relay::out]);
+					(*dynamic_cast<module::Relayer_fwd<uint8_t>*>(rlys[tas+1].get()))[module::rly_fwd::sck::relay_fwd::fwd]
+						.unbind((*dynamic_cast<module::Relayer<uint8_t>*>(rlys[tas].get()))[module::rly::sck::relay::out]);
 				}
 			}
 			else
@@ -660,15 +653,15 @@ int main(int argc, char** argv)
 				if (socket_type_task[i][j] == "SFWD")
 				{
 					(*dynamic_cast<module::Relayer<uint8_t>*>(rlys[tas+1].get()))[module::rly::sck::relay::in]
-																	.unbind((*dynamic_cast<module::Relayer_fwd<uint8_t>*>(rlys[tas].get()))[module::rly_fwd::sck::relay_fwd::fwd]);
+						.unbind((*dynamic_cast<module::Relayer_fwd<uint8_t>*>(rlys[tas].get()))[module::rly_fwd::sck::relay_fwd::fwd]);
 				}
 				else
 				{
 					(*dynamic_cast<module::Relayer<uint8_t>*>(rlys[tas+1].get()))[module::rly::sck::relay::in]
-																	.unbind((*dynamic_cast<module::Relayer<uint8_t>*>(rlys[tas].get()))[module::rly::sck::relay::out]);
-				}		
+						.unbind((*dynamic_cast<module::Relayer<uint8_t>*>(rlys[tas].get()))[module::rly::sck::relay::out]);
+				}
 			}
-			tas++;		
+			tas++;
 		}
 		// We have to unbind the last task of stage i to the first one of task i+1
 		if(i< socket_type_task.size()-1)
@@ -678,12 +671,12 @@ int main(int argc, char** argv)
 				if (socket_type_task[i][socket_type_task[i].size()-1] == "SFWD")
 				{
 					(*dynamic_cast<module::Relayer_fwd<uint8_t>*>(rlys[tas+1].get()))[module::rly_fwd::sck::relay_fwd::fwd]
-																	.unbind((*dynamic_cast<module::Relayer_fwd<uint8_t>*>(rlys[tas].get()))[module::rly_fwd::sck::relay_fwd::fwd]);
+						.unbind((*dynamic_cast<module::Relayer_fwd<uint8_t>*>(rlys[tas].get()))[module::rly_fwd::sck::relay_fwd::fwd]);
 				}
 				else
 				{
-					(*dynamic_cast<module::Relayer_fwd<uint8_t>*>(rlys[tas+1].get()))[module::rly_fwd::sck::relay_fwd::fwd] 
-																	.unbind((*dynamic_cast<module::Relayer<uint8_t>*>(rlys[tas].get()))[module::rly::sck::relay::out]);
+					(*dynamic_cast<module::Relayer_fwd<uint8_t>*>(rlys[tas+1].get()))[module::rly_fwd::sck::relay_fwd::fwd]
+						.unbind((*dynamic_cast<module::Relayer<uint8_t>*>(rlys[tas].get()))[module::rly::sck::relay::out]);
 				}
 			}
 			else
@@ -691,19 +684,19 @@ int main(int argc, char** argv)
 				if (socket_type_task[i][socket_type_task[i].size()-1] == "SFWD")
 				{
 					(*dynamic_cast<module::Relayer<uint8_t>*>(rlys[tas+1].get()))[module::rly::sck::relay::in]
-																	.unbind((*dynamic_cast<module::Relayer_fwd<uint8_t>*>(rlys[tas].get()))[module::rly_fwd::sck::relay_fwd::fwd]);
+						.unbind((*dynamic_cast<module::Relayer_fwd<uint8_t>*>(rlys[tas].get()))[module::rly_fwd::sck::relay_fwd::fwd]);
 				}
 				else
 				{
 					(*dynamic_cast<module::Relayer<uint8_t>*>(rlys[tas+1].get()))[module::rly::sck::relay::in]
-																	.unbind((*dynamic_cast<module::Relayer<uint8_t>*>(rlys[tas].get()))[module::rly::sck::relay::out]);
-				}		
+						.unbind((*dynamic_cast<module::Relayer<uint8_t>*>(rlys[tas].get()))[module::rly::sck::relay::out]);
+				}
 			}
 			tas++;
 		}
 	}
 
-	// Last stage bind 
+	// Last stage bind
 	if (socket_type_task[socket_type_task.size()-1][socket_type_task[socket_type_task.size()-1].size()-1] == "SFWD")
 	{
 		sink[module::snk::sck::send_count::in_data].unbind((*dynamic_cast<module::Relayer_fwd<uint8_t>*>(rlys[tas].get()))[module::rly_fwd::sck::relay_fwd::fwd]);
@@ -714,6 +707,6 @@ int main(int argc, char** argv)
 	}
 
 	sink[module::snk::sck::send_count::in_count].unbind(source[module::src::sck::generate::out_count]);
-	
+
 	return test_results;
 }

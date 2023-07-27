@@ -156,11 +156,11 @@ int main(int argc, char** argv)
 	auto& task_comp = comp.create_task("compare");
 	auto sock_0 = comp.create_socket_fwd<uint8_t>(task_comp, "fwd_0", data_length);
 	auto sock_1 = comp.create_socket_fwd<uint8_t>(task_comp, "fwd_1", data_length);
-	
+
 	comp.create_codelet(task_comp,[sock_0, sock_1,data_length,incs_fwd](module::Module &m, runtime::Task &t, const size_t frame_id) -> int
 	{
 		auto tab_0 = static_cast<uint8_t*>(t[sock_0].get_dataptr());
-		auto tab_1 = (uint8_t*)(t[sock_1].get_dataptr()); 
+		auto tab_1 = (uint8_t*)(t[sock_1].get_dataptr());
 		for (size_t i=0;i<data_length;i++)
 			if(tab_0[i] != tab_1[i])
 			{
@@ -179,7 +179,7 @@ int main(int argc, char** argv)
 	comp["compare::fwd_0"] = (*rlys_fwd[1])[module::rly_fwd::sck::relay_fwd::fwd];
     comp["compare::fwd_1"] =  (*incs_fwd[1])[module::inc_fwd::sck::increment_fwd::fwd];
 	finalizer[module::fin::sck::finalize::in] = comp["compare::fwd_1"];
- 
+
 	std::unique_ptr<runtime::Pipeline> pipeline_chain;
 
 	pipeline_chain.reset(new runtime::Pipeline(
@@ -193,7 +193,7 @@ int main(int argc, char** argv)
 							// pipeline stage 3
 							{ {&(*rlys_fwd[1])[module::rly_fwd::tsk::relay_fwd] },       // first tasks of stage 2
 	                         { &(*rlys_fwd[1])[module::rly_fwd::tsk::relay_fwd]} },      // last  tasks of stage 2
-	                        // pipeline stage 3
+	                        // pipeline stage 4
 	                    	{ {&(*incs_fwd[1])[module::inc_fwd::tsk::increment_fwd] },    // first tasks of stage 3
 	                         { &(*incs_fwd[1])[module::inc_fwd::tsk::increment_fwd] } },  // last  tasks of stage 3
                         	{ {&task_comp },                                              // first tasks of stage 4
@@ -207,7 +207,7 @@ int main(int argc, char** argv)
 	                       	1                       	// number of threads in the stage 4
 	                     },
 	                     {
-	                       	buffer_size,	// synchronizatfwdn buffer size between stages 0 and 1
+	                       	buffer_size,	// synchronization buffer size between stages 0 and 1
 	                       	buffer_size, 	// synchronization buffer size between stages 1 and 2
                            	buffer_size, 	// synchronization buffer size between stages 2 and 3
 						   	buffer_size, 	// synchronization buffer size between stages 4 and 4
@@ -246,7 +246,7 @@ int main(int argc, char** argv)
 		tsk->set_stats      (print_stats); // enable the statistics
 		tsk->set_fast       (true       ); // enable the fast mode (= disable the useless verifs in the tasks)
 	}
-	
+
 	auto t_start = std::chrono::steady_clock::now();
 	pipeline_chain->exec([](){return true;});
 	std::chrono::nanoseconds duration = std::chrono::steady_clock::now() - t_start;
@@ -256,7 +256,7 @@ int main(int argc, char** argv)
 	// verification of the sequence execution
 	bool tests_passed = true;
 	tid = 0;
-	
+
 	for (auto cur_finalizer : pipeline_chain.get()->get_stages()[pipeline_chain.get()->get_stages().size()-1]->get_cloned_modules<module::Finalizer<uint8_t>>(finalizer))
 	{
 		for (size_t f = 0; f < n_inter_frames; f++)
@@ -276,7 +276,7 @@ int main(int argc, char** argv)
 		}
 		tid++;
 	}
-	
+
 	if (tests_passed)
 		std::cout << "# " << rang::style::bold << rang::fg::green << "Tests passed!" << rang::style::reset << std::endl;
 	else
@@ -289,7 +289,7 @@ int main(int argc, char** argv)
 	pipeline_chain->unbind_adaptors();
 
 	(*rlys_fwd[0])[module::rly_fwd::sck::relay_fwd::fwd].unbind(initializer[module::ini::sck::initialize::out]);
-	
+
 	(*incs_fwd[0])[module::inc_fwd::sck::increment_fwd::fwd].unbind((*rlys_fwd[0])[module::rly_fwd::sck::relay_fwd::fwd]);
     (*incs_fwd[1])[module::inc_fwd::sck::increment_fwd::fwd].unbind((*rlys_fwd[0])[module::rly_fwd::sck::relay_fwd::fwd]);
     (*rlys_fwd[1])[module::rly_fwd::sck::relay_fwd::fwd].unbind((*incs_fwd[0])[module::inc_fwd::sck::increment_fwd::fwd]);
@@ -298,6 +298,6 @@ int main(int argc, char** argv)
 	comp["compare::fwd_0"].unbind((*rlys_fwd[1])[module::rly_fwd::sck::relay_fwd::fwd]);
 
 	finalizer[module::fin::sck::finalize::in].unbind(comp["compare::fwd_1"]);
-	
+
 	return test_results;
 }

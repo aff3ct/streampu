@@ -210,7 +210,6 @@ Pipeline
 {
 }
 
-
 Pipeline
 ::~Pipeline()
 {

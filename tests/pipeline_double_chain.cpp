@@ -156,7 +156,7 @@ int main(int argc, char** argv)
 		incs[s]->set_custom_name("Inc" + std::to_string(s));
 	}
 
-	// sockets binding 
+	// sockets binding
 	(*incs[0])[module::inc::sck::increment::in] = initializer[module::ini::sck::initialize::out];
 	(*incs_fwd[0])[module::inc_fwd::sck::increment_fwd::fwd] = initializer[module::ini::sck::initialize::out];
 		for (size_t s = 0; s < incs_fwd.size() -1; s++)
@@ -164,9 +164,9 @@ int main(int argc, char** argv)
 			(*incs_fwd[s+1])[module::inc_fwd::sck::increment_fwd::fwd] = (*incs_fwd[s])[module::inc_fwd::sck::increment_fwd::fwd];
             (*incs[s+1])[module::inc::sck::increment::in] = (*incs[s])[module::inc::sck::increment::out];
         }
-    
+
 	finalizer[module::fin::sck::finalize::in] = (*incs[incs.size()-1])[module::inc::sck::increment::out];
-	
+
 	std::unique_ptr<runtime::Pipeline> pipeline_chain;
 
 	pipeline_chain.reset(new runtime::Pipeline(
@@ -180,8 +180,8 @@ int main(int argc, char** argv)
 	                       	// pipeline stage 2
 	                    	{ {& finalizer[module::fin::tsk::finalize] },		// first tasks of stage 2
 	                       	  {                                     	} },	// last  tasks of stage 2
-	                     },	
-	                     {	
+	                     },
+	                     {
 	                    	1,                       			// number of threads in the stage 0
 	                       	n_threads ? n_threads : 1,			// number of threads in the stage 1
 	                       	1                        			// number of threads in the stage 2
@@ -222,7 +222,7 @@ int main(int argc, char** argv)
 		tsk->set_stats      (print_stats); // enable the statistics
 		tsk->set_fast       (true       ); // enable the fast mode (= disable the useless verifs in the tasks)
 	}
-	
+
 	auto t_start = std::chrono::steady_clock::now();
 	pipeline_chain->exec([](){return true;});
 	std::chrono::nanoseconds duration = std::chrono::steady_clock::now() - t_start;
@@ -232,7 +232,7 @@ int main(int argc, char** argv)
 	// verification of the sequence execution
 	bool tests_passed = true;
 	tid = 0;
-	
+
 	for (auto cur_finalizer : pipeline_chain.get()->get_stages()[pipeline_chain.get()->get_stages().size()-1]->get_cloned_modules<module::Finalizer<uint8_t>>(finalizer))
 	{
 		for (size_t f = 0; f < n_inter_frames; f++)
@@ -252,7 +252,7 @@ int main(int argc, char** argv)
 		}
 		tid++;
 	}
-	
+
 	if (tests_passed)
 		std::cout << "# " << rang::style::bold << rang::fg::green << "Tests passed!" << rang::style::reset << std::endl;
 	else
@@ -273,6 +273,6 @@ int main(int argc, char** argv)
         (*incs[s+1])[module::inc::sck::increment::in].unbind((*incs[s])[module::inc::sck::increment::out]);
     }
 	finalizer[module::fin::sck::finalize::in].unbind((*incs[incs.size()-1])[module::inc::sck::increment::out]);
-	
+
 	return test_results;
 }
