@@ -5,9 +5,10 @@
  -  [Tasks & modules](module & task.md)
  -  [Sockets](Socket.md)
  -  [Sequences & Subsequences](Sequence & Subsequence.md)
- -  [Pipeline](Pipeline & Adaptor.md)
+ -  [Pipeline](Pipeline & Adaptor.md)  
  -  [Control flow](Switcher.md)
 
 Then we introduce the new features, and the modifications made to support them : 
 
 -  [Forward sockets](Forward socket.md)
+-  [Control Flow](Control Flow.md)
