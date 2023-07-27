@@ -200,8 +200,9 @@ int main(int argc, char** argv)
 		std::clog << rang::tag::warning << "'no_copy_mode' has no effect with pipeline (it is always enable)" << std::endl;
 	if (!force_sequence && step_by_step)
 		std::clog << rang::tag::warning << "'step_by_step' is not available with pipeline" << std::endl;
-	if(force_sequence && n_threads > 1)
+	if (force_sequence && n_threads > 1)
 		std::clog << rang::tag::warning << "Sequence mode only supports a single thread (User-Source/Sinks are not clonable)" << std::endl;
+
 	// modules creation
 	const bool auto_reset = false;
 	module::Source_user_binary<uint8_t> source(data_length, in_filepath, auto_reset);

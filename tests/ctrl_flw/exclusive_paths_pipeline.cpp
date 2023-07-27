@@ -203,18 +203,21 @@ int main(int argc, char** argv)
 	if(force_sequence && n_threads > 1)
 		std::clog << rang::tag::warning << "Sequence mode only supports a single thread (User-Source/Sinks are not clonable" << std::endl;
 
-	std::function<uint8_t(uint8_t*)> pack = [](uint8_t* unpacked) {
+	std::function<uint8_t(uint8_t*)> pack = [](uint8_t* unpacked)
+	{
 		uint8_t res = 0;
-		for(size_t i=0; i < 8; i++)
+		for (size_t i=0; i < 8; i++)
 			res |= unpacked[i] << i;
 		return res;
 	};
-	std::function<uint8_t*(uint8_t)> unpack = [](uint8_t packed) {
+	std::function<uint8_t*(uint8_t)> unpack = [](uint8_t packed)
+	{
 		uint8_t* res = new uint8_t[8]();
-		for(size_t i=0; i < 8; i++)
+		for (size_t i=0; i < 8; i++)
 			res[7-i] |= ((packed & (1 << (7 - i))) >> (7 - i)) ;
 		return res;
 	};
+
 	// modules creation
 	const bool auto_reset = false;
 	module::Source_user_binary<uint8_t> source(data_length, in_filepath, auto_reset);
@@ -229,10 +232,12 @@ int main(int argc, char** argv)
 	relayer_sel.set_ns(sleep_time_us * 1000);
 
 	// Stateless tasks
-    alternator.create_task("alternate");
+	alternator.create_task("alternate");
 	auto s_in_alt = alternator.create_socket_in<uint8_t>(alternator("alternate"), "in", data_length);
-    auto s_path = alternator.create_socket_out<int8_t>(alternator("alternate"), "path", 1);
-    alternator.create_codelet(alternator("alternate"), [s_in_alt, s_path, &pack](module::Module &m, runtime::Task &t, const size_t frame_id){
+	auto s_path = alternator.create_socket_out<int8_t>(alternator("alternate"), "path", 1);
+	alternator.create_codelet(alternator("alternate"),
+		[s_in_alt, s_path, &pack](module::Module &m, runtime::Task &t, const size_t frame_id)
+	{
 		uint8_t packed = pack((uint8_t*)(t[s_in_alt].get_dataptr()));
 		if(packed >= 97 && packed <= 122) {
 			*(uint8_t*)(t[s_path].get_dataptr()) = 0;
@@ -240,13 +245,15 @@ int main(int argc, char** argv)
 		else {
 			*(uint8_t*)(t[s_path].get_dataptr()) = 1;
 		}
-        return 0;
-    });
+		return 0;
+	});
 
-    uppercaser.create_task("upcase");
-    auto s_in_up = uppercaser.create_socket_in<uint8_t>(uppercaser("upcase"), "in", data_length);
+	uppercaser.create_task("upcase");
+	auto s_in_up = uppercaser.create_socket_in<uint8_t>(uppercaser("upcase"), "in", data_length);
 	auto s_out_up = uppercaser.create_socket_out<uint8_t>(uppercaser("upcase"), "out", data_length);
-    uppercaser.create_codelet(uppercaser("upcase"), [s_in_up, s_out_up, &data_length, &pack, &unpack](module::Module &m, runtime::Task &t, const size_t frame_id){
+	uppercaser.create_codelet(uppercaser("upcase"),
+		[s_in_up, s_out_up, &pack, &unpack](module::Module &m, runtime::Task &t, const size_t frame_id)
+	{
 		*(long*)(t[s_out_up].get_dataptr()) = *(long*)(t[s_in_up].get_dataptr());
 		uint8_t packed = pack((uint8_t*)(t[s_in_up].get_dataptr()));
 		if(packed >= 97 && packed <= 122) {
@@ -255,13 +262,15 @@ int main(int argc, char** argv)
 				((uint8_t*)(t[s_out_up].get_dataptr()))[i] = unsigned(unpacked[i]); 	
 			}
 		}
-        return 0;
-    });
+		return 0;
+	});
 
-    lowercaser.create_task("lowcase");
-    auto s_in_low = lowercaser.create_socket_in<uint8_t>(lowercaser("lowcase"), "in", data_length);
+	lowercaser.create_task("lowcase");
+	auto s_in_low = lowercaser.create_socket_in<uint8_t>(lowercaser("lowcase"), "in", data_length);
 	auto s_out_low = lowercaser.create_socket_out<uint8_t>(lowercaser("lowcase"), "out", data_length);
-    lowercaser.create_codelet(lowercaser("lowcase"), [s_in_low, s_out_low, &pack, &unpack](module::Module &m, runtime::Task &t, const size_t frame_id){
+	lowercaser.create_codelet(lowercaser("lowcase"),
+		[s_in_low, s_out_low, &pack, &unpack](module::Module &m, runtime::Task &t, const size_t frame_id)
+	{
 		*(long*)(t[s_out_low].get_dataptr()) = *(long*)(t[s_in_low].get_dataptr());
 		uint8_t packed = pack((uint8_t*)(t[s_in_low].get_dataptr()));
 		if(packed >= 65 && packed <= 90) {	
@@ -270,8 +279,8 @@ int main(int argc, char** argv)
 				((uint8_t*)(t[s_out_low].get_dataptr()))[i] = unsigned(unpacked[i]); 	
 			}
 		} 
-        return 0;
-    });
+		return 0;
+	});
 
 	// sockets binding
 	relayer_com[module::rly::sck::relay::in] = source[module::src::sck::generate::out_data];
@@ -332,7 +341,6 @@ int main(int argc, char** argv)
 		auto elapsed_time = duration.count() / 1000.f / 1000.f;
 		std::cout << "Sequence elapsed time: " << elapsed_time << " ms" << std::endl;
 	}
-
 	else
 	{
 		pipeline_chain.reset(new runtime::Pipeline(

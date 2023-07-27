@@ -232,6 +232,7 @@ protected:
 
 	void gen_processes(const bool no_copy_mode = false);
 	void reset_no_copy_mode();
+
 	template<class SS>
 	void check_ctrl_flw(tools::Digraph_node<SS>* root);
 	Sub_sequence* get_last_subsequence(const size_t tid);

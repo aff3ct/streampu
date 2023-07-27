@@ -366,7 +366,8 @@ void Pipeline
 		catch(const tools::control_flow_error& e)
 		{
 			std::stringstream message;
-			message << "Invalid control flow error on stage " << s << " (perhaps a switcher's tasks were separated between different stages)." << std::endl
+			message << "Invalid control flow error on stage " << s
+			        << " (perhaps a switcher's tasks were separated between different stages)." << std::endl
 			        << e.what();
 			throw tools::control_flow_error(__FILE__, __LINE__, __func__, message.str());
 		}
@@ -1161,12 +1162,12 @@ void Pipeline
 	                   const size_t,
 	                   const std::string&,
 	                   std::ostream&,
-					   std::vector<tools::Digraph_node<Sub_sequence>*> &)> export_dot_subsequences_recursive =
+	                   std::vector<tools::Digraph_node<Sub_sequence>*> &)> export_dot_subsequences_recursive =
 		[&export_dot_subsequences_recursive, this](tools::Digraph_node<Sub_sequence> *cur_node,
 		                                           const size_t sta,
 		                                           const std::string &tab,
 		                                           std::ostream &stream,
-												   std::vector<tools::Digraph_node<Sub_sequence>*> &already_parsed_nodes)
+		                                           std::vector<tools::Digraph_node<Sub_sequence>*> &already_parsed_nodes)
 		{
 			if (cur_node != nullptr &&
 			    std::find(already_parsed_nodes.begin(),
@@ -1190,17 +1191,15 @@ void Pipeline
 	                   const size_t,
 	                   const std::string&,
 	                   std::ostream&,
-					   std::vector<tools::Digraph_node<Sub_sequence>*> &)> export_dot_connections_recursive =
+	                   std::vector<tools::Digraph_node<Sub_sequence>*> &)> export_dot_connections_recursive =
 		[&export_dot_connections_recursive, this](tools::Digraph_node<Sub_sequence> *cur_node,
 		                                          const size_t sta,
 		                                          const std::string &tab,
 		                                          std::ostream &stream,
-												  std::vector<tools::Digraph_node<Sub_sequence>*> &already_parsed_nodes)
+		                                          std::vector<tools::Digraph_node<Sub_sequence>*> &already_parsed_nodes)
 		{
-			if (cur_node != nullptr &&
-						  std::find(already_parsed_nodes.begin(),
-			              already_parsed_nodes.end(),
-			              cur_node) == already_parsed_nodes.end())
+			if (cur_node != nullptr && std::find(already_parsed_nodes.begin(), already_parsed_nodes.end(), cur_node) ==
+			    already_parsed_nodes.end())
 			{
 				already_parsed_nodes.push_back(cur_node);
 				this->stages[sta]->export_dot_connections(cur_node->get_c()->tasks, tab, stream);

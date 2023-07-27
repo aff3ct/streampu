@@ -257,8 +257,9 @@ int main(int argc, char** argv)
 
 		auto elapsed_time = duration.count() / 1000.f / 1000.f;
 		std::cout << "Sequence elapsed time: " << elapsed_time << " ms" << std::endl;
- 	}
-	else{
+	}
+	else
+	{
 		pipeline_chain.reset(new runtime::Pipeline(
 		                     initializer[module::ini::tsk::initialize], // first task of the sequence
 		                     { // pipeline stage 0
@@ -361,7 +362,7 @@ int main(int argc, char** argv)
 				}
 			}
 			tid++;
-		}		
+		}
 	}
 
 	if (tests_passed)
