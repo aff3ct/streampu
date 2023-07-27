@@ -2209,7 +2209,8 @@ void Sequence
 						continue;
 					// We now search for the second switcher task in the path taken
  					for(size_t j=i; j < already_parsed_nodes.size() && ctrl_task_second == nullptr; j++) {
-						if(already_parsed_nodes[j]->get_c()->type != expected_type)
+						if(already_parsed_nodes[j]->get_c() == nullptr ||
+						   already_parsed_nodes[j]->get_c()->type != expected_type)
 							continue;
 						for(auto t : already_parsed_nodes[j]->get_c()->tasks) {
 							if((t->get_name() == "select" || t->get_name() == "commute") && &(ctrl_task_first->get_module()) == &(t->get_module())) {
