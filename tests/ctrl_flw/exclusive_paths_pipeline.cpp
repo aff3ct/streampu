@@ -201,7 +201,7 @@ int main(int argc, char** argv)
 	if (!force_sequence && step_by_step)
 		std::clog << rang::tag::warning << "'step_by_step' is not available with pipeline" << std::endl;
 	if(force_sequence && n_threads > 1)
-		std::clog << rang::tag::warning << "Sequence mode only supports a single thread (User-Source/Sinks are not clonable)" << std::endl;
+		std::clog << rang::tag::warning << "Sequence mode only supports a single thread (User-Source/Sinks are not clonable" << std::endl;
 
 	std::function<uint8_t(uint8_t*)> pack = [](uint8_t* unpacked) {
 		uint8_t res = 0;
