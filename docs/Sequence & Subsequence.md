@@ -42,14 +42,14 @@ This function is the most important of the sequence class, its main purpose is t
  - `Other tasks` : original execution.
 
 ```cpp
-void explore_thread_rec(Socket* socket, std::vector<runtime::Socket*>& liste_fwd);
+void explore_thread_rec(Socket* socket, std::vector<runtime::Socket*>& list_fwd);
 ```
-The function called by `gen_processes` to get all the bound sockets (children) of the modified one, this call is performed once at sequence build.
+The function called by `gen_processes` to get all the bound sockets (next) of the modified one, if the encountred socket is of type forward the function is called recursively on this new socket.This call is performed once at sequence build. (See [Forward socket](Forward socket.md))
 
 ```cpp
-void explore_thread_rec_reverse(Socket* socket, std::vector<runtime::Socket*>& liste_fwd);
+void explore_thread_rec_reverse(Socket* socket, std::vector<runtime::Socket*>& list_fwd);
 ```
-The function does the same thing as the previous one, but in the other sense (parents). This function is introduced to support `forward socket` runtime rebinding, because all the tasks share the same `dataptr` (as explained in [socket](Socket.md)) .
+The function does the same thing as the previous one, but in the other sense (previous).
 
 <a name="Subsequence">
 ## Subsequence
