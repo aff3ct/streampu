@@ -6,7 +6,7 @@
 
 ### Finding the last subsequence
 
-Upon creation a pipeline must add pull and push tasks at the beginning the end of the sequences making up its stages (see [pipeline](Pipeline & Adaptor.md) and [sequence](Sequence & Subsequence.md) for the relationship between the two).  
+Upon creation a pipeline must add pull and push tasks at the beginning and end of the sequences making up its stages (see [pipeline](Pipeline & Adaptor.md) and [sequence](Sequence & Subsequence.md) for the relationship between the two).  
 For that purpose a depth-first search algorithm is used to traverse the digraph starting from the root of the sequence, marking every node on the path and returning the last node it passed through.  
 This however can return incorrect nodes depending on the configuration of the sequence.  
 
@@ -51,7 +51,7 @@ Node Last_Subseq(Node n):
     Here are the paths the DFS would take are  
     - [SS 1, SS select, SS 2, SS commute, SS 3] : returns SS 3  
     - [SS 1, SS select, SS 2, SS commute, SS 4] : returns SS 4  
-    As the function is recursive, it returns the result of the last path taken : SS Branch 3, which is *correct*.
+    As the function is recursive, it returns the result of the last path taken : SS Branch 3, which is *correct*, **but deceptive**. It only happened to work because of the order in which the children of node SS commute were parsed. If SS 4 was parsed first then it would have returned SS 3, this kind of behaviour is problematic as the algorithm should not depend on which children is first in a list as that is not relevant to the layout of the graph.
 === "Switch in a loop"
     ```mermaid
     graph LR;
