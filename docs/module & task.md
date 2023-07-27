@@ -79,7 +79,6 @@ size_t  unbind (Socket  &s_out );
 Unbinds and deletes `fake_input_socket`.
 Called by `Sequence::set_n_frames()` and manually by the user.
 
-
 ## Module  
 Modules are containers for tasks which share internal independent information of the application data flow.  
 

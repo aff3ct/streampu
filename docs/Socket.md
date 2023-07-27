@@ -1,5 +1,3 @@
-  
-
 ## Socket
 
 Sockets are used to communicate data between [tasks](module & task.md). There are 3 different types of sockets :
@@ -12,10 +10,7 @@ Sockets are used to communicate data between [tasks](module & task.md). There ar
 
 A task can have either `input & output` sockets or a `forward` socket, or both.
 
-
-
 ![Task with sockets!](./assets/task_sockets.svg)
-
 
 ### Attributes
 
@@ -69,7 +64,4 @@ We have to pay attention during the choice of the socket type for our task, usin
  - In the case of the `SIO`, the input and the output sockets have their own `dataptr`. The `input` socket receives the pointer from its bound socket and the `output` has its own allocated memory space, the data received and computed by the task are written to the `output` memory space. The initial data is not modified in this case, there are no *side effects*.
  
  - In the case of the `SFWD`, the forward socket receives its `dataptr` from the bound socket like an `input`. But unlike the `SIO` case, the computed data is written directly on the provided memory space, thus overwritting it (and potentially losing important information), there are *side effects*.
-
-
-
 

@@ -31,8 +31,8 @@ const size_t n_bytes_commute;
 const size_t n_bytes_select;
 ```
 The product of the size  of `datatype` with `n_elemts` for the total number of bytes expected on each data socket.
-	      
-### Tasks 
+
+### Tasks
 
 Since those tasks have a variable number of sockets they are accessed through the subcript `operator[]` with a numerical index unlike regular tasks which use namespaces and enumators.
 
@@ -68,7 +68,6 @@ Any task bound to its output sockets **besides status** will be considered in a 
 | `Input`     | ctrl            | 1        |
 | `Output`    | data{0..N-1}    | {2..N+1} |
 | `Output`    | status          | N+2      |
-
 
 <a name="Select"></a>
 #### Select

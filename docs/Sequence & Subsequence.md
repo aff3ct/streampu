@@ -29,7 +29,6 @@ std::vector<std::vector<module::Module*>>  all_modules;
 ```
 Vector of modules contained within the sequence. 
 
-
 ###  Methods
 
 ```cpp

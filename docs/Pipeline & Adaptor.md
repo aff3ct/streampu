@@ -1,15 +1,9 @@
 
 ## Pipeline
 
-  
-
 Pipelines is a feature offered by `AFF3CT-core` allowing the breaking of a [sequence](Sequence%20%26%20Subsequence.md) into multiple [stages](#Stage), each executed on one or multiple threads in parallel.
 
-  
-
 ![Image non affichée !](./assets/sequence_to_pipeline.svg)
-
-
 
 ### Attributes
 
@@ -18,14 +12,11 @@ Sequence original_sequence;
 ``` 
 The original sequence from which the pipeline was created.
 
-
 <a name="Stage"></a>
 ```cpp 
 std::vector<std::shared_ptr<Sequence>> stages; 
 ``` 
 Vector of the different stages in the pipeline. Each stage is a [sequence](Sequence%20%26%20Subsequence.md) in and of itself.
-
-  
 
 ```cpp
 std::vector<std::pair<std::tuple<runtime::Socket*, size_t, size_t, size_t,size_t>,
@@ -65,8 +56,6 @@ This function builds the pipeline given :
 
 - The type of waiting for the adaptor tasks. 
 
-  
-
 ```cpp
 void  create_adaptors(const  std::vector<size_t> &synchro_buffer_sizes = {},
 const  std::vector<bool> &synchro_active_waiting = {});
@@ -84,10 +73,8 @@ Adaptor module tasks `pull & push` need to be bound to each task in the two cons
 <a name="Adaptor"></a>
 ## Adaptor
   
-
 Adaptors are special modules inserted between stages when creating a pipeline and serve as "bridges" between stages, they are bound to first and last tasks of the consecutive stages. The purpose of adaptors is to synchronize data exchange between each stage using preallocated buffer pools. There are 4 tasks performed by adaptors :
   
-
 - push_1 : when the $S$ stage is executed on one thread and the $(S+1)$ stage is on multiple threads, the function gets an empty buffer and fills it with the data produced in the stage $S$. The buffers are filled using a round-robin algorithm.
 
 - pull_n : when the $S$ stage is executed on multiple threads and the $(S-1)$ stage is on one thread, it's the task executed just after the `push_1`, it takes a filled buffer from the interstage pool and forwards the data. There is a `pull_n` task for every thread of the stage.
@@ -95,7 +82,6 @@ Adaptors are special modules inserted between stages when creating a pipeline an
 - push_n : when the $S$ stage is executed on multiple threads and the $(S+1)$ stage is on one thread, the task takes an empty buffer from the pool and fills it with the data produced by the thread. There is a `push_n` task for each thread of the stage.
 
 - pull_1 : when the $S$ stage is executed on one thread and the $(S-1)$ stage is on multiple threads, it's the task executed just after the `push_n`. It takes filled buffers from the pool using the same round-robin algorithm as `push_1` and forward the data.
-
 
 ### Attributes
 ```cpp
@@ -113,7 +99,6 @@ std::shared_ptr<std::vector<std::atomic<uint64_t>>> first;
 std::shared_ptr<std::vector<std::atomic<uint64_t>>> last;
 ```
 Two pointers used to monitor the buffer pool, `first` is used to get the filled buffers, and `last` for the empty ones.
-
 
 ### Methods
 
