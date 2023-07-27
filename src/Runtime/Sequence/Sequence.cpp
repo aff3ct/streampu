@@ -1166,7 +1166,7 @@ void Sequence
 ::duplicate(const tools::Digraph_node<SS> *sequence)
 {
 	std::set<MO*> modules_set;
-
+	std::vector<const runtime::Task*> tsks_vec; // get a vector of tasks included in the tasks graph
 	std::function<void(const tools::Digraph_node<SS>*, std::vector<const tools::Digraph_node<SS>*> &)> collect_modules_list;
 	collect_modules_list = [&](const tools::Digraph_node<SS> *node, std::vector<const tools::Digraph_node<SS>*> &already_parsed_nodes)
 	{
@@ -1174,6 +1174,7 @@ void Sequence
 		    std::find(already_parsed_nodes.begin(), already_parsed_nodes.end(), node) == already_parsed_nodes.end())
 		{
 			already_parsed_nodes.push_back(node);
+			tsks_vec.insert(tsks_vec.end(), node->get_c()->tasks.begin(), node->get_c()->tasks.end());
 			if (node->get_c())
 				for (auto ta : node->get_c()->tasks)
 					modules_set.insert(&ta->get_module());
@@ -1295,9 +1296,11 @@ void Sequence
 							auto &t_ref_out = s_ref_out->get_task();
 							auto &m_ref_out = t_ref_out.get_module();
 
+							// check if `t_ref_out` is included in the tasks graph
+							auto t_in_seq = std::find(tsks_vec.begin(), tsks_vec.end(), &t_ref_out) != tsks_vec.end();
 							auto m_id_out = get_module_id(modules_vec, m_ref_out);
 
-							if (m_id_out != -1)
+							if (t_in_seq && m_id_out != -1)
 							{
 								auto t_id_out = get_task_id(m_ref_out.tasks, t_ref_out);
 								auto s_id_out = get_socket_id(t_ref_out.sockets, *s_ref_out);
@@ -1325,9 +1328,11 @@ void Sequence
 						auto &t_ref_out = s_ref_out->get_task();
 						auto &m_ref_out = t_ref_out.get_module();
 
+						// check if `t_ref_out` is included in the tasks graph
+						auto t_in_seq = std::find(tsks_vec.begin(), tsks_vec.end(), &t_ref_out) != tsks_vec.end();
 						auto m_id_out = get_module_id(modules_vec, m_ref_out);
 
-						if (m_id_out != -1)
+						if (t_in_seq && m_id_out != -1)
 						{
 							auto t_id_out = get_task_id(m_ref_out.tasks, t_ref_out);
 							auto s_id_out = get_socket_id(t_ref_out.sockets, *s_ref_out);
