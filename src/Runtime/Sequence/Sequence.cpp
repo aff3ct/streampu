@@ -965,8 +965,9 @@ tools::Digraph_node<SS>* Sequence
 							                                                    in_sockets_feed[&t] = 1;
 							bool t_is_select = dynamic_cast<const module::Switcher*>(&(t.get_module())) &&
 							                   t.get_name() == "select";
-							if ((!t_is_select && in_sockets_feed[&t] >= (t.get_n_input_sockets() + t.get_n_fwd_sockets()) - t.get_n_static_input_sockets()) ||
-							    ( t_is_select && t.is_last_input_socket(*bs)))
+							if ((!t_is_select && in_sockets_feed[&t] >=
+							     (t.get_n_input_sockets() + t.get_n_fwd_sockets()) - t.get_n_static_input_sockets())
+							    || (t_is_select && t.is_last_input_socket(*bs)))
 							{
 								is_last = false;
 								last_subseq = Sequence::init_recursive<SS,TA>(task_subseq[&t].first,
@@ -1290,7 +1291,8 @@ void Sequence
 				// replicate the sockets binding
 				for (size_t s_id = 0; s_id < t_ref->sockets.size(); s_id++)
 				{
-					if (t_ref->get_socket_type(*t_ref->sockets[s_id]) == socket_t::SIN || t_ref->get_socket_type(*t_ref->sockets[s_id]) == socket_t::SFWD)
+					if (t_ref->get_socket_type(*t_ref->sockets[s_id]) == socket_t::SIN ||
+					    t_ref->get_socket_type(*t_ref->sockets[s_id]) == socket_t::SFWD)
 					{
 						const runtime::Socket* s_ref_out = nullptr;
 						try { s_ref_out = &t_ref->sockets[s_id]->get_bound_socket(); } catch (...) {}
@@ -2136,7 +2138,8 @@ void Sequence
 	{
 		for (auto sck_out : tsk_out->sockets)
 		{
-			if (tsk_out->get_socket_type(*sck_out) == socket_t::SOUT || tsk_out->get_socket_type(*sck_out) == socket_t::SFWD)
+			if (tsk_out->get_socket_type(*sck_out) == socket_t::SOUT ||
+			    tsk_out->get_socket_type(*sck_out) == socket_t::SFWD)
 			{
 				for (auto sck_in : sck_out->get_bound_sockets())
 				{
