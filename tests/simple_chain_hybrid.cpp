@@ -231,7 +231,7 @@ int main(int argc, char** argv)
 	}
 
 	std::vector<runtime::Socket*> liste_fwd;
-	for (size_t i=0 ; i< sequence_chain.get_tasks_per_threads().size();++i)
+	for (size_t i = 0 ; i< sequence_chain.get_tasks_per_threads().size(); ++i)
 	{
 		for(size_t j=incs.size()/2+1; j<sequence_chain.get_tasks_per_threads()[i].size(); ++j)
 		{
@@ -318,7 +318,7 @@ int main(int argc, char** argv)
 
 	(*incs[0])[module::inc::sck::increment::in].unbind(initializer[module::ini::sck::initialize::out]);
 
-	for (size_t s = 0; s < incs.size()/2 -1; s++)
+	for (size_t s = 0; s < incs.size()/2 - 1; s++)
 		(*incs[s+1])[module::inc::sck::increment::in].unbind((*incs[s])[module::inc::sck::increment::out]);
 
 	finalizer[module::fin::sck::finalize::in].unbind((*incs[incs.size()-1])[module::inc::sck::increment::out]);

@@ -40,7 +40,6 @@ bool compare_files(const std::string& filename1, const std::string& filename2)
 }
 
 // Functions to parse arguments
-
 void parse_int_string( std::string& vector_param, std::vector<size_t>& vector)
 {
 	for (size_t i=0;i < vector_param.size(); ++i)
@@ -59,19 +58,26 @@ void parse_socket_type_task(std::string& socket_type_task_param, std::vector<std
     std::string tmp;
     while (i < socket_type_task_param.size())
 	{
-        if(socket_type_task_param[i] == '(' && socket_type_task_param[i+1] != '('){
+        if(socket_type_task_param[i] == '(' && socket_type_task_param[i+1] != '(')
+		{
 			socket_type_task.push_back({});
             tmp.clear();
-		}else if (socket_type_task_param[i] == ',' && socket_type_task_param[i+1] != '('){
+		}
+		else if (socket_type_task_param[i] == ',' && socket_type_task_param[i+1] != '(')
+		{
             socket_type_task[sta].push_back(tmp);
             tmp.clear();
-        }else if (socket_type_task_param[i] == ')'){
-				if (socket_type_task_param[i+1] != ')'){
+        }
+		else if (socket_type_task_param[i] == ')')
+		{
+				if (socket_type_task_param[i+1] != ')')
+				{
 					socket_type_task[sta].push_back(tmp);
 					tmp.clear();
 					sta++;
 				}
-		}else
+		}
+		else
             tmp.push_back(socket_type_task_param[i]);
 
         i++;
@@ -84,9 +90,10 @@ void parse_socket_type_stage(std::string& socket_type_stage_param, std::vector<s
     std::string tmp;
     while (i < socket_type_stage_param.size())
 	{
-        if(socket_type_stage_param[i] == '(')
+    	if(socket_type_stage_param[i] == '(')
             tmp.clear();
-        else if (socket_type_stage_param[i] == ',' || socket_type_stage_param[i] == ')'){
+        else if (socket_type_stage_param[i] == ',' || socket_type_stage_param[i] == ')')
+		{
             socket_type_stage.push_back(tmp);
             tmp.clear();
         }
@@ -285,7 +292,7 @@ int main(int argc, char** argv)
 	stages_number = task_per_stage.size();
 
 	// Parametre checking
-	if(stages_number != (n_threads.size()-2) || stages_number != socket_type_task.size())
+	if(stages_number != (n_threads.size() - 2) || stages_number != socket_type_task.size())
 	{
 		message << "Number of stages is incoherent";
 		throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
@@ -365,7 +372,7 @@ int main(int argc, char** argv)
 
 	// Task binding
 	// First task to bind to the initializer
-	tas= 0;
+	tas = 0;
 	if (socket_type_task[0][0] == "SFWD")
 	{
 		(*dynamic_cast<module::Relayer_fwd<uint8_t>*>(rlys[tas].get()))[module::rly_fwd::sck::relay_fwd::fwd] = source[module::src::sck::generate::out_data];
@@ -378,7 +385,7 @@ int main(int argc, char** argv)
 	// Binding tasks between them
 	for (size_t i = 0 ; i < socket_type_task.size();++i)
 	{
-		for (size_t j = 0; j < socket_type_task[i].size()-1;++j)
+		for (size_t j = 0; j < socket_type_task[i].size() - 1;++j)
 		{
 			if (socket_type_task[i][j+1] == "SFWD")
 			{
@@ -409,7 +416,7 @@ int main(int argc, char** argv)
 			tas++;
 		}
 		// We have to bind the last task of stage i to the first one of task i+1
-		if(i<socket_type_task.size()-1)
+		if(i < socket_type_task.size() - 1)
 		{
 			if (socket_type_task[i+1][0] == "SFWD")
 			{
@@ -539,12 +546,12 @@ int main(int argc, char** argv)
 
 		// Buffer vector
 		std::vector<size_t> pool_buff ;
-		for (size_t i = 0;i < stages_number +1 ; ++i)
+		for (size_t i = 0; i < stages_number + 1; ++i)
 			pool_buff.push_back(buffer_size);
 
 		// Waiting vector
 		std::vector<bool> wait_vect ;
-		for (size_t i = 0;i < stages_number +1 ; ++i)
+		for (size_t i = 0; i < stages_number + 1; ++i)
 			wait_vect.push_back(active_waiting);
 
 		pipeline_chain.reset(new runtime::Pipeline(
@@ -633,7 +640,7 @@ int main(int argc, char** argv)
 
 	for (size_t i = 0 ; i < socket_type_task.size(); ++i)
 	{
-		for (size_t j= 0; j < socket_type_task[i].size()-1; ++j)
+		for (size_t  j= 0; j < socket_type_task[i].size() - 1; ++j)
 		{
 			if (socket_type_task[i][j+1] == "SFWD")
 			{
@@ -664,7 +671,7 @@ int main(int argc, char** argv)
 			tas++;
 		}
 		// We have to unbind the last task of stage i to the first one of task i+1
-		if(i< socket_type_task.size()-1)
+		if(i < socket_type_task.size() - 1)
 		{
 			if (socket_type_task[i+1][0] == "SFWD")
 			{

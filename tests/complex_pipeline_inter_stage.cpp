@@ -156,11 +156,11 @@ int main(int argc, char** argv)
 	{
 		auto tab_0 = static_cast<uint8_t*>(t[sock_0].get_dataptr());
 		auto tab_1 = (uint8_t*)(t[sock_1].get_dataptr());
-		for (size_t i=0; i<data_length ;++i)
+		for (size_t i = 0; i < data_length ; ++i)
 		{
 			tab_0[i] = tab_0[i]*(incs.size()+1)+1;
 		}
-		for (size_t i=0;i<data_length;i++)
+		for (size_t i = 0; i < data_length; ++i)
 		{
 			if(tab_0[i] != tab_1[i])
 			{
