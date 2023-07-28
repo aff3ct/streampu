@@ -56,13 +56,14 @@ This function builds the pipeline given :
 
 - The type of waiting for the adaptor tasks. 
 
+!!! note
+	AFF3CT doesn't support consecutive multithreaded stages yet.
+
 ```cpp
 void  create_adaptors(const  std::vector<size_t> &synchro_buffer_sizes = {},
 const  std::vector<bool> &synchro_active_waiting = {});
 ```
 This function creates the adaptor tasks that are added between every stages to transmit data from the stage $S$ to the stage $S+1$. 
-!!! note
-	AFF3CT doesn't support consecutive multithreaded stages yet.
 
 ```cpp
 void  _bind_adaptors(const  bool  bind_adaptors = true);
@@ -73,7 +74,7 @@ Adaptor module tasks `pull & push` need to be bound to each task in the two cons
 <a name="Adaptor"></a>
 ## Adaptor
   
-Adaptors are special modules inserted between stages when creating a pipeline and serve as "bridges" between stages, they are bound to first and last tasks of the consecutive stages. The purpose of adaptors is to synchronize data exchange between each stage using preallocated buffer pools. There are 4 tasks performed by adaptors :
+Adaptors are special modules inserted between stages when creating a pipeline and serve as "bridges" between them, they are bound to first and last tasks of the consecutive stages. The purpose of adaptors is to synchronize data exchange between each stage using preallocated buffer pools. There are 4 tasks performed by adaptors :
   
 - push_1 : when the $S$ stage is executed on one thread and the $(S+1)$ stage is on multiple threads, the function gets an empty buffer and fills it with the data produced in the stage $S$. The buffers are filled using a round-robin algorithm.
 

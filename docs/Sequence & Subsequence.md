@@ -1,9 +1,9 @@
 <a name="Sequence"></a>
 ## Sequence
 
-Sequence is a set of task and an execution order defined by their binding.
+Sequence is a set of tasks and an execution order defined by their binding.
 
-![Image d'une sequence classique !](./assets/simple_sequence.svg)
+![simple sequence](./assets/simple_sequence.svg)
 
 ### Attributes 
 ```cpp 
@@ -43,7 +43,7 @@ This function is the most important of the sequence class, its main purpose is t
 ```cpp
 void explore_thread_rec(Socket* socket, std::vector<runtime::Socket*>& list_fwd);
 ```
-The function called by `gen_processes` to get all the bound sockets (next) of the modified one, if the encountred socket is of type forward the function is called recursively on this new socket.This call is performed once at sequence build. (See [Forward socket](Forward socket.md))
+The function called by `gen_processes` to get all the bound sockets (next) of the modified one, if the encountered socket is of type `forward` the function is called recursively on this new socket (See [Forward socket and pipeline](Forward socket.md)). This call is performed once at sequence build.
 
 ```cpp
 void explore_thread_rec_reverse(Socket* socket, std::vector<runtime::Socket*>& list_fwd);
@@ -55,9 +55,9 @@ The function does the same thing as the previous one, but in the other sense (pr
 </a>
 
 When [control flow tasks](./Switcher.md) are introduced into a sequence, the execution is not only defined by the tasks binding but also by their outputs. For this purpose tasks are grouped into subsequences.  
-Subsequences are organized in a [directed graph](#Digraph) with 2 nodes designated as start and end respectively, this graph is recursively built during a sequence initialization from the first task and going from bound `output` or `forward` socket to bound `output` or `forward` socket, when a control flow task is reached a new control flow node is created and new children nodes for each of its *paths*, only a single of those paths can be taken during execution hence why they are refered to as *exclusive paths*. This also means that a sequence with no control flow task will always have a single subsequence, because it has a single path.
+Subsequences are organized in a [directed graph](#Digraph) with 2 nodes designated as start and end respectively, this graph is recursively built during a sequence initialization from the first task and going from bound `output` or `forward` socket to bound `output` or `forward` socket. When a control flow task is reached, a new control flow node is created and new children nodes for each of its *paths*, only a single of those paths can be taken during execution hence why they are refered to as *exclusive paths*. This also means that a sequence with no control flow task will always have a single subsequence, because it has a single path.
 
-Upon execution the sequence will iterate over its subsequences and execute every task they contain, if one of those tasks happens to be a Commute it will select the children node designated by its *path* attribute thus branching in the execution.
+Upon execution the sequence will iterate over its subsequences and execute every task they contain, if one of those tasks happens to be a `Commute` it will select the children node designated by its *path* attribute thus branching in the execution.
 
 ### Attributes
 
@@ -84,7 +84,7 @@ The subsequence's id.
 std::vector<std::vector<std::vector<Socket*>>> rebind_sockets;
 std::vector<std::vector<std::vector<void*>>> rebind_dataptrs;
 ```
-This two vectors are used within the `gen_process` function to save the sockets and their `dataptr` to update after a runtime rebinding. 
+This two vectors are used within the `gen_process` function to save the sockets and their `dataptr` to update during the runtime rebinding. 
 
 <a name="Digraph">
 ## Digraph

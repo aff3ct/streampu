@@ -5,7 +5,7 @@
 
 \newcommand{\legendLight}[1][]{
   \begin{scope}[#1]
-    \node[draw=Paired-1, rounded corners=0pt, minimum height=0.3cm, minimum width=0.7cm, text=Paired-1, fill=Paired-1!20, label={right:Sequential task}] (l2) at (+0.0, 1.4) {};
+    \node[draw=Paired-1, rounded corners=0pt, minimum height=0.3cm, minimum width=0.7cm, text=Paired-1, label={right:task}] (l2) at (+0.0, 1.4) {};
     \node[sfwd, label={right:Forward socket}] (l3) at (4.0, 2.0) {};
     \node[sin,  label={right:Input socket} ] (l5) at (4.0, 1.0) {};
     \node[sout, label={right:Output socket}] (l6) at (4.0, 1.5) {};
@@ -16,14 +16,17 @@
 
 \begin{document}
   \begin{tikzpicture}
+
     %%%%%%%%%%%%%%%%%%
     %% create tasks %%
     %%%%%%%%%%%%%%%%%%
-    %     options                          id   coords    label               sin sout sfwd attributes
-    %     -------                          --   ------    -----               --- ---- ---- ----------
-    \task                                  {t1} {0.5, 0}  {$S_{IO1}$}         {1} {1}  {0}  {};
-    \task [right=2.0cm of t1]              {t2} {}        {$S_{FWD}$}         {0} {0}  {1}  {};
-    \task [right=2.0cm of t2]              {t3} {}        {$S_{FWD\_IO}$}     {1} {1}  {1}  {};
+    %     options                                          id   coords    label               sin sout sfwd attributes
+    %     -------                                          --   ------    -----               --- ---- ---- ----------
+    \task                                                  {t1} {0.0, 0}  {$S_{io}$}          {1} {1}  {0}  {};
+    \task [right=2.0cm of t1]                              {t2} {}        {$S_{fwd}$}         {0} {0}  {1}  {};
+    \task [right=2.0cm of t2]                              {t3} {}        {$S_{fwd\_io}$}     {1} {1}  {1}  {};
+    \task [below=1.0cm of t1, xshift = 1.5cm]              {t4} {}        {$S_{IO_s}$}        {3} {3}  {0}  {};
+    \task [right=2.0cm of t4]                              {t5} {}        {$S_{fwd_s}$}       {0} {0}  {2}  {};
 
     %%%%%%%%%%%%%%%%%%%%%
     %% draw the legend %%

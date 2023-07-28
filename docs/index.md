@@ -1,6 +1,6 @@
 # AFF3CT-core
 
-`AFF3CT-core` is a Domain-Specific Embedded Language *(DSEL)* for streaming applications written in C++. In this document, we try to explain the working of basics elements of the language :
+`AFF3CT-core` is a Domain-Specific Embedded Language *(DSEL)* for streaming applications written in C++. In this document, we try to explain working of basics elements of the language :
 		
  -  [Tasks & modules](module & task.md)
  -  [Sockets](Socket.md)

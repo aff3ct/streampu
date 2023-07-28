@@ -16,7 +16,7 @@
 
 \begin{document}
   \begin{tikzpicture}
-    
+
     %%%%%%%%%%%%%%%%%%
     %% create tasks %%
     %%%%%%%%%%%%%%%%%%
@@ -26,8 +26,11 @@
     \task [below=1.0cm of t1]              {t2} {}       {$S_{io}$}          {1} {1}  {0}  {};
     \task [below=0.25cm of t1,xshift=2cm ] {t3} {}       {$S_{io}$}          {1} {1}  {0}  {};
 
-    \task [below=2.0cm of t3]              {t7} {}       {$S_{io}$}          {1} {1}  {0}  {};
+    \task [below=3.0cm of t1]              {t7} {}       {$S_{io}$}          {1} {1}  {0}  {};
     \task [right=1.0cm of t7]              {t8} {}       {$S_{io}$}          {1} {1}  {0}  {};
+
+    \task [right=1.0cm of t8]              {t9} {}       {$S_{io}$}          {1} {1}  {0}  {};
+    \task [right=1.0cm of t9]              {t10} {}      {$S_{io}$}          {1} {1}  {0}  {};
 
     \task [right=4.0cm of t1]              {t4} {0.5, 0} {$S_{io}$}          {1} {1}  {0}  {};
     \task [below=1.0cm of t4]              {t5} {}       {$S_{io}$}          {1} {1}  {0}  {};
@@ -38,14 +41,16 @@
     %%%%%%%%%%%%%%%%
     %     options                   start id                          path                                      end id
     %     -------                   --------                          ----                                      ------
-                                                    
-    \draw [bind]                    (t1_so1)                           --                                      (t3_si1);
-    \draw [bind]                    (t2_so1)                           --                                      (t3_si1);
 
-    \draw [bind]                    (t7_si1) --++ (-0.25,0.0) --++ (0.0,0.75) --++(2.0,0.0) --++(0.0,-0.75) |- (t8_si1);
+    \draw [bind]                    (t1_so1)                           --                                       (t3_si1);
+    \draw [bind]                    (t2_so1)                           --                                       (t3_si1);
 
-    \draw [bind]                    (t4_so1)                           --                                      (t6_si1);
-    \draw [bind]                    (t5_so1)                           --                                      (t6_si1);
+    \draw [bind]                    (t7_si1) --++ (-0.25,0.0) --++ (0.0,0.75) --++(2.0,0.0) --++(0.0,-0.75) |-  (t8_si1);
+
+    \draw [bind]                    (t9_so1) --++ (0.25,0.0) --++ (0.0,0.75) --++ (2.25,0.0) --++(0.0,-0.75)|-  (t10_so1);
+
+    \draw [bind]                    (t4_so1)                           --                                       (t6_si1);
+    \draw [bind]                    (t5_so1)                           --                                       (t6_si1);
 
     %%%%%%%%%%%%%%%%%%%%%
     %% draw the legend %%

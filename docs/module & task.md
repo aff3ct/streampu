@@ -26,13 +26,10 @@ bool debug_hex;
 If true, the data displayed during `debug` will be in hexadecimal.
 ```cpp
 int32_t debug_limit;
-```   
-```cpp
 uint8_t debug_precision;
-```  
-```cpp 
 int32_t debug_frame_max;
 ```  
+
 ```cpp
 bool no_input_socket;
 ``` 
