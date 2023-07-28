@@ -51,29 +51,7 @@ Node Last_Subseq(Node n):
     Here are the paths the DFS would take are  
     - [SS 1, SS select, SS 2, SS commute, SS 3] : returns SS 3  
     - [SS 1, SS select, SS 2, SS commute, SS 4] : returns SS 4  
-    As the function is recursive, it returns the result of the last path taken : SS Branch 3, which is *correct*, **but deceptive**. It only happened to work because of the order in which the children of node SS commute were parsed. If SS 4 was parsed first then it would have returned SS 3, this kind of behaviour is problematic as the algorithm should not depend on which children is first in a list as that is not relevant to the layout of the graph.
-=== "Switch in a loop"
-    ```mermaid
-    graph LR;
-    A(SS 1)-.->B(SS select 1);
-    B(SS select 1)-->C(SS 2);
-    C(SS 2)-->F(SS commute 1);
-    F(SS commute 1)-..->G(SS commute 2);
-    G(SS commute 2)-.->H(SS Branch 1);
-    F(SS commute 1)-.->M(SS 4);
-    G(SS commute 2)-.->J(SS Branch 2);
-    G(SS commute 2)-.->K(SS Branch 3);
-    H(SS Branch 1)-.->L(SS select 2);
-    J(SS Branch 2)-.->L(SS select 2);
-    K(SS Branch 3)-.->L(SS select 2);
-    L(SS select 2)-->B(SS select 1);
-    ```
-    Here are the paths the DFS would take  
-    - [SS 1, SS select 1, SS 2, SS commute 1, SS 4] : returns SS 4  
-    - [SS 1, SS select 1, SS 2, SS commute 1, SS select commute 2, SS Branch 1, SS select 2] : returns SS select 2  
-    - [SS 1, SS select 1, SS 2, SS commute 1, SS select commute 2, SS Branch 2] : returns SS Branch 2  
-    - [SS 1, SS select 1, SS 2, SS commute 1, SS select commute 2, SS Branch 3] : returns SS Branch 3  
-    As the function is recursive, it returns the result of the last path taken : SS Branch 3, which is *incorrect*, SS 4 is the expected result.
+    As the function is recursive, it returns the result of the last path taken : SS 4, which is *correct*, **but deceptive**. It only happened to work because of the order in which the children of node SS commute were parsed. If SS 4 was parsed first then it would have returned SS 3, this kind of behaviour is problematic as the algorithm should not depend on which children is first in a list as that is not relevant to the layout of the graph.
 === "No switcher"
     ```mermaid
     graph LR;
@@ -82,8 +60,9 @@ Node Last_Subseq(Node n):
     As explained in [Sequence & Subsequence](Sequence & Subsequence.md), a sequence with no [switcher](Switcher.md) would only have a single 
     subsequence, thus the DFS would return **SS 1** as the last subsequence which is *correct*.
 
-The solution would be to consider the node *without* children as the last one. Thus an improved DFS would be :  
-```
+#### Improved DFS
+The solution would be to consider the node *without* children as the last one.    
+```python
 Node Last_Subseq(Node n):
     mark(n)
     if n is childless:
@@ -117,3 +96,22 @@ Here are the paths the DFS would take
 - [SS 1, SS commute, SS Branch 1, SS select, SS 2] : No problem, the list contains both commute and select  
 - [SS 1, SS commute, SS Branch 2, SS select, SS 2] : Ditto  
 - [SS 1, SS commute, SS Branch 1]                  : Invalid, this path only contains a commute. We notify the user regarding the broken commute
+```python
+#Note that path_taken here is copied between recursive calls and NOT shared
+void Check_ctrl_flw(Node n, List path_taken):
+    if n is not in path_taken and n is not childless
+        path_taken.append(n)
+        for every child c of n:
+            Check_ctrl_flw(c, path_taken)
+    else
+        for i = 0, i < path_taken.size, i++:
+            if path_taken[i] does not contain a switcher task:
+                continue:
+            Task first_task  = path_taken[i] #We found the first task
+            for j = i, j < path_taken.size, j++:
+                if path_taken[j] is the opposite switcher task of path_taken[i]: #We found the second task
+                    break:
+            if j == path_taken.size #We went through the entire path and didn't find the other switcher task
+                throw an error
+
+```
