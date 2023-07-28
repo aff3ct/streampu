@@ -300,13 +300,16 @@ int main(int argc, char** argv)
 	{
 		(*incs[0])[module::inc_fwd::sck::increment_fwd::fwd].unbind(initializer[module::ini::sck::initialize::out]);
 		for (size_t s = 0; s < incs.size() - 1; s++)
-			(*incs[s+1])[module::inc_fwd::sck::increment_fwd::fwd].unbind((*incs[s])[module::inc_fwd::sck::increment_fwd::fwd]);
-		finalizer[module::fin::sck::finalize::in].unbind((*incs[incs.size()-1])[module::inc_fwd::sck::increment_fwd::fwd]);
+			(*incs[s+1])[module::inc_fwd::sck::increment_fwd::fwd]
+				.unbind((*incs[s])[module::inc_fwd::sck::increment_fwd::fwd]);
+		finalizer[module::fin::sck::finalize::in]
+			.unbind((*incs[incs.size()-1])[module::inc_fwd::sck::increment_fwd::fwd]);
 	}
 	else
 	{
 		for (size_t s = 0; s < incs.size() - 1; s++)
-			(*incs[s+1])[module::inc_fwd::sck::increment_fwd::fwd].unbind((*incs[s])[module::inc_fwd::sck::increment_fwd::fwd]);
+			(*incs[s+1])[module::inc_fwd::sck::increment_fwd::fwd]
+				.unbind((*incs[s])[module::inc_fwd::sck::increment_fwd::fwd]);
 		(*subsequence)[module::ssq::tsk::exec    ][ 0].unbind(initializer   [module::ini::sck::initialize::out]);
 		finalizer     [module::fin::sck::finalize::in].unbind((*subsequence)[module::ssq::tsk::exec      ][  1]);
 	}

@@ -150,21 +150,20 @@ int main(int argc, char** argv)
 	module::Finalizer  <uint8_t> finalizer  (data_length);
 
 	std::vector<std::shared_ptr<module::Incrementer_fwd<uint8_t>>> incs_fwd(6);
-    std::vector<std::shared_ptr<module::Incrementer<uint8_t>>> incs(6);
+	std::vector<std::shared_ptr<module::Incrementer<uint8_t>>> incs(6);
 
-    for (size_t s = 0; s < incs.size(); s++)
+	for (size_t s = 0; s < incs.size(); s++)
 	{
-        incs[s].reset(new module::Incrementer<uint8_t>(data_length));
-        incs[s]->set_ns(sleep_time_us * 1000);
-        incs[s]->set_custom_name("Inc" + std::to_string(s));
+		incs[s].reset(new module::Incrementer<uint8_t>(data_length));
+		incs[s]->set_ns(sleep_time_us * 1000);
+		incs[s]->set_custom_name("Inc" + std::to_string(s));
 	}
 
-	 for (size_t s = 0; s < incs_fwd.size(); s++)
+	for (size_t s = 0; s < incs_fwd.size(); s++)
 	{
 		incs_fwd[s].reset(new module::Incrementer_fwd<uint8_t>(data_length));
 		incs_fwd[s]->set_ns(sleep_time_us * 1000);
-        incs_fwd[s]->set_custom_name("Inc_fwd" + std::to_string(s));
-
+		incs_fwd[s]->set_custom_name("Inc_fwd" + std::to_string(s));
 	}
 
 	std::shared_ptr<runtime::Sequence> partial_sequence;
@@ -177,11 +176,12 @@ int main(int argc, char** argv)
 	for (; s < incs.size()/2 - 1; ++s)
 		(*incs[s+1])[module::inc::sck::increment::in] = (*incs[s])[module::inc::sck::increment::out];
 	// Hybrid binding
-	(*incs_fwd[0])[module::inc_fwd::sck::increment_fwd::fwd] =  (*incs[s])[module::inc::sck::increment::out];
+	(*incs_fwd[0])[module::inc_fwd::sck::increment_fwd::fwd] = (*incs[s])[module::inc::sck::increment::out];
 
 	size_t s_fwd = 0;
 	for (; s_fwd < incs_fwd.size() -1; ++s_fwd)
-		(*incs_fwd[s_fwd+1])[module::inc_fwd::sck::increment_fwd::fwd] = (*incs_fwd[s_fwd])[module::inc_fwd::sck::increment_fwd::fwd];
+		(*incs_fwd[s_fwd+1])[module::inc_fwd::sck::increment_fwd::fwd] =
+			(*incs_fwd[s_fwd])[module::inc_fwd::sck::increment_fwd::fwd];
 
 	s++;
 	(*incs[s])[module::inc::sck::increment::in] = (*incs_fwd[s_fwd])[module::inc_fwd::sck::increment_fwd::fwd];
@@ -233,7 +233,7 @@ int main(int argc, char** argv)
 	std::vector<runtime::Socket*> liste_fwd;
 	for (size_t i = 0 ; i< sequence_chain.get_tasks_per_threads().size(); ++i)
 	{
-		for(size_t j=incs.size()/2+1; j<sequence_chain.get_tasks_per_threads()[i].size(); ++j)
+		for(size_t j = incs.size() / 2 +1; j < sequence_chain.get_tasks_per_threads()[i].size(); ++j)
 		{
 			auto task = sequence_chain.get_tasks_per_threads()[i][j];
 			if (task->get_n_fwd_sockets() == 0)
@@ -286,7 +286,7 @@ int main(int argc, char** argv)
 			const auto &final_data = cur_finalizer->get_final_data()[f];
 			for (size_t d = 0; d < final_data.size(); d++)
 			{
-				auto expected = (int)(incs.size()+incs_fwd.size() + (tid * n_inter_frames +f));
+				auto expected = (int)(incs.size() + incs_fwd.size() + (tid * n_inter_frames + f));
 				expected = expected % 256;
 				if (final_data[d] != expected)
 				{
