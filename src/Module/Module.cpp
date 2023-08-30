@@ -209,6 +209,12 @@ size_t Module
 	return task.create_socket_out(name, n_elmts * this->n_frames, datatype);
 }
 
+size_t Module
+::create_socket_fwd(runtime::Task& task, const std::string &name, const size_t n_elmts, const std::type_index& datatype)
+{
+	return task.create_socket_fwd(name, n_elmts * this->n_frames, datatype);
+}
+
 void Module
 ::register_timer(runtime::Task& task, const std::string &key)
 {

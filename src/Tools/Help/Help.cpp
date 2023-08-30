@@ -68,7 +68,7 @@ std::string aff3ct::tools::get_help(const aff3ct::runtime::Task& tsk, const bool
 			auto sck_type = tsk.get_socket_type(*tsk.sockets[i]);
 			std::string line;
 			std::istringstream isstr(sck_msg);
-			if (sck_type == aff3ct::runtime::socket_t::SIN)
+			if (sck_type == aff3ct::runtime::socket_t::SIN || sck_type == aff3ct::runtime::socket_t::SFWD)
 			{
 				n_inputs++;
 				while (std::getline(isstr, line))

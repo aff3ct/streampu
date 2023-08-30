@@ -1,3 +1,4 @@
 *.gitignore*
 build*/
 src/Tools/version.cpp
+.vscode*/
