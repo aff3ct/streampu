@@ -43,7 +43,7 @@ int main(int argc, char** argv)
 
 	while (1)
 	{
-		const int opt = getopt_long(argc, argv, "t:f:s:d:e:i:j:o:cpbgh", longopts, 0);
+		const int opt = getopt_long(argc, argv, "t:f:s:d:e:i:j:o:cpbgqh", longopts, 0);
 		if (opt == -1)
 			break;
 		switch (opt)
@@ -229,7 +229,7 @@ int main(int argc, char** argv)
 			sequence_nested_loops->export_dot(file);
 		}
 
-		// configuration of the sequence tasks
+		// configuration of the sequence tasksexport_dot
 		for (auto& mod : sequence_nested_loops->get_modules<module::Module>(false)) for (auto& tsk : mod->tasks)
 		{
 			tsk->reset          (           );
@@ -257,8 +257,9 @@ int main(int argc, char** argv)
 
 		auto elapsed_time = duration.count() / 1000.f / 1000.f;
 		std::cout << "Sequence elapsed time: " << elapsed_time << " ms" << std::endl;
- 	}
-	else{
+	}
+	else
+	{
 		pipeline_chain.reset(new runtime::Pipeline(
 		                     initializer[module::ini::tsk::initialize], // first task of the sequence
 		                     { // pipeline stage 0
@@ -361,7 +362,7 @@ int main(int argc, char** argv)
 				}
 			}
 			tid++;
-		}		
+		}
 	}
 
 	if (tests_passed)

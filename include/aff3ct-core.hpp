@@ -39,6 +39,9 @@
 #ifndef FINALIZER_HPP_
 #include <Module/Finalizer/Finalizer.hpp>
 #endif
+#ifndef INCREMENTERFWD_HPP_
+#include <Module/Incrementer/Incrementer_fwd.hpp>
+#endif
 #ifndef INCREMENTER_HPP_
 #include <Module/Incrementer/Incrementer.hpp>
 #endif
@@ -74,6 +77,9 @@
 #endif
 #ifndef REDUCER_HPP_
 #include <Module/Reducer/Reducer.hpp>
+#endif
+#ifndef RELAYERFWD_HPP_
+#include <Module/Relayer/Relayer_fwd.hpp>
 #endif
 #ifndef RELAYER_HPP_
 #include <Module/Relayer/Relayer.hpp>
@@ -155,6 +161,9 @@
 #endif
 #ifndef CANNOT_ALLOCATE_HPP_
 #include <Tools/Exception/cannot_allocate/cannot_allocate.hpp>
+#endif
+#ifndef CONTROL_FLOW_ERROR_HPP_
+#include <Tools/Exception/control_flow_error/control_flow_error.hpp>
 #endif
 #ifndef DOMAIN_ERROR_HPP_
 #include <Tools/Exception/domain_error/domain_error.hpp>

@@ -210,7 +210,6 @@ Pipeline
 {
 }
 
-
 Pipeline
 ::~Pipeline()
 {
@@ -354,14 +353,23 @@ void Pipeline
 		const bool stage_thread_pinning = thread_pinning.size() ? thread_pinning[s] : false;
 		const std::vector<size_t> stage_puids =  puids.size() ? puids[s] : std::vector<size_t>();
 		const bool stage_tasks_inplace = /*tasks_inplace.size() ? tasks_inplace[s] :*/ true;
-
-		this->stages[s].reset(create_sequence<TA>(stage_firsts,
-		                                          stage_lasts,
-		                                          stage_exclusions,
-		                                          stage_n_threads,
-		                                          stage_thread_pinning,
-		                                          stage_puids,
-		                                          stage_tasks_inplace));
+		try{
+			this->stages[s].reset(create_sequence<TA>(stage_firsts,
+													stage_lasts,
+													stage_exclusions,
+													stage_n_threads,
+													stage_thread_pinning,
+													stage_puids,
+													stage_tasks_inplace));
+		}
+		catch(const tools::control_flow_error& e)
+		{
+			std::stringstream message;
+			message << "Invalid control flow error on stage " << s
+			        << " (perhaps a switcher's tasks were separated between different stages)." << std::endl
+			        << e.what();
+			throw tools::control_flow_error(__FILE__, __LINE__, __func__, message.str());
+		}
 		this->stages[s]->is_part_of_pipeline = true;
 	}
 
@@ -428,8 +436,8 @@ void Pipeline
 				for (size_t sck_id = 0; sck_id < tsk->sockets.size(); sck_id++)
 				{
 					auto sck = tsk->sockets[sck_id];
-					// if the current socket is an output socket type
-					if (tsk->get_socket_type(*sck) == socket_t::SOUT)
+					// if the current socket is an output or forward socket type
+					if (tsk->get_socket_type(*sck) == socket_t::SOUT || tsk->get_socket_type(*sck) == socket_t::SFWD)
 					{
 						// for all the bounded sockets to the current socket
 						for (auto bsck : sck->get_bound_sockets())
@@ -471,8 +479,8 @@ void Pipeline
 				for (size_t sck_id = 0; sck_id < tsk->sockets.size(); sck_id++)
 				{
 					auto sck = tsk->sockets[sck_id];
-					// if the current socket is an input socket type
-					if (tsk->get_socket_type(*sck) == socket_t::SIN)
+					// if the current socket is an input or forward socket type
+					if (tsk->get_socket_type(*sck) == socket_t::SIN || tsk->get_socket_type(*sck) == socket_t::SFWD)
 					{
 						runtime::Socket* bsck = nullptr;
 						try
@@ -1152,14 +1160,20 @@ void Pipeline
 	std::function<void(tools::Digraph_node<Sub_sequence>*,
 	                   const size_t,
 	                   const std::string&,
-	                   std::ostream&)> export_dot_subsequences_recursive =
+	                   std::ostream&,
+	                   std::vector<tools::Digraph_node<Sub_sequence>*> &)> export_dot_subsequences_recursive =
 		[&export_dot_subsequences_recursive, this](tools::Digraph_node<Sub_sequence> *cur_node,
 		                                           const size_t sta,
 		                                           const std::string &tab,
-		                                           std::ostream &stream)
+		                                           std::ostream &stream,
+		                                           std::vector<tools::Digraph_node<Sub_sequence>*> &already_parsed_nodes)
 		{
-			if (cur_node != nullptr)
+			if (cur_node != nullptr &&
+			    std::find(already_parsed_nodes.begin(),
+			              already_parsed_nodes.end(),
+			              cur_node) == already_parsed_nodes.end())
 			{
+				already_parsed_nodes.push_back(cur_node);
 				this->stages[sta]->export_dot_subsequence(cur_node->get_c()->tasks,
 				                                          cur_node->get_c()->tasks_id,
 				                                          cur_node->get_c()->type,
@@ -1168,25 +1182,29 @@ void Pipeline
 				                                          stream);
 
 				for (auto c : cur_node->get_children())
-					export_dot_subsequences_recursive(c, sta, tab, stream);
+					export_dot_subsequences_recursive(c, sta, tab, stream, already_parsed_nodes);
 			}
 		};
 
 	std::function<void(tools::Digraph_node<Sub_sequence>*,
 	                   const size_t,
 	                   const std::string&,
-	                   std::ostream&)> export_dot_connections_recursive =
+	                   std::ostream&,
+	                   std::vector<tools::Digraph_node<Sub_sequence>*> &)> export_dot_connections_recursive =
 		[&export_dot_connections_recursive, this](tools::Digraph_node<Sub_sequence> *cur_node,
 		                                          const size_t sta,
 		                                          const std::string &tab,
-		                                          std::ostream &stream)
+		                                          std::ostream &stream,
+		                                          std::vector<tools::Digraph_node<Sub_sequence>*> &already_parsed_nodes)
 		{
-			if (cur_node != nullptr)
+			if (cur_node != nullptr && std::find(already_parsed_nodes.begin(), already_parsed_nodes.end(), cur_node) ==
+			    already_parsed_nodes.end())
 			{
+				already_parsed_nodes.push_back(cur_node);
 				this->stages[sta]->export_dot_connections(cur_node->get_c()->tasks, tab, stream);
 
 				for (auto c : cur_node->get_children())
-					export_dot_connections_recursive(c, sta, tab, stream);
+					export_dot_connections_recursive(c, sta, tab, stream, already_parsed_nodes);
 			}
 		};
 
@@ -1196,10 +1214,11 @@ void Pipeline
 
 	for (size_t sta = 0; sta < this->stages.size(); sta++)
 	{
+		std::vector<tools::Digraph_node<Sub_sequence>*> already_parsed_nodes;
 		const auto n_threads = this->stages[sta]->get_n_threads();
 		stream << tab << "subgraph \"cluster_Stage " << sta << "\" {" << std::endl;
 		stream << tab << tab << "node [style=filled];" << std::endl;
-		export_dot_subsequences_recursive(this->stages[sta]->sequences[0], sta, tab, stream);
+		export_dot_subsequences_recursive(this->stages[sta]->sequences[0], sta, tab, stream, already_parsed_nodes);
 		stream << tab << tab << "label=\"Pipeline stage " << sta << " (" << n_threads << " thread(s))\";" << std::endl;
 		std::string color = "blue";
 		stream << tab << tab << "color=" << color << ";" << std::endl;
@@ -1208,7 +1227,8 @@ void Pipeline
 
 	for (size_t sta = 0; sta < this->stages.size(); sta++)
 	{
-		export_dot_connections_recursive(this->stages[sta]->sequences[0], sta, tab, stream);
+		std::vector<tools::Digraph_node<Sub_sequence>*> already_parsed_nodes;
+		export_dot_connections_recursive(this->stages[sta]->sequences[0], sta, tab, stream, already_parsed_nodes);
 		if (this->bound_adaptors)
 		{
 			if (sta > 0)

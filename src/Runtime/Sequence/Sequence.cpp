@@ -249,6 +249,15 @@ void Sequence
 			throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
 		}
 	}
+	for (auto t : lasts)
+	{
+		if (dynamic_cast<const module::Switcher*>(&t->get_module()) && t->get_name() == "commute")
+		{
+			std::stringstream message;
+			message << "A sequence cannot end with a 'commute' task.";
+			throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
+		}
+	}
 
 	auto root = new tools::Digraph_node<SS>({}, {}, nullptr, 0);
 	root->set_contents(nullptr);
@@ -301,6 +310,7 @@ void Sequence
 	}
 
 	this->n_tasks = taid;
+	this->check_ctrl_flw(root);
 	this->_init<SS>(root);
 	this->update_firsts_and_lasts_tasks();
 	this->gen_processes();
@@ -871,108 +881,102 @@ tools::Digraph_node<SS>* Sequence
 	if (auto switcher = dynamic_cast<const module::Switcher*>(&current_task.get_module()))
 	{
 		const auto current_task_name = current_task.get_name();
-		if (current_task_name == "commute") // ---------------------------------------------------------------- COMMUTE
+		if (current_task_name == "commute" && // -------------------------------------------------------------- COMMUTE
+		    std::find(switchers.begin(), switchers.end(), &current_task) == switchers.end())
 		{
-			if (std::find(switchers.begin(), switchers.end(), &current_task) == switchers.end())
+			switchers.push_back(&current_task);
+			auto node_commute = new tools::Digraph_node<SS>({cur_subseq}, {}, nullptr, cur_subseq->get_depth() +1);
+
+			node_commute->set_contents(new SS());
+			node_commute->get_c()->tasks.push_back(&current_task);
+			node_commute->get_c()->tasks_id.push_back(taid++);
+			node_commute->get_c()->type = subseq_t::COMMUTE;
+			node_commute->get_c()->id = ssid++;
+
+			cur_subseq->add_child(node_commute);
+
+			for (size_t sdo = 0; sdo < switcher->get_n_data_sockets(); sdo++)
 			{
-				switchers.push_back(&current_task);
-				auto node_switcher = new tools::Digraph_node<SS>({cur_subseq}, {}, nullptr, cur_subseq->get_depth() +1);
+				auto node_commute_son = new tools::Digraph_node<SS>({node_commute}, {}, nullptr,
+					node_commute->get_depth() +1);
 
-				node_switcher->set_contents(new SS());
-				node_switcher->get_c()->tasks.push_back(&current_task);
-				node_switcher->get_c()->tasks_id.push_back(taid++);
-				node_switcher->get_c()->type = subseq_t::COMMUTE;
-				node_switcher->get_c()->id = ssid++;
+				node_commute_son->set_contents(new SS());
+				node_commute_son->get_c()->id = ssid++;
 
-				cur_subseq->add_child(node_switcher);
+				node_commute->add_child(node_commute_son);
 
-				for (size_t sdo = 0; sdo < switcher->get_n_data_sockets(); sdo++)
+				auto &bss = (*switcher)[module::swi::tsk::commute].sockets[sdo+2]->get_bound_sockets();
+				for (auto bs : bss)
 				{
-					auto node_switcher_son = new tools::Digraph_node<SS>({node_switcher}, {}, nullptr,
-						node_switcher->get_depth() +1);
-
-					node_switcher_son->set_contents(new SS());
-					node_switcher_son->get_c()->id = ssid++;
-
-					node_switcher->add_child(node_switcher_son);
-
-					auto &bss = (*switcher)[module::swi::tsk::commute].sockets[sdo+2]->get_bound_sockets();
-					for (auto bs : bss)
+					if (bs == nullptr)
+						continue;
+					auto &t = bs->get_task();
+					if (std::find(exclusions.begin(), exclusions.end(), &t) == exclusions.end())
 					{
-						if (bs != nullptr)
+						if (task_subseq.find(&t) == task_subseq.end() || task_subseq[&t].second < ssid)
+							task_subseq[&t] = {node_commute_son, ssid};
+
+						in_sockets_feed.find(&t) != in_sockets_feed.end() ? in_sockets_feed[&t]++ :
+						                                                    in_sockets_feed[&t] = 1;
+						bool t_is_select = dynamic_cast<const module::Switcher*>(&(t.get_module())) &&
+						                   t.get_name() == "select";
+						if ((!t_is_select && in_sockets_feed[&t] >=
+						     (t.get_n_input_sockets() + t.get_n_fwd_sockets()) - t.get_n_static_input_sockets())
+						    || (t_is_select && t.is_last_input_socket(*bs)))
 						{
-							auto &t = bs->get_task();
-							if (std::find(exclusions.begin(), exclusions.end(), &t) == exclusions.end())
+							is_last = false;
+							last_subseq = Sequence::init_recursive<SS,TA>(task_subseq[&t].first,
+								task_subseq[&t].second, taid, selectors, switchers, first, t, lasts, exclusions,
+								real_lasts_id, real_lasts, in_sockets_feed, task_subseq);
+						}
+						else if (t_is_select)
+						{
+							tools::Digraph_node<SS>* node_selector = nullptr;
+							for (auto &sel : selectors)
+								if (sel.first == &t)
+								{
+									node_selector = sel.second;
+									break;
+								}
+
+							if (!node_selector)
 							{
-								if (task_subseq.find(&t) == task_subseq.end() || task_subseq[&t].second < ssid)
-									task_subseq[&t] = {node_switcher_son, ssid};
-
-								in_sockets_feed.find(&t) != in_sockets_feed.end() ? in_sockets_feed[&t]++ :
-								                                                    in_sockets_feed[&t] = 1;
-								bool t_is_select = dynamic_cast<const module::Switcher*>(&(t.get_module())) &&
-								                   t.get_name() == "select";
-								if ((!t_is_select && in_sockets_feed[&t] >= t.get_n_input_sockets() - t.get_n_static_input_sockets()) ||
-								    ( t_is_select && t.is_last_input_socket(*bs)))
-								{
-									is_last = false;
-									last_subseq = Sequence::init_recursive<SS,TA>(task_subseq[&t].first,
-										task_subseq[&t].second, taid, selectors, switchers, first, t, lasts, exclusions,
-										real_lasts_id, real_lasts, in_sockets_feed, task_subseq);
-								}
-								else
-								{
-									if (dynamic_cast<const module::Switcher*>(&t.get_module()) &&
-										t.get_name() == "select")
-									{
-										tools::Digraph_node<SS>* node_selector = nullptr;
-										for (auto &sel : selectors)
-											if (sel.first == &t)
-											{
-												node_selector = sel.second;
-												break;
-											}
-
-										if (!node_selector)
-										{
-											node_selector = new tools::Digraph_node<SS>({node_switcher_son}, {}, nullptr,
-												node_switcher_son->get_depth() +1);
-											selectors.push_back({&t, node_selector});
-										}
-										else
-											node_selector->add_father(node_switcher_son);
-										node_switcher_son->add_child(node_selector);
-									}
-								}
+								node_selector = new tools::Digraph_node<SS>({node_commute_son}, {}, nullptr,
+									node_commute_son->get_depth() +1);
+								selectors.push_back({&t, node_selector});
 							}
+							else
+								node_selector->add_father(node_commute_son);
+							node_commute_son->add_child(node_selector);
 						}
 					}
 				}
-				// exception for the status socket
-				auto &bss = (*switcher)[module::swi::tsk::commute].sockets[switcher->get_n_data_sockets()+2]
-					->get_bound_sockets();
-				for (auto bs : bss)
+			}
+			// exception for the status socket
+			auto &bss = (*switcher)[module::swi::tsk::commute].sockets[switcher->get_n_data_sockets()+2]
+				->get_bound_sockets();
+			for (auto bs : bss)
+			{
+				if (bs == nullptr)
+					continue;
+				auto &t = bs->get_task();
+				if (std::find(exclusions.begin(), exclusions.end(), &t) == exclusions.end())
 				{
-					if (bs != nullptr)
-					{
-						auto &t = bs->get_task();
-						if (std::find(exclusions.begin(), exclusions.end(), &t) == exclusions.end())
-						{
-							if (task_subseq.find(&t) == task_subseq.end() || task_subseq[&t].second < ssid)
-								task_subseq[&t] = {node_switcher, ssid};
+					if (task_subseq.find(&t) == task_subseq.end() || task_subseq[&t].second < ssid)
+						task_subseq[&t] = {node_commute, ssid};
 
-							in_sockets_feed.find(&t) != in_sockets_feed.end() ? in_sockets_feed[&t]++ :
-							                                                    in_sockets_feed[&t] = 1;
-							bool t_is_select = dynamic_cast<const module::Switcher*>(&(t.get_module())) &&
-							                   t.get_name() == "select";
-							if ((!t_is_select && in_sockets_feed[&t] >= t.get_n_input_sockets() - t.get_n_static_input_sockets()) ||
-							    ( t_is_select && t.is_last_input_socket(*bs)))
-							{
-								is_last = false;
-								last_subseq = Sequence::init_recursive<SS,TA>(task_subseq[&t].first,
-									task_subseq[&t].second, taid, selectors, switchers, first, t, lasts, exclusions,
-									real_lasts_id, real_lasts, in_sockets_feed, task_subseq);
-							}
-						}
+					in_sockets_feed.find(&t) != in_sockets_feed.end() ? in_sockets_feed[&t]++ :
+					                                                    in_sockets_feed[&t] = 1;
+					bool t_is_select = dynamic_cast<const module::Switcher*>(&(t.get_module())) &&
+					                   t.get_name() == "select";
+					if ((!t_is_select && in_sockets_feed[&t] >=
+					      (t.get_n_input_sockets() + t.get_n_fwd_sockets()) - t.get_n_static_input_sockets())
+					    || (t_is_select && t.is_last_input_socket(*bs)))
+					{
+						is_last = false;
+						last_subseq = Sequence::init_recursive<SS,TA>(task_subseq[&t].first,
+							task_subseq[&t].second, taid, selectors, switchers, first, t, lasts, exclusions,
+							real_lasts_id, real_lasts, in_sockets_feed, task_subseq);
 					}
 				}
 			}
@@ -1011,57 +1015,52 @@ tools::Digraph_node<SS>* Sequence
 
 			for (auto &s : current_task.sockets)
 			{
-				if (current_task.get_socket_type(*s) == socket_t::SOUT)
+				if (!(current_task.get_socket_type(*s) == socket_t::SOUT))
+					continue;
+				auto bss = s->get_bound_sockets();
+				for (auto bs : bss)
 				{
-					auto bss = s->get_bound_sockets();
-					for (auto bs : bss)
+					if (bs == nullptr)
+						continue;
+					auto &t = bs->get_task();
+					if (std::find(exclusions.begin(), exclusions.end(), &t) == exclusions.end())
 					{
-						if (bs != nullptr)
+						if (task_subseq.find(&t) == task_subseq.end() || task_subseq[&t].second < ssid)
+							task_subseq[&t] = {node_selector_son, ssid};
+
+						in_sockets_feed.find(&t) != in_sockets_feed.end() ? in_sockets_feed[&t]++ :
+						                                                    in_sockets_feed[&t] = 1;
+						bool t_is_select = dynamic_cast<const module::Switcher*>(&(t.get_module())) &&
+						                   t.get_name() == "select";
+
+						if ((!t_is_select && in_sockets_feed[&t] >=
+						     (t.get_n_input_sockets() + t.get_n_fwd_sockets()) - t.get_n_static_input_sockets())
+						   || (t_is_select && t.is_last_input_socket(*bs)))
 						{
-							auto &t = bs->get_task();
-							if (std::find(exclusions.begin(), exclusions.end(), &t) == exclusions.end())
+							is_last = false;
+							last_subseq = Sequence::init_recursive<SS,TA>(task_subseq[&t].first,
+								task_subseq[&t].second, taid, selectors, switchers, first, t, lasts, exclusions,
+								real_lasts_id, real_lasts, in_sockets_feed, task_subseq);
+						}
+						else if (t_is_select)
+						{
+							tools::Digraph_node<SS>* node_selector = nullptr;
+							for (auto &sel : selectors)
+								if (sel.first == &t)
+								{
+									node_selector = sel.second;
+									break;
+								}
+
+							if (!node_selector)
 							{
-								if (task_subseq.find(&t) == task_subseq.end() || task_subseq[&t].second < ssid)
-									task_subseq[&t] = {node_selector_son, ssid};
-
-								in_sockets_feed.find(&t) != in_sockets_feed.end() ? in_sockets_feed[&t]++ :
-								                                                    in_sockets_feed[&t] = 1;
-								bool t_is_select = dynamic_cast<const module::Switcher*>(&(t.get_module())) &&
-								                   t.get_name() == "select";
-
-								if ((!t_is_select && in_sockets_feed[&t] >= t.get_n_input_sockets() - t.get_n_static_input_sockets()) ||
-								    ( t_is_select && t.is_last_input_socket(*bs)))
-								{
-									is_last = false;
-									last_subseq = Sequence::init_recursive<SS,TA>(task_subseq[&t].first,
-										task_subseq[&t].second, taid, selectors, switchers, first, t, lasts, exclusions,
-										real_lasts_id, real_lasts, in_sockets_feed, task_subseq);
-								}
-								else
-								{
-									if (dynamic_cast<const module::Switcher*>(&t.get_module()) &&
-										t.get_name() == "select")
-									{
-										tools::Digraph_node<SS>* node_selector = nullptr;
-										for (auto &sel : selectors)
-											if (sel.first == &t)
-											{
-												node_selector = sel.second;
-												break;
-											}
-
-										if (!node_selector)
-										{
-											node_selector = new tools::Digraph_node<SS>({node_selector_son}, {}, nullptr,
-												node_selector_son->get_depth() +1);
-											selectors.push_back({&t, node_selector});
-										}
-										else
-											node_selector->add_father(node_selector_son);
-										node_selector_son->add_child(node_selector);
-									}
-								}
+								node_selector = new tools::Digraph_node<SS>({node_selector_son}, {}, nullptr,
+									node_selector_son->get_depth() +1);
+								selectors.push_back({&t, node_selector});
 							}
+							else
+								node_selector->add_father(node_selector_son);
+							node_selector_son->add_child(node_selector);
 						}
 					}
 				}
@@ -1077,73 +1076,67 @@ tools::Digraph_node<SS>* Sequence
 		{
 			for (auto &s : current_task.sockets)
 			{
-				if (current_task.get_socket_type(*s) == socket_t::SOUT)
+				if (current_task.get_socket_type(*s) == socket_t::SOUT ||
+				    current_task.get_socket_type(*s) == socket_t::SFWD)
 				{
 					auto bss = s->get_bound_sockets();
 					for (auto &bs : bss)
 					{
-						if (bs != nullptr)
+						if (bs == nullptr)
+							continue;
+						auto &t = bs->get_task();
+						if (std::find(exclusions.begin(), exclusions.end(), &t) == exclusions.end())
 						{
-							auto &t = bs->get_task();
-							if (std::find(exclusions.begin(), exclusions.end(), &t) == exclusions.end())
-							{
-								if (task_subseq.find(&t) == task_subseq.end() || task_subseq[&t].second < ssid)
-									task_subseq[&t] = {cur_subseq, ssid};
+							if (task_subseq.find(&t) == task_subseq.end() || task_subseq[&t].second < ssid)
+								task_subseq[&t] = {cur_subseq, ssid};
 
-								in_sockets_feed.find(&t) != in_sockets_feed.end() ? in_sockets_feed[&t]++ :
-								                                                    in_sockets_feed[&t] = 1;
-								bool t_is_select = dynamic_cast<const module::Switcher*>(&(t.get_module())) &&
-								                   t.get_name() == "select";
-								if ((!t_is_select && in_sockets_feed[&t] >= t.get_n_input_sockets() - t.get_n_static_input_sockets()) ||
-								    ( t_is_select && t.is_last_input_socket(*bs)))
+							in_sockets_feed.find(&t) != in_sockets_feed.end() ? in_sockets_feed[&t]++ :
+							                                                    in_sockets_feed[&t] = 1;
+							bool t_is_select = dynamic_cast<const module::Switcher*>(&(t.get_module())) &&
+							                   t.get_name() == "select";
+							if ((!t_is_select && in_sockets_feed[&t] >=
+							      (t.get_n_input_sockets() + t.get_n_fwd_sockets()) - t.get_n_static_input_sockets())
+							    || (t_is_select && t.is_last_input_socket(*bs)))
+							{
+								is_last = false;
+								last_subseq = Sequence::init_recursive<SS,TA>(task_subseq[&t].first,
+									task_subseq[&t].second, taid, selectors, switchers, first, t, lasts, exclusions,
+									real_lasts_id, real_lasts, in_sockets_feed, task_subseq);
+							}
+							else if (t_is_select)
+							{
+								tools::Digraph_node<SS>* node_selector = nullptr;
+								for (auto &sel : selectors)
+									if (sel.first == &t)
+									{
+										node_selector = sel.second;
+										break;
+									}
+
+								if (!node_selector)
 								{
-									is_last = false;
-									last_subseq = Sequence::init_recursive<SS,TA>(task_subseq[&t].first,
-										task_subseq[&t].second, taid, selectors, switchers, first, t, lasts, exclusions,
-										real_lasts_id, real_lasts, in_sockets_feed, task_subseq);
+									node_selector = new tools::Digraph_node<SS>({cur_subseq}, {}, nullptr,
+										cur_subseq->get_depth() +1);
+									selectors.push_back({&t, node_selector});
 								}
 								else
-								{
-									if (dynamic_cast<const module::Switcher*>(&t.get_module()) &&
-										t.get_name() == "select")
-									{
-										tools::Digraph_node<SS>* node_selector = nullptr;
-										for (auto &sel : selectors)
-											if (sel.first == &t)
-											{
-												node_selector = sel.second;
-												break;
-											}
-
-										if (!node_selector)
-										{
-											node_selector = new tools::Digraph_node<SS>({cur_subseq}, {}, nullptr,
-												cur_subseq->get_depth() +1);
-											selectors.push_back({&t, node_selector});
-										}
-										else
-											node_selector->add_father(cur_subseq);
-										cur_subseq->add_child(node_selector);
-									}
-								}
+									node_selector->add_father(cur_subseq);
+								cur_subseq->add_child(node_selector);
 							}
 						}
 					}
 				}
-				else if (current_task.get_socket_type(*s) == socket_t::SIN)
+				else if (current_task.get_socket_type(*s) == socket_t::SIN && s->get_bound_sockets().size() > 1)
 				{
-					if (s->get_bound_sockets().size() > 1)
-					{
-						std::stringstream message;
-						message << "'s->get_bound_sockets().size()' has to be smaller or equal to 1 ("
-						        << "'s->get_bound_sockets().size()'"         << " = " << s->get_bound_sockets().size() << ", "
-						        << "'get_socket_type(*s)'"                   << " = " << "socket_t::SIN"               << ", "
-						        << "'s->get_name()'"                         << " = " << s->get_name()                 << ", "
-						        << "'s->get_task().get_name()'"              << " = " << s->get_task().get_name()      << ", "
-						        << "'s->get_task().get_module().get_name()'" << " = " << s->get_task().get_module().get_name()
-						        << ").";
-						throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
-					}
+					std::stringstream message;
+					message << "'s->get_bound_sockets().size()' has to be smaller or equal to 1 ("
+					        << "'s->get_bound_sockets().size()'"         << " = " << s->get_bound_sockets().size() << ", "
+					        << "'get_socket_type(*s)'"                   << " = " << "socket_t::SIN"               << ", "
+					        << "'s->get_name()'"                         << " = " << s->get_name()                 << ", "
+					        << "'s->get_task().get_name()'"              << " = " << s->get_task().get_name()      << ", "
+					        << "'s->get_task().get_module().get_name()'" << " = " << s->get_task().get_module().get_name()
+					        << ").";
+					throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
 				}
 			}
 		}
@@ -1287,7 +1280,8 @@ void Sequence
 				// replicate the sockets binding
 				for (size_t s_id = 0; s_id < t_ref->sockets.size(); s_id++)
 				{
-					if (t_ref->get_socket_type(*t_ref->sockets[s_id]) == socket_t::SIN)
+					if (t_ref->get_socket_type(*t_ref->sockets[s_id]) == socket_t::SIN ||
+					    t_ref->get_socket_type(*t_ref->sockets[s_id]) == socket_t::SFWD)
 					{
 						const runtime::Socket* s_ref_out = nullptr;
 						try { s_ref_out = &t_ref->sockets[s_id]->get_bound_socket(); } catch (...) {}
@@ -1474,6 +1468,7 @@ void Sequence
 					static_input = s->get_dataptr() != nullptr && s->bound_socket == nullptr;
 					break;
 				case socket_t::SOUT: stype = "out[" + std::to_string(sid) + "]"; break;
+				case socket_t::SFWD: stype = "fwd[" + std::to_string(sid) + "]"; break;
 				default: stype = "unkn"; break;
 			}
 
@@ -1521,7 +1516,7 @@ void Sequence
 	{
 		for (auto &s : t->sockets)
 		{
-			if (t->get_socket_type(*s) == socket_t::SOUT)
+			if (t->get_socket_type(*s) == socket_t::SOUT || t->get_socket_type(*s) == socket_t::SFWD)
 			{
 				auto &bss = s->get_bound_sockets();
 				size_t id = 0;
@@ -1610,10 +1605,42 @@ void Sequence
 void Sequence
 ::gen_processes(const bool no_copy_mode)
 {
+	std::function<void(Socket* socket, std::vector<runtime::Socket*>& list_fwd)> explore_thread_rec =
+		[&explore_thread_rec](Socket* socket, std::vector<runtime::Socket*>& list_fwd)
+		{
+			auto bound = socket->get_bound_sockets();
+			for (auto explore_bound : bound)
+			{
+				if (find(list_fwd.begin(), list_fwd.end(), explore_bound) == list_fwd.end() &&
+				    explore_bound->get_type() != socket_t::SOUT)
+				{
+					list_fwd.push_back(explore_bound);
+				}
+				if (explore_bound->get_type() == socket_t::SFWD)
+					explore_thread_rec(explore_bound, list_fwd);
+			}
+		};
+
+	std::function<void(Socket* socket, std::vector<runtime::Socket*>& list_fwd)> explore_thread_rec_reverse =
+		[&explore_thread_rec, &explore_thread_rec_reverse](Socket* socket, std::vector<runtime::Socket*>& list_fwd)
+		{
+			auto bound = &socket->get_bound_socket();
+			if (find(list_fwd.begin(), list_fwd.end(), bound) == list_fwd.end())
+			{
+				list_fwd.push_back(bound);
+			}
+			if (bound->get_type() == socket_t::SFWD)
+			{
+				explore_thread_rec(bound, list_fwd);
+				explore_thread_rec_reverse(bound, list_fwd);
+			}
+		};
+
 	std::function<void(            tools::Digraph_node<Sub_sequence>*,
 	                   std::vector<tools::Digraph_node<Sub_sequence>*>&)> gen_processes_recursive =
-		[&gen_processes_recursive, no_copy_mode](            tools::Digraph_node<Sub_sequence>   *cur_node,
-		                                         std::vector<tools::Digraph_node<Sub_sequence>*> &already_parsed_nodes)
+		[&gen_processes_recursive, no_copy_mode, &explore_thread_rec, &explore_thread_rec_reverse]
+		(            tools::Digraph_node<Sub_sequence>   *cur_node,
+		 std::vector<tools::Digraph_node<Sub_sequence>*> &already_parsed_nodes)
 		{
 			if (cur_node != nullptr &&
 			    std::find(already_parsed_nodes.begin(),
@@ -1648,9 +1675,13 @@ void Sequence
 								std::vector<runtime::Socket*> bound_sockets;
 								std::vector<void*> dataptrs;
 
-								auto bs = select_task->sockets[s]->get_bound_sockets();
-								bound_sockets.insert(bound_sockets.end(), bs.begin(), bs.end());
-								for (auto sck : bs)
+								for (auto socket : select_task->sockets[s]->get_bound_sockets())
+								{
+									bound_sockets.push_back(socket);
+									if (socket->get_type() == socket_t::SFWD)
+										explore_thread_rec(socket, bound_sockets);
+								}
+								for (auto sck : bound_sockets)
 									dataptrs.push_back(sck->get_dataptr());
 
 								contents->rebind_sockets[rebind_id].push_back(bound_sockets);
@@ -1694,9 +1725,13 @@ void Sequence
 								std::vector<runtime::Socket*> bound_sockets;
 								std::vector<void*> dataptrs;
 
-								auto bs = commute_task->sockets[s]->get_bound_sockets();
-								bound_sockets.insert(bound_sockets.end(), bs.begin(), bs.end());
-								for (auto sck : bs)
+								for (auto socket : commute_task->sockets[s]->get_bound_sockets())
+								{
+									bound_sockets.push_back(socket);
+									if (socket->get_type() == socket_t::SFWD)
+										explore_thread_rec(socket, bound_sockets);
+								}
+								for (auto sck : bound_sockets)
 									dataptrs.push_back(sck->get_dataptr());
 
 								contents->rebind_sockets[rebind_id].push_back(bound_sockets);
@@ -1737,11 +1772,13 @@ void Sequence
 								std::vector<void*> dataptrs;
 
 								bound_sockets.push_back(pull_task->sockets[s].get());
-								dataptrs.push_back(pull_task->sockets[s]->get_dataptr());
-
-								auto bs = pull_task->sockets[s]->get_bound_sockets();
-								bound_sockets.insert(bound_sockets.end(), bs.begin(), bs.end());
-								for (auto sck : bs)
+								for (auto socket : pull_task->sockets[s]->get_bound_sockets())
+								{
+									bound_sockets.push_back(socket);
+									if (socket->get_type() == socket_t::SFWD)
+										explore_thread_rec(socket, bound_sockets);
+								}
+								for (auto sck : bound_sockets)
 									dataptrs.push_back(sck->get_dataptr());
 
 								contents->rebind_sockets[rebind_id].push_back(bound_sockets);
@@ -1793,19 +1830,18 @@ void Sequence
 								std::vector<void*> dataptrs;
 
 								bound_sockets.push_back(push_task->sockets[s].get());
-								dataptrs.push_back(push_task->sockets[s]->get_dataptr());
 
 								auto bound_socket = &push_task->sockets[s]->get_bound_socket();
 								bound_sockets.push_back(bound_socket);
-								dataptrs.push_back(bound_socket->get_dataptr());
+								explore_thread_rec(bound_socket, bound_sockets);
 
-								auto &bs = bound_socket->get_bound_sockets();
-								for (size_t s = 0; s < bs.size(); s++)
-									if (&bs[s]->get_task() != push_task)
-									{
-										bound_sockets.push_back(bs[s]);
-										dataptrs.push_back(bs[s]->get_dataptr());
-									}
+								// If the socket is FWD, we have to update all the other sockets with a backward
+								// exploration
+								if (bound_socket->get_type() == socket_t::SFWD)
+									explore_thread_rec_reverse(bound_socket, bound_sockets);
+
+								for (auto sck : bound_sockets)
+										dataptrs.push_back(sck->get_dataptr());
 
 								contents->rebind_sockets[rebind_id].push_back(bound_sockets);
 								contents->rebind_dataptrs[rebind_id].push_back(dataptrs);
@@ -1964,8 +2000,9 @@ Sub_sequence* Sequence
 {
 	std::function<Sub_sequence*(tools::Digraph_node<Sub_sequence>*,
 	              std::vector<tools::Digraph_node<Sub_sequence>*>&)> get_last_subsequence_recursive =
-		[&get_last_subsequence_recursive, &tid](tools::Digraph_node<Sub_sequence>* cur_node,
-		                                  std::vector<tools::Digraph_node<Sub_sequence>*> &already_parsed_nodes) -> Sub_sequence*
+		[&get_last_subsequence_recursive, &tid]
+		(            tools::Digraph_node<Sub_sequence>   *cur_node,
+		 std::vector<tools::Digraph_node<Sub_sequence>*> &already_parsed_nodes) -> Sub_sequence*
 		{
 			if (cur_node != nullptr &&
 			    std::find(already_parsed_nodes.begin(),
@@ -1979,12 +2016,13 @@ Sub_sequence* Sequence
 				for (auto c : cur_node->get_children()) {
 					Sub_sequence* last_branch_ss = nullptr;
 					last_branch_ss = get_last_subsequence_recursive(c, already_parsed_nodes);
-					if(last_ss && last_branch_ss && last_ss != last_branch_ss) {
+					if (last_ss && last_branch_ss && last_ss != last_branch_ss)
+					{
 						std::stringstream message;
-						message << "found multiple candidates for last subsequence, this shouldn't be possible. ("
-						        << "tid" << " = " << tid << ", "
-								<< "last_ss.id" << " = " << last_ss->id << ", "
-								<< "last_branch_ss.id" << " = " << last_branch_ss->id << ")";
+						message << "Multiple candidates have been found for the last subsequence, this shouldn't be "
+						        << "possible. (tid" << " = " << tid << ", "
+						        << "last_ss.id" << " = " << last_ss->id << ", "
+						        << "last_branch_ss.id" << " = " << last_branch_ss->id << ")";
 						throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
 					}
 					last_ss = last_branch_ss ? last_branch_ss : last_ss;
@@ -2098,7 +2136,8 @@ void Sequence
 	{
 		for (auto sck_out : tsk_out->sockets)
 		{
-			if (tsk_out->get_socket_type(*sck_out) == socket_t::SOUT)
+			if (tsk_out->get_socket_type(*sck_out) == socket_t::SOUT ||
+			    tsk_out->get_socket_type(*sck_out) == socket_t::SFWD)
 			{
 				for (auto sck_in : sck_out->get_bound_sockets())
 				{
@@ -2172,4 +2211,96 @@ void Sequence
 		this->_set_n_frames(n_frames);
 		this->_set_n_frames_rebind(unbind_sockets, unbind_tasks);
 	}
+}
+
+template<class SS>
+void Sequence
+::check_ctrl_flw(tools::Digraph_node<SS>* root)
+{
+	std::function<void(tools::Digraph_node<SS>*,
+	              std::vector<tools::Digraph_node<SS>*>&)> check_control_flow_parity =
+		[&check_control_flow_parity](tools::Digraph_node<SS>* cur_node,
+		                             std::vector<tools::Digraph_node<SS>*> already_parsed_nodes) -> void
+		{
+			if (cur_node != nullptr &&
+			    std::find(already_parsed_nodes.begin(),
+			              already_parsed_nodes.end(),
+			              cur_node) == already_parsed_nodes.end() &&
+				cur_node->get_children().size())
+			{
+				already_parsed_nodes.push_back(cur_node);
+				for (auto c : cur_node->get_children())
+					check_control_flow_parity(c, already_parsed_nodes);
+			}
+			else
+			{
+				already_parsed_nodes.push_back(cur_node);
+				std::vector<module::Module*> parsed_switchers;
+				for (size_t i = 0; i < already_parsed_nodes.size(); i++)
+				{
+					// This check occurs before dud-nodes are removed by _init, some nodes have no contents and must be
+					// accounted for
+					if (already_parsed_nodes[i]->get_c() == nullptr ||
+					    !(already_parsed_nodes[i]->get_c()->type == subseq_t::COMMUTE ||
+					      already_parsed_nodes[i]->get_c()->type == subseq_t::SELECT))
+						continue;
+
+					// We search for the first switcher task in the path taken: already_parsed_nodes
+					const runtime::Task *ctrl_task_first = nullptr;
+					const runtime::Task *ctrl_task_second = nullptr;
+					for (auto t : already_parsed_nodes[i]->get_c()->tasks)
+					{
+						if (dynamic_cast<const module::Switcher*>(&t->get_module()) &&
+						    (t->get_name() == "select" || t->get_name() == "commute"))
+						{
+							ctrl_task_first = t;
+							break;
+						}
+					}
+
+					if (std::find(parsed_switchers.begin(), parsed_switchers.end(), &(ctrl_task_first->get_module())) !=
+					    parsed_switchers.end())
+						continue;
+
+					// We now search for the second switcher task in the path taken
+ 					auto expected_type = ctrl_task_first->get_name() == "select" ? subseq_t::COMMUTE : subseq_t::SELECT;
+ 					for (size_t j = i; j < already_parsed_nodes.size() && ctrl_task_second == nullptr; j++)
+ 					{
+						if (already_parsed_nodes[j]->get_c() == nullptr ||
+						    already_parsed_nodes[j]->get_c()->type != expected_type)
+							continue;
+						for (auto t : already_parsed_nodes[j]->get_c()->tasks)
+						{
+							if ((t->get_name() == "select" || t->get_name() == "commute") &&
+							    &(ctrl_task_first->get_module()) == &(t->get_module()))
+							{
+								parsed_switchers.push_back(&(t->get_module()));
+								ctrl_task_second = t;
+								break;
+							}
+						}
+					}
+
+					if (ctrl_task_second == nullptr)
+					{
+						for (auto t : ctrl_task_first->get_module().tasks)
+						{
+							if ((ctrl_task_first->get_name() == "select" && t->get_name() == "commute") ||
+							    (ctrl_task_first->get_name() == "commute" && t->get_name() == "select"))
+							{
+								ctrl_task_second = t.get();
+								break;
+							}
+						}
+						std::stringstream message;
+						message << ctrl_task_first->get_name() << " is missing a path to "
+						        << ctrl_task_second->get_name() << ".";
+						throw tools::control_flow_error(__FILE__, __LINE__, __func__, message.str());
+					}
+				}
+			}
+		};
+
+	std::vector<tools::Digraph_node<SS>*> already_parsed_nodes;
+	return check_control_flow_parity(root, already_parsed_nodes);
 }
