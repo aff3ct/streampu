@@ -42,6 +42,25 @@ Task
 {
 }
 
+Socket& Task
+::operator[](const std::string &sck_name)
+{
+	std::string s_name = sck_name;
+	s_name.erase(remove(s_name.begin(), s_name.end(), ' '), s_name.end());
+
+	auto it = find_if(this->sockets.begin(), this->sockets.end(),
+	                  [s_name](std::shared_ptr<runtime::Socket> s){ return s->get_name() == s_name; });
+
+	if (it == this->sockets.end())
+	{
+		std::stringstream message;
+		message << "runtime::Socket '" << s_name << "' not found for task '" << this->get_name() << "'.";
+		throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
+	}
+
+	return *it->get();
+}
+
 void Task
 ::set_autoalloc(const bool autoalloc)
 {

@@ -144,6 +144,7 @@ public:
 	const std::vector<int>& exec(const int frame_id = -1, const bool managed_memory = true);
 
 	inline Socket& operator[](const size_t id);
+	       Socket& operator[](const std::string &sck_name);
 
 	inline void update_timer(const size_t id, const std::chrono::nanoseconds &duration);
 
