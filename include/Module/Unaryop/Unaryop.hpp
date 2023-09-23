@@ -33,8 +33,9 @@ template <typename TI, typename TO, tools::proto_uop<TI,TO> UOP>
 class Unaryop : public Module
 {
 public:
-	inline runtime::Task&   operator[](const uop::tsk          t);
-	inline runtime::Socket& operator[](const uop::sck::perform s);
+	inline runtime::Task&   operator[](const uop::tsk           t);
+	inline runtime::Socket& operator[](const uop::sck::perform  s);
+	inline runtime::Socket& operator[](const std::string &tsk_sck);
 
 protected:
 	const size_t n_elmts;

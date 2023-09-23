@@ -20,6 +20,13 @@ runtime::Socket& Binaryop<TI,TO,BOP>
 }
 
 template <typename TI, typename TO, tools::proto_bop<TI,TO> BOP>
+runtime::Socket& Binaryop<TI,TO,BOP>
+::operator[](const std::string &tsk_sck)
+{
+	return Module::operator[](tsk_sck);
+}
+
+template <typename TI, typename TO, tools::proto_bop<TI,TO> BOP>
 Binaryop<TI,TO,BOP>
 ::Binaryop(const size_t n_elmts)
 : Module(), n_elmts(n_elmts)

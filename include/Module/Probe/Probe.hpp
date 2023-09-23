@@ -47,6 +47,7 @@ public:
 	inline runtime::Task&   operator[](const prb::tsk             t);
 	inline runtime::Socket& operator[](const prb::sck::probe      s);
 	inline runtime::Socket& operator[](const prb::sck::probe_noin s);
+	inline runtime::Socket& operator[](const std::string &tsk_sck  );
 
 protected:
 	const int size;

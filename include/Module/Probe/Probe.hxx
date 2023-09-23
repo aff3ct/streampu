@@ -32,6 +32,13 @@ runtime::Socket& Probe<T>
 }
 
 template <typename T>
+runtime::Socket& Probe<T>
+::operator[](const std::string &tsk_sck)
+{
+	return Module::operator[](tsk_sck);
+}
+
+template <typename T>
 Probe<T>
 ::Probe(const int size, const std::string &col_name, tools::Reporter_probe& reporter, const int n_frames)
 : AProbe(), size(size), col_name(col_name), reporter(reporter)

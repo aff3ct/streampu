@@ -24,6 +24,13 @@ runtime::Socket& Source<B>
 }
 
 template <typename B>
+runtime::Socket& Source<B>
+::operator[](const std::string &tsk_sck)
+{
+	return Module::operator[](tsk_sck);
+}
+
+template <typename B>
 Source<B>
 ::Source(const int max_data_size)
 : Module(), max_data_size(max_data_size)

@@ -20,6 +20,13 @@ runtime::Socket& Incrementer_fwd<T>
 }
 
 template <typename T>
+runtime::Socket& Incrementer_fwd<T>
+::operator[](const std::string &tsk_sck)
+{
+	return Module::operator[](tsk_sck);
+}
+
+template <typename T>
 template <class A>
 void Incrementer_fwd<T>
 ::increment_fwd(std::vector<T,A>& fwd, const int frame_id, const bool managed_memory)

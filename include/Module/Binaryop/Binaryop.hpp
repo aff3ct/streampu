@@ -33,8 +33,9 @@ template <typename TI, typename TO, tools::proto_bop<TI,TO> BOP>
 class Binaryop : public Module
 {
 public:
-	inline runtime::Task&   operator[](const bop::tsk          t);
-	inline runtime::Socket& operator[](const bop::sck::perform s);
+	inline runtime::Task&   operator[](const bop::tsk           t);
+	inline runtime::Socket& operator[](const bop::sck::perform  s);
+	inline runtime::Socket& operator[](const std::string &tsk_sck);
 
 protected:
 	const size_t n_elmts;

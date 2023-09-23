@@ -31,6 +31,7 @@ class Incrementer_fwd : public Module
 public:
 	inline runtime::Task&   operator[](const inc_fwd::tsk                t);
 	inline runtime::Socket& operator[](const inc_fwd::sck::increment_fwd s);
+	inline runtime::Socket& operator[](const std::string &tsk_sck         );
 
 protected:
 	const size_t n_elmts;

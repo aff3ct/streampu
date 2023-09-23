@@ -30,6 +30,7 @@ class Finalizer : public Module
 public:
 	inline runtime::Task&   operator[](const fin::tsk           t);
 	inline runtime::Socket& operator[](const fin::sck::finalize s);
+	inline runtime::Socket& operator[](const std::string &tsk_sck);
 
 protected:
 	std::vector<std::vector<T>> final_data;

@@ -24,6 +24,14 @@ runtime::Socket& Initializer<T>
 	return Module::operator[]((size_t)ini::tsk::initialize)[(size_t)s];
 }
 
+
+template <typename T>
+runtime::Socket& Initializer<T>
+::operator[](const std::string &tsk_sck)
+{
+	return Module::operator[](tsk_sck);
+}
+
 template <typename T>
 template <class A>
 void Initializer<T>

@@ -22,6 +22,12 @@ runtime::Socket& Iterator
 	return Module::operator[]((size_t)ite::tsk::iterate)[(size_t)s];
 }
 
+runtime::Socket& Iterator
+::operator[](const std::string &tsk_sck)
+{
+	return Module::operator[](tsk_sck);
+}
+
 template <class A>
 void Iterator
 ::iterate(std::vector<int8_t,A>& out, const int frame_id, const bool managed_memory)

@@ -26,5 +26,12 @@ runtime::Socket& Delayer<D>
 	return Module::operator[]((size_t)dly::tsk::produce)[(size_t)s];
 }
 
+template <typename D>
+runtime::Socket& Delayer<D>
+::operator[](const std::string &tsk_sck)
+{
+	return Module::operator[](tsk_sck);
+}
+
 }
 }

@@ -36,6 +36,7 @@ public:
 	inline runtime::Task&   operator[](const snk::tsk             t);
 	inline runtime::Socket& operator[](const snk::sck::send       s);
 	inline runtime::Socket& operator[](const snk::sck::send_count s);
+	inline runtime::Socket& operator[](const std::string &tsk_sck  );
 
 protected:
 	const int max_data_size;

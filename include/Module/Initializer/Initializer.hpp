@@ -29,6 +29,7 @@ class Initializer : public Module
 public:
 	inline runtime::Task&   operator[](const ini::tsk             t);
 	inline runtime::Socket& operator[](const ini::sck::initialize s);
+	inline runtime::Socket& operator[](const std::string &tsk_sck  );
 
 protected:
 	std::vector<std::vector<T>> init_data;
