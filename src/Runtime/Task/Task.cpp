@@ -604,6 +604,29 @@ size_t Task
 	}
 }
 
+size_t Task
+::create_socket_in(const std::string &name, const size_t n_elmts, const datatype_t datatype)
+{
+	switch (datatype) {
+		case datatype_t::F64: return this->template create_socket_in<double  >(name, n_elmts); break;
+		case datatype_t::F32: return this->template create_socket_in<float   >(name, n_elmts); break;
+		case datatype_t::S64: return this->template create_socket_in<int64_t >(name, n_elmts); break;
+		case datatype_t::S32: return this->template create_socket_in<int32_t >(name, n_elmts); break;
+		case datatype_t::S16: return this->template create_socket_in<int16_t >(name, n_elmts); break;
+		case datatype_t::S8:  return this->template create_socket_in<int8_t  >(name, n_elmts); break;
+		case datatype_t::U64: return this->template create_socket_in<uint64_t>(name, n_elmts); break;
+		case datatype_t::U32: return this->template create_socket_in<uint32_t>(name, n_elmts); break;
+		case datatype_t::U16: return this->template create_socket_in<uint16_t>(name, n_elmts); break;
+		case datatype_t::U8:  return this->template create_socket_in<uint8_t >(name, n_elmts); break;
+		default: {
+			std::stringstream message;
+			message << "This should never happen.";
+			throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
+			break;
+		}
+	}
+}
+
 template <typename T>
 size_t Task
 ::create_socket_out(const std::string &name, const size_t n_elmts, const bool hack_status)
@@ -645,6 +668,29 @@ size_t Task
 	}
 }
 
+size_t Task
+::create_socket_out(const std::string &name, const size_t n_elmts, const datatype_t datatype, const bool hack_status)
+{
+	switch (datatype) {
+		case datatype_t::F64: return this->template create_socket_out<double  >(name, n_elmts, hack_status); break;
+		case datatype_t::F32: return this->template create_socket_out<float   >(name, n_elmts, hack_status); break;
+		case datatype_t::S64: return this->template create_socket_out<int64_t >(name, n_elmts, hack_status); break;
+		case datatype_t::S32: return this->template create_socket_out<int32_t >(name, n_elmts, hack_status); break;
+		case datatype_t::S16: return this->template create_socket_out<int16_t >(name, n_elmts, hack_status); break;
+		case datatype_t::S8:  return this->template create_socket_out<int8_t  >(name, n_elmts, hack_status); break;
+		case datatype_t::U64: return this->template create_socket_out<uint64_t>(name, n_elmts, hack_status); break;
+		case datatype_t::U32: return this->template create_socket_out<uint32_t>(name, n_elmts, hack_status); break;
+		case datatype_t::U16: return this->template create_socket_out<uint16_t>(name, n_elmts, hack_status); break;
+		case datatype_t::U8:  return this->template create_socket_out<uint8_t >(name, n_elmts, hack_status); break;
+		default: {
+			std::stringstream message;
+			message << "This should never happen.";
+			throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
+			break;
+		}
+	}
+}
+
 template <typename T>
 size_t Task
 ::create_socket_fwd(const std::string &name, const size_t n_elmts)
@@ -677,6 +723,29 @@ size_t Task
 		std::stringstream message;
 		message << "This should never happen.";
 		throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
+	}
+}
+
+size_t Task
+::create_socket_fwd(const std::string &name, const size_t n_elmts, const datatype_t datatype)
+{
+	switch (datatype) {
+		case datatype_t::F64: return this->template create_socket_fwd<double  >(name, n_elmts); break;
+		case datatype_t::F32: return this->template create_socket_fwd<float   >(name, n_elmts); break;
+		case datatype_t::S64: return this->template create_socket_fwd<int64_t >(name, n_elmts); break;
+		case datatype_t::S32: return this->template create_socket_fwd<int32_t >(name, n_elmts); break;
+		case datatype_t::S16: return this->template create_socket_fwd<int16_t >(name, n_elmts); break;
+		case datatype_t::S8:  return this->template create_socket_fwd<int8_t  >(name, n_elmts); break;
+		case datatype_t::U64: return this->template create_socket_fwd<uint64_t>(name, n_elmts); break;
+		case datatype_t::U32: return this->template create_socket_fwd<uint32_t>(name, n_elmts); break;
+		case datatype_t::U16: return this->template create_socket_fwd<uint16_t>(name, n_elmts); break;
+		case datatype_t::U8:  return this->template create_socket_fwd<uint8_t >(name, n_elmts); break;
+		default: {
+			std::stringstream message;
+			message << "This should never happen.";
+			throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
+			break;
+		}
 	}
 }
 

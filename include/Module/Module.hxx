@@ -81,6 +81,13 @@ inline size_t Module
 
 template <typename T>
 inline size_t Module
+::create_sck_in(runtime::Task& task, const std::string &name, const size_t n_elmts)
+{
+	return this->template create_socket_in<T>(task, name, n_elmts);
+}
+
+template <typename T>
+inline size_t Module
 ::create_socket_out(runtime::Task& task, const std::string &name, const size_t n_elmts)
 {
 	return task.template create_socket_out<T>(name, n_elmts * this->n_frames);
@@ -88,9 +95,23 @@ inline size_t Module
 
 template <typename T>
 inline size_t Module
+::create_sck_out(runtime::Task& task, const std::string &name, const size_t n_elmts)
+{
+	return this->template create_socket_out<T>(task, name, n_elmts);
+}
+
+template <typename T>
+inline size_t Module
 ::create_socket_fwd(runtime::Task& task, const std::string &name, const size_t n_elmts)
 {
 	return task.template create_socket_fwd<T>(name, n_elmts * this->n_frames);
+}
+
+template <typename T>
+inline size_t Module
+::create_sck_fwd(runtime::Task& task, const std::string &name, const size_t n_elmts)
+{
+	return this->template create_socket_fwd<T>(task, name, n_elmts);
 }
 
 size_t Module

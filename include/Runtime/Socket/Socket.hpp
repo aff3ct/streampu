@@ -57,12 +57,19 @@ public:
 	inline size_t                      get_databytes      () const;
 	inline size_t                      get_n_elmts        () const;
 	inline void*                       get_dataptr        () const;
+	inline void*                       get_dptr           () const;
 	inline bool                        is_fast            () const;
 	inline Task&                       get_task           () const;
 	inline const std::vector<Socket*>& get_bound_sockets  () const;
 	inline const Socket&               get_bound_socket   () const;
 	inline       Socket&               get_bound_socket   ();
 	inline socket_t                    get_type           () const;
+
+	template <typename T>
+	inline T* get_dataptr() const;
+
+	template <typename T>
+	inline T* get_dptr() const;
 
 	inline void set_fast(const bool fast);
 
