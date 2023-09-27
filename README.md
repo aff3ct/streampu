@@ -31,15 +31,15 @@ The project is licensed under the MIT license.
 
 ## How to cite AFF3CT-core
 
-The main contributions of this work are described in the CCPE journal article: A. Cassagne et al.,
-“[A DSEL for High Throughput and Low Latency Software-Defined Radio on Multicore CPUs](https://doi.org/10.1002/cpe.7820),“
-Wiley Concurrency and Computation: Practice and Experience (CCPE), 2023 [[Bibtex Entry](https://aff3ct.github.io/resources/bibtex/Cassagne2023%20-%20A%20DSEL%20for%20High%20Throughput%20and%20Low%20Latency%20Software-Defined%20Radio%20on%20Multicore%20CPUs.bib)].
+The main contributions of this work are described in the following journal 
+article:  
+- A. Cassagne et al.,
+  “[A DSEL for High Throughput and Low Latency Software-Defined Radio on Multicore CPUs](https://doi.org/10.1002/cpe.7820),“
+  *Wiley Concurrency and Computation: Practice and Experience (CCPE)*, 2023 [[Bibtex Entry](https://aff3ct.github.io/resources/bibtex/Cassagne2023%20-%20A%20DSEL%20for%20High%20Throughput%20and%20Low%20Latency%20Software-Defined%20Radio%20on%20Multicore%20CPUs.bib)]
 
-**If you should cite only one article, citing this previous article is the best
-option.**
-
-**To thank us even more**, we encourage you to also cite the original the
-[AFF3CT](https://github.com/aff3ct/aff3ct) SoftwareX journal article to give 
-more visibility to our work: A. Cassagne et al.,
-“[AFF3CT: A Fast Forward Error Correction Toolbox!](https://doi.org/10.1016/j.softx.2019.100345),“
-Elsevier SoftwareX, 2019 [[Bibtex Entry](https://aff3ct.github.io/resources/bibtex/Cassagne2019a%20-%20AFF3CT:%20A%20Fast%20Forward%20Error%20Correction%20Toolbox.bib)].
+*To thank us even more*, we encourage you to also cite the original 
+[AFF3CT](https://github.com/aff3ct/aff3ct) journal article to give more 
+visibility to our work:  
+- A. Cassagne et al.,
+  “[AFF3CT: A Fast Forward Error Correction Toolbox!](https://doi.org/10.1016/j.softx.2019.100345),“
+  *Elsevier SoftwareX*, 2019 [[Bibtex Entry](https://aff3ct.github.io/resources/bibtex/Cassagne2019a%20-%20AFF3CT:%20A%20Fast%20Forward%20Error%20Correction%20Toolbox.bib)]
