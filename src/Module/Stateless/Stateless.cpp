@@ -42,22 +42,81 @@ size_t Stateless
 }
 
 size_t Stateless
+::create_socket_in(runtime::Task& task, const std::string &name, const size_t n_elmts, const runtime::datatype_t datatype)
+{
+	return Module::create_socket_in(task, name, n_elmts, datatype);
+}
+
+size_t Stateless
+::create_sck_in(runtime::Task& task, const std::string &name, const size_t n_elmts, const std::type_index& datatype)
+{
+	return Module::create_sck_in(task, name, n_elmts, datatype);
+}
+
+size_t Stateless
+::create_sck_in(runtime::Task& task, const std::string &name, const size_t n_elmts, const runtime::datatype_t datatype)
+{
+	return Module::create_sck_in(task, name, n_elmts, datatype);
+}
+
+size_t Stateless
 ::create_socket_out(runtime::Task& task, const std::string &name, const size_t n_elmts, const std::type_index& datatype)
 {
 	return Module::create_socket_out(task, name, n_elmts, datatype);
 }
 
-// Forward sockets
+size_t Stateless
+::create_socket_out(runtime::Task& task, const std::string &name, const size_t n_elmts, const runtime::datatype_t datatype)
+{
+	return Module::create_socket_out(task, name, n_elmts, datatype);
+}
+
+size_t Stateless
+::create_sck_out(runtime::Task& task, const std::string &name, const size_t n_elmts, const std::type_index& datatype)
+{
+	return Module::create_sck_out(task, name, n_elmts, datatype);
+}
+
+size_t Stateless
+::create_sck_out(runtime::Task& task, const std::string &name, const size_t n_elmts, const runtime::datatype_t datatype)
+{
+	return Module::create_sck_out(task, name, n_elmts, datatype);
+}
+
 size_t Stateless
 ::create_socket_fwd(runtime::Task& task, const std::string &name, const size_t n_elmts, const std::type_index& datatype)
 {
 	return Module::create_socket_fwd(task, name, n_elmts, datatype);
 }
 
+size_t Stateless
+::create_socket_fwd(runtime::Task& task, const std::string &name, const size_t n_elmts, const runtime::datatype_t datatype)
+{
+	return Module::create_socket_fwd(task, name, n_elmts, datatype);
+}
+
+size_t Stateless
+::create_sck_fwd(runtime::Task& task, const std::string &name, const size_t n_elmts, const std::type_index& datatype)
+{
+	return Module::create_sck_fwd(task, name, n_elmts, datatype);
+}
+
+size_t Stateless
+::create_sck_fwd(runtime::Task& task, const std::string &name, const size_t n_elmts, const runtime::datatype_t datatype)
+{
+	return Module::create_sck_fwd(task, name, n_elmts, datatype);
+}
+
 void Stateless
 ::create_codelet(runtime::Task& task, std::function<int(Module &m, runtime::Task &t, const size_t frame_id)> codelet)
 {
 	Module::create_codelet(task, codelet);
+}
+
+void Stateless
+::create_cdl(runtime::Task& task, std::function<int(Module &m, runtime::Task &t, const size_t frame_id)> codelet)
+{
+	Module::create_cdl(task, codelet);
 }
 
 void Stateless

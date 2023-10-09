@@ -17,5 +17,11 @@ runtime::Socket& Sleeper
 	return Module::operator[]((size_t)slp::tsk::sleep)[(size_t)s];
 }
 
+runtime::Socket& Sleeper
+::operator[](const std::string &tsk_sck)
+{
+	return Module::operator[](tsk_sck);
+}
+
 }
 }

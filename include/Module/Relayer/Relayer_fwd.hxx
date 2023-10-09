@@ -20,6 +20,13 @@ runtime::Socket& Relayer_fwd<T>
 }
 
 template <typename T>
+runtime::Socket& Relayer_fwd<T>
+::operator[](const std::string &tsk_sck)
+{
+	return Module::operator[](tsk_sck);
+}
+
+template <typename T>
 template <class A>
 void Relayer_fwd<T>
 ::relay_fwd(std::vector<T,A>& fwd, const int frame_id, const bool managed_memory)

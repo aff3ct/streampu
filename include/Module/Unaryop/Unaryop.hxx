@@ -20,6 +20,13 @@ runtime::Socket& Unaryop<TI,TO,UOP>
 }
 
 template <typename TI, typename TO, tools::proto_uop<TI,TO> UOP>
+runtime::Socket& Unaryop<TI,TO,UOP>
+::operator[](const std::string &tsk_sck)
+{
+	return Module::operator[](tsk_sck);
+}
+
+template <typename TI, typename TO, tools::proto_uop<TI,TO> UOP>
 Unaryop<TI,TO,UOP>
 ::Unaryop(const size_t n_elmts)
 : Module(), n_elmts(n_elmts)

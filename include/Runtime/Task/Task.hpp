@@ -35,6 +35,8 @@ enum status_t : int { SUCCESS = 0,
 
 enum class socket_t : uint8_t { SIN, SOUT, SFWD };
 
+enum class datatype_t : uint8_t { F64, F32, S64, S32, S16, S8, U64, U32, U16, U8 };
+
 static std::unordered_map<int,std::string> status_t_to_string = {{                              0, "SUCCESS"     },
                                                                  {                              1, "FAILURE"     },
                                                                  {                             -1, "FAILURE_STOP"},
@@ -144,6 +146,7 @@ public:
 	const std::vector<int>& exec(const int frame_id = -1, const bool managed_memory = true);
 
 	inline Socket& operator[](const size_t id);
+	       Socket& operator[](const std::string &sck_name);
 
 	inline void update_timer(const size_t id, const std::chrono::nanoseconds &duration);
 
@@ -167,15 +170,19 @@ protected:
 	template <typename T>
 	size_t create_socket_in(const std::string &name, const size_t n_elmts);
 	size_t create_socket_in(const std::string &name, const size_t n_elmts, const std::type_index& datatype);
+	size_t create_socket_in(const std::string &name, const size_t n_elmts, const datatype_t datatype);
 
 	template <typename T>
 	size_t create_socket_out(const std::string &name, const size_t n_elmts, const bool hack_status = false);
 	size_t create_socket_out(const std::string &name, const size_t n_elmts, const std::type_index& datatype,
 	                         const bool hack_status = false);
+	size_t create_socket_out(const std::string &name, const size_t n_elmts, const datatype_t datatype,
+	                         const bool hack_status = false);
 
 	template <typename T>
 	size_t create_socket_fwd(const std::string &name, const size_t n_elmts);
-	size_t create_socket_fwd(const std::string &name, const size_t n_elmts, const std::type_index& datatype); 
+	size_t create_socket_fwd(const std::string &name, const size_t n_elmts, const std::type_index& datatype);
+	size_t create_socket_fwd(const std::string &name, const size_t n_elmts, const datatype_t datatype);
 
 	void create_codelet(std::function<int(module::Module &m, Task& t, const size_t frame_id)> &codelet);
 

@@ -27,8 +27,9 @@ namespace module
 class Iterator : public Module, public tools::Interface_reset
 {
 public:
-	inline runtime::Task&   operator[](const ite::tsk          t);
-	inline runtime::Socket& operator[](const ite::sck::iterate s);
+	inline runtime::Task&   operator[](const ite::tsk           t);
+	inline runtime::Socket& operator[](const ite::sck::iterate  s);
+	inline runtime::Socket& operator[](const std::string &tsk_sck);
 
 protected:
 	size_t limit;

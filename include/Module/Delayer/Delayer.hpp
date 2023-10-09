@@ -29,6 +29,8 @@ public:
 	inline runtime::Task& operator[](const dly::tsk t);
 	inline runtime::Socket& operator[](const dly::sck::memorize s);
 	inline runtime::Socket& operator[](const dly::sck::produce s);
+	inline runtime::Socket& operator[](const std::string &tsk_sck);
+
 protected:
 	const size_t size; // Size of one frame (= number of datas in one frame)
 	const D init_val;

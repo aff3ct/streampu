@@ -191,10 +191,22 @@ runtime::Task& Module
 	return *tasks.back();
 }
 
+runtime::Task& Module
+::create_tsk(const std::string &name, const int id)
+{
+	return this->create_task(name, id);
+}
+
 void Module
 ::create_codelet(runtime::Task& task, std::function<int(Module &m, runtime::Task &t, const size_t frame_id)> codelet)
 {
 	task.create_codelet(codelet);
+}
+
+void Module
+::create_cdl(runtime::Task& task, std::function<int(Module &m, runtime::Task &t, const size_t frame_id)> codelet)
+{
+	this->create_codelet(task, codelet);
 }
 
 size_t Module
@@ -204,15 +216,69 @@ size_t Module
 }
 
 size_t Module
+::create_socket_in(runtime::Task& task, const std::string &name, const size_t n_elmts, const runtime::datatype_t datatype)
+{
+	return task.create_socket_in(name, n_elmts * this->n_frames, datatype);
+}
+
+size_t Module
+::create_sck_in(runtime::Task& task, const std::string &name, const size_t n_elmts, const std::type_index& datatype)
+{
+	return this->create_socket_in(task, name, n_elmts, datatype);
+}
+
+size_t Module
+::create_sck_in(runtime::Task& task, const std::string &name, const size_t n_elmts, const runtime::datatype_t datatype)
+{
+	return this->create_socket_in(task, name, n_elmts, datatype);
+}
+
+size_t Module
 ::create_socket_out(runtime::Task& task, const std::string &name, const size_t n_elmts, const std::type_index& datatype)
 {
 	return task.create_socket_out(name, n_elmts * this->n_frames, datatype);
 }
 
 size_t Module
+::create_socket_out(runtime::Task& task, const std::string &name, const size_t n_elmts, const runtime::datatype_t datatype)
+{
+	return task.create_socket_out(name, n_elmts * this->n_frames, datatype);
+}
+
+size_t Module
+::create_sck_out(runtime::Task& task, const std::string &name, const size_t n_elmts, const std::type_index& datatype)
+{
+	return this->create_socket_out(task, name, n_elmts, datatype);
+}
+
+size_t Module
+::create_sck_out(runtime::Task& task, const std::string &name, const size_t n_elmts, const runtime::datatype_t datatype)
+{
+	return this->create_socket_out(task, name, n_elmts, datatype);
+}
+
+size_t Module
 ::create_socket_fwd(runtime::Task& task, const std::string &name, const size_t n_elmts, const std::type_index& datatype)
 {
 	return task.create_socket_fwd(name, n_elmts * this->n_frames, datatype);
+}
+
+size_t Module
+::create_socket_fwd(runtime::Task& task, const std::string &name, const size_t n_elmts, const runtime::datatype_t datatype)
+{
+	return task.create_socket_fwd(name, n_elmts * this->n_frames, datatype);
+}
+
+size_t Module
+::create_sck_fwd(runtime::Task& task, const std::string &name, const size_t n_elmts, const std::type_index& datatype)
+{
+	return this->create_socket_fwd(task, name, n_elmts, datatype);
+}
+
+size_t Module
+::create_sck_fwd(runtime::Task& task, const std::string &name, const size_t n_elmts, const runtime::datatype_t datatype)
+{
+	return this->create_socket_fwd(task, name, n_elmts, datatype);
 }
 
 void Module

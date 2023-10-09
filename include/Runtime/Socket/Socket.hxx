@@ -96,6 +96,26 @@ void* Socket
 	return dataptr;
 }
 
+void* Socket
+::get_dptr() const
+{
+	return this->get_dataptr();
+}
+
+template <typename T>
+T* Socket
+::get_dataptr() const
+{
+	return static_cast<T*>(this->get_dataptr());
+}
+
+template <typename T>
+T* Socket
+::get_dptr() const
+{
+	return this->template get_dataptr<T>();
+}
+
 bool Socket
 ::is_fast() const
 {

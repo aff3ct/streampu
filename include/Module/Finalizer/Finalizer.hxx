@@ -20,6 +20,13 @@ runtime::Socket& Finalizer<T>
 }
 
 template <typename T>
+runtime::Socket& Finalizer<T>
+::operator[](const std::string &tsk_sck)
+{
+	return Module::operator[](tsk_sck);
+}
+
+template <typename T>
 template <class A>
 void Finalizer<T>
 ::finalize(const std::vector<T,A>& in, const int frame_id, const bool managed_memory)

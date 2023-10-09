@@ -31,6 +31,13 @@ runtime::Socket& Sink<B>
 }
 
 template <typename B>
+runtime::Socket& Sink<B>
+::operator[](const std::string &tsk_sck)
+{
+	return Module::operator[](tsk_sck);
+}
+
+template <typename B>
 Sink<B>
 ::Sink(const int max_data_size)
 : Module(), max_data_size(max_data_size)

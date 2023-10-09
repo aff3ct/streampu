@@ -38,6 +38,7 @@ class Source : public Module, public tools::Interface_set_seed,
 public:
 	inline runtime::Task&   operator[](const src::tsk           t);
 	inline runtime::Socket& operator[](const src::sck::generate s);
+	inline runtime::Socket& operator[](const std::string &tsk_sck);
 
 protected:
 	const int max_data_size;
