@@ -71,13 +71,13 @@ extra_javascript:
 nav:
   - Home: 
     - index.md
-  - Elementary Componenets:
-      - module & task.md
-      - Socket.md
-      - Sequence & Subsequence.md
-      - Pipeline & Adaptor.md
-      - Switcher.md
-  - New features : 
-      - Forward socket.md
-      - Control Flow.md
-      - Work in Progress.md
+  - Elementary Components:
+      - 1_module_task.md
+      - 2_socket.md
+      - 3_sequence.md
+      - 4_pipeline.md
+      - 5_switcher.md
+  - New features:
+      - 6_socket_fwd.md
+      - 7_pipeline_ctrl_flow.md
+      - 8_wip.md

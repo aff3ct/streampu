@@ -1,15 +1,17 @@
 # AFF3CT-core
 
-`AFF3CT-core` is a Domain-Specific Embedded Language *(DSEL)* for streaming applications written in C++. In this document, we try to explain working of basics elements of the language :
-		
- -  [Tasks & modules](module & task.md)
- -  [Sockets](Socket.md)
- -  [Sequences & Subsequences](Sequence & Subsequence.md)
- -  [Pipeline](Pipeline & Adaptor.md)  
- -  [Control flow](Switcher.md)
+`AFF3CT-core` is a Domain-Specific Embedded Language (DSEL) for streaming 
+applications written in C++. In this document, we try to explain the basics 
+elements of the language:
 
-Then we introduce the new features, and the modifications made to support them : 
+- [Module & Task](1_module_task.md)
+- [Socket](2_socket.md)
+- [Sequence & Subsequence](3_sequence.md)
+- [Pipeline](4_pipeline.md)  
+- [Control flow](5_switcher.md)
 
--  [Forward sockets](Forward socket.md)
--  [Control Flow](Control Flow.md)
--  [Work in Progress](Work in Progress.md)
+Then we introduce the new features, and the modifications made to support them:
+
+- [Forward sockets](6_socket_fwd.md)
+- [Pipeline & Control Flow](7_pipeline_ctrl_flow.md)
+- [Work in Progress](8_wip.md)
