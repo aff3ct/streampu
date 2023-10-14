@@ -25,7 +25,7 @@ namespace module
 
 		namespace sck
 		{
-			enum class perform : size_t { in1, in2, out, status };
+			enum class perform : size_t { in0, in1, out, status };
 		}
 	}
 

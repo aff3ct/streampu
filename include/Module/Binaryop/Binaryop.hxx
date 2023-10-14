@@ -43,8 +43,8 @@ Binaryop<TI,TO,BOP>
 	}
 
 	auto &p = this->create_task("perform");
-	auto ps1_in = this->template create_socket_in <TI>(p, "in1", this->n_elmts);
-	auto ps2_in = this->template create_socket_in <TI>(p, "in2", this->n_elmts);
+	auto ps1_in = this->template create_socket_in <TI>(p, "in0", this->n_elmts);
+	auto ps2_in = this->template create_socket_in <TI>(p, "in1", this->n_elmts);
 	auto ps_out = this->template create_socket_out<TO>(p, "out", this->n_elmts);
 	this->create_codelet(p, [ps1_in, ps2_in, ps_out](Module &m, runtime::Task &t, const size_t frame_id) -> int
 	{
@@ -82,8 +82,8 @@ void Binaryop<TI,TO,BOP>
           const int frame_id,
           const bool managed_memory)
 {
-	(*this)[bop::sck::perform::in1].bind(in1);
-	(*this)[bop::sck::perform::in2].bind(in2);
+	(*this)[bop::sck::perform::in0].bind(in1);
+	(*this)[bop::sck::perform::in1].bind(in2);
 	(*this)[bop::sck::perform::out].bind(out);
 	(*this)[bop::tsk::perform].exec(frame_id, managed_memory);
 }
@@ -92,8 +92,8 @@ template <typename TI, typename TO, tools::proto_bop<TI,TO> BOP>
 void Binaryop<TI,TO,BOP>
 ::perform(const TI *in1, const TI *in2, TO *out, const int frame_id, const bool managed_memory)
 {
-	(*this)[bop::sck::perform::in1].bind(in1);
-	(*this)[bop::sck::perform::in2].bind(in2);
+	(*this)[bop::sck::perform::in0].bind(in1);
+	(*this)[bop::sck::perform::in1].bind(in2);
 	(*this)[bop::sck::perform::out].bind(out);
 	(*this)[bop::tsk::perform].exec(frame_id, managed_memory);
 }
