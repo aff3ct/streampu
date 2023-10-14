@@ -67,7 +67,7 @@ The function gets the caller's `dataptr` and redirects it to `s_out dataptr`.
     ![Invalid bind](./assets/invalid_bind.svg)
 
 ```cpp
-void  unbind(Socket  &s_out, const  int  priority = -1);
+void unbind(Socket &s_out, const int priority = -1);
 ```
 This function is used to disconnect sockets from each other, the `s_out` must be
 bound to the caller socket.
