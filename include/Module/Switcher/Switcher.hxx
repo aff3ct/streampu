@@ -23,6 +23,12 @@ const runtime::Task& Switcher
 	return Module::operator[]((size_t)t);
 }
 
+runtime::Socket& Switcher
+::operator[](const std::string &tsk_sck)
+{
+	return Module::operator[](tsk_sck);
+}
+
 Switcher
 ::Switcher(const size_t n_data_sockets,
            const size_t n_elmts_commute,
