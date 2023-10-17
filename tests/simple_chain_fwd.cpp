@@ -157,12 +157,12 @@ int main(int argc, char** argv)
 	module::Initializer<uint8_t> initializer(data_length);
 	module::Finalizer  <uint8_t> finalizer  (data_length);
 
-	std::vector<std::shared_ptr<module::Incrementer_fwd<uint8_t>>> incs(6);
+	std::vector<std::shared_ptr<module::Incrementer<uint8_t>>> incs(6);
 	for (size_t s = 0; s < incs.size(); s++)
 	{
-		incs[s].reset(new module::Incrementer_fwd<uint8_t>(data_length));
+		incs[s].reset(new module::Incrementer<uint8_t>(data_length));
 		incs[s]->set_ns(sleep_time_us * 1000);
-		incs[s]->set_custom_name("Inc_fwd" + std::to_string(s));
+		incs[s]->set_custom_name("Inc" + std::to_string(s));
 	}
 
 	std::shared_ptr<runtime::Sequence> partial_sequence;
@@ -171,18 +171,18 @@ int main(int argc, char** argv)
 	// sockets binding
 	if (!subseq)
 	{
-		(*incs[0])[module::inc_fwd::sck::increment_fwd::fwd] = initializer[module::ini::sck::initialize::out];
+		(*incs[0])[module::inc::sck::incrementf::fwd] = initializer[module::ini::sck::initialize::out];
 		for (size_t s = 0; s < incs.size() - 1; s++)
-			(*incs[s+1])[module::inc_fwd::sck::increment_fwd::fwd] = (*incs[s])[module::inc_fwd::sck::increment_fwd::fwd];
-		finalizer[module::fin::sck::finalize::in] = (*incs[incs.size()-1])[module::inc_fwd::sck::increment_fwd::fwd];
+			(*incs[s+1])[module::inc::sck::incrementf::fwd] = (*incs[s])[module::inc::sck::incrementf::fwd];
+		finalizer[module::fin::sck::finalize::in] = (*incs[incs.size()-1])[module::inc::sck::incrementf::fwd];
 	}
 	else
 	{
 		for (size_t s = 0; s < incs.size() - 1; s++)
-			(*incs[s+1])[module::inc_fwd::sck::increment_fwd::fwd] = (*incs[s])[module::inc_fwd::sck::increment_fwd::fwd];
+			(*incs[s+1])[module::inc::sck::incrementf::fwd] = (*incs[s])[module::inc::sck::incrementf::fwd];
 
-		partial_sequence.reset(new runtime::Sequence((*incs[0])[module::inc_fwd::tsk::increment_fwd],
-		                                             (*incs[incs.size() -1])[module::inc_fwd::tsk::increment_fwd]));
+		partial_sequence.reset(new runtime::Sequence((*incs[0])[module::inc::tsk::incrementf],
+		                                             (*incs[incs.size() -1])[module::inc::tsk::incrementf]));
 		subsequence.reset(new module::Subsequence(*partial_sequence));
 		(*subsequence)[module::ssq::tsk::exec    ][ 0] = initializer   [module::ini::sck::initialize::out];
 		finalizer     [module::fin::sck::finalize::in] = (*subsequence)[module::ssq::tsk::exec      ][  1];
@@ -298,18 +298,18 @@ int main(int argc, char** argv)
 	sequence_chain.set_n_frames(1);
 	if (!subseq)
 	{
-		(*incs[0])[module::inc_fwd::sck::increment_fwd::fwd].unbind(initializer[module::ini::sck::initialize::out]);
+		(*incs[0])[module::inc::sck::incrementf::fwd].unbind(initializer[module::ini::sck::initialize::out]);
 		for (size_t s = 0; s < incs.size() - 1; s++)
-			(*incs[s+1])[module::inc_fwd::sck::increment_fwd::fwd]
-				.unbind((*incs[s])[module::inc_fwd::sck::increment_fwd::fwd]);
+			(*incs[s+1])[module::inc::sck::incrementf::fwd]
+				.unbind((*incs[s])[module::inc::sck::incrementf::fwd]);
 		finalizer[module::fin::sck::finalize::in]
-			.unbind((*incs[incs.size()-1])[module::inc_fwd::sck::increment_fwd::fwd]);
+			.unbind((*incs[incs.size()-1])[module::inc::sck::incrementf::fwd]);
 	}
 	else
 	{
 		for (size_t s = 0; s < incs.size() - 1; s++)
-			(*incs[s+1])[module::inc_fwd::sck::increment_fwd::fwd]
-				.unbind((*incs[s])[module::inc_fwd::sck::increment_fwd::fwd]);
+			(*incs[s+1])[module::inc::sck::incrementf::fwd]
+				.unbind((*incs[s])[module::inc::sck::incrementf::fwd]);
 		(*subsequence)[module::ssq::tsk::exec    ][ 0].unbind(initializer   [module::ini::sck::initialize::out]);
 		finalizer     [module::fin::sck::finalize::in].unbind((*subsequence)[module::ssq::tsk::exec      ][  1]);
 	}

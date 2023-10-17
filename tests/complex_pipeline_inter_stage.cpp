@@ -132,12 +132,12 @@ int main(int argc, char** argv)
 	module::Initializer<uint8_t> initializer(data_length);
 	module::Finalizer  <uint8_t> finalizer  (data_length);
 
-	std::vector<std::shared_ptr<module::Incrementer_fwd<uint8_t>>> incs(6);
+	std::vector<std::shared_ptr<module::Incrementer<uint8_t>>> incs(6);
 	for (size_t s = 0; s < incs.size(); s++)
 	{
-		incs[s].reset(new module::Incrementer_fwd<uint8_t>(data_length));
+		incs[s].reset(new module::Incrementer<uint8_t>(data_length));
 		incs[s]->set_ns(sleep_time_us * 1000);
-		incs[s]->set_custom_name("Inc_fwd" + std::to_string(s));
+		incs[s]->set_custom_name("Inc" + std::to_string(s));
 	}
 
 	std::shared_ptr<module::Incrementer<uint8_t>> inc_calssique;
@@ -175,29 +175,29 @@ int main(int argc, char** argv)
 
 	// sockets binding
 	(*inc_calssique)[module::inc::sck::increment::in] = initializer[module::ini::sck::initialize::out];
-	(*incs[0])[module::inc_fwd::sck::increment_fwd::fwd] = (*inc_calssique)[module::inc::sck::increment::out];
+	(*incs[0])[module::inc::sck::incrementf::fwd] = (*inc_calssique)[module::inc::sck::increment::out];
 	// Bind the initial data to the multiplier
 	multi_comp["multiply_compare::fwd_0"] = initializer[module::ini::sck::initialize::out];
 	for (size_t s = 0; s < incs.size() -1; s++)
-		(*incs[s+1])[module::inc_fwd::sck::increment_fwd::fwd] = (*incs[s])[module::inc_fwd::sck::increment_fwd::fwd];
-	multi_comp["multiply_compare::fwd_1"] = (*incs[incs.size()-1])[module::inc_fwd::sck::increment_fwd::fwd];
+		(*incs[s+1])[module::inc::sck::incrementf::fwd] = (*incs[s])[module::inc::sck::incrementf::fwd];
+	multi_comp["multiply_compare::fwd_1"] = (*incs[incs.size()-1])[module::inc::sck::incrementf::fwd];
 	finalizer[module::fin::sck::finalize::in] = multi_comp["multiply_compare::fwd_1"];
 
 	std::unique_ptr<runtime::Pipeline> pipeline_chain;
 	pipeline_chain.reset(new runtime::Pipeline(
 		initializer[module::ini::tsk::initialize], // first task of the sequence
 		{  // pipeline stage 0
-		   { { &initializer[module::ini::tsk::initialize] },                      // first tasks of stage 0
-		     { &initializer[module::ini::tsk::initialize] } },                    // last  tasks of stage 0
+		   { { &initializer[module::ini::tsk::initialize] },               // first tasks of stage 0
+		     { &initializer[module::ini::tsk::initialize] } },             // last  tasks of stage 0
 		   // pipeline stage 1
-		   { { &(*inc_calssique)[module::inc::tsk::increment] },                  // first tasks of stage 1
-		     { &(*incs[incs.size() -1])[module::inc_fwd::tsk::increment_fwd] } }, // last  tasks of stage 1
+		   { { &(*inc_calssique)[module::inc::tsk::increment] },           // first tasks of stage 1
+		     { &(*incs[incs.size() -1])[module::inc::tsk::incrementf] } }, // last  tasks of stage 1
 		   // pipeline stage 2
-		   { { &task_multi_comp },                                                // first tasks of stage 2
-		     { &task_multi_comp } },                                              // last  tasks of stage 2
+		   { { &task_multi_comp },                                         // first tasks of stage 2
+		     { &task_multi_comp } },                                       // last  tasks of stage 2
 		   // pipeline stage 3
-		   { { &finalizer[module::fin::tsk::finalize] },                          // first tasks of stage 3
-		     {                                        } },                        // last  tasks of stage 3
+		   { { &finalizer[module::fin::tsk::finalize] },                   // first tasks of stage 3
+		     {                                        } },                 // last  tasks of stage 3
 		},
 		{
 		   1,                         // number of threads in the stage 0
@@ -290,11 +290,11 @@ int main(int argc, char** argv)
 
 	(*inc_calssique)[module::inc::sck::increment::in].unbind(initializer[module::ini::sck::initialize::out]);
 	multi_comp["multiply_compare::fwd_0"].unbind(initializer[module::ini::sck::initialize::out]);
-	(*incs[0])[module::inc_fwd::sck::increment_fwd::fwd].unbind((*inc_calssique)[module::inc::sck::increment::out]);
+	(*incs[0])[module::inc::sck::incrementf::fwd].unbind((*inc_calssique)[module::inc::sck::increment::out]);
 	for (size_t s = 0; s < incs.size() -1; s++)
-		(*incs[s+1])[module::inc_fwd::sck::increment_fwd::fwd]
-			.unbind((*incs[s])[module::inc_fwd::sck::increment_fwd::fwd]);
-	multi_comp["multiply_compare::fwd_1"].unbind((*incs[incs.size()-1])[module::inc_fwd::sck::increment_fwd::fwd]);
+		(*incs[s+1])[module::inc::sck::incrementf::fwd]
+			.unbind((*incs[s])[module::inc::sck::incrementf::fwd]);
+	multi_comp["multiply_compare::fwd_1"].unbind((*incs[incs.size()-1])[module::inc::sck::incrementf::fwd]);
 	finalizer[module::fin::sck::finalize::in].unbind(multi_comp["multiply_compare::fwd_1"]);
 
 	return test_results;
