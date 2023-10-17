@@ -91,7 +91,7 @@ public:
 	void create_reset_task();
 
 protected:
-	virtual void deep_copy(const Module &m);
+	void deep_copy(const Module &m);
 
 	void set_name(const std::string &name);
 
