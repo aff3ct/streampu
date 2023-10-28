@@ -168,21 +168,26 @@ protected:
 	void register_timer(const std::string &key);
 
 	template <typename T>
-	size_t create_socket_in(const std::string &name, const size_t n_elmts);
-	size_t create_socket_in(const std::string &name, const size_t n_elmts, const std::type_index& datatype);
-	size_t create_socket_in(const std::string &name, const size_t n_elmts, const datatype_t datatype);
+	size_t create_2d_socket_in(const std::string &name, const size_t n_rows, const size_t n_cols);
+	size_t create_2d_socket_in(const std::string &name, const size_t n_rows, const size_t n_cols,
+	                           const std::type_index& datatype);
+	size_t create_2d_socket_in(const std::string &name, const size_t n_rows, const size_t n_cols,
+	                           const datatype_t datatype);
 
 	template <typename T>
-	size_t create_socket_out(const std::string &name, const size_t n_elmts, const bool hack_status = false);
-	size_t create_socket_out(const std::string &name, const size_t n_elmts, const std::type_index& datatype,
-	                         const bool hack_status = false);
-	size_t create_socket_out(const std::string &name, const size_t n_elmts, const datatype_t datatype,
-	                         const bool hack_status = false);
+	size_t create_2d_socket_out(const std::string &name, const size_t n_rows, const size_t n_cols,
+	                            const bool hack_status = false);
+	size_t create_2d_socket_out(const std::string &name, const size_t n_rows, const size_t n_cols,
+	                            const std::type_index& datatype, const bool hack_status = false);
+	size_t create_2d_socket_out(const std::string &name, const size_t n_rows, const size_t n_cols,
+	                            const datatype_t datatype, const bool hack_status = false);
 
 	template <typename T>
-	size_t create_socket_fwd(const std::string &name, const size_t n_elmts);
-	size_t create_socket_fwd(const std::string &name, const size_t n_elmts, const std::type_index& datatype);
-	size_t create_socket_fwd(const std::string &name, const size_t n_elmts, const datatype_t datatype);
+	size_t create_2d_socket_fwd(const std::string &name, const size_t n_rows, const size_t n_cols);
+	size_t create_2d_socket_fwd(const std::string &name, const size_t n_rows, const size_t n_cols,
+	                            const std::type_index& datatype);
+	size_t create_2d_socket_fwd(const std::string &name, const size_t n_rows, const size_t n_cols,
+	                            const datatype_t datatype);
 
 	void create_codelet(std::function<int(module::Module &m, Task& t, const size_t frame_id)> &codelet);
 
@@ -192,7 +197,8 @@ protected:
 
 private:
 	template <typename T>
-	inline Socket& create_socket(const std::string &name, const size_t n_elmts, const socket_t type, const bool hack_status = false);
+	inline Socket& create_2d_socket(const std::string &name, const size_t n_rows, const size_t n_cols,
+	                                const socket_t type, const bool hack_status = false);
 };
 }
 }

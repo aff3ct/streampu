@@ -76,7 +76,7 @@ template <typename T>
 inline size_t Module
 ::create_socket_in(runtime::Task& task, const std::string &name, const size_t n_elmts)
 {
-	return task.template create_socket_in<T>(name, n_elmts * this->n_frames);
+	return task.template create_2d_socket_in<T>(name, this->n_frames, n_elmts);
 }
 
 template <typename T>
@@ -90,7 +90,7 @@ template <typename T>
 inline size_t Module
 ::create_socket_out(runtime::Task& task, const std::string &name, const size_t n_elmts)
 {
-	return task.template create_socket_out<T>(name, n_elmts * this->n_frames);
+	return task.template create_2d_socket_out<T>(name, this->n_frames, n_elmts);
 }
 
 template <typename T>
@@ -104,7 +104,7 @@ template <typename T>
 inline size_t Module
 ::create_socket_fwd(runtime::Task& task, const std::string &name, const size_t n_elmts)
 {
-	return task.template create_socket_fwd<T>(name, n_elmts * this->n_frames);
+	return task.template create_2d_socket_fwd<T>(name, this->n_frames, n_elmts);
 }
 
 template <typename T>
@@ -112,6 +112,48 @@ inline size_t Module
 ::create_sck_fwd(runtime::Task& task, const std::string &name, const size_t n_elmts)
 {
 	return this->template create_socket_fwd<T>(task, name, n_elmts);
+}
+
+template <typename T>
+inline size_t Module
+::create_2d_socket_in(runtime::Task& task, const std::string &name, const size_t n_rows, const size_t n_cols)
+{
+	return task.template create_2d_socket_in<T>(name, this->n_frames * n_rows, n_cols);
+}
+
+template <typename T>
+inline size_t Module
+::create_2d_sck_in(runtime::Task& task, const std::string &name, const size_t n_rows, const size_t n_cols)
+{
+	return this->template create_2d_socket_in<T>(task, name, n_rows, n_cols);
+}
+
+template <typename T>
+inline size_t Module
+::create_2d_socket_out(runtime::Task& task, const std::string &name, const size_t n_rows, const size_t n_cols)
+{
+	return task.template create_2d_socket_out<T>(name, this->n_frames * n_rows, n_cols);
+}
+
+template <typename T>
+inline size_t Module
+::create_2d_sck_out(runtime::Task& task, const std::string &name, const size_t n_rows, const size_t n_cols)
+{
+	return this->template create_2d_socket_out<T>(task, name, n_rows, n_cols);
+}
+
+template <typename T>
+inline size_t Module
+::create_2d_socket_fwd(runtime::Task& task, const std::string &name, const size_t n_rows, const size_t n_cols)
+{
+	return task.template create_2d_socket_fwd<T>(name, this->n_frames * n_rows, n_cols);
+}
+
+template <typename T>
+inline size_t Module
+::create_2d_sck_fwd(runtime::Task& task, const std::string &name, const size_t n_rows, const size_t n_cols)
+{
+	return this->template create_2d_socket_fwd<T>(task, name, n_rows, n_cols);
 }
 
 size_t Module
