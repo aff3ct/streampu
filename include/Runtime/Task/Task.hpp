@@ -158,6 +158,10 @@ public:
 	void   operator=(Socket &s_out                         );
 	size_t unbind   (Socket &s_out                         );
 
+	void   bind     (Task &tsk, const int priority = -1);
+	void   operator=(Task &tsk                         );
+	size_t unbind   (Task &tsk                         );
+
 	bool is_no_input_socket() const;
 
 protected:

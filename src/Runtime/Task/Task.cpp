@@ -1033,6 +1033,12 @@ void Task
 }
 
 void Task
+::bind(Task &tsk, const int priority)
+{
+	this->bind(*tsk.sockets.back(), priority);
+}
+
+void Task
 ::operator=(Socket &s_out)
 {
 	if (s_out.get_type() == socket_t::SOUT || s_out.get_type() == socket_t::SFWD)
@@ -1049,6 +1055,12 @@ void Task
 		        << ").";
 		throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
 	}
+}
+
+void Task
+::operator=(Task &tsk)
+{
+	(*this) = *tsk.sockets.back();
 }
 
 size_t Task
@@ -1095,6 +1107,12 @@ size_t Task
 		        << ").";
 		throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
 	}
+}
+
+size_t Task
+::unbind(Task &tsk)
+{
+	return this->unbind(*tsk.sockets.back());
 }
 
 size_t Task
