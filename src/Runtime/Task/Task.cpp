@@ -950,7 +950,7 @@ Task* Task
 	Task* t = new Task(*this);
 	t->sockets.clear();
 	t->last_input_socket = nullptr;
-	t->fake_input_socket = nullptr;
+	t->fake_input_sockets.clear();
 
 	size_t out_buffers_counter = 0;
 	for (auto s : this->sockets)
@@ -1001,29 +1001,41 @@ void Task
 void Task
 ::bind(Socket &s_out, const int priority)
 {
-	if (this->is_no_input_socket())
+	// check if the 's_out' socket is already used for an other fake input socket
+	bool already_bound = false;
+	for (auto &fsi : this->fake_input_sockets)
+		if (&fsi->get_bound_socket() == &s_out) {
+			already_bound = true;
+			break;
+		}
+
+	// check if the 's_out' socket is already used for an other read input/fwd socket
+	if (!already_bound)
+		for (auto &s : this->sockets)
+			if (s->get_type() == socket_t::SIN || s->get_type() == socket_t::SFWD)
+				if (&s->get_bound_socket() == &s_out)
+					already_bound = true;
+
+	// if the s_out socket is not already bound, then create a new fake input socket
+	if (!already_bound)
 	{
-		this->fake_input_socket.reset(new Socket(*this,
-		                                         "fake",
-		                                         s_out.get_datatype(),
-		                                         s_out.get_databytes(),
-		                                         socket_t::SIN,
-		                                         this->is_fast()));
-		this->fake_input_socket->bind(s_out, priority);
-		this->last_input_socket = this->fake_input_socket.get();
-	}
-	else
-	{
-		std::stringstream message;
-		message << "Only tasks with no input socket can be directly bind.";
-		throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
+		this->fake_input_sockets.push_back(std::shared_ptr<Socket>(
+		                                       new Socket(*this,
+		                                                  "fake" + std::to_string(this->fake_input_sockets.size()),
+		                                                  s_out.get_datatype(),
+		                                                  s_out.get_databytes(),
+		                                                  socket_t::SIN,
+		                                                  this->is_fast())));
+		this->fake_input_sockets.back()->bind(s_out, priority);
+		this->last_input_socket = this->fake_input_sockets.back().get();
+		this->n_input_sockets++;
 	}
 }
 
 void Task
 ::operator=(Socket &s_out)
 {
-	if (s_out.get_type() == socket_t::SOUT)
+	if (s_out.get_type() == socket_t::SOUT || s_out.get_type() == socket_t::SFWD)
 		this->bind(s_out);
 	else
 	{
@@ -1032,8 +1044,8 @@ void Task
 		        << "'s_out.datatype'"         << " = " << type_to_string[s_out.get_datatype()] << ", "
 		        << "'s_out.name'"             << " = " << s_out.get_name()                     << ", "
 		        << "'s_out.task.name'"        << " = " << s_out.task.get_name()                << ", "
-		        << "'s_out.type'"             << " = " << (s_out.get_type() == socket_t::SIN ? "SIN" : "SOUT") /*<< ", "*/
-//		        << "'s_out.task.module.name'" << " = " << s_out.task.get_module_name()
+		        << "'s_out.type'"             << " = " << (s_out.get_type() == socket_t::SIN ? "SIN" : "SOUT") << ", "
+		        << "'s_out.task.module.name'" << " = " << s_out.task.get_module().get_custom_name()
 		        << ").";
 		throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
 	}
@@ -1042,17 +1054,45 @@ void Task
 size_t Task
 ::unbind(Socket &s_out)
 {
-	if (this->is_no_input_socket())
+	if (this->fake_input_sockets.size())
 	{
-		this->last_input_socket = nullptr;
-		const auto pos = this->fake_input_socket->unbind(s_out);
-		this->fake_input_socket = nullptr;
-		return pos;
+		size_t i = 0;
+		for (auto &fsi : this->fake_input_sockets) {
+			if (&fsi->get_bound_socket() == &s_out) {
+				const auto pos = fsi->unbind(s_out);
+				if (this->last_input_socket == fsi.get())
+					this->last_input_socket = nullptr;
+				this->fake_input_sockets.erase(this->fake_input_sockets.begin() + i);
+				this->n_input_sockets--;
+				if (this->fake_input_sockets.size() && this->last_input_socket == nullptr)
+					this->last_input_socket = this->fake_input_sockets.back().get();
+				return pos;
+			}
+			i++;
+		}
+
+		std::stringstream message;
+		message << "'s_out' is not bound the this task ("
+		        << "'s_out.datatype'"         << " = " << type_to_string[s_out.datatype]            << ", "
+		        << "'s_out.name'"             << " = " << s_out.get_name()                          << ", "
+		        << "'s_out.task.name'"        << " = " << s_out.task.get_name()                     << ", "
+		        << "'s_out.task.module.name'" << " = " << s_out.task.get_module().get_custom_name() << ", "
+		        << "'task.name'"              << " = " << this->get_name()                          << ", "
+		        << "'task.module.name'"       << " = " << this->get_module().get_custom_name()
+		        << ").";
+		throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
 	}
 	else
 	{
 		std::stringstream message;
-		message << "Only tasks with no input socket can be directly unbind.";
+		message << "This task does not have fake input socket to unbind ("
+		        << "'s_out.datatype'"         << " = " << type_to_string[s_out.datatype]            << ", "
+		        << "'s_out.name'"             << " = " << s_out.get_name()                          << ", "
+		        << "'s_out.task.name'"        << " = " << s_out.task.get_name()                     << ", "
+		        << "'s_out.task.module.name'" << " = " << s_out.task.get_module().get_custom_name() << ", "
+		        << "'task.name'"              << " = " << this->get_name()                          << ", "
+		        << "'task.module.name'"       << " = " << this->get_module().get_custom_name()
+		        << ").";
 		throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
 	}
 }

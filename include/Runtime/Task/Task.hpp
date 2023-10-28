@@ -91,7 +91,7 @@ protected:
 	std::vector<std::vector<int8_t >> sockets_data;
 
 public:
-	std::shared_ptr<Socket> fake_input_socket;
+	std::vector<std::shared_ptr<Socket>> fake_input_sockets;
 	std::vector<std::shared_ptr<Socket>> sockets;
 
 	Task(      module::Module &module,
