@@ -153,7 +153,7 @@ template <typename T>
 T** Socket
 ::get_2d_dataptr()
 {
-	return static_cast<T**>(this->get_2d_dataptr());
+	return (T**)(this->get_2d_dataptr());
 }
 
 template <typename T>
