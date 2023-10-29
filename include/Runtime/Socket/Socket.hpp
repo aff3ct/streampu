@@ -41,7 +41,9 @@ protected:
 	size_t               databytes;
 	bool                 fast;
 	void*                dataptr;
-	std::vector<void*>   rowsptr;
+	void**               rowsptr;
+	size_t               n_rows;
+	size_t               start_row;
 	std::vector<Socket*> bound_sockets;
 	Socket*              bound_socket;
 	socket_t             type;
@@ -63,8 +65,8 @@ public:
 	inline size_t                      get_n_rows         () const;
 	inline void*                       get_dataptr        () const;
 	inline void*                       get_dptr           () const;
-	inline void**                      get_2d_dataptr     ();
-	inline void**                      get_2d_dptr        ();
+	inline void**                      get_2d_dataptr     (const size_t start_row = 0, const size_t start_col = 0);
+	inline void**                      get_2d_dptr        (const size_t start_row = 0, const size_t start_col = 0);
 	inline bool                        is_fast            () const;
 	inline Task&                       get_task           () const;
 	inline const std::vector<Socket*>& get_bound_sockets  () const;
@@ -79,10 +81,10 @@ public:
 	inline T* get_dptr() const;
 
 	template <typename T>
-	inline T** get_2d_dataptr();
+	inline T** get_2d_dataptr(const size_t start_row = 0, const size_t start_col = 0);
 
 	template <typename T>
-	inline T** get_2d_dptr();
+	inline T** get_2d_dptr(const size_t start_row = 0, const size_t start_col = 0);
 
 	inline void set_fast(const bool fast);
 

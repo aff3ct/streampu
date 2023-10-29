@@ -1004,7 +1004,8 @@ void Task
 	// check if the 's_out' socket is already used for an other fake input socket
 	bool already_bound = false;
 	for (auto &fsi : this->fake_input_sockets)
-		if (&fsi->get_bound_socket() == &s_out) {
+		if (&fsi->get_bound_socket() == &s_out)
+		{
 			already_bound = true;
 			break;
 		}
@@ -1014,7 +1015,10 @@ void Task
 		for (auto &s : this->sockets)
 			if (s->get_type() == socket_t::SIN || s->get_type() == socket_t::SFWD)
 				if (&s->get_bound_socket() == &s_out)
+				{
 					already_bound = true;
+					break;
+				}
 
 	// if the s_out socket is not already bound, then create a new fake input socket
 	if (!already_bound)

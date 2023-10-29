@@ -37,7 +37,7 @@ Socket
          const std::pair<size_t, size_t> databytes_per_dim, const socket_t type, const bool fast, void *dataptr)
 : task(task), name(name), datatype(datatype),
   databytes(std::get<0>(databytes_per_dim) * std::get<1>(databytes_per_dim)), fast(fast), dataptr(dataptr),
-  rowsptr(std::get<0>(databytes_per_dim)), bound_socket(nullptr), type(type)
+  rowsptr(nullptr), n_rows(std::get<0>(databytes_per_dim)), start_row(0), bound_socket(nullptr), type(type)
 {
 	if (databytes % type_to_size[datatype] != 0)
 	{
@@ -48,6 +48,8 @@ Socket
 		        << "'datatype'"               << " = " << type_to_string[datatype] << ").";
 		throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
 	}
+
+	this->rowsptr = new void*[this->n_rows];
 }
 
 Socket
@@ -61,6 +63,8 @@ Socket
 ::~Socket()
 {
 	this->reset();
+	this->rowsptr -= this->start_row;
+	delete[] rowsptr;
 }
 
 const std::string& Socket
@@ -102,7 +106,7 @@ size_t Socket
 size_t Socket
 ::get_n_rows() const
 {
-	return this->rowsptr.size();
+	return this->n_rows;
 }
 
 void* Socket
@@ -118,21 +122,30 @@ void* Socket
 }
 
 void** Socket
-::get_2d_dataptr()
+::get_2d_dataptr(const size_t start_row, const size_t start_col)
 {
-	const size_t n_cols = this->get_databytes() / this->rowsptr.size();
-	uint8_t* dptr = this->template get_dataptr<uint8_t>();
-	for (size_t l = 0; l < this->rowsptr.size(); l++) {
-		this->rowsptr[l] = (void*)dptr;
+	assert(start_row < this->get_n_rows());
+	const size_t n_cols = this->get_databytes() / this->get_n_rows();
+	assert(start_col < n_cols);
+
+	this->rowsptr -= this->start_row;
+	uint8_t* dptr = this->template get_dataptr<uint8_t>() + start_col;
+	for (size_t r = 0; r < this->get_n_rows(); r++)
+	{
+		this->rowsptr[r] = (void*)dptr;
 		dptr += n_cols;
 	}
-	return this->rowsptr.data();
+
+	this->start_row = start_row;
+	this->rowsptr += this->start_row;
+
+	return this->rowsptr;
 }
 
 void** Socket
-::get_2d_dptr()
+::get_2d_dptr(const size_t start_row, const size_t start_col)
 {
-	return this->get_2d_dataptr();
+	return this->get_2d_dataptr(start_row, start_col);
 }
 
 template <typename T>
@@ -151,16 +164,16 @@ T* Socket
 
 template <typename T>
 T** Socket
-::get_2d_dataptr()
+::get_2d_dataptr(const size_t start_row, const size_t start_col)
 {
-	return (T**)(this->get_2d_dataptr());
+	return (T**)(this->get_2d_dataptr(start_row, start_col * sizeof(T)));
 }
 
 template <typename T>
 T** Socket
-::get_2d_dptr()
+::get_2d_dptr(const size_t start_row, const size_t start_col)
 {
-	return this->template get_2d_dataptr<T>();
+	return this->template get_2d_dataptr<T>(start_row, start_col);
 }
 
 bool Socket
@@ -708,8 +721,17 @@ void Socket
 }
 
 void Socket
-::set_n_rows(const size_t n_rows) {
-	this->rowsptr.resize(n_rows);
+::set_n_rows(const size_t n_rows)
+{
+	if (n_rows != this->get_n_rows())
+	{
+		this->n_rows = n_rows;
+		this->rowsptr -= this->start_row;
+		delete[] this->rowsptr;
+
+		this->rowsptr = new void*[this->n_rows];
+		this->start_row = 0;
+	}
 }
 
 void Socket
