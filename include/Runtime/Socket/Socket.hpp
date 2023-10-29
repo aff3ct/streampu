@@ -63,8 +63,8 @@ public:
 	inline size_t                      get_databytes      () const;
 	inline size_t                      get_n_elmts        () const;
 	inline size_t                      get_n_rows         () const;
-	inline void*                       get_dataptr        () const;
-	inline void*                       get_dptr           () const;
+	inline void*                       get_dataptr        (const size_t start_col = 0) const;
+	inline void*                       get_dptr           (const size_t start_col = 0) const;
 	inline void**                      get_2d_dataptr     (const size_t start_row = 0, const size_t start_col = 0);
 	inline void**                      get_2d_dptr        (const size_t start_row = 0, const size_t start_col = 0);
 	inline bool                        is_fast            () const;
@@ -75,10 +75,10 @@ public:
 	inline socket_t                    get_type           () const;
 
 	template <typename T>
-	inline T* get_dataptr() const;
+	inline T* get_dataptr(const size_t start_col = 0) const;
 
 	template <typename T>
-	inline T* get_dptr() const;
+	inline T* get_dptr(const size_t start_col = 0) const;
 
 	template <typename T>
 	inline T** get_2d_dataptr(const size_t start_row = 0, const size_t start_col = 0);

@@ -110,15 +110,16 @@ size_t Socket
 }
 
 void* Socket
-::get_dataptr() const
+::get_dataptr(const size_t start_col) const
 {
-	return dataptr;
+	uint8_t* ptr = (uint8_t*)dataptr;
+	return (void*)(ptr + start_col);
 }
 
 void* Socket
-::get_dptr() const
+::get_dptr(const size_t start_col) const
 {
-	return this->get_dataptr();
+	return this->get_dataptr(start_col);
 }
 
 void** Socket
@@ -150,16 +151,16 @@ void** Socket
 
 template <typename T>
 T* Socket
-::get_dataptr() const
+::get_dataptr(const size_t start_col) const
 {
-	return static_cast<T*>(this->get_dataptr());
+	return static_cast<T*>(this->get_dataptr(start_col * sizeof(T)));
 }
 
 template <typename T>
 T* Socket
-::get_dptr() const
+::get_dptr(const size_t start_col) const
 {
-	return this->template get_dataptr<T>();
+	return this->template get_dataptr<T>(start_col);
 }
 
 template <typename T>
