@@ -22,15 +22,24 @@ Incrementer<T>
 		throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
 	}
 
-	auto &p = this->create_task("increment");
-	auto ps_in  = this->template create_socket_in <T>(p, "in",  this->n_elmts);
-	auto ps_out = this->template create_socket_out<T>(p, "out", this->n_elmts);
-	this->create_codelet(p, [ps_in, ps_out](Module &m, runtime::Task &t, const size_t frame_id) -> int
+	auto &p1 = this->create_task("increment");
+	auto p1s_in  = this->template create_socket_in <T>(p1, "in",  this->n_elmts);
+	auto p1s_out = this->template create_socket_out<T>(p1, "out", this->n_elmts);
+	this->create_codelet(p1, [p1s_in, p1s_out](Module &m, runtime::Task &t, const size_t frame_id) -> int
 	{
 		auto &inc = static_cast<Incrementer&>(m);
-		inc._increment(static_cast<const T*>(t[ps_in ].get_dataptr()),
-		               static_cast<      T*>(t[ps_out].get_dataptr()),
+		inc._increment(static_cast<const T*>(t[p1s_in ].get_dataptr()),
+		               static_cast<      T*>(t[p1s_out].get_dataptr()),
 		               frame_id);
+		return runtime::status_t::SUCCESS;
+	});
+
+	auto &p2 = this->create_task("incrementf");
+	auto p2s_fwd  = this->template create_socket_fwd <T>(p2, "fwd", this->n_elmts);
+	this->create_codelet(p2, [p2s_fwd](Module &m, runtime::Task &t, const size_t frame_id) -> int
+	{
+		auto &inc = static_cast<Incrementer&>(m);
+		inc._increment(t[p2s_fwd].template get_dataptr<const T>(), t[p2s_fwd].template get_dataptr<T>(), frame_id);
 		return runtime::status_t::SUCCESS;
 	});
 }

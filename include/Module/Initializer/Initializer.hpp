@@ -43,6 +43,7 @@ public:
 
 	void set_init_data(const std::vector<T>& init_data);
 	void set_init_data(const std::vector<std::vector<T>>& init_data);
+	void set_init_data(const T val);
 	void set_n_frames(const size_t n_frames);
 
 	template <class A = std::allocator<T>>

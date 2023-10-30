@@ -21,6 +21,13 @@ runtime::Socket& Incrementer<T>
 
 template <typename T>
 runtime::Socket& Incrementer<T>
+::operator[](const inc::sck::incrementf s)
+{
+	return Module::operator[]((size_t)inc::tsk::incrementf)[(size_t)s];
+}
+
+template <typename T>
+runtime::Socket& Incrementer<T>
 ::operator[](const std::string &tsk_sck)
 {
 	return Module::operator[](tsk_sck);

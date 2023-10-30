@@ -30,31 +30,89 @@ public:
 
 	template <typename T>
 	inline size_t create_socket_in(runtime::Task& task, const std::string &name, const size_t n_elmts);
-	size_t create_socket_in(runtime::Task& task, const std::string &name, const size_t n_elmts, const std::type_index& datatype);
-	size_t create_socket_in(runtime::Task& task, const std::string &name, const size_t n_elmts, const runtime::datatype_t datatype);
+	size_t create_socket_in(runtime::Task& task, const std::string &name, const size_t n_elmts,
+	                        const std::type_index& datatype);
+	size_t create_socket_in(runtime::Task& task, const std::string &name, const size_t n_elmts,
+	                        const runtime::datatype_t datatype);
 	template <typename T>
 	inline size_t create_sck_in(runtime::Task& task, const std::string &name, const size_t n_elmts);
-	size_t create_sck_in(runtime::Task& task, const std::string &name, const size_t n_elmts, const std::type_index& datatype);
-	size_t create_sck_in(runtime::Task& task, const std::string &name, const size_t n_elmts, const runtime::datatype_t datatype);
+	size_t create_sck_in(runtime::Task& task, const std::string &name, const size_t n_elmts,
+	                     const std::type_index& datatype);
+	size_t create_sck_in(runtime::Task& task, const std::string &name, const size_t n_elmts,
+	                     const runtime::datatype_t datatype);
 
 	template <typename T>
 	inline size_t create_socket_out(runtime::Task& task, const std::string &name, const size_t n_elmts);
-	size_t create_socket_out(runtime::Task& task, const std::string &name, const size_t n_elmts, const std::type_index& datatype);
-	size_t create_socket_out(runtime::Task& task, const std::string &name, const size_t n_elmts, const runtime::datatype_t datatype);
+	size_t create_socket_out(runtime::Task& task, const std::string &name, const size_t n_elmts,
+	                         const std::type_index& datatype);
+	size_t create_socket_out(runtime::Task& task, const std::string &name, const size_t n_elmts,
+	                         const runtime::datatype_t datatype);
 	template <typename T>
 	inline size_t create_sck_out(runtime::Task& task, const std::string &name, const size_t n_elmts);
-	size_t create_sck_out(runtime::Task& task, const std::string &name, const size_t n_elmts, const std::type_index& datatype);
-	size_t create_sck_out(runtime::Task& task, const std::string &name, const size_t n_elmts, const runtime::datatype_t datatype);
+	size_t create_sck_out(runtime::Task& task, const std::string &name, const size_t n_elmts,
+	                      const std::type_index& datatype);
+	size_t create_sck_out(runtime::Task& task, const std::string &name, const size_t n_elmts,
+	                      const runtime::datatype_t datatype);
 
 	// Add FWD support for Stateless modules 
 	template <typename T>
 	inline size_t create_socket_fwd(runtime::Task& task, const std::string &name, const size_t n_elmts);
-	size_t create_socket_fwd(runtime::Task& task, const std::string &name, const size_t n_elmts, const std::type_index& datatype);
-	size_t create_socket_fwd(runtime::Task& task, const std::string &name, const size_t n_elmts, const runtime::datatype_t datatype);
+	size_t create_socket_fwd(runtime::Task& task, const std::string &name, const size_t n_elmts,
+	                         const std::type_index& datatype);
+	size_t create_socket_fwd(runtime::Task& task, const std::string &name, const size_t n_elmts,
+	                         const runtime::datatype_t datatype);
 	template <typename T>
 	inline size_t create_sck_fwd(runtime::Task& task, const std::string &name, const size_t n_elmts);
-	size_t create_sck_fwd(runtime::Task& task, const std::string &name, const size_t n_elmts, const std::type_index& datatype);
-	size_t create_sck_fwd(runtime::Task& task, const std::string &name, const size_t n_elmts, const runtime::datatype_t datatype);
+	size_t create_sck_fwd(runtime::Task& task, const std::string &name, const size_t n_elmts,
+	                      const std::type_index& datatype);
+	size_t create_sck_fwd(runtime::Task& task, const std::string &name, const size_t n_elmts,
+	                      const runtime::datatype_t datatype);
+
+	template <typename T>
+	inline size_t create_2d_socket_in(runtime::Task& task, const std::string &name, const size_t n_rows,
+	                                  const size_t n_cols);
+	size_t create_2d_socket_in(runtime::Task& task, const std::string &name, const size_t n_rows, const size_t n_cols,
+	                           const std::type_index& datatype);
+	size_t create_2d_socket_in(runtime::Task& task, const std::string &name, const size_t n_rows, const size_t n_cols,
+	                           const runtime::datatype_t datatype);
+	template <typename T>
+	inline size_t create_2d_sck_in(runtime::Task& task, const std::string &name, const size_t n_rows,
+	                               const size_t n_cols);
+	size_t create_2d_sck_in(runtime::Task& task, const std::string &name, const size_t n_rows, const size_t n_cols,
+	                        const std::type_index& datatype);
+	size_t create_2d_sck_in(runtime::Task& task, const std::string &name, const size_t n_rows, const size_t n_cols,
+	                        const runtime::datatype_t datatype);
+
+	template <typename T>
+	inline size_t create_2d_socket_out(runtime::Task& task, const std::string &name, const size_t n_rows,
+	                                   const size_t n_cols);
+	size_t create_2d_socket_out(runtime::Task& task, const std::string &name, const size_t n_rows, const size_t n_cols,
+	                            const std::type_index& datatype);
+	size_t create_2d_socket_out(runtime::Task& task, const std::string &name, const size_t n_rows, const size_t n_cols,
+	                            const runtime::datatype_t datatype);
+	template <typename T>
+	inline size_t create_2d_sck_out(runtime::Task& task, const std::string &name, const size_t n_rows,
+	                                const size_t n_cols);
+	size_t create_2d_sck_out(runtime::Task& task, const std::string &name, const size_t n_rows, const size_t n_cols,
+	                         const std::type_index& datatype);
+	size_t create_2d_sck_out(runtime::Task& task, const std::string &name, const size_t n_rows, const size_t n_cols,
+	                         const runtime::datatype_t datatype);
+
+	// Add FWD support for Stateless modules
+	template <typename T>
+	inline size_t create_2d_socket_fwd(runtime::Task& task, const std::string &name, const size_t n_rows,
+	                                   const size_t n_cols);
+	size_t create_2d_socket_fwd(runtime::Task& task, const std::string &name, const size_t n_rows, const size_t n_cols,
+	                            const std::type_index& datatype);
+	size_t create_2d_socket_fwd(runtime::Task& task, const std::string &name, const size_t n_rows, const size_t n_cols,
+	                            const runtime::datatype_t datatype);
+	template <typename T>
+	inline size_t create_2d_sck_fwd(runtime::Task& task, const std::string &name, const size_t n_rows,
+	                                const size_t n_cols);
+	size_t create_2d_sck_fwd(runtime::Task& task, const std::string &name, const size_t n_rows, const size_t n_cols,
+	                         const std::type_index& datatype);
+	size_t create_2d_sck_fwd(runtime::Task& task, const std::string &name, const size_t n_rows, const size_t n_cols,
+	                         const runtime::datatype_t datatype);
 
 	void create_codelet(runtime::Task& task, std::function<int(Module &m, runtime::Task &t, const size_t frame_id)> codelet);
 	void create_cdl(runtime::Task& task, std::function<int(Module &m, runtime::Task &t, const size_t frame_id)> codelet);

@@ -41,6 +41,8 @@ public:
 	virtual Delayer<D>* clone() const;
 	virtual size_t get_size() const;
 	virtual void set_n_frames(const size_t n_frames);
+	void set_data(const std::vector<D> &init);
+	void set_data(const D *init);
 protected:
 	virtual void _memorize(const D *in, const size_t frame_id);
 	virtual void _produce (      D *out, const size_t frame_id);

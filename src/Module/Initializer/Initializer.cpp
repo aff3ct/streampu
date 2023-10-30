@@ -2,6 +2,7 @@
 #include <thread>
 #include <string>
 #include <sstream>
+#include <algorithm>
 
 #include "Module/Initializer/Initializer.hpp"
 
@@ -90,6 +91,14 @@ void Initializer<T>
 		}
 		this->init_data[f] = init_data[f];
 	}
+}
+
+template <typename T>
+void Initializer<T>
+::set_init_data(const T val)
+{
+	for (auto &ini : this->init_data)
+		std::fill(ini.begin(), ini.end(), val);
 }
 
 template <typename T>

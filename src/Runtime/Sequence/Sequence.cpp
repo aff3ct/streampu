@@ -1313,32 +1313,34 @@ void Sequence
 				}
 
 				// replicate the tasks binding
-				if (t_ref->is_no_input_socket() && t_ref->fake_input_socket != nullptr)
+				if (t_ref->fake_input_sockets.size())
 				{
-					const runtime::Socket* s_ref_out = nullptr;
-					try { s_ref_out = &t_ref->fake_input_socket->get_bound_socket(); } catch (...) {}
-					if (s_ref_out)
-					{
-						auto &t_ref_out = s_ref_out->get_task();
-						auto &m_ref_out = t_ref_out.get_module();
-
-						// check if `t_ref_out` is included in the tasks graph
-						auto t_in_seq = std::find(tsks_vec.begin(), tsks_vec.end(), &t_ref_out) != tsks_vec.end();
-						auto m_id_out = get_module_id(modules_vec, m_ref_out);
-
-						if (t_in_seq && m_id_out != -1)
+					for (auto &fsi : t_ref->fake_input_sockets) {
+						const runtime::Socket* s_ref_out = nullptr;
+						try { s_ref_out = &fsi->get_bound_socket(); } catch (...) {}
+						if (s_ref_out)
 						{
-							auto t_id_out = get_task_id(m_ref_out.tasks, t_ref_out);
-							auto s_id_out = get_socket_id(t_ref_out.sockets, *s_ref_out);
+							auto &t_ref_out = s_ref_out->get_task();
+							auto &m_ref_out = t_ref_out.get_module();
 
-							assert(t_id_out != -1);
-							assert(s_id_out != -1);
+							// check if `t_ref_out` is included in the tasks graph
+							auto t_in_seq = std::find(tsks_vec.begin(), tsks_vec.end(), &t_ref_out) != tsks_vec.end();
+							auto m_id_out = get_module_id(modules_vec, m_ref_out);
 
-							(*this->all_modules[thread_id][m_id_out]).tasks[t_id_out]->set_autoalloc(true);
+							if (t_in_seq && m_id_out != -1)
+							{
+								auto t_id_out = get_task_id(m_ref_out.tasks, t_ref_out);
+								auto s_id_out = get_socket_id(t_ref_out.sockets, *s_ref_out);
 
-							auto &t_in  = *this->all_modules[thread_id][m_id    ]->tasks[t_id    ];
-							auto &s_out = *this->all_modules[thread_id][m_id_out]->tasks[t_id_out]->sockets[s_id_out];
-							t_in.bind(s_out);
+								assert(t_id_out != -1);
+								assert(s_id_out != -1);
+
+								(*this->all_modules[thread_id][m_id_out]).tasks[t_id_out]->set_autoalloc(true);
+
+								auto &t_in  = *this->all_modules[thread_id][m_id    ]->tasks[t_id    ];
+								auto &s_out = *this->all_modules[thread_id][m_id_out]->tasks[t_id_out]->sockets[s_id_out];
+								t_in.bind(s_out);
+							}
 						}
 					}
 				}
@@ -1447,13 +1449,14 @@ void Sequence
 		stream << tab << tab << tab << "subgraph \"cluster_" << +&t << "\" {" << std::endl;
 		stream << tab << tab << tab << tab << "node [style=filled];" << std::endl;
 
-		if (t->fake_input_socket != nullptr)
+		if (t->fake_input_sockets.size())
 		{
-			auto &s = t->fake_input_socket;
 			std::string stype = "in";
-			stream << tab << tab << tab << tab << "\"" << +s.get() << "\""
-			                                   << "[label=\"" << stype << ":" << s->get_name() << "\", style=filled, "
-			                                   << "fillcolor=red, penwidth=\"2.0\"];" << std::endl;
+			for (auto &fsi : t->fake_input_sockets)
+				stream << tab << tab << tab << tab << "\"" << +fsi.get() << "\""
+				                                   << "[label=\"" << stype << ":" << fsi->get_name()
+				                                   << "\", style=filled, " << "fillcolor=red, penwidth=\"2.0\"];"
+				                                   << std::endl;
 		}
 
 		size_t sid = 0;
@@ -2145,12 +2148,12 @@ void Sequence
 					// if the task of the current input socket is in the tasks of the sequence
 					if (std::find(possessed_tsks.begin(), possessed_tsks.end(), tsk_in) != possessed_tsks.end())
 					{
-						if (tsk_in->is_no_input_socket())
+						try
 						{
 							tsk_in->unbind(*sck_out);
 							unbind_tasks.push_back(std::make_pair(tsk_in, sck_out.get()));
 						}
-						else
+						catch (...)
 						{
 							sck_in->unbind(*sck_out);
 							// memorize the unbinds to rebind after!

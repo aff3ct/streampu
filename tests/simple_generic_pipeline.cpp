@@ -357,9 +357,9 @@ int main(int argc, char** argv)
 			}
 			else if (str == "SFWD")
 			{
-				rlys[tas].reset(new module::Relayer_fwd<uint8_t>(data_length));
+				rlys[tas].reset(new module::Relayer<uint8_t>(data_length));
 				rlys[tas]->set_custom_name("Relayer_io" + std::to_string(tas));
-				dynamic_cast<module::Relayer_fwd<uint8_t>*>(rlys[tas].get())->set_ns(sleep_time_us * 1000);
+				dynamic_cast<module::Relayer<uint8_t>*>(rlys[tas].get())->set_ns(sleep_time_us * 1000);
 			}
 			else
 			{
@@ -375,7 +375,7 @@ int main(int argc, char** argv)
 	tas = 0;
 	if (socket_type_task[0][0] == "SFWD")
 	{
-		(*dynamic_cast<module::Relayer_fwd<uint8_t>*>(rlys[tas].get()))[module::rly_fwd::sck::relay_fwd::fwd] =
+		(*dynamic_cast<module::Relayer<uint8_t>*>(rlys[tas].get()))[module::rly::sck::relayf::fwd] =
 			source[module::src::sck::generate::out_data];
 	}
 	else
@@ -393,12 +393,12 @@ int main(int argc, char** argv)
 			{
 				if (socket_type_task[i][j] == "SFWD")
 				{
-					(*dynamic_cast<module::Relayer_fwd<uint8_t>*>(rlys[tas+1].get()))[module::rly_fwd::sck::relay_fwd::fwd] =
-						(*dynamic_cast<module::Relayer_fwd<uint8_t>*>(rlys[tas].get()))[module::rly_fwd::sck::relay_fwd::fwd];
+					(*dynamic_cast<module::Relayer<uint8_t>*>(rlys[tas+1].get()))[module::rly::sck::relayf::fwd] =
+						(*dynamic_cast<module::Relayer<uint8_t>*>(rlys[tas].get()))[module::rly::sck::relayf::fwd];
 				}
 				else
 				{
-					(*dynamic_cast<module::Relayer_fwd<uint8_t>*>(rlys[tas+1].get()))[module::rly_fwd::sck::relay_fwd::fwd] =
+					(*dynamic_cast<module::Relayer<uint8_t>*>(rlys[tas+1].get()))[module::rly::sck::relayf::fwd] =
 						(*dynamic_cast<module::Relayer<uint8_t>*>(rlys[tas].get()))[module::rly::sck::relay::out];
 				}
 			}
@@ -407,7 +407,7 @@ int main(int argc, char** argv)
 				if (socket_type_task[i][j] == "SFWD")
 				{
 					(*dynamic_cast<module::Relayer<uint8_t>*>(rlys[tas+1].get()))[module::rly::sck::relay::in] =
-						(*dynamic_cast<module::Relayer_fwd<uint8_t>*>(rlys[tas].get()))[module::rly_fwd::sck::relay_fwd::fwd];
+						(*dynamic_cast<module::Relayer<uint8_t>*>(rlys[tas].get()))[module::rly::sck::relayf::fwd];
 				}
 				else
 				{
@@ -424,12 +424,12 @@ int main(int argc, char** argv)
 			{
 				if (socket_type_task[i][socket_type_task[i].size() -1] == "SFWD")
 				{
-					(*dynamic_cast<module::Relayer_fwd<uint8_t>*>(rlys[tas +1].get()))[module::rly_fwd::sck::relay_fwd::fwd] =
-						(*dynamic_cast<module::Relayer_fwd<uint8_t>*>(rlys[tas].get()))[module::rly_fwd::sck::relay_fwd::fwd];
+					(*dynamic_cast<module::Relayer<uint8_t>*>(rlys[tas +1].get()))[module::rly::sck::relayf::fwd] =
+						(*dynamic_cast<module::Relayer<uint8_t>*>(rlys[tas].get()))[module::rly::sck::relayf::fwd];
 				}
 				else
 				{
-					(*dynamic_cast<module::Relayer_fwd<uint8_t>*>(rlys[tas +1].get()))[module::rly_fwd::sck::relay_fwd::fwd] =
+					(*dynamic_cast<module::Relayer<uint8_t>*>(rlys[tas +1].get()))[module::rly::sck::relayf::fwd] =
 						(*dynamic_cast<module::Relayer<uint8_t>*>(rlys[tas].get()))[module::rly::sck::relay::out];
 				}
 			}
@@ -438,7 +438,7 @@ int main(int argc, char** argv)
 				if (socket_type_task[i][socket_type_task[i].size() -1] == "SFWD")
 				{
 					(*dynamic_cast<module::Relayer<uint8_t>*>(rlys[tas +1].get()))[module::rly::sck::relay::in] =
-						(*dynamic_cast<module::Relayer_fwd<uint8_t>*>(rlys[tas].get()))[module::rly_fwd::sck::relay_fwd::fwd];
+						(*dynamic_cast<module::Relayer<uint8_t>*>(rlys[tas].get()))[module::rly::sck::relayf::fwd];
 				}
 				else
 				{
@@ -453,7 +453,7 @@ int main(int argc, char** argv)
 	// Last stage bind
 	if (socket_type_task[socket_type_task.size() -1][socket_type_task[socket_type_task.size()-1].size()-1] == "SFWD")
 	{
-		sink[module::snk::sck::send_count::in_data] = (*dynamic_cast<module::Relayer_fwd<uint8_t>*>(rlys[tas].get()))[module::rly_fwd::sck::relay_fwd::fwd];
+		sink[module::snk::sck::send_count::in_data] = (*dynamic_cast<module::Relayer<uint8_t>*>(rlys[tas].get()))[module::rly::sck::relayf::fwd];
 	}
 	else
 	{
@@ -522,18 +522,18 @@ int main(int argc, char** argv)
 		{
 			if (socket_type_task[i][0] == "SFWD" && socket_type_task[i][socket_type_task[i].size() -1] == "SFWD")
 			{
-				stage_creat.push_back({ { &(*dynamic_cast<module::Relayer_fwd<uint8_t>*>(rlys[tas].get()))[module::rly_fwd::tsk::relay_fwd] },
-					{ &(*dynamic_cast<module::Relayer_fwd<uint8_t>*>(rlys[tas + socket_type_task[i].size() -1].get()))[module::rly_fwd::tsk::relay_fwd] } });
+				stage_creat.push_back({ { &(*dynamic_cast<module::Relayer<uint8_t>*>(rlys[tas].get()))[module::rly::tsk::relayf] },
+					{ &(*dynamic_cast<module::Relayer<uint8_t>*>(rlys[tas + socket_type_task[i].size() -1].get()))[module::rly::tsk::relayf] } });
 			}
 			else if(socket_type_task[i][0] == "SFWD" && socket_type_task[i][socket_type_task[i].size() -1] == "SIO")
 			{
-				stage_creat.push_back({ { &(*dynamic_cast<module::Relayer_fwd<uint8_t>*>(rlys[tas].get()))[module::rly_fwd::tsk::relay_fwd] },
+				stage_creat.push_back({ { &(*dynamic_cast<module::Relayer<uint8_t>*>(rlys[tas].get()))[module::rly::tsk::relayf] },
 					{ &(*dynamic_cast<module::Relayer<uint8_t>*>(rlys[tas + socket_type_task[i].size() -1].get()))[module::rly::tsk::relay] } });
 			}
 			else if (socket_type_task[i][0] == "SIO" && socket_type_task[i][socket_type_task[i].size() -1] == "SFWD")
 			{
 				stage_creat.push_back({ { &(*dynamic_cast<module::Relayer<uint8_t>*>(rlys[tas].get()))[module::rly::tsk::relay] },
-					{ &(*dynamic_cast<module::Relayer_fwd<uint8_t>*>(rlys[tas + socket_type_task[i].size() -1].get()))[module::rly_fwd::tsk::relay_fwd] } });
+					{ &(*dynamic_cast<module::Relayer<uint8_t>*>(rlys[tas + socket_type_task[i].size() -1].get()))[module::rly::tsk::relayf] } });
 			}
 			else
 			{
@@ -632,7 +632,7 @@ int main(int argc, char** argv)
 
 	if (socket_type_task[0][0] == "SFWD")
 	{
-		(*dynamic_cast<module::Relayer_fwd<uint8_t>*>(rlys[tas].get()))[module::rly_fwd::sck::relay_fwd::fwd]
+		(*dynamic_cast<module::Relayer<uint8_t>*>(rlys[tas].get()))[module::rly::sck::relayf::fwd]
 			.unbind(source[module::src::sck::generate::out_data]);
 	}
 	else
@@ -649,12 +649,12 @@ int main(int argc, char** argv)
 			{
 				if (socket_type_task[i][j] == "SFWD")
 				{
-					(*dynamic_cast<module::Relayer_fwd<uint8_t>*>(rlys[tas +1].get()))[module::rly_fwd::sck::relay_fwd::fwd]
-						.unbind((*dynamic_cast<module::Relayer_fwd<uint8_t>*>(rlys[tas].get()))[module::rly_fwd::sck::relay_fwd::fwd]);
+					(*dynamic_cast<module::Relayer<uint8_t>*>(rlys[tas +1].get()))[module::rly::sck::relayf::fwd]
+						.unbind((*dynamic_cast<module::Relayer<uint8_t>*>(rlys[tas].get()))[module::rly::sck::relayf::fwd]);
 				}
 				else
 				{
-					(*dynamic_cast<module::Relayer_fwd<uint8_t>*>(rlys[tas +1].get()))[module::rly_fwd::sck::relay_fwd::fwd]
+					(*dynamic_cast<module::Relayer<uint8_t>*>(rlys[tas +1].get()))[module::rly::sck::relayf::fwd]
 						.unbind((*dynamic_cast<module::Relayer<uint8_t>*>(rlys[tas].get()))[module::rly::sck::relay::out]);
 				}
 			}
@@ -663,7 +663,7 @@ int main(int argc, char** argv)
 				if (socket_type_task[i][j] == "SFWD")
 				{
 					(*dynamic_cast<module::Relayer<uint8_t>*>(rlys[tas +1].get()))[module::rly::sck::relay::in]
-						.unbind((*dynamic_cast<module::Relayer_fwd<uint8_t>*>(rlys[tas].get()))[module::rly_fwd::sck::relay_fwd::fwd]);
+						.unbind((*dynamic_cast<module::Relayer<uint8_t>*>(rlys[tas].get()))[module::rly::sck::relayf::fwd]);
 				}
 				else
 				{
@@ -680,12 +680,12 @@ int main(int argc, char** argv)
 			{
 				if (socket_type_task[i][socket_type_task[i].size() -1] == "SFWD")
 				{
-					(*dynamic_cast<module::Relayer_fwd<uint8_t>*>(rlys[tas +1].get()))[module::rly_fwd::sck::relay_fwd::fwd]
-						.unbind((*dynamic_cast<module::Relayer_fwd<uint8_t>*>(rlys[tas].get()))[module::rly_fwd::sck::relay_fwd::fwd]);
+					(*dynamic_cast<module::Relayer<uint8_t>*>(rlys[tas +1].get()))[module::rly::sck::relayf::fwd]
+						.unbind((*dynamic_cast<module::Relayer<uint8_t>*>(rlys[tas].get()))[module::rly::sck::relayf::fwd]);
 				}
 				else
 				{
-					(*dynamic_cast<module::Relayer_fwd<uint8_t>*>(rlys[tas +1].get()))[module::rly_fwd::sck::relay_fwd::fwd]
+					(*dynamic_cast<module::Relayer<uint8_t>*>(rlys[tas +1].get()))[module::rly::sck::relayf::fwd]
 						.unbind((*dynamic_cast<module::Relayer<uint8_t>*>(rlys[tas].get()))[module::rly::sck::relay::out]);
 				}
 			}
@@ -694,7 +694,7 @@ int main(int argc, char** argv)
 				if (socket_type_task[i][socket_type_task[i].size() -1] == "SFWD")
 				{
 					(*dynamic_cast<module::Relayer<uint8_t>*>(rlys[tas +1].get()))[module::rly::sck::relay::in]
-						.unbind((*dynamic_cast<module::Relayer_fwd<uint8_t>*>(rlys[tas].get()))[module::rly_fwd::sck::relay_fwd::fwd]);
+						.unbind((*dynamic_cast<module::Relayer<uint8_t>*>(rlys[tas].get()))[module::rly::sck::relayf::fwd]);
 				}
 				else
 				{
@@ -710,7 +710,7 @@ int main(int argc, char** argv)
 	if (socket_type_task[socket_type_task.size() -1][socket_type_task[socket_type_task.size() -1].size() -1] == "SFWD")
 	{
 		sink[module::snk::sck::send_count::in_data]
-			.unbind((*dynamic_cast<module::Relayer_fwd<uint8_t>*>(rlys[tas].get()))[module::rly_fwd::sck::relay_fwd::fwd]);
+			.unbind((*dynamic_cast<module::Relayer<uint8_t>*>(rlys[tas].get()))[module::rly::sck::relayf::fwd]);
 	}
 	else
 	{

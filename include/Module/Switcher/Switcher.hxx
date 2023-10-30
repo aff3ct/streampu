@@ -23,6 +23,12 @@ const runtime::Task& Switcher
 	return Module::operator[]((size_t)t);
 }
 
+runtime::Socket& Switcher
+::operator[](const std::string &tsk_sck)
+{
+	return Module::operator[](tsk_sck);
+}
+
 Switcher
 ::Switcher(const size_t n_data_sockets,
            const size_t n_elmts_commute,
@@ -68,12 +74,12 @@ Switcher
 	}
 
 	auto &p1 = this->create_task("commute");
-	const auto p1s_in_data = this->create_socket_in(p1, "data", n_elmts_commute, datatype_commute);
-	const auto p1s_in_ctrl = this->create_socket_in(p1, "ctrl", 1, typeid(int8_t));
+	const auto p1s_in_data = this->create_socket_in(p1, "in_data", n_elmts_commute, datatype_commute);
+	const auto p1s_in_ctrl = this->create_socket_in(p1, "in_ctrl", 1, typeid(int8_t));
 
 	std::vector<size_t> p1s_out_data;
 	for (size_t s = 0; s < this->get_n_data_sockets(); s++)
-		p1s_out_data.push_back(this->create_socket_out(p1, "data" + std::to_string(s), n_elmts_commute, datatype_commute));
+		p1s_out_data.push_back(this->create_socket_out(p1, "out_data" + std::to_string(s), n_elmts_commute, datatype_commute));
 
 	this->create_codelet(p1, [p1s_in_data, p1s_in_ctrl, p1s_out_data](Module &m, runtime::Task &t, const size_t frame_id) -> int
 	{
@@ -99,8 +105,8 @@ Switcher
 	auto &p2 = this->create_task("select");
 	std::vector<size_t> p2s_in_data;
 	for (size_t s = 0; s < this->get_n_data_sockets(); s++)
-		p2s_in_data.push_back(this->create_socket_in(p2, "data" + std::to_string(s), n_elmts_select, datatype_select));
-	auto p2s_out_data = this->create_socket_out(p2, "data", n_elmts_select, datatype_select);
+		p2s_in_data.push_back(this->create_socket_in(p2, "in_data" + std::to_string(s), n_elmts_select, datatype_select));
+	auto p2s_out_data = this->create_socket_out(p2, "out_data", n_elmts_select, datatype_select);
 
 	this->create_codelet(p2, [p2s_in_data, p2s_out_data](Module &m, runtime::Task &t, const size_t frame_id) -> int
 	{

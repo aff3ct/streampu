@@ -22,15 +22,24 @@ Relayer<T>
 		throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
 	}
 
-	auto &p = this->create_task("relay");
-	auto ps_in  = this->template create_socket_in <T>(p, "in",  this->n_elmts);
-	auto ps_out = this->template create_socket_out<T>(p, "out", this->n_elmts);
-	this->create_codelet(p, [ps_in, ps_out](Module &m, runtime::Task &t, const size_t frame_id) -> int
+	auto &p1 = this->create_task("relay");
+	auto p1s_in  = this->template create_socket_in <T>(p1, "in",  this->n_elmts);
+	auto p1s_out = this->template create_socket_out<T>(p1, "out", this->n_elmts);
+	this->create_codelet(p1, [p1s_in, p1s_out](Module &m, runtime::Task &t, const size_t frame_id) -> int
 	{
 		auto &rly = static_cast<Relayer&>(m);
-		rly._relay(static_cast<const T*>(t[ps_in ].get_dataptr()),
-		           static_cast<      T*>(t[ps_out].get_dataptr()),
+		rly._relay(static_cast<const T*>(t[p1s_in ].get_dataptr()),
+		           static_cast<      T*>(t[p1s_out].get_dataptr()),
 		           frame_id);
+		return runtime::status_t::SUCCESS;
+	});
+
+	auto &p2 = this->create_task("relayf");
+	auto p2s_fwd = this->template create_socket_fwd<T>(p2, "fwd", this->n_elmts);
+	this->create_codelet(p2, [p2s_fwd](Module &m, runtime::Task &t, const size_t frame_id) -> int
+	{
+		auto &rly_fwd = static_cast<Relayer&>(m);
+		rly_fwd._relay(t[p2s_fwd].template get_dataptr<const T>(), t[p2s_fwd].template get_dataptr<T>(), frame_id);
 		return runtime::status_t::SUCCESS;
 	});
 }
@@ -82,7 +91,8 @@ void Relayer<T>
 	if (this->ns)
 		t_start = std::chrono::steady_clock::now();
 
-	std::copy(in, in + this->n_elmts, out);
+	if (in != out)
+		std::copy(in, in + this->n_elmts, out);
 
 	if (this->ns)
 	{

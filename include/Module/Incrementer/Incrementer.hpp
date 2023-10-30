@@ -16,11 +16,12 @@ namespace module
 {
 	namespace inc
 	{
-		enum class tsk : size_t { increment, SIZE };
+		enum class tsk : size_t { increment, incrementf, SIZE };
 
 		namespace sck
 		{
 			enum class increment : size_t { in, out, status };
+			enum class incrementf : size_t { fwd, status };
 		}
 	}
 
@@ -28,9 +29,10 @@ template <typename T = int>
 class Incrementer : public Module
 {
 public:
-	inline runtime::Task&   operator[](const inc::tsk            t);
-	inline runtime::Socket& operator[](const inc::sck::increment s);
-	inline runtime::Socket& operator[](const std::string &tsk_sck );
+	inline runtime::Task&   operator[](const inc::tsk             t);
+	inline runtime::Socket& operator[](const inc::sck::increment  s);
+	inline runtime::Socket& operator[](const inc::sck::incrementf s);
+	inline runtime::Socket& operator[](const std::string   &tsk_sck);
 
 protected:
 	const size_t n_elmts;

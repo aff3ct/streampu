@@ -33,6 +33,7 @@ friend runtime::Sequence; // Sequence is friend to enable the no copy mode (0 co
 public:
 	inline       runtime::Task& operator[](const swi::tsk t);
 	inline const runtime::Task& operator[](const swi::tsk t) const;
+	inline       runtime::Socket& operator[](const std::string &tsk_sck);
 
 protected:
 	const size_t n_data_sockets;

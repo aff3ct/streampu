@@ -87,6 +87,25 @@ void Delayer<D>
 	}
 }
 
+template<typename D>
+void Delayer<D>
+::set_data(const std::vector<D> &init) {
+	if (init.size() < this->data.size())
+	{
+		std::stringstream message;
+		message << "'init.size()' has to be greater than data.size() ('init.size(' = " << init.size()
+			    << ", 'data.size()' = " << this->data.size() << ").";
+		throw aff3ct::tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
+	}
+	std::copy(init.begin(), init.begin() + this->data.size(), this->data.begin());
+}
+
+template<typename D>
+void Delayer<D>
+::set_data(const D *init) {
+	std::copy(init, init + this->data.size(), this->data.begin());
+}
+
 // ==================================================================================== explicit template instantiation
 template class aff3ct::module::Delayer<int8_t>;
 template class aff3ct::module::Delayer<uint8_t>;

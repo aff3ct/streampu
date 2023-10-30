@@ -133,21 +133,21 @@ int main(int argc, char** argv)
 	module::Finalizer  <uint8_t> finalizer  (data_length);
 
 	// Incrementers construction
-	std::vector<std::shared_ptr<module::Incrementer_fwd<uint8_t>>> incs_fwd(6);
-	for (size_t s = 0; s < incs_fwd.size(); s++)
+	std::vector<std::shared_ptr<module::Incrementer<uint8_t>>> incs(6);
+	for (size_t s = 0; s < incs.size(); s++)
 	{
-		incs_fwd[s].reset(new module::Incrementer_fwd<uint8_t>(data_length));
-		incs_fwd[s]->set_ns(sleep_time_us * 1000);
-		incs_fwd[s]->set_custom_name("Inc_fwd" + std::to_string(s));
+		incs[s].reset(new module::Incrementer<uint8_t>(data_length));
+		incs[s]->set_ns(sleep_time_us * 1000);
+		incs[s]->set_custom_name("Inc" + std::to_string(s));
 	}
 
 	// Relayers construction
-	std::vector<std::shared_ptr<module::Relayer_fwd<uint8_t>>> rlys_fwd(6);
-	for (size_t s = 0; s < rlys_fwd.size(); s++)
+	std::vector<std::shared_ptr<module::Relayer<uint8_t>>> rlys(6);
+	for (size_t s = 0; s < rlys.size(); s++)
 	{
-		rlys_fwd[s].reset(new module::Relayer_fwd<uint8_t>(data_length));
-		rlys_fwd[s]->set_ns(sleep_time_us * 1000);
-		rlys_fwd[s]->set_custom_name("Relayer_fwd" + std::to_string(s));
+		rlys[s].reset(new module::Relayer<uint8_t>(data_length));
+		rlys[s]->set_ns(sleep_time_us * 1000);
+		rlys[s]->set_custom_name("Relayer" + std::to_string(s));
 	}
 
 	// Stateless module used only for the test
@@ -158,7 +158,7 @@ int main(int argc, char** argv)
 	auto sock_1 = comp.create_socket_fwd<uint8_t>(task_comp, "fwd_1", data_length);
 
 	comp.create_codelet(task_comp,
-		[sock_0, sock_1,data_length,incs_fwd](module::Module &m, runtime::Task &t, const size_t frame_id) -> int
+		[sock_0, sock_1,data_length,incs](module::Module &m, runtime::Task &t, const size_t frame_id) -> int
 	{
 		auto tab_0 = static_cast<uint8_t*>(t[sock_0].get_dataptr());
 		auto tab_1 = (uint8_t*)(t[sock_1].get_dataptr());
@@ -175,31 +175,31 @@ int main(int argc, char** argv)
 	});
 
 	// sockets binding
-	(*rlys_fwd[0])[module::rly_fwd::sck::relay_fwd::fwd] = initializer[module::ini::sck::initialize::out];
-	(*incs_fwd[0])[module::inc_fwd::sck::increment_fwd::fwd] = (*rlys_fwd[0])[module::rly_fwd::sck::relay_fwd::fwd];
-	(*incs_fwd[1])[module::inc_fwd::sck::increment_fwd::fwd] = (*rlys_fwd[0])[module::rly_fwd::sck::relay_fwd::fwd];
-	(*rlys_fwd[1])[module::rly_fwd::sck::relay_fwd::fwd] = (*incs_fwd[0])[module::inc_fwd::sck::increment_fwd::fwd];
-	comp["compare::fwd_0"] = (*rlys_fwd[1])[module::rly_fwd::sck::relay_fwd::fwd];
-	comp["compare::fwd_1"] = (*incs_fwd[1])[module::inc_fwd::sck::increment_fwd::fwd];
+	(*rlys[0])[module::rly::sck::relayf::fwd] = initializer[module::ini::sck::initialize::out];
+	(*incs[0])[module::inc::sck::incrementf::fwd] = (*rlys[0])[module::rly::sck::relayf::fwd];
+	(*incs[1])[module::inc::sck::incrementf::fwd] = (*rlys[0])[module::rly::sck::relayf::fwd];
+	(*rlys[1])[module::rly::sck::relayf::fwd] = (*incs[0])[module::inc::sck::incrementf::fwd];
+	comp["compare::fwd_0"] = (*rlys[1])[module::rly::sck::relayf::fwd];
+	comp["compare::fwd_1"] = (*incs[1])[module::inc::sck::incrementf::fwd];
 	finalizer[module::fin::sck::finalize::in] = comp["compare::fwd_1"];
 
 	std::unique_ptr<runtime::Pipeline> pipeline_chain;
 	pipeline_chain.reset(new runtime::Pipeline(
-		initializer[module::ini::tsk::initialize],                       // first task of the sequence
+		initializer[module::ini::tsk::initialize],            // first task of the sequence
 		{  // pipeline stage 0
-		   { { &initializer[module::ini::tsk::initialize] },             // first tasks of stage 0
-		     { &(*rlys_fwd[0])[module::rly_fwd::tsk::relay_fwd] } },     // last  tasks of stage 0
+		   { { &initializer[module::ini::tsk::initialize] },  // first tasks of stage 0
+		     { &(*rlys[0])[module::rly::tsk::relayf] } },     // last  tasks of stage 0
 		   // pipeline stage 1
-		   { { &(*incs_fwd[0])[module::inc_fwd::tsk::increment_fwd] },   // first tasks of stage 1
-		     { &(*incs_fwd[0])[module::inc_fwd::tsk::increment_fwd] } }, // last  tasks of stage 1
+		   { { &(*incs[0])[module::inc::tsk::incrementf] },   // first tasks of stage 1
+		     { &(*incs[0])[module::inc::tsk::incrementf] } }, // last  tasks of stage 1
 		   // pipeline stage 3
-		   { { &(*rlys_fwd[1])[module::rly_fwd::tsk::relay_fwd] },       // first tasks of stage 2
-		     { &(*rlys_fwd[1])[module::rly_fwd::tsk::relay_fwd]} },      // last  tasks of stage 2
+		   { { &(*rlys[1])[module::rly::tsk::relayf] },       // first tasks of stage 2
+		     { &(*rlys[1])[module::rly::tsk::relayf]} },      // last  tasks of stage 2
 		   // pipeline stage 4
-		   { { &(*incs_fwd[1])[module::inc_fwd::tsk::increment_fwd] },   // first tasks of stage 3
-		     { &(*incs_fwd[1])[module::inc_fwd::tsk::increment_fwd] } }, // last  tasks of stage 3
-		   { { &task_comp },                                             // first tasks of stage 4
-		     { &finalizer[module::fin::tsk::finalize] } },               // last  tasks of stage 4
+		   { { &(*incs[1])[module::inc::tsk::incrementf] },   // first tasks of stage 3
+		     { &(*incs[1])[module::inc::tsk::incrementf] } }, // last  tasks of stage 3
+		   { { &task_comp },                                  // first tasks of stage 4
+		     { &finalizer[module::fin::tsk::finalize] } },    // last  tasks of stage 4
 		},
 		{
 		   1,                         // number of threads in the stage 0
@@ -293,15 +293,15 @@ int main(int argc, char** argv)
 	pipeline_chain->set_n_frames(1);
 	pipeline_chain->unbind_adaptors();
 
-	(*rlys_fwd[0])[module::rly_fwd::sck::relay_fwd::fwd].unbind(initializer[module::ini::sck::initialize::out]);
-	(*incs_fwd[0])[module::inc_fwd::sck::increment_fwd::fwd]
-		.unbind((*rlys_fwd[0])[module::rly_fwd::sck::relay_fwd::fwd]);
-	(*incs_fwd[1])[module::inc_fwd::sck::increment_fwd::fwd]
-		.unbind((*rlys_fwd[0])[module::rly_fwd::sck::relay_fwd::fwd]);
-	(*rlys_fwd[1])[module::rly_fwd::sck::relay_fwd::fwd]
-		.unbind((*incs_fwd[0])[module::inc_fwd::sck::increment_fwd::fwd]);
-	comp["compare::fwd_1"].unbind((*incs_fwd[1])[module::inc_fwd::sck::increment_fwd::fwd]);
-	comp["compare::fwd_0"].unbind((*rlys_fwd[1])[module::rly_fwd::sck::relay_fwd::fwd]);
+	(*rlys[0])[module::rly::sck::relayf::fwd].unbind(initializer[module::ini::sck::initialize::out]);
+	(*incs[0])[module::inc::sck::incrementf::fwd]
+		.unbind((*rlys[0])[module::rly::sck::relayf::fwd]);
+	(*incs[1])[module::inc::sck::incrementf::fwd]
+		.unbind((*rlys[0])[module::rly::sck::relayf::fwd]);
+	(*rlys[1])[module::rly::sck::relayf::fwd]
+		.unbind((*incs[0])[module::inc::sck::incrementf::fwd]);
+	comp["compare::fwd_1"].unbind((*incs[1])[module::inc::sck::incrementf::fwd]);
+	comp["compare::fwd_0"].unbind((*rlys[1])[module::rly::sck::relayf::fwd]);
 	finalizer[module::fin::sck::finalize::in].unbind(comp["compare::fwd_1"]);
 
 	return test_results;

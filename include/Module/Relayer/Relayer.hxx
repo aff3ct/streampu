@@ -21,6 +21,13 @@ runtime::Socket& Relayer<T>
 
 template <typename T>
 runtime::Socket& Relayer<T>
+::operator[](const rly::sck::relayf s)
+{
+	return Module::operator[]((size_t)rly::tsk::relayf)[(size_t)s];
+}
+
+template <typename T>
+runtime::Socket& Relayer<T>
 ::operator[](const std::string &tsk_sck)
 {
 	return Module::operator[](tsk_sck);
