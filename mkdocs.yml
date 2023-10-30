@@ -1,4 +1,4 @@
-site_name: AFF3CT-CORE
+site_name: AFF3CT-core
 site_url: https://affec3ct-core-siteplaceholder.com/
 theme:
   logo: assets/diagram-project-solid.svg
@@ -33,7 +33,7 @@ theme:
 
   language: en
 
-repo_url: https://gitlab.lip6.fr/sog/aff3ct-core
+repo_url: https://github.com/aff3ct/aff3ct-core
 
 markdown_extensions:
   - pymdownx.highlight:
@@ -51,11 +51,14 @@ markdown_extensions:
           class: mermaid
           format: !!python/name:pymdownx.superfences.fence_code_format
   - pymdownx.inlinehilite
-  - pymdownx.snippets
+  - pymdownx.snippets :
+      auto_append:
+        - docs/abbreviations.md
   - pymdownx.tabbed:
       alternate_style: true
   - pymdownx.arithmatex:
       generic: true
+  - abbr
 
 plugins: 
   - search
@@ -72,12 +75,13 @@ nav:
   - Home: 
     - index.md
   - Elementary Components:
-      - 1_module_task.md
-      - 2_socket.md
-      - 3_sequence.md
-      - 4_pipeline.md
-      - 5_switcher.md
+      - task.md
+      - module.md
+      - socket.md
+      - sequence.md
+      - pipeline.md
+      - switcher.md
   - New features:
-      - 6_socket_fwd.md
-      - 7_pipeline_ctrl_flow.md
-      - 8_wip.md
+      - socket_fwd.md
+      - pipeline_ctrl_flow.md
+      - wip.md

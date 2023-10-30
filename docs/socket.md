@@ -1,12 +1,12 @@
 # Socket
 
-Sockets are used to communicate data between [tasks](1_module_task.md). There
-are 3 different types of sockets:
+Sockets are used to communicate data between [tasks](task.md). There are 3 
+different types of sockets:
 
 - `Socket_IN`: read input data.
 - `Socket_OUT`: write output data.
 - `Socket_Forward`: a combination of in and out sockets, reading and writing
-                    data. (See [Forward socket](6_socket_fwd.md))
+                    data. (See [Forward socket](socket_fwd.md))
 
 A task can have either `input & output` sockets or a `forward` socket, or both
 (more than one).
@@ -61,6 +61,7 @@ The function gets the caller's `dataptr` and redirects it to `s_out dataptr`.
 
 !!! danger
     Binding rules must be respected.
+
 === "Valid bindings"
     ![Valid bind](./assets/bind_permission.svg)
 === "Invalid bindings"

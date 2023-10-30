@@ -1,7 +1,7 @@
 # Switcher for Control Flow
 
-A switcher is a control flow [module](1_module_task.md) used to break
-sequences into *exclusive paths* through its two tasks, [Select](#Select) and
+A switcher is a control flow [module](module.md) used to break sequences into 
+*exclusive paths* through its two tasks, [Select](#Select) and 
 [Commute](#Commute).  
 
 ## Attributes

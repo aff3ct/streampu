@@ -1,7 +1,7 @@
 # Pipeline
 
 Pipelines is a feature offered by `AFF3CT-core` allowing the breaking of a
-[sequence](3_sequence.md) into multiple [stages](#Stage), each executed on one
+[sequence](sequence.md) into multiple [stages](#Stage), each executed on one
 or multiple threads in parallel.
 
 ![Image non affichée !](./assets/sequence_to_pipeline.svg)
@@ -18,13 +18,13 @@ The original sequence from which the pipeline was created.
 std::vector<std::shared_ptr<Sequence>> stages;
 ``` 
 Vector of the different stages in the pipeline. Each stage is a
-[sequence](3_sequence.md) in and of itself.
+[sequence](sequence.md) in and of itself.
 
 ```cpp
 std::vector<std::pair<std::tuple<runtime::Socket*, size_t, size_t, size_t,size_t>,
             std::tuple<runtime::Socket*, size_t, size_t, size_t>>> sck_orphan_binds;
 ```
-Vector of [sockets](2_socket.md) with broken connections due to the pipeline
+Vector of [sockets](socket.md) with broken connections due to the pipeline
 stages creation (hence "orphan"). These sockets will be bound later to special
 modules called [adaptors](#Adaptor) to make bridges between the stages.
 

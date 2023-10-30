@@ -3,7 +3,7 @@
 ## Introduction
 
 The forward socket is a new feature added to `AFF3CT-core` to improve the
-performances of some applications. As said in [Socket](2_socket.md), the `SFWD`
+performances of some applications. As said in [Socket](socket.md), the `SFWD`
 works as an input and output at the same time, it receives its `dataptr` for the
 input bound socket and this same pointer is sent to all the output bound
 sockets, which means that all the consecutive tasks bound by `SFWD` share the
@@ -26,16 +26,16 @@ support of this socket for the pipelines.
 
 ### Forward sockets and pipelines
 
-As explained in the adaptor part in [Pipeline & Adaptor](4_pipeline.md),
-we use a buffer pool between every stage of the pipeline, the adaptor gets a
-buffer from this pool (`dataptr`) and gives it as an input for the stage first
-task `SIN`, the new data are written to the `SOUT` memory space so that the data
-are coherent for all the next tasks. The forward sockets are all pointing to the
+As explained in the adaptor part in [Pipeline & Adaptor](pipeline.md), we use a 
+buffer pool between every stage of the pipeline, the adaptor gets a buffer from 
+this pool (`dataptr`) and gives it as an input for the stage first task `SIN`, 
+the new data are written to the `SOUT` memory space so that the data are 
+coherent for all the next tasks. The forward sockets are all pointing to the 
 same `dataptr`, so getting a new buffer means that we have to update the
 `dataptr` of all the consecutive bound forward sockets to this new memory space.
 The same update need to be done in reverse when the `dataptr` is exchanged at
 the end of the stage. For that we added the two functions explained in
-[Sequence & Subsequence](3_sequence.md) `explore_thread_rec` and
+[Sequence & Subsequence](sequence.md) `explore_thread_rec` and
 `explore_thread_rec_reverse`.
 
 ### Tests

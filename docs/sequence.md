@@ -42,7 +42,7 @@ to browse the subsequence graph and perform some operations modifying the
 original sequence bind and the function of some tasks to add more features to
 the original execution for more performance or coherence. Before reading the
 modifications applied by the function, you have to see for
-[Adaptor](4_pipeline.md) and [Switcher](5_switcher.md).
+[Adaptor](pipeline.md) and [Switcher](switcher.md).
 
  - `push_task` & `pull_task` : as we explained in the adaptor part, the tasks
    change their `dataptr` when they get the new buffers from the interstage
@@ -60,8 +60,8 @@ void explore_thread_rec(Socket* socket, std::vector<runtime::Socket*>& list_fwd)
 The function called by `gen_processes` to get all the bound sockets (next) of
 the modified one, if the encountered socket is of type `forward` the function is
 called recursively on this new socket (see
-[Forward socket and pipeline](6_socket_fwd.md)). This call is performed once
-at sequence build.
+[Forward socket and pipeline](socket_fwd.md)). This call is performed once at 
+sequence build.
 
 ```cpp
 void explore_thread_rec_reverse(Socket* socket, std::vector<runtime::Socket*>& list_fwd);
@@ -72,7 +72,7 @@ The function does the same thing as the previous one, but in the other sense
 <a name="Subsequence"></a>
 # Subsequence
 
-When [control flow tasks](5_switcher.md) are introduced into a sequence, the
+When [control flow tasks](switcher.md) are introduced into a sequence, the
 execution is not only defined by the tasks binding but also by their outputs.
 For this purpose tasks are grouped into subsequences.
 Subsequences are organized in a [directed graph](#Digraph) with 2 nodes

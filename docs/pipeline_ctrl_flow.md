@@ -3,8 +3,8 @@
 ## Introduction
 
 `AFF3CT-core` allows the user to control the execution flow of sequences through
-the use of [switcher](5_switcher.md), however sequences are often used within the
-context of [pipelines](4_pipeline.md) and thus some slight adjustements
+the use of [switcher](switcher.md), however sequences are often used within the
+context of [pipelines](pipeline.md) and thus some slight adjustements
 to behaviour were required for them to consistently work.
 
 ## Technical improvement
@@ -12,8 +12,8 @@ to behaviour were required for them to consistently work.
 ### Finding the last subsequence
 
 Upon creation a pipeline must add pull and push tasks at the beginning and end
-of the sequences making up its stages (see [pipeline](4_pipeline.md) and
-[sequence](3_sequence.md) for the relationship between the two).
+of the sequences making up its stages (see [pipeline](pipeline.md) and
+[sequence](sequence.md) for the relationship between the two).
 For that purpose a depth-first search algorithm is used to traverse the digraph
 starting from the root of the sequence, marking every node on the path and
 returning the last node it passed through. This however can return incorrect
@@ -74,8 +74,8 @@ Node Last_Subseq(Node n):
     graph LR;
     A(SS 1);
     ```
-    As explained in [Sequence & Subsequence](3_sequence.md), a sequence with no 
-    [switcher](5_switcher.md) would only have a single subsequence, thus the DFS 
+    As explained in [Sequence & Subsequence](sequence.md), a sequence with no 
+    [switcher](switcher.md) would only have a single subsequence, thus the DFS 
     would return **SS 1** as the last subsequence which is *correct*.
 
 #### Improved DFS

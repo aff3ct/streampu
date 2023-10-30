@@ -1,17 +1,47 @@
 # AFF3CT-core
 
-`AFF3CT-core` is a Domain-Specific Embedded Language (DSEL) for streaming 
-applications written in C++. In this document, we try to explain the basics 
-elements of the language:
+## Short Presentation
 
-- [Module & Task](1_module_task.md)
-- [Socket](2_socket.md)
-- [Sequence & Subsequence](3_sequence.md)
-- [Pipeline](4_pipeline.md)  
-- [Control flow](5_switcher.md)
+`AFF3CT-core` is a DSEL for streaming applications written in C++. This document 
+focus on explaining the basics elements of the language from the **developer 
+point of view**.
 
-Then we introduce the new features, and the modifications made to support them:
+Here are the main features of `AFF3CT-core`:
 
-- [Forward sockets](6_socket_fwd.md)
-- [Pipeline & Control Flow](7_pipeline_ctrl_flow.md)
-- [Work in Progress](8_wip.md)
+- Definition of modules, tasks and sockets (dataflow)
+- Elementary modules and tasks implementations
+- Domain Specific Embedded Language for streaming applications
+- Parallel runtime (replication, pipeline)
+
+The DSEL is suitable for SDR systems, video processing and more generally it 
+matches **single-rate SDF streaming applications**.
+
+!!! note
+    The **DSEL term** can be sometimes confusing and `AFF3CT-core` can also be
+    seen as a **standard C++ library**. The name "DSEL" comes from the ability 
+    to write **interpreted Turing-complete programs** using the C++ library.
+
+!!! warning
+    This library is **NOT intended to address data and task parallelisms**.
+    `AFF3CT-core` focus on replication and pipeline parallelisms. For data 
+    parallelism, `AFF3CT-core` combines well with OpenMP. If you look for task
+    parallelism, using OpenMP can also be a possible solution, or other runtime 
+    like the excellent [StarPU](https://starpu.gitlabpages.inria.fr) can be a 
+    good choice.
+
+## Contents of the Documentation
+
+Basic components:
+
+1. [Task](task.md)
+2. [Module](module.md)
+3. [Socket](socket.md)
+4. [Sequence & Subsequence](sequence.md)
+5. [Pipeline](pipeline.md)  
+6. [Control flow](switcher.md)
+
+Newly introduced features and discussions:
+
+7. [Forward sockets](socket_fwd.md)
+8. [Pipeline & Control Flow](pipeline_ctrl_flow.md)
+9. [Work in Progress](wip.md)
