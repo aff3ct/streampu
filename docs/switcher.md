@@ -1,10 +1,14 @@
 # Switcher
 
 A **switcher** is a control flow [module](module.md) used to break sequences 
-into *exclusive paths* through its two tasks, [`select`](#Select) and 
+into *exclusive paths* through its two tasks: [`select`](#Select) and 
 [`commute`](#Commute).  
 
-## Attributes
+A switcher is a C++ object of the `aff3ct::module::Switcher` class. The 
+following sections try to give an overview of the most important attributes and 
+methods to facilitate the code understanding.
+
+## Main Attributes
 
 <a name="Path"></a>
 ```cpp
@@ -53,35 +57,35 @@ regular tasks which use namespaces and enumators.
 === "Numerical indexes"
 
     ```cpp
-    Switcher switcher(2, 6, typeid(uint8_t)); // n_data_sockets, n_elemts, datatype
+    Switcher swi(2, 6, typeid(uint8_t)); // n_data_sockets, n_elemts, datatype
 
-    switcher [module::swi::tsk::select ][0]; // input  socket data0
-    switcher [module::swi::tsk::select ][1]; // input  socket data1
-    switcher [module::swi::tsk::select ][2]; // output socket data
-    switcher [module::swi::tsk::select ][3]; // output socket status
+    swi[module::swi::tsk::select ][0]; // input  socket data0
+    swi[module::swi::tsk::select ][1]; // input  socket data1
+    swi[module::swi::tsk::select ][2]; // output socket data
+    swi[module::swi::tsk::select ][3]; // output socket status
 
-    switcher [module::swi::tsk::commute][0]; // input  socket data
-    switcher [module::swi::tsk::commute][1]; // input  socket ctrl
-    switcher [module::swi::tsk::commute][2]; // output socket data0
-    switcher [module::swi::tsk::commute][3]; // output socket data1
-    switcher [module::swi::tsk::commute][4]; // output socket status
+    swi[module::swi::tsk::commute][0]; // input  socket data
+    swi[module::swi::tsk::commute][1]; // input  socket ctrl
+    swi[module::swi::tsk::commute][2]; // output socket data0
+    swi[module::swi::tsk::commute][3]; // output socket data1
+    swi[module::swi::tsk::commute][4]; // output socket status
     ```
 
 === "`std::string`"
 
     ```cpp
-    Switcher switcher(2, 6, typeid(uint8_t)); // n_data_sockets, n_elemts, datatype
+    Switcher swi(2, 6, typeid(uint8_t)); // n_data_sockets, n_elemts, datatype
 
-    switcher ["select::in_data0" ]; // input  socket data0
-    switcher ["select::in_data1" ]; // input  socket data1
-    switcher ["select::out_data" ]; // output socket data
-    switcher ["select::status"   ]; // output socket status
+    swi[ "select::in_data0" ];         // input  socket data0
+    swi[ "select::in_data1" ];         // input  socket data1
+    swi[ "select::out_data" ];         // output socket data
+    swi[ "select::status"   ];         // output socket status 
 
-    switcher ["select::in_data"  ]; // input  socket data
-    switcher ["select::in_ctrl"  ]; // input  socket ctrl
-    switcher ["select::out_data0"]; // output socket data0
-    switcher ["select::out_data1"]; // output socket data1
-    switcher ["select::status"   ]; // output socket status
+    swi["commute::in_data"  ];         // input  socket data
+    swi["commute::in_ctrl"  ];         // input  socket ctrl
+    swi["commute::out_data0"];         // output socket data0
+    swi["commute::out_data1"];         // output socket data1
+    swi["commute::status"   ];         // output socket status
     ```
 
 <a name="Commute"></a>

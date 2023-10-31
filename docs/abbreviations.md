@@ -20,6 +20,7 @@
 *[CRC]: Cyclic Redundancy Check
 *[CRCs]: Cyclic Redundancy Checks
 *[CSV]: Comma-Separated Values
+*[DFS]: Depth-First Search
 *[DSEL]: Domain-Specific Embedded Language
 *[EOF]: End Of File
 *[FER]: Frame Error Rate

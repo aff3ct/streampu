@@ -1,16 +1,15 @@
-# AFF3CT-core
+# AFF3CT-core Developer Documentation
 
 ## Introduction
 
-`AFF3CT-core` is a DSEL for streaming applications written in C++. This document 
-focus on explaining the basics elements of the language from the **developer 
-point of view**.
+`AFF3CT-core` is a DSEL for streaming applications written in C++. This 
+documentation focus on explaining the basic elements of the language from the 
+**developer point of view**.
 
 Here are the main features of `AFF3CT-core`:
 
 - Definition of modules, tasks and sockets (dataflow)
 - Elementary modules and tasks implementations
-- Domain Specific Embedded Language for streaming applications
 - Parallel runtime (replication, pipeline)
 
 The DSEL is suitable for SDR systems, video processing and more generally it 

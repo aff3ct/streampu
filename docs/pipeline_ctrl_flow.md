@@ -4,20 +4,21 @@
 
 `AFF3CT-core` allows the user to control the execution flow of sequences through
 the use of [switcher](switcher.md), however sequences are often used within the
-context of [pipelines](pipeline.md) and thus some slight adjustements
-to behaviour were required for them to consistently work.
+context of [pipelines](pipeline.md) and thus some slight behavior adjustments 
+were required for them to consistently work.
 
-## Technical improvement
+## Technical Improvement
 
-### Finding the last subsequence
+### Finding the Last Sub-sequence
 
-Upon creation a pipeline must add pull and push tasks at the beginning and end
-of the sequences making up its stages (see [pipeline](pipeline.md) and
-[sequence](sequence.md) for the relationship between the two).
-For that purpose a depth-first search algorithm is used to traverse the digraph
-starting from the root of the sequence, marking every node on the path and
-returning the last node it passed through. This however can return incorrect
-nodes depending on the configuration of the sequence.
+Upon creation, a pipeline must add `pull` and `push` tasks at the beginning and 
+the end of the sequences making up its stages (see [pipeline](pipeline.md) 
+section and [sequence](sequence.md) section for the relationship between the 
+two). For that purpose, a DFS algorithm is used to traverse the 
+[directed graph](sequence.md#Digraph) starting from the root of the sequence, 
+marking every node on the path and returning the last node it passed through. 
+This however can return incorrect nodes depending on the configuration of the 
+sequence.
 
 Pseudo-code
 ```
@@ -29,7 +30,7 @@ Node Last_Subseq(Node n):
     return last_node
 ```
 
-#### Depth-first search for the last subsequence
+#### DFS for the Last Sub-sequence
 
 === "Switch"
     ```mermaid
@@ -42,13 +43,16 @@ Node Last_Subseq(Node n):
         D(SS Branch 2)-.->F(SS select);
         E(SS Branch 3)-.->F(SS select);
         F(SS select)-->G(SS 2);
-    ```
+    ```  
     Here are the paths the DFS would take are
-    - [SS 1, SS commute, SS Branch 1, SS select, SS 2] : returns SS 2
-    - [SS 1, SS commute, SS Branch 2] : returns SS Branch 2
-    - [SS 1, SS commute, SS Branch 3] : returns SS Branch 3
+
+    - [`SS 1`, `SS commute`, `SS Branch 1`, `SS select`, `SS 2`] : returns `SS 2`
+    - [`SS 1`, `SS commute`, `SS Branch 2`] : returns `SS Branch 2`
+    - [`SS 1`, `SS commute`, `SS Branch 3`] : returns `SS Branch 3`
+
     As the function is recursive, it returns the result of the last path taken:
-    SS Branch 3, which is *incorrect*, SS 2 is the expected result.
+    `SS Branch 3`, which is *incorrect*, `SS 2` is the expected result.
+
 === "Loop"
     ```mermaid
     graph LR;
@@ -58,29 +62,34 @@ Node Last_Subseq(Node n):
     F(SS commute)-.->E(SS 3);
     E(SS 3)-.->B(SS select);
     F(SS commute)-.->G(SS 4);
-    ```
+    ```  
     Here are the paths the DFS would take are
-    - [SS 1, SS select, SS 2, SS commute, SS 3] : returns SS 3
-    - [SS 1, SS select, SS 2, SS commute, SS 4] : returns SS 4
+
+    - [`SS 1`, `SS select`, `SS 2`, `SS commute`, `SS 3`] : returns `SS 3`
+    - [`SS 1`, `SS select`, `SS 2`, `SS commute`, `SS 4`] : returns `SS 4`
+
     As the function is recursive, it returns the result of the last path taken:
-    SS 4, which is *correct*, **but deceptive**. It only happened to work
-    because of the order in which the children of node SS commute were parsed.
-    If SS 4 was parsed first then it would have returned SS 3, this kind of
-    behaviour is problematic as the algorithm should not depend on which
+    `SS 4`, which is *correct*, **but deceptive**. It only happened to work
+    because of the order in which the children of node `SS commute` were parsed.
+    If `SS 4` was parsed first then it would have returned `SS 3`, this kind of
+    behavior is problematic as the algorithm should not depend on which
     children is first in a list as that is not relevant to the layout of the
     graph.
+
 === "No switcher"
     ```mermaid
     graph LR;
     A(SS 1);
-    ```
-    As explained in [Sequence & Subsequence](sequence.md), a sequence with no 
-    [switcher](switcher.md) would only have a single subsequence, thus the DFS 
-    would return **SS 1** as the last subsequence which is *correct*.
+    ```  
+    As explained in the [sequence](sequence.md) section, a sequence with no 
+    [switcher](switcher.md) would only have a single sub-sequence, thus the DFS 
+    would return `SS 1` as the last sub-sequence which is *correct*.
+
+----
 
 #### Improved DFS
 
-The solution would be to consider the node *without* children as the last one.
+The solution is to consider the node *without* children as the last one.
 ```python
 Node Last_Subseq(Node n):
     mark(n)
@@ -95,17 +104,22 @@ Node Last_Subseq(Node n):
         return last_node
 ```
 
-### Finding invalid switchers
+This is simple and efficient.
 
-Another use  of the DFS algorithm would be to notify the user of improper uses
-of switchers. Commutes and Selects must always have paths linking each other, we
-find broken paths by traversing the subsequences with a modified DFS. Since the
-DFS already records parsed nodes we can use this information to tell if a
-commute or select is invalid.
+!!! info
+    This is the current implementation in `AFF3CT-core`.
 
-#### Depth-first search for invalid switchers
+### Finding Invalid Switchers
 
-The following subsequences denotes an invalid binding.
+Another use of the DFS algorithm is to notify the user of improper uses of 
+switchers. `commute` and `select` tasks must always have paths linking each 
+other. We find broken paths by traversing the sub-sequences with a modified DFS. 
+Since the DFS already records parsed nodes we can use this information to tell 
+if a `commute` or `select` task is orphan (and thus, *invalid*).
+
+#### Depth-first Search for Invalid Switchers
+
+The following sub-sequences denotes an invalid binding.
 
 ```mermaid
     graph LR;
@@ -118,15 +132,14 @@ The following subsequences denotes an invalid binding.
     F(SS select)-->G(SS 2);
 ```
 
-This subsequence is invalid because the last branch has no path to the select.
-Here are the paths the DFS would take:
-- [SS 1, SS commute, SS Branch 1, SS select, SS 2] :
-  No problem, the list contains both commute and select
-- [SS 1, SS commute, SS Branch 2, SS select, SS 2] :
-  Ditto
-- [SS 1, SS commute, SS Branch 1] : 
-  Invalid, this path only contains a commute. We notify the user regarding the
-  broken commute
+This sub-sequence is invalid because the last `SS Branch 3` has no path to the 
+`select` task. Here are the paths the DFS would take:
+
+- [`SS 1`, `SS commute`, `SS Branch 1`, `SS select`, `SS 2`] : No problem, the 
+  list contains both commute and select
+- [`SS 1`, `SS commute`, `SS Branch 2`, `SS select`, `SS 2`] : Ditto
+- [`SS 1`, `SS commute`, `SS Branch 3`] : Invalid, this path only contains a 
+  `commute`. We notify the user regarding the broken `commute`.
 
 ```python
 #Note that path_taken here is copied between recursive calls and NOT shared

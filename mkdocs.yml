@@ -81,7 +81,7 @@ nav:
       - sequence.md
       - pipeline.md
       - switcher.md
-  - New features:
+  - New Features and Discussions:
       - socket_fwd.md
       - pipeline_ctrl_flow.md
       - wip.md

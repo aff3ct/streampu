@@ -1,19 +1,19 @@
 # Work in Progress
 
-## Forward socket with control flow
+## Forward Socket with Control Flow
 
-Currently when `gen_processes` is called Select and Commute tasks do not behave
-properly with `SFWD` tasks bound directly on their data sockets, indeed they
-only rebind the first bound sockets while they should use `explore_thread_rec()`
-to update the data pointers of every linked `SFWD`. As of now tasks bound to
-switchers should be `SIO`.  
+Currently when `gen_processes()` is called, `select` and `commute` tasks do not 
+behave properly with `SFWD` tasks bound directly on their data sockets, indeed 
+they only rebind the first bound sockets while they should use 
+`explore_thread_rec()` to update the data pointers of every linked `SFWD`. **For 
+now, tasks bound to switchers should be `SIO`.**
 
-## Id updates
+## Id Updates
 
-When push and pull tasks are inserted into the pipeline the function
-`update_tasks_id()` is called to assert that the task IDs are still coherent,
-the task with the greatest ID is used to insert the `push` task in stages for
-instance. It uses the following algorithm.
+When `push` and `pull` tasks are inserted into the pipeline the 
+`update_tasks_id()` method is called to assert that the task IDs are still 
+coherent, the task with the greatest ID is used to insert the `push` task in 
+stages for instance. It uses the following algorithm.
 
 ```python
 #It is called with min_id = 0 in the pipeline code, min_id is shared between recursive calls and NOT copied
@@ -30,7 +30,8 @@ void update_tasks_id(Node n, min_id):
 This however can lead to issues. For instance when updating the IDs of a
 sequence with a switch-case.
 
-***This is a graph of TASKS, not SUBSEQUENCES***
+!!! warning
+    The following is a graph of tasks, and NOT a graph of sub-sequences.
 
 ```mermaid
     graph LR;
@@ -95,12 +96,12 @@ A better long term solution would perhaps be to use the `min_id` system in order
 to keep the old numerical values of already existing tasks but this time with a
 breadth-first type algorithm.
 
-## End-of-sequence commutes
+## End-of-sequence Commutes
 
 Currently a sequence may not end with a switcher task, this is problematic for
 pipelines as this means that individual stages cannot have a commute as their
 last task. This would require modifications to the `last_subsequence()`
-function, as an end-of-sequence commute would still have a children.
+method, as an end-of-sequence commute would still have a children.
 
 ### Example
 
@@ -121,6 +122,7 @@ E(SS 3)-.->B(SS select);
     graph LR;
     A(SS1);
     ```
+
 === "Stage 2"
     ```mermaid
     graph LR;
@@ -129,11 +131,12 @@ E(SS 3)-.->B(SS select);
     F(SS commute)-.->E(SS 3);
     E(SS 3)-.->B(SS select);
     ```
+
 === "Stage 3" 
     ```mermaid
     graph LR;
     G(SS 4);
-    ```!
+    ```
 
 With our current implementation of the DFS, Stage 2 technically has no final
 subsequence as every single node has atleast one child thus making the insertion

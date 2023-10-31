@@ -4,58 +4,58 @@
 \usetikzlibrary{aff3ct}
 
 \begin{document}
-  \begin{tikzpicture}
+  \begin{tikzpicture}[background rectangle/.style={thick, draw=gray!60, fill=white, fill opacity=0.2, rounded corners=2px}, show background rectangle]
 
     %%%%%%%%%%%%%%%%%%
     %% create tasks %%
     %%%%%%%%%%%%%%%%%%
-    %     options                          id   coords  label                       sin sout sfwd attributes
-    %     -------                          --   ------  -----                       --- ---- ---- ----------
-    \task                                  {t1} {-0.5, 0}   {$Init$}                {0} {1}  {0}  {"seq"};
-    \task [right=1.0cm of t1]              {t2} {}          {$Relayer_{fwd_1}$}     {0} {0}  {1}  {};
-    \task [right=1.0cm of t2]              {t3} {}          {$Relayer_{fwd_2}$}     {0} {0}  {1}  {};
-    \task [right=1.0cm of t3]              {t4} {}          {$Relayer_{fwd_3}$}     {0} {0}  {1}  {};
-    \task [right=1.0cm of t4]              {t5} {}          {$Sink$}                {1} {0}  {0}  {"seq"};
+    %     options             id   coords  label                   sin sout sfwd attributes
+    %     -------             --   ------  -----                   --- ---- ---- ----------
+    \task                     {t1} {-0.5, 0}   {generate\\($t_1$)} {0} {1}  {0}  {"seq"};
+    \task [right=1.0cm of t1] {t2} {}          {relayf\\($t_2$)}   {0} {0}  {1}  {};
+    \task [right=1.0cm of t2] {t3} {}          {relayf\\($t_3$)}   {0} {0}  {1}  {};
+    \task [right=1.0cm of t3] {t4} {}          {relayf\\($t_4$)}   {0} {0}  {1}  {};
+    \task [right=1.0cm of t4] {t5} {}          {send\\($t_5$)}     {1} {0}  {0}  {"seq"};
 
     %%%%%%%%%%%%%%%%%%%%
     %% create modules %%
     %%%%%%%%%%%%%%%%%%%%
-    %       options      task ids         id   label
-    %       -------      --------         --   -----
-    \module              {"t1"}           {m1} {$M_1$};
-    \module              {"t2"}           {m2} {$M_2$};
-    \module              {"t3"}           {m3} {$M_3$};
-    \module              {"t4"}           {m4} {$M_4$};
-    \module              {"t5"}           {m5} {$M_5$};
+    %       options  task ids id   label
+    %       -------  -------- --   -----
+    \module          {"t1"}   {m1} {Source};
+    \module          {"t2"}   {m2} {Relayer};
+    \module          {"t3"}   {m3} {Relayer};
+    \module          {"t4"}   {m4} {Relayer};
+    \module          {"t5"}   {m5} {Sink};
 
     %%%%%%%%%%%%%%%%
     %% bind tasks %%
     %%%%%%%%%%%%%%%%
-    %     options start id    path        end id
-    %     ------- --------    ----        ------
-    \draw [bind]  (t1_so1)    --          (t2_si1);
-    \draw [bind]  (t2_so1)    --          (t3_si1);
-    \draw [bind]  (t3_so1)    --          (t4_si1);
-    \draw [bind]  (t4_so1)    --          (t5_si1);
+    %     options start id path end id
+    %     ------- -------- ---- ------
+    \draw [bind]  (t1_so1) --   (t2_si1);
+    \draw [bind]  (t2_so1) --   (t3_si1);
+    \draw [bind]  (t3_so1) --   (t4_si1);
+    \draw [bind]  (t4_so1) --   (t5_si1);
 
     %%%%%%%%%%%%%%%%%%%
     %% create stages %%
     %%%%%%%%%%%%%%%%%%%
-    %      options                    object ids                  id   label             n_threads
-    %      -------                    ----------                  --   -----             ---------
-    \stage [minimum height=3.00cm]    {"m1"}                      {s1} {Stage 1}         {1}
-    \stage [minimum height=3.00cm]    {"m2","m3","m4"}            {s1} {Stage 2}         {3}
-    \stage [minimum height=3.00cm]    {"m5"}                      {s1} {Stage 3}         {1}
+    %      options                 object ids       id   label     n_threads
+    %      -------                 ----------       --   -----     ---------
+    \stage [minimum height=3.00cm] {"m1"}           {s1} {Stage 1} {1}
+    \stage [minimum height=3.00cm] {"m2","m3","m4"} {s1} {Stage 2} {3}
+    \stage [minimum height=3.00cm] {"m5"}           {s1} {Stage 3} {1}
 
     %%%%%%%%%%%%%%%%%%%%%
     %% clone the tasks %%
     %%%%%%%%%%%%%%%%%%%%%
-    %      options      task ids                              n clones
-    %      -------      --------                              --------
-    \clone []           {"t2","t3","t4"}                      {2}
+    %      options task ids         n clones
+    %      ------- --------         --------
+    \clone []      {"t2","t3","t4"} {2}
     %%%%%%%%%%%%%%%%%%%%%
     %% draw the legend %%
     %%%%%%%%%%%%%%%%%%%%%
-    \legend [shift={(-1.0,2.0)}]
+    \legend [shift={(-1.15,1.75)}]
   \end{tikzpicture}
 \end{document}
