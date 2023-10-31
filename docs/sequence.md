@@ -1,21 +1,31 @@
 <a name="Sequence"></a>
 # Sequence
 
-Sequence is a set of tasks and an execution order defined by their binding.
+A **sequence** is a set of bound [tasks](task.md). A sequence represents the 
+graph to execute for each new frame (= new stream). When a sequence is built, 
+the tasks execution order is fixed. For each frame, the tasks will be executed 
+in the same order.
 
-![simple sequence](./assets/simple_sequence.svg)
+<figure markdown>
+  ![Simple sequence](./assets/simple_sequence.svg){ width="500", align="left" }
+  <figcaption>Example a simple sequence of tasks (single threaded).</figcaption>
+</figure>
 
-## Attributes 
+A sequence is a C++ object of the `aff3ct::runtime::Sequence` class. The 
+following sections try to give an overview of the most important attributes and 
+methods to facilitate the code understanding.
+
+## Main Attributes 
 
 ```cpp 
 size_t n_threads;
 ``` 
-Thread number executing the sequence.
+The number of threads that are executing the sequence.
 
 ```cpp
-std::vector<tools::Digraph_node<Sub_sequence>*> sequences;
+std::vector<tools::Digraph_node<runtime::Sub_sequence>*> sequences;
 ```
-Vector of [Subsequences](#Subsequence) of the main sequence.
+Vector of [sub-sequences](#Sub-sequence) of the main sequence (one per thread).
 
 ```cpp
 std::vector<size_t>                      firsts_tasks_id;
@@ -25,84 +35,100 @@ std::vector<std::vector<runtime::Task*>> lasts_tasks;
 ```
 Vectors used to get the firsts and lasts tasks of the sequence. The first tasks
 are the ones without parents, and  the last are the ones without children in the
-constructed [Subsequences](#Subsequence) [digraph](#Digraph).
+constructed [directed graph](#Digraph).
 
 ```cpp
 std::vector<std::vector<module::Module*>> all_modules;
 ```
-Vector of modules contained within the sequence.
+Vector of [modules](module.md) contained within the sequence.
 
-## Methods
+## Main Methods
+
+```cpp
+void exec();
+```
+This is the public method that runs the sequence in loop. Other variants exist
+where it is possible to give a stop condition function.
 
 ```cpp
 void gen_processes(const bool no_copy_mode = false);
 ```
-This function is the most important of the sequence class, its main purpose is
-to browse the subsequence graph and perform some operations modifying the
-original sequence bind and the function of some tasks to add more features to
-the original execution for more performance or coherence. Before reading the
-modifications applied by the function, you have to see for
-[Adaptor](pipeline.md) and [Switcher](switcher.md).
+This function is one of the most important of the sequence class, it is called
+by the `Sequence` constructor. Its main purpose is to parse the sub-sequence 
+graph and to perform some operations that can modify the user bindings. 
+Additionally, some tasks can be optimized and/or interpreted as a DSEL keyword. 
 
- - `push_task` & `pull_task` : as we explained in the adaptor part, the tasks
-   change their `dataptr` when they get the new buffers from the interstage
-   pool, the new pointer needs to be updated for each socket bound to the old
-   one. `gen_processes` performs the update every time it finds a
-   `pull or push task`.
- - `commute_task` & `select_task` : this two tasks are used to select which path
-   to flow for the execution, when a path is selected the bound sockets needs to
-   update their `dataptr` to follow the right one.
- - `Other tasks` : original execution.
+!!! warning
+    Before reading the following paragraphs you should be familiar with the 
+    [Adaptor](pipeline.md#Adaptor) and [Switcher](switcher.md) modules.
+
+Here is a list of the transformations that are performed during the 
+`gen_processes` method:
+
+ - `push` & `pull` tasks (from `Adaptor` module): as explained in the 
+   [adaptor's](pipeline.md#Adaptor) section, tasks change their `dataptr` when 
+   they get the new buffers from the inter-stage pool, the new pointer needs to 
+   be updated for each socket bound to the old one. This behavior is added 
+   through a `process` (noting to do with OS processes) that encapsulates `push` 
+   and `pull` tasks. This `process` is triggered each time there is a `pull` or
+   `push` task execution in the sequence.
+ - `commute` & `select` tasks (from `Switcher` module): this two tasks are used 
+   to select which path to flow for the execution, when a path is selected the 
+   bound sockets needs to update their `dataptr` to follow the right one. Same 
+   as before, a dedicated `process` is created and triggered.
+ - Other tasks: a dumb `process` will be created for each task and it will only 
+   call its corresponding task.
 
 ```cpp
 void explore_thread_rec(Socket* socket, std::vector<runtime::Socket*>& list_fwd);
 ```
-The function called by `gen_processes` to get all the bound sockets (next) of
+The function is called by `gen_processes` to get all the bound sockets (next) of
 the modified one, if the encountered socket is of type `forward` the function is
-called recursively on this new socket (see
-[Forward socket and pipeline](socket_fwd.md)). This call is performed once at 
-sequence build.
+called recursively on this new socket (see the
+[Forward socket and pipeline](socket_fwd.md) section). This call is performed 
+once at sequence build.
 
 ```cpp
-void explore_thread_rec_reverse(Socket* socket, std::vector<runtime::Socket*>& list_fwd);
+void explore_thread_rec_reverse(runtime::Socket* socket, std::vector<runtime::Socket*>& list_fwd);
 ```
 The function does the same thing as the previous one, but in the other sense
 (previous).
 
-<a name="Subsequence"></a>
-# Subsequence
+<a name="Sub-sequence"></a>
+## Sub-sequence
 
 When [control flow tasks](switcher.md) are introduced into a sequence, the
-execution is not only defined by the tasks binding but also by their outputs.
-For this purpose tasks are grouped into subsequences.
-Subsequences are organized in a [directed graph](#Digraph) with 2 nodes
-designated as start and end respectively, this graph is recursively built during
-a sequence initialization from the first task and going from bound `output` or
-`forward` socket to bound `output` or `forward` socket. When a control flow task
-is reached, a new control flow node is created and new children nodes for each
-of its *paths*, only a single of those paths can be taken during execution hence
-why they are refered to as *exclusive paths*. This also means that a sequence
-with no control flow task will always have a single subsequence, because it has
-a single path.
+execution is not only defined by the tasks binding but also by their output 
+sockets. For this purpose, tasks are grouped into sub-sequences. Sub-sequences 
+are organized in a [directed graph](#Digraph) with 2 nodes designated as begin 
+and end, respectively. This graph is recursively built during a sequence 
+initialization from the first task and going from bound `output`/`forward` 
+socket to bound `input`/`forward` socket. When a control flow task (`select` or 
+`commute`) is reached, a new control flow node is created and new children nodes 
+for each of its *paths*. **Only a single of those paths can be taken during 
+execution** hence why they are referred to as **exclusive paths**. This also 
+means that a sequence with no control flow task will always have a single 
+sub-sequence, because it has a single path.
 
-Upon execution the sequence will iterate over its subsequences and execute every
-task they contain, if one of those tasks happens to be a `Commute` it will
+Upon execution the sequence will iterate over its sub-sequences and execute 
+every task they contain, if one of those tasks happens to be a `commute` it will
 select the children node designated by its *path* attribute thus branching in
 the execution.
 
-## Attributes
+### Attributes
 
 ```cpp
-subseq_t type;
+runtime::subseq_t type;
 ```
-The subsequence types are `STD`, `COMMUTE` and `SELECT`, they are used by
-`_exec()` to determine which exclusive path to take during execution.
+The sub-sequence types can be: `STD`, `COMMUTE` and `SELECT`. This type is used 
+by the `_exec()` method to determine which exclusive path to take during 
+execution.
 
 ```cpp
 std::vector<std::function<const int*()>> processes;
 ```
-Whenever `_exec()` reaches a new subsequence it executes every function
-contained in this list, there is one for each task in the subsequence. Refer to
+Whenever `_exec()` reaches a new sub-sequence it executes every function
+contained in this list, there is one for each task in the sub-sequence. Refer to
 `gen_processes()` to understand how they are created and what they contain.
 
 ```cpp
@@ -114,30 +140,30 @@ id of task `processes[0]` was made with.
 ```cpp
 size_t id;
 ```
-The subsequence's id.
+The sub-sequence's id.
 ```cpp
-std::vector<std::vector<std::vector<Socket*>>> rebind_sockets;
+std::vector<std::vector<std::vector<runtime::Socket*>>> rebind_sockets;
 std::vector<std::vector<std::vector<void*>>> rebind_dataptrs;
 ```
-This two vectors are used within the `gen_process` function to save the sockets
+This two vectors are used within the `gen_process()` method to save the sockets
 and their `dataptr` to update during the runtime rebinding.
 
 <a name="Digraph"></a>
-# Digraph
+## Digraph Node
 
-[Subsequences](#Subsequence) make up a directed graph. Whenever a subsequence is
-accessed it is through this class as subsequences themselves do not contain 
-information regarding the graph.
+[Sub-sequences](#Sub-sequence) make up a directed graph. Whenever a sub-sequence 
+is accessed it is through this class (`aff3ct::tools::Digraph_node`) as 
+sub-sequences themselves do not contain information regarding the graph.
 
-## Attributes
+### Main Attributes
 
 ```cpp
-std::vector<Digraph_node<T>*> fathers;
-std::vector<Digraph_node<T>*> children;
+std::vector<tools::Digraph_node<T>*> fathers;
+std::vector<tools::Digraph_node<T>*> children;
 ```
 The nodes pointing to this node and the ones it points to respectively.
 
 ```cpp
 T* contents; /*!< Pointer to the node contents, could be anything. */
 ```
-The contents of the node, usually a [subsequence](#Subsequence).
+The contents of the node, usually a [sub-sequence](#Sub-sequence).

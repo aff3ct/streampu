@@ -1,6 +1,6 @@
 # AFF3CT-core
 
-## Short Presentation
+## Introduction
 
 `AFF3CT-core` is a DSEL for streaming applications written in C++. This document 
 focus on explaining the basics elements of the language from the **developer 
