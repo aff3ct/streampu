@@ -20,119 +20,123 @@ manipulate the module instances.
 ## Main Attributes
 
 ```cpp
-using namespace aff3ct;
-/*
- * The tasks list of the current module. All the tasks in the vector are 
- * allocated (no `nullptr`).
- */
 std::vector<std::shared_ptr<runtime::Task>> tasks;
-/*
- * The tasks list of the current module where the tasks have a fixed position in
- * the vector. This is useful when a task in conditionally created. In the case
- * of a task is not created in the current module, its value is set to 
- * `nullptr`.
- */
+```
+The tasks list of the current module. All the tasks in the vector are 
+allocated (no `nullptr`).
+
+```cpp
 std::vector<std::shared_ptr<runtime::Task>> tasks_with_nullptr;
-/*
- * Number of frames/streams to process each time a task is executed. For 
- * instance, if `n_frames == 2`, all the tasks of the current module will 
- * process 2 frames each time there are triggered.
- */
+```
+The tasks list of the current module where the tasks have a fixed position in
+the vector. This is useful when a task in conditionally created. In the case
+of a task is not created in the current module, its value is set to 
+`nullptr`.
+
+```cpp
 size_t n_frames;
-/*
- * Name of the Module. This name is the same for all the instances of one class.
- */
+```
+Number of frames/streams to process each time a task is executed. For 
+instance, if `n_frames == 2`, all the tasks of the current module will 
+process 2 frames each time there are triggered.
+
+```cpp
 std::string name;
-/*
- * Short name of the Module. This name is the same for all the instances of one 
- * class.
- */
+```
+Name of the Module. This name is the same for all the instances of one class.
+
+```cpp
 std::string short_name;
-/*
- * Custom name of the Module. This name can be redefined by the user for each 
- * instance.
- */
+```
+Short name of the Module. This name is the same for all the instances of one 
+class.
+
+```cpp
 std::string custom_name;
 ```
+Custom name of the Module. This name can be redefined by the user for each 
+instance.
 
 ## Main Protected Methods
 
 ```cpp
-using namespace aff3ct;
-/*
- * Sets the module name.
- */
 void set_name(const std::string &name);
-/*
- * Sets the module short name.
- */
-void set_short_name(const std::string &short_name);
-/*
- * Creates a new task, two tasks cannot share the same `name`.
- */
-runtime::Task& create_task(const std::string &name, const int id = -1);
-/*
- * Creates an input socket over a given task.
- */
-template <typename T>
-size_t create_socket_in(runtime::Task& task, const std::string &name, 
-                        const size_t n_elmts);
-/*
- * Creates an output socket over a given task.
- */
-template <typename T>
-size_t create_socket_out(runtime::Task& task, const std::string &name, 
-                         const size_t n_elmts);
-/*
- * Creates a forward socket over a given task.
- */
-template <typename T>
-size_t create_socket_fwd(runtime::Task& task, const std::string &name, 
-                         const size_t n_elmts);
-/*
- * Creates the codelet of the given task.
- */
-void create_codelet(runtime::Task& task, 
-    std::function<int(module::Module &m, runtime::Task &t, 
-                      const size_t frame_id)> codelet);
 ```
+Sets the module name.
+
+```cpp
+void set_short_name(const std::string &short_name);
+```
+Sets the module short name.
+
+```cpp
+runtime::Task& create_task(const std::string &name, const int id = -1);
+```
+Creates a new task, two tasks cannot share the same `name`.
+
+```cpp
+template <typename T>
+size_t create_socket_in(runtime::Task& task, const std::string &name, const size_t n_elmts);
+```
+Creates an input socket over a given task.
+
+```cpp
+template <typename T>
+size_t create_socket_out(runtime::Task& task, const std::string &name, const size_t n_elmts);
+```
+Creates an output socket over a given task.
+
+```cpp
+template <typename T>
+size_t create_socket_fwd(runtime::Task& task, const std::string &name, const size_t n_elmts);
+```
+Creates a forward socket over a given task.
+
+```cpp
+void create_codelet(runtime::Task& task, std::function<int(module::Module &m, runtime::Task &t, onst size_t frame_id)> codelet);
+```
+Creates the codelet of the given task.
 
 ## Main Public Methods
 
 ```cpp
-using namespace aff3ct;
-/*
- * Returns the number of frames to process in this Module.
- */
 size_t get_n_frames() const;
-/*
- * Sets the number of frames to process each time a task is executed.
- */
+```
+Returns the number of frames to process in this Module.
+
+```cpp
 void set_n_frames(const size_t n_frames);
-/*
- * Returns the module name.
- */
+```
+Sets the number of frames to process each time a task is executed.
+
+```cpp
 const std::string& get_name() const;
-/*
- * Returns the module short name.
- */
+```
+Returns the module name.
+
+```cpp
 const std::string& get_short_name() const;
-/*
- * Sets the module custom name (each instance can have a different custom name).
- */
+```
+Returns the module short name.
+
+```cpp
 void set_custom_name(const std::string &custom_name);
-/*
- * Gets the custom name.
- */
+```
+Sets the module custom name (each instance can have a different custom name).
+
+```cpp
 const std::string& get_custom_name() const;
-/*
- * Returns the socket if it exists. The expected string format is 
- * "task_name::socket_name".
- */
+```
+Gets the custom name.
+
+```cpp
 runtime::Socket& operator[](const std::string &tsk_sck);
-/*
- * Returns the task if it exists. The input string has to match an existing task 
- * name in this module. 
- */
+```
+Returns the socket if it exists. The expected string format is 
+`"task_name::socket_name"`.
+
+```cpp
 runtime::Task& operator()(const std::string &tsk_name);
 ```
+Returns the task if it exists. The input string has to match an existing task 
+name in this module.

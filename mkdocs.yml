@@ -74,7 +74,7 @@ extra_javascript:
 nav:
   - Home: 
     - index.md
-  - Elementary Components:
+  - Basic Components:
       - task.md
       - module.md
       - socket.md
