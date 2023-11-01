@@ -99,7 +99,7 @@ socket. Then it sets the path attribute of the module to the one read.
 Any task bound to its output sockets **before `status** will be considered in a
 diffferent *exclusive path*.
  
-#### Sockets
+<u>Sockets</u>
 
 | Type        | Name            | Index    |
 | ----------- | --------------- | -------- |
@@ -126,7 +126,7 @@ path*.
     first path taken before the first `select` execution should always be bound 
     to the last input socket**.
 
-#### Sockets
+<u>Sockets</u>
 
 | Type        | Name            | Index    |
 | ----------- | --------------- | -------- |
@@ -134,17 +134,16 @@ path*.
 | `output`    | data            | N        |
 | `Output`    | status          | N+1      |
 
+<a name="Examples"><a/>
 ## Examples
 
-<a name="Examples"><a/>
-
-=== "while loop"
+=== "While loop"
     <figure markdown>
       ![while loop](./assets/while_loop.svg){ width=800 }
       <figcaption>Example of a sequence with a while-loop.</figcaption>
     </figure>
 
-=== "switch-case"
+=== "Switch-case"
     <figure markdown>
       ![switch case](./assets/switch_case.svg){ width=800 }
       <figcaption>Example of a sequence with a switch-case.</figcaption>
