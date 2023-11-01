@@ -1,5 +1,5 @@
 site_name: AFF3CT-core Developer Documentation
-site_url: https://affec3ct-core-siteplaceholder.com/
+site_url: https://aff3ct.github.io/aff3ct-core/
 theme:
   logo: assets/diagram-project-solid.svg
   features:
