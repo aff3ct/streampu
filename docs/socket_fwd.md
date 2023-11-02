@@ -47,6 +47,8 @@ section (see `explore_thread_rec()` and `explore_thread_rec_reverse()`).
 Some specific tests have been added to the project to validate the robustness of 
 the forward socket implementation.
 
+#### Specific for Forward Socket
+
 === "Pipeline with two different chains"
     <figure markdown>
       ![double chain](./assets/pipeline_double_chain.svg){ width="500", align="left" }
@@ -90,19 +92,23 @@ the middle tasks from the command line (the initial `Init` and last task `Sink`
 are automatically added) using these parameters:
 
 - `-n`: the number of tasks on each stage.
-- `-t`: the number of thread on each stage.
+- `-t`: the number of threads on each stage.
 - The socket type (`SIO` or `SFWD`) of the tasks:
-    - `-r`: specifying each task socket type.
-    - `-R`: specifying socket type by stage (All the sockets of the stage will
+    - `-r`: specifying each socket type (`SIO` -> `relay` task and `SFWD` -> 
+            `relayf` task).
+    - `-R`: specifying socket type by stage (all the sockets of the stage will
       be of this type).
-!!! note
-    `-r` and `-R` parameters are exclusive.
 
-There are some examples of generated pipelines :
+!!! note
+    You cannot use `-r` and `-R` parameters at the same time, they are 
+    exclusive.
+
+Here are some examples of generated pipelines:
+
 === "Simple pipeline" 
     <figure markdown>
       ![simple pipeline io](./assets/simple_pipeline_io.svg){ width="500", align="left" }
-      <figcaption>`test-generic-pipeline`: input/output sockets.</figcaption>
+      <figcaption>`test-generic-pipeline`: input/output sockets & 3-stage pipeline.</figcaption>
     </figure>
     ```bash
     test-generic-pipeline -n "(3)" -t "(3)" -R "(SIO)"
@@ -111,7 +117,7 @@ There are some examples of generated pipelines :
 === "Simple pipeline forward"
     <figure markdown>
       ![simple pipeline fwd](./assets/simple_pipeline_fwd.svg){ width="500", align="left" }
-      <figcaption>`test-generic-pipeline`: forward sockets.</figcaption>
+      <figcaption>`test-generic-pipeline`: forward sockets & 3-stage pipeline.</figcaption>
     </figure>
     ```bash
     test-generic-pipeline -n "(3)" -t "(3)" -R "(SFWD)"
@@ -120,8 +126,17 @@ There are some examples of generated pipelines :
 === "Simple pipeline hybrid"
     <figure markdown>
       ![simple pipeline hybrid](./assets/simple_pipeline_hybrid.svg){ width="500", align="left" }
-      <figcaption>`test-generic-pipeline`: hybrid in/out and forward sockets.</figcaption>
+      <figcaption>`test-generic-pipeline`: hybrid in/out and forward sockets & 3-stage pipeline.</figcaption>
     </figure>
     ```bash
     test-generic-pipeline -n "(3)" -t "(3)" -r "((SFWD,SIO,SFWD))"
+    ```
+
+=== "Simple pipeline hybrid with a 5-stage pipeline"
+    <figure markdown>
+      ![simple pipeline hybrid](./assets/simple_pipeline_hybrid_5_stages.svg){ width="880", align="left" }
+      <figcaption>`test-generic-pipeline`: hybrid in/out and forward sockets & 5-stage pipeline.</figcaption>
+    </figure>
+    ```bash
+    test-generic-pipeline -n "(4,1,2)" -t "(3,1,2)" -r "((SFWD,SIO,SFWD,SIO),(SFWD),(SIO,SIO))"
     ```

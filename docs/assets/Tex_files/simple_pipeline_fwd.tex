@@ -5,7 +5,6 @@
 
 \begin{document}
   \begin{tikzpicture}[background rectangle/.style={thick, draw=gray!60, fill=white, fill opacity=1.0, rounded corners=2px}, show background rectangle]
-
     %%%%%%%%%%%%%%%%%%
     %% create tasks %%
     %%%%%%%%%%%%%%%%%%
@@ -44,15 +43,15 @@
     %      options                 object ids       id   label     n_threads
     %      -------                 ----------       --   -----     ---------
     \stage [minimum height=3.00cm] {"m1"}           {s1} {Stage 1} {1}
-    \stage [minimum height=3.00cm] {"m2","m3","m4"} {s1} {Stage 2} {3}
-    \stage [minimum height=3.00cm] {"m5"}           {s1} {Stage 3} {1}
+    \stage [minimum height=3.00cm] {"m2","m3","m4"} {s2} {Stage 2} {3}
+    \stage [minimum height=3.00cm] {"m5"}           {s3} {Stage 3} {1}
 
     %%%%%%%%%%%%%%%%%%%%%
     %% clone the tasks %%
     %%%%%%%%%%%%%%%%%%%%%
     %      options task ids         n clones
     %      ------- --------         --------
-    \clone []      {"t2","t3","t4"} {2}
+    \clone []      {"t2","t3","t4"} {3}
     %%%%%%%%%%%%%%%%%%%%%
     %% draw the legend %%
     %%%%%%%%%%%%%%%%%%%%%
