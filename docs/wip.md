@@ -16,8 +16,8 @@ coherent, the task with the greatest ID is used to insert the `push` task in
 stages for instance. It uses the following algorithm.
 
 ```python
-#It is called with min_id = 0 in the pipeline code, min_id is shared between recursive calls and NOT copied
-#because it is a reference
+# It is called with min_id = 0 in the pipeline code, min_id is shared between 
+# recursive calls and NOT copied because it is a reference
 void update_tasks_id(Node n, min_id):
     mark(n)
     for every task t in n:
@@ -67,7 +67,7 @@ later and given a greater id.
 The current implementation uses the following algorithm.
 
 ```python
-#We no longer have a minimum, instead we simply increment each ID by 1
+# We no longer have a minimum, instead we simply increment each ID by 1
 void update_tasks_id(Node n):
     mark(n)
     for every task t in n:
@@ -139,6 +139,6 @@ E(SS 3)-.->B(SS select);
     ```
 
 With our current implementation of the DFS, Stage 2 technically has no final
-subsequence as every single node has atleast one child thus making the insertion
+sub-sequence as every single node has atleast one child thus making the insertion
 of push tasks impossible. A solution would be to introduce a fake task after
 each commute on their last path during pipeline creations.

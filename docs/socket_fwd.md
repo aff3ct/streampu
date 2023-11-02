@@ -51,7 +51,7 @@ the forward socket implementation.
     <figure markdown>
       ![double chain](./assets/pipeline_double_chain.svg){ width="500", align="left" }
       <figcaption>`test-simple-pipeline-double-chain`.</figcaption>
-    </figure>  
+    </figure>
     ```bash
     test-simple-pipeline-double-chain -t 3
     ```  
@@ -62,7 +62,7 @@ the forward socket implementation.
     <figure markdown>
       ![forward inter stage](./assets/pipeline_inter_stage_fwd.svg){ width="700", align="left" }
       <figcaption>`test-complex-pipeline-full-fwd`.</figcaption>
-    </figure>  
+    </figure>
     ```bash
     test-complex-pipeline-full-fwd -t 3
     ``` 
@@ -74,7 +74,7 @@ the forward socket implementation.
     <figure markdown>
       ![double inter stage](./assets/pipeline_inter_stage_complex.svg){ width="750", align="left" }
       <figcaption>`test-complex-pipeline-inter-stage`.</figcaption>
-    </figure>  
+    </figure>
     ```bash
     test-complex-pipeline-inter-stage -t 3
     ```  
@@ -103,7 +103,7 @@ There are some examples of generated pipelines :
     <figure markdown>
       ![simple pipeline io](./assets/simple_pipeline_io.svg){ width="500", align="left" }
       <figcaption>`test-generic-pipeline`: input/output sockets.</figcaption>
-    </figure> 
+    </figure>
     ```bash
     test-generic-pipeline -n "(3)" -t "(3)" -R "(SIO)"
     ```
@@ -112,7 +112,7 @@ There are some examples of generated pipelines :
     <figure markdown>
       ![simple pipeline fwd](./assets/simple_pipeline_fwd.svg){ width="500", align="left" }
       <figcaption>`test-generic-pipeline`: forward sockets.</figcaption>
-    </figure> 
+    </figure>
     ```bash
     test-generic-pipeline -n "(3)" -t "(3)" -R "(SFWD)"
     ```
@@ -120,8 +120,8 @@ There are some examples of generated pipelines :
 === "Simple pipeline hybrid"
     <figure markdown>
       ![simple pipeline hybrid](./assets/simple_pipeline_hybrid.svg){ width="500", align="left" }
-      <figcaption>`test-generic-pipeline`: hybrid input/output and forward sockets.</figcaption>
-    </figure> 
+      <figcaption>`test-generic-pipeline`: hybrid in/out and forward sockets.</figcaption>
+    </figure>
     ```bash
     test-generic-pipeline -n "(3)" -t "(3)" -r "((SFWD,SIO,SFWD))"
     ```

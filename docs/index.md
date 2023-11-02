@@ -39,8 +39,8 @@ Basic components:
 5. [Pipeline](pipeline.md)  
 6. [Control flow](switcher.md)
 
-Newly introduced features and discussions:
+New features and discussions:
 
-7. [Forward sockets](socket_fwd.md)
-8. [Pipeline & Control Flow](pipeline_ctrl_flow.md)
-9. [Work in Progress](wip.md)
+1. [Forward sockets](socket_fwd.md)
+2. [Pipeline & Control Flow](pipeline_ctrl_flow.md)
+3. [Work in Progress](wip.md)

@@ -142,7 +142,7 @@ This sub-sequence is invalid because the last `SS Branch 3` has no path to the
   `commute`. We notify the user regarding the broken `commute`.
 
 ```python
-#Note that path_taken here is copied between recursive calls and NOT shared
+# Note that path_taken here is copied between recursive calls and NOT shared
 void Check_ctrl_flw(Node n, List path_taken):
     if n is not in path_taken and n is not childless
         path_taken.append(n)
@@ -154,8 +154,11 @@ void Check_ctrl_flw(Node n, List path_taken):
                 continue:
             Task first_task  = path_taken[i] #We found the first task
             for j = i, j < path_taken.size, j++:
-                if path_taken[j] is the opposite switcher task of path_taken[i]: #We found the second task
+                # We found the second task
+                if path_taken[j] is the opposite switcher task of path_taken[i]: 
                     break:
-            if j == path_taken.size #We went through the entire path and didn't find the other switcher task
+            # We went through the entire path and didn't find the other switcher 
+            # task
+            if j == path_taken.size 
                 throw an error
 ```

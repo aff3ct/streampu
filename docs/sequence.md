@@ -115,7 +115,11 @@ every task they contain, if one of those tasks happens to be a `commute` it will
 select the children node designated by its *path* attribute thus branching in
 the execution.
 
-### Attributes
+`aff3ct::runtime::Sub_sequence` (not to be confused with 
+`aff3ct::module::Subsequence`!) main attributes are described in the following
+section.
+
+### Main Attributes
 
 ```cpp
 runtime::subseq_t type;
