@@ -109,7 +109,7 @@ endif(AFF3CT_CORE_COMPILE_STATIC_LIB)
 # Tests
 if(AFF3CT_CORE_TESTS)
     add_executable(aff3ct-core-test-simple-chain $<TARGET_OBJECTS:aff3ct-core-obj>
-                                                 ${CMAKE_CURRENT_SOURCE_DIR}/tests/simple_chain.cpp)
+                                                 ${CMAKE_CURRENT_SOURCE_DIR}/tests/bootstrap/simple_chain.cpp)
     set_target_properties(aff3ct-core-test-simple-chain PROPERTIES
                                                         OUTPUT_NAME test-simple-chain
                                                         POSITION_INDEPENDENT_CODE ON) # set -fpie
@@ -117,7 +117,7 @@ if(AFF3CT_CORE_TESTS)
     list(APPEND aff3ct_core_targets_list aff3ct-core-test-simple-chain)
 
     add_executable(aff3ct-core-test-simple-chain-fwd $<TARGET_OBJECTS:aff3ct-core-obj>
-                                                 ${CMAKE_CURRENT_SOURCE_DIR}/tests/simple_chain_fwd.cpp)
+                                                 ${CMAKE_CURRENT_SOURCE_DIR}/tests/bootstrap/simple_chain_fwd.cpp)
     set_target_properties(aff3ct-core-test-simple-chain-fwd PROPERTIES
                                                         OUTPUT_NAME test-simple-chain-io
                                                         POSITION_INDEPENDENT_CODE ON) # set -fpie
@@ -125,7 +125,7 @@ if(AFF3CT_CORE_TESTS)
     list(APPEND aff3ct_core_targets_list aff3ct-core-test-simple-chain-fwd)
 
     add_executable(aff3ct-core-test-simple-chain-hybrid $<TARGET_OBJECTS:aff3ct-core-obj>
-                                                 ${CMAKE_CURRENT_SOURCE_DIR}/tests/simple_chain_hybrid.cpp)
+                                                 ${CMAKE_CURRENT_SOURCE_DIR}/tests/bootstrap/simple_chain_hybrid.cpp)
     set_target_properties(aff3ct-core-test-simple-chain-hybrid PROPERTIES
                                                         OUTPUT_NAME test-simple-chain-hybrid
                                                         POSITION_INDEPENDENT_CODE ON) # set -fpie
@@ -133,7 +133,7 @@ if(AFF3CT_CORE_TESTS)
     list(APPEND aff3ct_core_targets_list aff3ct-core-test-simple-chain-hybrid)
 
     add_executable(aff3ct-core-test-for-loop $<TARGET_OBJECTS:aff3ct-core-obj>
-                                                 ${CMAKE_CURRENT_SOURCE_DIR}/tests/for_loop.cpp)
+                                                 ${CMAKE_CURRENT_SOURCE_DIR}/tests/bootstrap/for_loop.cpp)
     set_target_properties(aff3ct-core-test-for-loop PROPERTIES
                                                     OUTPUT_NAME test-for-loop
                                                     POSITION_INDEPENDENT_CODE ON) # set -fpie
@@ -141,7 +141,7 @@ if(AFF3CT_CORE_TESTS)
     list(APPEND aff3ct_core_targets_list aff3ct-core-test-for-loop)
 
     add_executable(aff3ct-core-test-do-while-loop $<TARGET_OBJECTS:aff3ct-core-obj>
-                                                  ${CMAKE_CURRENT_SOURCE_DIR}/tests/do_while_loop.cpp)
+                                                  ${CMAKE_CURRENT_SOURCE_DIR}/tests/bootstrap/do_while_loop.cpp)
     set_target_properties(aff3ct-core-test-do-while-loop PROPERTIES
                                                          OUTPUT_NAME test-do-while-loop
                                                          POSITION_INDEPENDENT_CODE ON) # set -fpie
@@ -149,7 +149,7 @@ if(AFF3CT_CORE_TESTS)
     list(APPEND aff3ct_core_targets_list aff3ct-core-test-do-while-loop)
 
     add_executable(aff3ct-core-test-exclusive-paths $<TARGET_OBJECTS:aff3ct-core-obj>
-                                                    ${CMAKE_CURRENT_SOURCE_DIR}/tests/exclusive_paths.cpp)
+                                                    ${CMAKE_CURRENT_SOURCE_DIR}/tests/bootstrap/exclusive_paths.cpp)
     set_target_properties(aff3ct-core-test-exclusive-paths PROPERTIES
                                                            OUTPUT_NAME test-exclusive-paths
                                                            POSITION_INDEPENDENT_CODE ON) # set -fpie
@@ -157,7 +157,7 @@ if(AFF3CT_CORE_TESTS)
     list(APPEND aff3ct_core_targets_list aff3ct-core-test-exclusive-paths)
 
     add_executable(aff3ct-core-test-nested-loops $<TARGET_OBJECTS:aff3ct-core-obj>
-                                                 ${CMAKE_CURRENT_SOURCE_DIR}/tests/nested_loops.cpp)
+                                                 ${CMAKE_CURRENT_SOURCE_DIR}/tests/bootstrap/nested_loops.cpp)
     set_target_properties(aff3ct-core-test-nested-loops PROPERTIES
                                                         OUTPUT_NAME test-nested-loops
                                                         POSITION_INDEPENDENT_CODE ON) # set -fpie
@@ -165,35 +165,35 @@ if(AFF3CT_CORE_TESTS)
     list(APPEND aff3ct_core_targets_list aff3ct-core-test-nested-loops)
 
     add_executable(aff3ct-core-test-simple-pipeline $<TARGET_OBJECTS:aff3ct-core-obj>
-                                                    ${CMAKE_CURRENT_SOURCE_DIR}/tests/simple_pipeline.cpp)
+                                                    ${CMAKE_CURRENT_SOURCE_DIR}/tests/bootstrap/simple_pipeline.cpp)
     set_target_properties(aff3ct-core-test-simple-pipeline PROPERTIES
                                                            OUTPUT_NAME test-simple-pipeline
                                                            POSITION_INDEPENDENT_CODE ON) # set -fpie
     list(APPEND aff3ct_core_targets_list aff3ct-core-test-simple-pipeline)
 
     add_executable(aff3ct-core-test-complex-pipeline-inter-stage $<TARGET_OBJECTS:aff3ct-core-obj>
-                                                    ${CMAKE_CURRENT_SOURCE_DIR}/tests/complex_pipeline_inter_stage.cpp)
+                                                    ${CMAKE_CURRENT_SOURCE_DIR}/tests/advanced/complex_pipeline_inter_stage.cpp)
     set_target_properties(aff3ct-core-test-complex-pipeline-inter-stage PROPERTIES
                                                            OUTPUT_NAME test-complex-pipeline-inter-stage
                                                            POSITION_INDEPENDENT_CODE ON) # set -fpie
     list(APPEND aff3ct_core_targets_list aff3ct-core-test-complex-pipeline-inter-stage)
 
     add_executable(aff3ct-core-test-simple-pipeline-double-chain $<TARGET_OBJECTS:aff3ct-core-obj>
-                                                    ${CMAKE_CURRENT_SOURCE_DIR}/tests/pipeline_double_chain.cpp)
+                                                    ${CMAKE_CURRENT_SOURCE_DIR}/tests/advanced/pipeline_double_chain.cpp)
     set_target_properties(aff3ct-core-test-simple-pipeline-double-chain PROPERTIES
                                                            OUTPUT_NAME test-simple-pipeline-double-chain
                                                            POSITION_INDEPENDENT_CODE ON) # set -fpie
     list(APPEND aff3ct_core_targets_list aff3ct-core-test-simple-pipeline-double-chain)
 
     add_executable(aff3ct-core-test-complex-pipeline-full-fwd $<TARGET_OBJECTS:aff3ct-core-obj>
-                                                    ${CMAKE_CURRENT_SOURCE_DIR}/tests/complex_pipeline_full_fwd.cpp)
+                                                    ${CMAKE_CURRENT_SOURCE_DIR}/tests/advanced/complex_pipeline_full_fwd.cpp)
     set_target_properties(aff3ct-core-test-complex-pipeline-full-fwd PROPERTIES
                                                            OUTPUT_NAME test-complex-pipeline-full-fwd
                                                            POSITION_INDEPENDENT_CODE ON) # set -fpie
     list(APPEND aff3ct_core_targets_list aff3ct-core-test-complex-pipeline-full-fwd)
 
     add_executable(aff3ct-core-test-generic-pipeline $<TARGET_OBJECTS:aff3ct-core-obj>
-                                                    ${CMAKE_CURRENT_SOURCE_DIR}/tests/simple_generic_pipeline.cpp)
+                                                    ${CMAKE_CURRENT_SOURCE_DIR}/tests/advanced/simple_generic_pipeline.cpp)
     set_target_properties(aff3ct-core-test-generic-pipeline PROPERTIES
                                                            OUTPUT_NAME test-generic-pipeline
                                                            POSITION_INDEPENDENT_CODE ON) # set -fpie
