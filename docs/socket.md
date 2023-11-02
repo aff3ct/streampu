@@ -12,7 +12,7 @@ A task can have multiple sockets of different types (input, output and forward).
 This is illustrated in the following figure:
 
 <figure markdown>
-  ![Task with sockets!](./assets/task_sockets.svg){ width="600", align="left" }
+  ![Task with sockets!](./assets/task_sockets.svg){ width="600" }
   <figcaption>Tasks with different socket types.</figcaption>
 </figure>
 
@@ -70,13 +70,13 @@ Below some examples of valid and invalids socket bindings :
 
 === "Valid bindings"
     <figure markdown>
-        ![Valid bindings](./assets/valid_bindings.svg){ width=750, align="left" }
+        ![Valid bindings](./assets/valid_bindings.svg){ width=750 }
         <figcaption>Examples of **valid** socket bindings.</figcaption>
     </figure>
 
 === "Invalid bindings"
     <figure markdown>
-        ![Invalid bindings](./assets/invalid_bindings.svg){ width=487, align="left" }
+        ![Invalid bindings](./assets/invalid_bindings.svg){ width=487 }
         <figcaption>Examples of **invalid** socket bindings.</figcaption>
     </figure>
 

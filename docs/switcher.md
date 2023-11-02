@@ -96,7 +96,7 @@ task is executed it reads the [`path`](#Path) to take from its `ctrl` socket and
 then copies the bytes from its `data` input socket to the `data{path}` output 
 socket. Then it sets the path attribute of the module to the one read.
 
-Any task bound to its output sockets **before `status** will be considered in a
+Any task bound to its output sockets **before `status`** will be considered in a
 diffferent *exclusive path*.
  
 <u>Sockets</u>
