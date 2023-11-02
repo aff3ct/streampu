@@ -139,12 +139,12 @@ path*.
 
 === "While loop"
     <figure markdown>
-      ![while loop](./assets/while_loop.svg){ width=800 }
+      ![while loop](./assets/while_loop.svg){ width=1000 }
       <figcaption>Example of a sequence with a while-loop.</figcaption>
     </figure>
 
 === "Switch-case"
     <figure markdown>
-      ![switch case](./assets/switch_case.svg){ width=800 }
+      ![switch case](./assets/switch_case.svg){ width=1000 }
       <figcaption>Example of a sequence with a switch-case.</figcaption>
     </figure>

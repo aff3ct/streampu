@@ -7,7 +7,7 @@ the tasks execution order is fixed. For each frame, the tasks will be executed
 in the same order.
 
 <figure markdown>
-  ![Simple sequence](./assets/simple_sequence.svg){ width="500", align="left" }
+  ![Simple sequence](./assets/simple_sequence.svg){ width="600", align="left" }
   <figcaption>Example a simple sequence of tasks (single threaded).</figcaption>
 </figure>
 

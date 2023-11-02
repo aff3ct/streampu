@@ -153,9 +153,9 @@ int main(int argc, char** argv)
 	std::cout << "#" << std::endl;
 
 	module::Switcher switcher(2, data_length, typeid(uint8_t));
-	switcher.set_custom_name("SwitcherOut");
-	module::Iterator iterator(n_loop_out);
-	iterator.set_custom_name("IteratorOut");
+	switcher.set_custom_name("SwitcherIn");
+	module::Iterator iterator(n_loop_in);
+	iterator.set_custom_name("IteratorIn");
 
 	module::Initializer<uint8_t> initializer(data_length);
 	module::Finalizer  <uint8_t> finalizer  (data_length);
@@ -169,9 +169,9 @@ int main(int argc, char** argv)
 	}
 
 	module::Switcher switcher2(2, data_length, typeid(uint8_t));
-	switcher2.set_custom_name("SwitcherIn");
-	module::Iterator iterator2(n_loop_in);
-	iterator2.set_custom_name("IteratorIn");
+	switcher2.set_custom_name("SwitcherOut");
+	module::Iterator iterator2(n_loop_out);
+	iterator2.set_custom_name("IteratorOut");
 
 	switcher2 [module::swi::tsk::select ][1]    = initializer[module::ini::sck::initialize::out];
 	iterator2 [module::ite::tsk::iterate]       = switcher2  [module::swi::tsk::select][3];

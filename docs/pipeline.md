@@ -7,7 +7,7 @@ on one or more threads in parallel. The pipeline takes care of the
 of **a producer/consumer algorithm**.
 
 <figure markdown>
-  ![Sequence and pipeline](./assets/sequence_to_pipeline.svg){ width=900 }
+  ![Sequence and pipeline](./assets/sequence_to_pipeline.svg){ width=1200 }
   <figcaption>Example a sequence on the left and a pipeline on the right.</figcaption>
 </figure>
 

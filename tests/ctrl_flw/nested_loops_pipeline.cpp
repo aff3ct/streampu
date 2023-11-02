@@ -139,9 +139,9 @@ int main(int argc, char** argv)
 		}
 	}
 
-	std::cout << "#################################" << std::endl;
-	std::cout << "# Micro-benchmark: Nested loops #" << std::endl;
-	std::cout << "#################################" << std::endl;
+	std::cout << "##########################################" << std::endl;
+	std::cout << "# Micro-benchmark: Nested loops pipeline #" << std::endl;
+	std::cout << "##########################################" << std::endl;
 	std::cout << "#" << std::endl;
 
 	std::cout << "# Command line arguments:" << std::endl;
@@ -160,9 +160,9 @@ int main(int argc, char** argv)
 	std::cout << "#" << std::endl;
 
 	module::Switcher switcher(2, data_length, typeid(uint8_t));
-	switcher.set_custom_name("SwitcherOut");
-	module::Iterator iterator(n_loop_out);
-	iterator.set_custom_name("IteratorOut");
+	switcher.set_custom_name("SwitcherIn");
+	module::Iterator iterator(n_loop_in);
+	iterator.set_custom_name("IteratorIn");
 
 	module::Initializer<uint8_t> initializer(data_length);
 	module::Finalizer  <uint8_t> finalizer  (data_length);
@@ -176,9 +176,9 @@ int main(int argc, char** argv)
 	}
 
 	module::Switcher switcher2(2, data_length, typeid(uint8_t));
-	switcher2.set_custom_name("SwitcherIn");
-	module::Iterator iterator2(n_loop_in);
-	iterator2.set_custom_name("IteratorIn");
+	switcher2.set_custom_name("SwitcherOut");
+	module::Iterator iterator2(n_loop_out);
+	iterator2.set_custom_name("IteratorOut");
 	module::Relayer<uint8_t> relayer1(data_length);
 	relayer1.set_custom_name("RelayerStart");
 	module::Relayer<uint8_t> relayer2(data_length);

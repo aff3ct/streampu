@@ -51,7 +51,7 @@ the forward socket implementation.
 
 === "Pipeline with two different chains"
     <figure markdown>
-      ![double chain](./assets/pipeline_double_chain.svg){ width="500", align="left" }
+      ![double chain](./assets/pipeline_double_chain.svg){ width="700", align="left" }
       <figcaption>`test-simple-pipeline-double-chain`.</figcaption>
     </figure>
     ```bash
@@ -62,7 +62,7 @@ the forward socket implementation.
 
 === "Pipeline with distant stage binding" 
     <figure markdown>
-      ![forward inter stage](./assets/pipeline_inter_stage_fwd.svg){ width="700", align="left" }
+      ![forward inter stage](./assets/pipeline_inter_stage_fwd.svg){ width="900", align="left" }
       <figcaption>`test-complex-pipeline-full-fwd`.</figcaption>
     </figure>
     ```bash
@@ -74,7 +74,7 @@ the forward socket implementation.
 
 === "Pipeline with distant stage binding and mix of SIN, SOUT & SFWD"
     <figure markdown>
-      ![double inter stage](./assets/pipeline_inter_stage_complex.svg){ width="750", align="left" }
+      ![double inter stage](./assets/pipeline_inter_stage_complex.svg){ width="950", align="left" }
       <figcaption>`test-complex-pipeline-inter-stage`.</figcaption>
     </figure>
     ```bash
@@ -107,7 +107,7 @@ Here are some examples of generated pipelines:
 
 === "Simple pipeline" 
     <figure markdown>
-      ![simple pipeline io](./assets/simple_pipeline_io.svg){ width="500", align="left" }
+      ![simple pipeline io](./assets/simple_pipeline_io.svg){ width="600", align="left" }
       <figcaption>`test-generic-pipeline`: input/output sockets & 3-stage pipeline.</figcaption>
     </figure>
     ```bash
@@ -116,7 +116,7 @@ Here are some examples of generated pipelines:
 
 === "Simple pipeline forward"
     <figure markdown>
-      ![simple pipeline fwd](./assets/simple_pipeline_fwd.svg){ width="500", align="left" }
+      ![simple pipeline fwd](./assets/simple_pipeline_fwd.svg){ width="600", align="left" }
       <figcaption>`test-generic-pipeline`: forward sockets & 3-stage pipeline.</figcaption>
     </figure>
     ```bash
@@ -125,7 +125,7 @@ Here are some examples of generated pipelines:
 
 === "Simple pipeline hybrid"
     <figure markdown>
-      ![simple pipeline hybrid](./assets/simple_pipeline_hybrid.svg){ width="500", align="left" }
+      ![simple pipeline hybrid](./assets/simple_pipeline_hybrid.svg){ width="600", align="left" }
       <figcaption>`test-generic-pipeline`: hybrid in/out and forward sockets & 3-stage pipeline.</figcaption>
     </figure>
     ```bash
@@ -134,7 +134,7 @@ Here are some examples of generated pipelines:
 
 === "Simple pipeline hybrid with a 5-stage pipeline"
     <figure markdown>
-      ![simple pipeline hybrid](./assets/simple_pipeline_hybrid_5_stages.svg){ width="880", align="left" }
+      ![simple pipeline hybrid](./assets/simple_pipeline_hybrid_5_stages.svg){ width="1100", align="left" }
       <figcaption>`test-generic-pipeline`: hybrid in/out and forward sockets & 5-stage pipeline.</figcaption>
     </figure>
     ```bash

@@ -1,0 +1,106 @@
+\documentclass{standalone}
+
+\usepackage{tikz}
+\usetikzlibrary{aff3ct}
+
+\begin{document}
+  \begin{tikzpicture}[background rectangle/.style={thick, draw=gray!60, fill=white, fill opacity=1.0, rounded corners=2px}, show background rectangle]
+    %%%%%%%%%%%%%%%%%%
+    %% create tasks %%
+    %%%%%%%%%%%%%%%%%%
+    %
+    % Note:
+    %   `\select` & `\commute` are special control flow tasks, there is no need
+    %   to set the number of sockets for this type of task. Instead the number
+    %   of exclusive paths has to be given.
+    %
+    %        options                                id    coords label                          sin sout sfwd attributes
+    %        -------                                --    ------ -----                          --- ---- ---- ----------
+    \task                                           {t1}  {0, 0} {initialize\\($t_1$)}          {0} {1}  {0}  {"seq"};
+
+    \task    [right=2.25cm of t1,  yshift=-2.15cm]  {t2}  {}     {relay\\($t_2$)}               {1} {1}  {0}  {};
+    \select  [right=1.00cm of t2                 ]  {t3}  {}     {select\\($t_3)$}              {2}           {};
+    \task    [right=1.00cm of t3,  yshift=-2.50cm]  {t4}  {}     {iterate\\($t_4)$}             {0} {1}  {0}  {};
+    \commute [right=1.00cm of t4,  yshift=+2.50cm]  {t5}  {}     {commute\\($t_5$)}             {2}           {};
+    \select  [right=1.00cm of t5,  yshift=+4.00cm]  {t6}  {}     {select\\($t_6)$}              {2}           {};
+    \task    [right=1.00cm of t6,  yshift=-2.50cm]  {t7}  {}     {iterate\\($t_7)$}             {0} {1}  {0}  {};
+    \commute [right=1.00cm of t7,  yshift=+2.50cm]  {t8}  {}     {commute\\($t_8$)}             {2}           {};
+    \task    [above=1.50cm of t8,  xshift=+0.00cm]  {t9}  {}     {increment\\($t_{9})$}         {1} {1}  {0}  {"rev"};
+    \task    [left= 1.00cm of t9                 ]  {t10} {}     {increment\\($t_{10})$}        {1} {1}  {0}  {"rev"};
+    \task    [left= 1.00cm of t10                ]  {t11} {}     {increment\\($t_{11})$}        {1} {1}  {0}  {"rev"};
+    \task    [left= 1.00cm of t11                ]  {t12} {}     {increment\\($t_{12})$}        {1} {1}  {0}  {"rev"};
+    \task    [left= 1.00cm of t12                ]  {t13} {}     {increment\\($t_{13})$}        {1} {1}  {0}  {"rev"};
+    \task    [left= 1.00cm of t13                ]  {t14} {}     {increment\\($t_{14})$}        {1} {1}  {0}  {"rev"};
+    \task    [right=1.00cm of t5                 ]  {t15} {}     {relay\\($t_{15}$)}            {1} {1}  {0}  {};
+
+    \task    [right=7.75cm of t15, yshift=+2.15cm]  {t16} {}     {finalize\\($t_{16}$)}         {1} {0}  {0}  {};
+
+
+    %%%%%%%%%%%%%%%%%%%%
+    %% create modules %%
+    %%%%%%%%%%%%%%%%%%%%
+    %       options  task ids    id    label
+    %       -------  --------    --    -----
+    \module          {"t1"}      {m1}  {Initializer};
+    \module          {"t2"}      {m2}  {Relayer};
+    \module          {"t3","t5"} {m3}  {Switcher (out)};
+    \module          {"t4"}      {m4}  {Iterator (out)};
+    \module          {"t6","t8"} {m6}  {Switcher (in)};
+    \module          {"t7"}      {m7}  {Iterator (in)};
+    \module          {"t9"}      {m9}  {Incrementer};
+    \module          {"t10"}     {m10} {Incrementer};
+    \module          {"t11"}     {m11} {Incrementer};
+    \module          {"t12"}     {m12} {Incrementer};
+    \module          {"t13"}     {m13} {Incrementer};
+    \module          {"t14"}     {m14} {Incrementer};
+    \module          {"t15"}     {m15} {Relayer};
+    \module          {"t16"}     {m16} {Finalizer};
+
+    %%%%%%%%%%%%%%%%
+    %% bind tasks %%
+    %%%%%%%%%%%%%%%%
+    %     options                   start id  path             end id
+    %     -------                   --------  ----             ------
+    \draw [bind]                    (t1_so1)  --++ (0.60,0) |- (t2_si1);
+    \draw [bind,densely dashdotted] (t2_so1)  --++ (0.50,0) |- (t3_si2);
+    \draw [bind]                    (t3_so1)  --++ (3.05,0) |- (t5_si1);
+    \draw [bind, densely dashed]    (t3_so1)  --++ (0.50,0) |- (t4.west);
+    \draw [bind]                    (t4_so1)  --++ (0.50,0) |- (t5_si2);
+    \draw [bind,densely dashdotted] (t5_so1)  --++ (0.50,0) |- (t6_si2);
+    \draw [bind]                    (t6_so1)  --++ (3.00,0) |- (t8_si1);
+    \draw [bind, densely dashed]    (t6_so1)  --++ (0.50,0) |- (t7.west);
+    \draw [bind]                    (t7_so1)  --++ (0.50,0) |- (t8_si2);
+    \draw [bind,densely dashdotted] (t8_so1)  --++ (0.50,0) |- (t9_si1);
+    \draw [bind]                    (t9_so1)                -- (t10_si1);
+    \draw [bind]                    (t10_so1)               -- (t11_si1);
+    \draw [bind]                    (t11_so1)               -- (t12_si1);
+    \draw [bind]                    (t12_so1)               -- (t13_si1);
+    \draw [bind]                    (t13_so1)               -- (t14_si1);
+    \draw [bind,densely dashdotted] (t14_so1) --++ (-0.50,0) --++ (0,-2.58) -- (t6_si1);
+    \draw [bind,densely dashdotted] (t8_so2) --++ (1.00,0) --++ (0,4.5) --++ (-19.35,0.0) --++ (0,-4.6) --++ (2.95,0.0) |- (t3_si1);
+    \draw [bind]                    (t5_so2) --++ (0.50,0)  |- (t15_si1);
+    \draw [bind]                    (t15_so1) --++ (7.125,0) |- (t16_si1);
+    
+
+    %%%%%%%%%%%%%%%%%%%
+    %% create stages %%
+    %%%%%%%%%%%%%%%%%%%
+    %      options                                         object ids         id   label     n_threads
+    %      -------                                         ----------         --   -----     ---------
+    \stage [minimum height=13.50cm]                        {"m1"}            {s1} {Stage 1} {1}
+    \stage [minimum height=13.50cm, minimum width=20.00cm] {"m14","m4","m6"} {s2} {Stage 2} {8}
+    \stage [minimum height=13.50cm]                        {"m16"}           {s3} {Stage 3} {1}
+
+    %%%%%%%%%%%%%%%%%%%%%
+    %% clone the tasks %%
+    %%%%%%%%%%%%%%%%%%%%%
+    %      options task ids                                                                      n clones
+    %      ------- --------                                                                      --------
+    \clone []      {"t2","t3","t4","t5","t6","t7","t8","t9","t10","t11","t12","t13","t14","t15"} {8}
+
+    %%%%%%%%%%%%%%%%%%%%%
+    %% draw the legend %%
+    %%%%%%%%%%%%%%%%%%%%%
+    \legend [shift={(-0.6,7.0)}]
+  \end{tikzpicture}
+\end{document}

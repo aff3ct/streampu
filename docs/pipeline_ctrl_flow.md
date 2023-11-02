@@ -170,7 +170,7 @@ the control flow inside a pipelie stage.
 
 === "Switch-case inside a parallel stage"
     <figure markdown>
-      ![double chain](./assets/exclusive_paths_pipeline.svg){ width="750", align="left" }
+      ![double chain](./assets/exclusive_paths_pipeline.svg){ width="950", align="left" }
       <figcaption>`test-exclusive-paths-pipeline`.</figcaption>
     </figure>
     ```bash
@@ -179,5 +179,20 @@ the control flow inside a pipelie stage.
     In this test, the read bytes (from the source $t_1$) are alternatively 
     converted to upper case and to lower case (see $t_5$ and $t_6$ task). As 
     explained in the [Work in Progress](./wip.md#End-of-sequence) section, we 
-    need to add a delayer module ($t_8$) after the `select` task ($t_7$) to
+    need to add a `relay` task ($t_8$) after the `select` task ($t_7$) to
     make it work.
+
+=== "Nested loops inside a parallel stage"
+    <figure markdown>
+      ![double chain](./assets/nested_loops_pipeline.svg){ width="1200", align="left" }
+      <figcaption>`test-nested-loops-pipeline`.</figcaption>
+    </figure>
+    ```bash
+    test-nested-loops-pipeline -i 20 -j 50 -t 8
+    ```
+    In this test, two nested loops inside a parallel stage are tested.
+    `-i` sets the number of iterations in the outer loop ($t_4$ Iterator) and 
+    `-j` sets the number of iterations in the inner loop ($t_7$ Iterator).
+    As explained in the [Work in Progress](./wip.md#End-of-sequence) section, we 
+    need to add `relay` tasks ($t_2$ and $t_{15}$) before the first `select` 
+    task ($t_3$) and after the last `commute` task ($t_5$) to make it work.
