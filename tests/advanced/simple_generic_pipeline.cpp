@@ -102,7 +102,7 @@ void parse_socket_type_stage(std::string& socket_type_stage_param, std::vector<s
 int main(int argc, char** argv)
 {
 	option longopts[] = {
-		{"n-threads per stage", required_argument, NULL, 't'},
+		{"n-threads", required_argument, NULL, 't'},
 		{"n-inter-frames", required_argument, NULL, 'f'},
 		{"sleep-time", required_argument, NULL, 's'},
 		{"data-length", required_argument, NULL, 'd'},
@@ -251,7 +251,7 @@ int main(int argc, char** argv)
 				          << "Enable active waiting in the pipeline synchronizations                "
 				          << "[" << (active_waiting ? "true" : "false") << "]" << std::endl;
 				std::cout << "  -n, --stages-task-number "
-				          << "The number of tasks on each stage of the pipelin                      "
+				          << "The number of tasks on each stage of the pipeline                     "
 				          << "[" << (task_per_stage_param.empty() ? "empty" : "\"" + task_per_stage_param + "\"") << "]"
 				          << std::endl;
 				std::cout << "  -r, --sockets-type-task  "

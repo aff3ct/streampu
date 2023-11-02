@@ -1037,9 +1037,9 @@ void Task
 }
 
 void Task
-::bind(Task &tsk, const int priority)
+::bind(Task &t_out, const int priority)
 {
-	this->bind(*tsk.sockets.back(), priority);
+	this->bind(*t_out.sockets.back(), priority);
 }
 
 void Task
@@ -1062,9 +1062,9 @@ void Task
 }
 
 void Task
-::operator=(Task &tsk)
+::operator=(Task &t_out)
 {
-	(*this) = *tsk.sockets.back();
+	(*this) = *t_out.sockets.back();
 }
 
 size_t Task
@@ -1114,9 +1114,9 @@ size_t Task
 }
 
 size_t Task
-::unbind(Task &tsk)
+::unbind(Task &t_out)
 {
-	return this->unbind(*tsk.sockets.back());
+	return this->unbind(*t_out.sockets.back());
 }
 
 size_t Task

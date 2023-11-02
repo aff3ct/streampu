@@ -158,9 +158,9 @@ public:
 	void   operator=(Socket &s_out                         );
 	size_t unbind   (Socket &s_out                         );
 
-	void   bind     (Task &tsk, const int priority = -1);
-	void   operator=(Task &tsk                         );
-	size_t unbind   (Task &tsk                         );
+	void   bind     (Task &t_out, const int priority = -1);
+	void   operator=(Task &t_out                         );
+	size_t unbind   (Task &t_out                         );
 
 	bool is_no_input_socket() const;
 
