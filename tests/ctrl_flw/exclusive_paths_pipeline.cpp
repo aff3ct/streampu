@@ -176,9 +176,9 @@ int main(int argc, char** argv)
 		}
 	}
 
-	std::cout << "####################################" << std::endl;
-	std::cout << "# Micro-benchmark: Simple pipeline #" << std::endl;
-	std::cout << "####################################" << std::endl;
+	std::cout << "#############################################" << std::endl;
+	std::cout << "# Micro-benchmark: Exclusive paths pipeline #" << std::endl;
+	std::cout << "#############################################" << std::endl;
 	std::cout << "#" << std::endl;
 
 	std::cout << "# Command line arguments:" << std::endl;
@@ -197,23 +197,25 @@ int main(int argc, char** argv)
 	std::cout << "#   - active_waiting = " << (active_waiting ? "true" : "false") << std::endl;
 	std::cout << "#" << std::endl;
 	if (!force_sequence && !no_copy_mode)
-		std::clog << rang::tag::warning << "'no_copy_mode' has no effect with pipeline (it is always enable)" << std::endl;
+		std::clog << rang::tag::warning << "'no_copy_mode' has no effect with pipeline (it is always enable)"
+		          << std::endl;
 	if (!force_sequence && step_by_step)
 		std::clog << rang::tag::warning << "'step_by_step' is not available with pipeline" << std::endl;
-	if(force_sequence && n_threads > 1)
-		std::clog << rang::tag::warning << "Sequence mode only supports a single thread (User-Source/Sinks are not clonable" << std::endl;
+	if (force_sequence && n_threads > 1)
+		std::clog << rang::tag::warning
+		          << "Sequence mode only supports a single thread (User-Source/Sinks are not clonable)" << std::endl;
 
 	std::function<uint8_t(uint8_t*)> pack = [](uint8_t* unpacked)
 	{
 		uint8_t res = 0;
-		for (size_t i=0; i < 8; i++)
+		for (size_t i = 0; i < 8; i++)
 			res |= unpacked[i] << i;
 		return res;
 	};
 	std::function<uint8_t*(uint8_t)> unpack = [](uint8_t packed)
 	{
 		uint8_t* res = new uint8_t[8]();
-		for (size_t i=0; i < 8; i++)
+		for (size_t i = 0; i < 8; i++)
 			res[7-i] |= ((packed & (1 << (7 - i))) >> (7 - i)) ;
 		return res;
 	};
@@ -239,12 +241,10 @@ int main(int argc, char** argv)
 		[s_in_alt, s_path, &pack](module::Module &m, runtime::Task &t, const size_t frame_id)
 	{
 		uint8_t packed = pack((uint8_t*)(t[s_in_alt].get_dataptr()));
-		if(packed >= 97 && packed <= 122) {
+		if (packed >= 97 && packed <= 122)
 			*(uint8_t*)(t[s_path].get_dataptr()) = 0;
-		}
-		else {
+		else
 			*(uint8_t*)(t[s_path].get_dataptr()) = 1;
-		}
 		return 0;
 	});
 
@@ -256,11 +256,11 @@ int main(int argc, char** argv)
 	{
 		*(long*)(t[s_out_up].get_dataptr()) = *(long*)(t[s_in_up].get_dataptr());
 		uint8_t packed = pack((uint8_t*)(t[s_in_up].get_dataptr()));
-		if(packed >= 97 && packed <= 122) {
-			uint8_t* unpacked = unpack(packed-32);
-			for(size_t i=0; i < 8; i++) {
-				((uint8_t*)(t[s_out_up].get_dataptr()))[i] = unsigned(unpacked[i]); 	
-			}
+		if (packed >= 97 && packed <= 122)
+		{
+			uint8_t* unpacked = unpack(packed - 32);
+			for (size_t i = 0; i < 8; i++)
+				((uint8_t*)(t[s_out_up].get_dataptr()))[i] = unsigned(unpacked[i]);
 		}
 		return 0;
 	});
@@ -273,11 +273,11 @@ int main(int argc, char** argv)
 	{
 		*(long*)(t[s_out_low].get_dataptr()) = *(long*)(t[s_in_low].get_dataptr());
 		uint8_t packed = pack((uint8_t*)(t[s_in_low].get_dataptr()));
-		if(packed >= 65 && packed <= 90) {	
-			uint8_t* unpacked = unpack(packed+32);
-			for(size_t i=0; i < 8; i++) {
-				((uint8_t*)(t[s_out_low].get_dataptr()))[i] = unsigned(unpacked[i]); 	
-			}
+		if (packed >= 65 && packed <= 90)
+		{
+			uint8_t* unpacked = unpack(packed + 32);
+			for (size_t i = 0; i < 8; i++)
+				((uint8_t*)(t[s_out_low].get_dataptr()))[i] = unsigned(unpacked[i]);
 		} 
 		return 0;
 	});
@@ -343,31 +343,32 @@ int main(int argc, char** argv)
 	}
 	else
 	{
-		pipeline_chain.reset(new runtime::Pipeline(
-		                     source[module::src::tsk::generate], // first task of the sequence
-		                     { // pipeline stage 0
-		                       { { &source[module::src::tsk::generate] },   // first tasks of stage 0
-		                         { &relayer_com[module::rly::tsk::relay], &alternator("alternate") } }, // last  tasks of stage 0
-		                       // pipeline stage 1
-		                       { { &switcher[module::swi::tsk::commute] },   // first tasks of stage 1
-		                         { &relayer_sel[module::rly::tsk::relay] } }, // last  tasks of stage 1
-		                       // pipeline stage 2
-		                       { { &sink[module::snk::tsk::send_count] },   // first tasks of stage 2
-		                         {                                     } }, // last  tasks of stage 2
-		                     },
-		                     {
-		                       1,                         // number of threads in the stage 0
-		                       n_threads ? n_threads : 1, // number of threads in the stage 1
-		                       1                          // number of threads in the stage 2
-		                     },
-		                     {
-		                       buffer_size, // synchronization buffer size between stages 0 and 1
-		                       buffer_size, // synchronization buffer size between stages 1 and 2
-		                     },
-		                     {
-		                       active_waiting, // type of waiting between stages 0 and 1 (true = active, false = passive)
-		                       active_waiting, // type of waiting between stages 1 and 2 (true = active, false = passive)
-		                     }));
+		pipeline_chain.reset(
+			new runtime::Pipeline(
+			source[module::src::tsk::generate], // first task of the sequence
+			{ // pipeline stage 0
+			  { { &source[module::src::tsk::generate] },   // first tasks of stage 0
+			    { &relayer_com[module::rly::tsk::relay], &alternator("alternate") } }, // last  tasks of stage 0
+			  // pipeline stage 1
+			  { { &switcher[module::swi::tsk::commute] },   // first tasks of stage 1
+			    { &relayer_sel[module::rly::tsk::relay] } }, // last  tasks of stage 1
+			  // pipeline stage 2
+			  { { &sink[module::snk::tsk::send_count] },   // first tasks of stage 2
+			    {                                     } }, // last  tasks of stage 2
+			},
+			{
+			  1,                         // number of threads in the stage 0
+			  n_threads ? n_threads : 1, // number of threads in the stage 1
+			  1                          // number of threads in the stage 2
+			},
+			{
+			  buffer_size, // synchronization buffer size between stages 0 and 1
+			  buffer_size, // synchronization buffer size between stages 1 and 2
+			},
+			{
+			  active_waiting, // type of waiting between stages 0 and 1 (true = active, false = passive)
+			  active_waiting, // type of waiting between stages 1 and 2 (true = active, false = passive)
+			}));
 		pipeline_chain->set_n_frames(n_inter_frames);
 
 		if (!dot_filepath.empty())
@@ -404,7 +405,8 @@ int main(int argc, char** argv)
 	if (tests_passed)
 		std::cout << "# " << rang::style::bold << rang::fg::green << "Tests passed!" << rang::style::reset << std::endl;
 	else
-		std::cout << "# " << rang::style::bold << rang::fg::red << "Tests failed :-(" << rang::style::reset << std::endl;
+		std::cout << "# " << rang::style::bold << rang::fg::red << "Tests failed :-(" << rang::style::reset
+	              << std::endl;
 	unsigned int test_results = !tests_passed;
 
 	// display the statistics of the tasks (if enabled)
@@ -419,7 +421,8 @@ int main(int argc, char** argv)
 			for (size_t s = 0; s < stages.size(); s++)
 			{
 				const int n_threads = stages[s]->get_n_threads();
-				std::cout << "#" << std::endl << "# Pipeline stage " << s << " (" << n_threads << " thread(s)): " << std::endl;
+				std::cout << "#" << std::endl << "# Pipeline stage " << s << " (" << n_threads << " thread(s)): "
+				          << std::endl;
 				tools::Stats::show(stages[s]->get_tasks_per_types(), true, false);
 			}
 		}
