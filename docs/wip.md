@@ -96,12 +96,14 @@ A better long term solution would perhaps be to use the `min_id` system in order
 to keep the old numerical values of already existing tasks but this time with a
 breadth-first type algorithm.
 
-## End-of-sequence Commutes
+<a name="End-of-sequence"></a>
+## End-of-sequence (`commute`/`select`)
 
-Currently a sequence may not end with a switcher task, this is problematic for
-pipelines as this means that individual stages cannot have a commute as their
-last task. This would require modifications to the `last_subsequence()`
-method, as an end-of-sequence commute would still have a children.
+Currently a sequence may not end with a switcher task (`commute` or `select`), 
+this is problematic for pipelines as this means that individual stages cannot 
+have a commute as their last task. This would require modifications to the 
+`last_subsequence()` method, as an end-of-sequence commute would still have a 
+children.
 
 ### Example
 
@@ -139,6 +141,6 @@ E(SS 3)-.->B(SS select);
     ```
 
 With our current implementation of the DFS, Stage 2 technically has no final
-sub-sequence as every single node has atleast one child thus making the insertion
-of push tasks impossible. A solution would be to introduce a fake task after
-each commute on their last path during pipeline creations.
+sub-sequence as every single node has atleast one child thus making the 
+insertion of push tasks impossible. A solution would be to introduce a fake task 
+after each commute on their last path during pipeline creations.

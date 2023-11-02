@@ -221,14 +221,14 @@
         \node[sin, at=(\tskid.\tsksiside), yshift=\sckiyshift] (\tskid_si\sckiid) {};
         \ifthenelse{\equal{\scknum}{yes}} {
           \node[sckshdw, at=(\tskid.\tsksiside), yshift=\sckiyshift] (\tskid_si\sckiid_shdw) {};
-          \node[sinlbl,  at=(\tskid_si\sckiid.center)] (\tskid_si\sckiid_lbl) {\sckiid};
+          \node[sinlbl,  at=(\tskid_si\sckiid.center)] (\tskid_si\sckiid_lbl) {\i};
         }{}
       \else
         \node[sfwd, at=(\tskid.\tsksiside), yshift=\sckiyshift] (\tskid_si\sckiid) {};
         \node[inv, at=(\tskid_si\sckiid.center)] (\tskid_si\sckiid_fwd) {};
         \ifthenelse{\equal{\scknum}{yes}} {
           \node[sckshdw, at=(\tskid.\tsksiside), yshift=\sckiyshift] (\tskid_si\sckiid_shdw) {};
-          \node[sfwdlbl, at=(\tskid_si\sckiid.center)] (\tskid_si\sckiid_lbl) {\sckiid};
+          \node[sfwdlbl, at=(\tskid_si\sckiid.center)] (\tskid_si\sckiid_lbl) {\i};
         }{}
       \fi
     }
@@ -247,14 +247,14 @@
         \node[sout, at=(\tskid.\tsksoside), yshift=\sckoyshift] (\tskid_so\sckoid) {};
         \ifthenelse{\equal{\scknum}{yes}} {
           \node[sckshdw, at=(\tskid.\tsksoside), yshift=\sckoyshift] (\tskid_so\sckoid_shdw) {};
-          \node[soutlbl, at=(\tskid_so\sckoid.center)] (\tskid_so\sckoid_lbl) {\sckoid};
+          \node[soutlbl, at=(\tskid_so\sckoid.center)] (\tskid_so\sckoid_lbl) {\i};
         }{}
       \else
         \node[sfwd, at=(\tskid.\tsksoside), yshift=\sckoyshift] (\tskid_so\sckoid) {};
         \node[inv, at=(\tskid_so\sckoid.center)] (\tskid_so\sckoid_fwd) {};
         \ifthenelse{\equal{\scknum}{yes}} {
           \node[sckshdw, at=(\tskid.\tsksoside), yshift=\sckoyshift] (\tskid_so\sckoid_shdw) {};
-          \node[sfwdlbl, at=(\tskid_so\sckoid.center)] (\tskid_so\sckoid_lbl) {\sckoid};
+          \node[sfwdlbl, at=(\tskid_so\sckoid.center)] (\tskid_so\sckoid_lbl) {\i};
         }{}
       \fi
     }

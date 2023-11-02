@@ -162,3 +162,22 @@ void Check_ctrl_flw(Node n, List path_taken):
             if j == path_taken.size 
                 throw an error
 ```
+
+### Tests
+
+Some specific tests have been added to the project to validate the robustness of 
+the control flow inside a pipelie stage.
+
+=== "Switch-case inside a parallel stage"
+    <figure markdown>
+      ![double chain](./assets/exclusive_paths_pipeline.svg){ width="750", align="left" }
+      <figcaption>`test-exclusive-paths-pipeline`.</figcaption>
+    </figure>
+    ```bash
+    test-exclusive-paths-pipeline -t 4 -i ../CMakeLists.txt
+    ```  
+    In this test, the read bytes (from the source $t_1$) are alternatively 
+    converted to upper case and to lower case (see $t_5$ and $t_6$ task). As 
+    explained in the [Work in Progress](./wip.md#End-of-sequence) section, we 
+    need to add a delayer module ($t_8$) after the `select` task ($t_7$) to
+    make it work.

@@ -1,0 +1,76 @@
+\documentclass{standalone}
+
+\usepackage{tikz}
+\usetikzlibrary{aff3ct}
+
+\begin{document}
+  \begin{tikzpicture}[background rectangle/.style={thick, draw=gray!60, fill=white, fill opacity=1.0, rounded corners=2px}, show background rectangle]
+    %%%%%%%%%%%%%%%%%%
+    %% create tasks %%
+    %%%%%%%%%%%%%%%%%%
+    %        options                            id   coords    label                sin sout sfwd attributes
+    %        -------                            --   ------    -----                --- ---- ---- ----------
+    \task                                       {t1} {-0.5, 0} {generate\\($t_1$)}  {0} {1}  {0}  {"seq"};
+    \task    [right=1.2cm of t1, yshift=+1.5cm] {t2} {}        {relay\\($t_2$)}     {1} {1}  {0}  {};
+    \task    [right=1.2cm of t1, yshift=-1.5cm] {t3} {}        {alternate\\($t_3$)} {0} {1}  {0}  {};
+    \commute [right=1.2cm of t3, yshift=+1.5cm] {t4} {}        {commute\\($t_4$)}   {2}           {};
+    \task    [right=1.5cm of t4, yshift=+1.5cm] {t5} {}        {upcase\\($t_5$)}    {1} {1}  {0}  {};
+    \task    [right=1.5cm of t4, yshift=-1.5cm] {t6} {}        {lowcase\\($t_6$)}   {1} {1}  {0}  {};
+    \select  [right=1.5cm of t6, yshift=+1.5cm] {t7} {}        {select\\($t_{7})$}  {2}           {};
+    \task    [right=1.2cm of t7               ] {t8} {}        {relay\\($t_8$)}     {1} {1}  {0}  {};
+    \task    [right=1.2cm of t8               ] {t9} {}        {send\\($t_9$)}      {1} {0}  {0}  {"seq"};
+
+    %%%%%%%%%%%%%%%%%%%%
+    %% create modules %%
+    %%%%%%%%%%%%%%%%%%%%
+    %       options  task ids id   label
+    %       -------  -------- --   -----
+    \module          {"t1"}   {m1} {Source};
+    \module          {"t2"}   {m2} {Relayer};
+    \module          {"t3"}   {m3} {Alternator};
+    \module          {"t4"}   {m4} {Switcher};
+    \module          {"t5"}   {m5} {Uppercaser};
+    \module          {"t6"}   {m6} {Lowercaser};
+    \module          {"t7"}   {m7} {Switcher};
+    \module          {"t8"}   {m8} {Relayer};
+    \module          {"t9"}   {m9} {Sink};
+
+    \draw [<->, dashed, Paired-3] (m4) -- (m7) node[midway, below] {{\small same Switcher module}};
+
+    %%%%%%%%%%%%%%%%
+    %% bind tasks %%
+    %%%%%%%%%%%%%%%%
+    %     options                   start id path              end id
+    %     -------                   -------- ----              ------
+    \draw [bind]                    (t1_so1) --++ (0.60, 0) |- (t2_si1);
+    \draw [bind]                    (t2_so1) --++ (1.15, 0) |- (t4_si1);
+    \draw [bind]                    (t3_so1) --++ (0.60, 0) |- (t4_si2);
+    \draw [bind,densely dashdotted] (t4_so1) --++ (0.60, 0) |- (t5_si1);
+    \draw [bind,densely dashdotted] (t4_so2) --++ (0.60, 0) |- (t6_si1);
+    \draw [bind,densely dashdotted] (t5_so1) --++ (1.05, 0) |- (t7_si1);
+    \draw [bind,densely dashdotted] (t6_so1) --++ (0.90, 0) |- (t7_si2);
+    \draw [bind]                    (t7_so1)                -- (t8_si1);
+    \draw [bind]                    (t8_so1)                -- (t9_si1);
+
+    %%%%%%%%%%%%%%%%%%%
+    %% create stages %%
+    %%%%%%%%%%%%%%%%%%%
+    %      options                 object ids                 id   label     n_threads
+    %      -------                 ----------                 --   -----     ---------
+    \stage [minimum height=5.50cm] {"m1","m2","m3"}           {s1} {Stage 1} {1}
+    \stage [minimum height=5.50cm] {"m4","m5","m6","m7","m8"} {s2} {Stage 2} {4}
+    \stage [minimum height=5.50cm] {"m9"}                     {s3} {Stage 3} {1}
+
+    %%%%%%%%%%%%%%%%%%%%%
+    %% clone the tasks %%
+    %%%%%%%%%%%%%%%%%%%%%
+    %      options task ids                   n clones
+    %      ------- --------                   --------
+    \clone []      {"t4","t5","t6","t7","t8"} {4}
+
+    %%%%%%%%%%%%%%%%%%%%%
+    %% draw the legend %%
+    %%%%%%%%%%%%%%%%%%%%%
+    \legend [shift={(-1.0,3.0)}]
+  \end{tikzpicture}
+\end{document}
