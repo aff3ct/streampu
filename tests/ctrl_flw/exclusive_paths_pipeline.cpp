@@ -205,7 +205,7 @@ int main(int argc, char** argv)
 		std::clog << rang::tag::warning
 		          << "Sequence mode only supports a single thread (User-Source/Sinks are not clonable)" << std::endl;
 
-	std::function<uint8_t(uint8_t*)> pack = [](uint8_t* unpacked)
+	std::function<uint8_t(const uint8_t*)> pack = [](const uint8_t* unpacked)
 	{
 		uint8_t res = 0;
 		for (size_t i = 0; i < 8; i++)
@@ -240,11 +240,11 @@ int main(int argc, char** argv)
 	alternator.create_codelet(alternator("alternate"),
 		[s_in_alt, s_path, &pack](module::Module &m, runtime::Task &t, const size_t frame_id)
 	{
-		uint8_t packed = pack((uint8_t*)(t[s_in_alt].get_dataptr()));
+		uint8_t packed = pack(t[s_in_alt].get_dataptr<const uint8_t>());
 		if (packed >= 97 && packed <= 122)
-			*(uint8_t*)(t[s_path].get_dataptr()) = 0;
+			*t[s_path].get_dataptr<uint8_t>() = 0;
 		else
-			*(uint8_t*)(t[s_path].get_dataptr()) = 1;
+			*t[s_path].get_dataptr<uint8_t>() = 1;
 		return 0;
 	});
 
@@ -254,13 +254,12 @@ int main(int argc, char** argv)
 	uppercaser.create_codelet(uppercaser("upcase"),
 		[s_in_up, s_out_up, &pack, &unpack](module::Module &m, runtime::Task &t, const size_t frame_id)
 	{
-		*(long*)(t[s_out_up].get_dataptr()) = *(long*)(t[s_in_up].get_dataptr());
-		uint8_t packed = pack((uint8_t*)(t[s_in_up].get_dataptr()));
+		uint8_t packed = pack(t[s_in_up].get_dataptr<const uint8_t>());
 		if (packed >= 97 && packed <= 122)
 		{
 			uint8_t* unpacked = unpack(packed - 32);
 			for (size_t i = 0; i < 8; i++)
-				((uint8_t*)(t[s_out_up].get_dataptr()))[i] = unsigned(unpacked[i]);
+				t[s_out_up].get_dataptr<uint8_t>()[i] = unsigned(unpacked[i]);
 		}
 		return 0;
 	});
@@ -271,13 +270,12 @@ int main(int argc, char** argv)
 	lowercaser.create_codelet(lowercaser("lowcase"),
 		[s_in_low, s_out_low, &pack, &unpack](module::Module &m, runtime::Task &t, const size_t frame_id)
 	{
-		*(long*)(t[s_out_low].get_dataptr()) = *(long*)(t[s_in_low].get_dataptr());
-		uint8_t packed = pack((uint8_t*)(t[s_in_low].get_dataptr()));
+		uint8_t packed = pack(t[s_in_low].get_dataptr<const uint8_t>());
 		if (packed >= 65 && packed <= 90)
 		{
 			uint8_t* unpacked = unpack(packed + 32);
 			for (size_t i = 0; i < 8; i++)
-				((uint8_t*)(t[s_out_low].get_dataptr()))[i] = unsigned(unpacked[i]);
+				t[s_out_low].get_dataptr<uint8_t>()[i] = unsigned(unpacked[i]);
 		} 
 		return 0;
 	});

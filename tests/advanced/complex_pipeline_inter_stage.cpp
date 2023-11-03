@@ -155,19 +155,17 @@ int main(int argc, char** argv)
 	multi_comp.create_codelet(task_multi_comp,
 		[sock_0, sock_1,data_length,incs](module::Module &m, runtime::Task &t, const size_t frame_id) -> int
 	{
-		auto tab_0 = static_cast<uint8_t*>(t[sock_0].get_dataptr());
-		auto tab_1 = (uint8_t*)(t[sock_1].get_dataptr());
+		auto tab_0 = t[sock_0].get_dataptr<      uint8_t>();
+		auto tab_1 = t[sock_1].get_dataptr<const uint8_t>();
 		for (size_t i = 0; i < data_length ; ++i)
 			tab_0[i] = tab_0[i]*(incs.size() +1) +1;
 		for (size_t i = 0; i < data_length; ++i)
-		{
 			if (tab_0[i] != tab_1[i])
 			{
 				std::cout << "Found different values => " << " Tab_0 : " << unsigned (tab_0[i]) <<  ", Tab_1 : "
 				          << unsigned (tab_1[i]) << std::endl;
 				return runtime::status_t::FAILURE;
 			}
-		}
 		std::cout << "All the values are correct " << "Expected : " << unsigned (tab_0[0]) << ", got : "
 		          << unsigned (tab_1[0]) << std::endl;
 		return runtime::status_t::SUCCESS;

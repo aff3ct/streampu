@@ -2,6 +2,7 @@
 #include <iterator>
 #include <sstream>
 #include <utility>
+#include <type_traits>
 
 #include "Tools/Exception/exception.hpp"
 #include "Runtime/Socket/Socket.hpp"
@@ -153,6 +154,19 @@ template <typename T>
 T* Socket
 ::get_dataptr(const size_t start_col) const
 {
+	if (this->get_type() == socket_t::SIN && !std::is_const<T>::value)
+	{
+		std::stringstream message;
+		message << "'This is an input socket and the 'T' template should be 'const' ("
+		        << "'T'"                      << " = " << typeid(T).name()               << ", "
+		        << "'datatype'"               << " = " << type_to_string[this->datatype] << ", "
+		        << "'name'"                   << " = " << get_name()                     << ", "
+		        << "'task.name'"              << " = " << task.get_name()              /*<< ", "*/
+//		        << "'task.module.name'"       << " = " << task.get_module_name()
+		        << ").";
+		throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
+	}
+
 	return static_cast<T*>(this->get_dataptr(start_col * sizeof(T)));
 }
 
@@ -167,6 +181,19 @@ template <typename T>
 T** Socket
 ::get_2d_dataptr(const size_t start_row, const size_t start_col)
 {
+	if (this->get_type() == socket_t::SIN && !std::is_const<T>::value)
+	{
+		std::stringstream message;
+		message << "'This is an input socket and the 'T' template should be 'const' ("
+		        << "'T'"                      << " = " << typeid(T).name()               << ", "
+		        << "'datatype'"               << " = " << type_to_string[this->datatype] << ", "
+		        << "'name'"                   << " = " << get_name()                     << ", "
+		        << "'task.name'"              << " = " << task.get_name()              /*<< ", "*/
+//		        << "'task.module.name'"       << " = " << task.get_module_name()
+		        << ").";
+		throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
+	}
+
 	return (T**)(this->get_2d_dataptr(start_row, start_col * sizeof(T)));
 }
 
