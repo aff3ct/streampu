@@ -9,7 +9,7 @@ if(${CMAKE_VERSION} VERSION_EQUAL "3.14" OR ${CMAKE_VERSION} VERSION_GREATER "3.
     cmake_policy(SET CMP0083 NEW)
 endif()
 
-project(aff3ct-core)
+project(aff3ct-core CXX)
 
 # ---------------------------------------------------------------------------------------------------------------------
 # ------------------------------------------------------------------------------------------------------- CMAKE OPTIONS
