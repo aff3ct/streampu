@@ -1015,7 +1015,7 @@ tools::Digraph_node<SS>* Sequence
 
 			for (auto &s : current_task.sockets)
 			{
-				if (!(current_task.get_socket_type(*s) == socket_t::SOUT))
+				if (!(s->get_type() == socket_t::SOUT))
 					continue;
 				auto bss = s->get_bound_sockets();
 				for (auto bs : bss)
@@ -1076,8 +1076,7 @@ tools::Digraph_node<SS>* Sequence
 		{
 			for (auto &s : current_task.sockets)
 			{
-				if (current_task.get_socket_type(*s) == socket_t::SOUT ||
-				    current_task.get_socket_type(*s) == socket_t::SFWD)
+				if (s->get_type() == socket_t::SOUT || s->get_type() == socket_t::SFWD)
 				{
 					auto bss = s->get_bound_sockets();
 					for (auto &bs : bss)
@@ -1126,12 +1125,12 @@ tools::Digraph_node<SS>* Sequence
 						}
 					}
 				}
-				else if (current_task.get_socket_type(*s) == socket_t::SIN && s->get_bound_sockets().size() > 1)
+				else if (s->get_type() == socket_t::SIN && s->get_bound_sockets().size() > 1)
 				{
 					std::stringstream message;
 					message << "'s->get_bound_sockets().size()' has to be smaller or equal to 1 ("
 					        << "'s->get_bound_sockets().size()'"         << " = " << s->get_bound_sockets().size() << ", "
-					        << "'get_socket_type(*s)'"                   << " = " << "socket_t::SIN"               << ", "
+					        << "'s->get_type()'"                         << " = " << "socket_t::SIN"               << ", "
 					        << "'s->get_name()'"                         << " = " << s->get_name()                 << ", "
 					        << "'s->get_task().get_name()'"              << " = " << s->get_task().get_name()      << ", "
 					        << "'s->get_task().get_module().get_name()'" << " = " << s->get_task().get_module().get_name()
@@ -1280,8 +1279,8 @@ void Sequence
 				// replicate the sockets binding
 				for (size_t s_id = 0; s_id < t_ref->sockets.size(); s_id++)
 				{
-					if (t_ref->get_socket_type(*t_ref->sockets[s_id]) == socket_t::SIN ||
-					    t_ref->get_socket_type(*t_ref->sockets[s_id]) == socket_t::SFWD)
+					if (t_ref->sockets[s_id]->get_type() == socket_t::SIN ||
+					    t_ref->sockets[s_id]->get_type() == socket_t::SFWD)
 					{
 						const runtime::Socket* s_ref_out = nullptr;
 						try { s_ref_out = &t_ref->sockets[s_id]->get_bound_socket(); } catch (...) {}
@@ -1464,7 +1463,7 @@ void Sequence
 		{
 			std::string stype;
 			bool static_input = false;
-			switch (t->get_socket_type(*s))
+			switch (s->get_type())
 			{
 				case socket_t::SIN:
 					stype = "in[" + std::to_string(sid) + "]";
@@ -1519,7 +1518,7 @@ void Sequence
 	{
 		for (auto &s : t->sockets)
 		{
-			if (t->get_socket_type(*s) == socket_t::SOUT || t->get_socket_type(*s) == socket_t::SFWD)
+			if (s->get_type() == socket_t::SOUT || s->get_type() == socket_t::SFWD)
 			{
 				auto &bss = s->get_bound_sockets();
 				size_t id = 0;
@@ -1673,7 +1672,7 @@ void Sequence
 						for (size_t s = 0; s < select_task->sockets.size() -1; s++)
 						{
 							// there should be only one output socket at this time
-							if (select_task->get_socket_type(*select_task->sockets[s]) == socket_t::SOUT)
+							if (select_task->sockets[s]->get_type() == socket_t::SOUT)
 							{
 								std::vector<runtime::Socket*> bound_sockets;
 								std::vector<void*> dataptrs;
@@ -1723,7 +1722,7 @@ void Sequence
 
 						for (size_t s = 0; s < commute_task->sockets.size() -1; s++)
 						{
-							if (commute_task->get_socket_type(*commute_task->sockets[s]) == socket_t::SOUT)
+							if (commute_task->sockets[s]->get_type() == socket_t::SOUT)
 							{
 								std::vector<runtime::Socket*> bound_sockets;
 								std::vector<void*> dataptrs;
@@ -1769,7 +1768,7 @@ void Sequence
 
 						for (size_t s = 0; s < pull_task->sockets.size() -1; s++)
 						{
-							if (pull_task->get_socket_type(*pull_task->sockets[s]) == socket_t::SOUT)
+							if (pull_task->sockets[s]->get_type() == socket_t::SOUT)
 							{
 								std::vector<runtime::Socket*> bound_sockets;
 								std::vector<void*> dataptrs;
@@ -1827,7 +1826,7 @@ void Sequence
 						contents->rebind_dataptrs.resize(rebind_id +1);
 
 						for (size_t s = 0; s < push_task->sockets.size() -1; s++)
-							if (push_task->get_socket_type(*push_task->sockets[s]) == socket_t::SIN)
+							if (push_task->sockets[s]->get_type() == socket_t::SIN)
 							{
 								std::vector<runtime::Socket*> bound_sockets;
 								std::vector<void*> dataptrs;
@@ -2139,8 +2138,7 @@ void Sequence
 	{
 		for (auto sck_out : tsk_out->sockets)
 		{
-			if (tsk_out->get_socket_type(*sck_out) == socket_t::SOUT ||
-			    tsk_out->get_socket_type(*sck_out) == socket_t::SFWD)
+			if (sck_out->get_type() == socket_t::SOUT || sck_out->get_type() == socket_t::SFWD)
 			{
 				for (auto sck_in : sck_out->get_bound_sockets())
 				{

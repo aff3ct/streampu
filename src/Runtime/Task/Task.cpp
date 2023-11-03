@@ -24,7 +24,6 @@ Task
   fast(fast),
   debug(debug),
   debug_hex(false),
-  no_input_socket(true),
   debug_limit(-1),
   debug_precision(2),
   debug_frame_max(-1),
@@ -72,13 +71,13 @@ void Task
 		{
 			this->out_buffers.clear();
 			for (auto& s : sockets)
-				if (get_socket_type(*s) == socket_t::SOUT && s->get_name() != "status")
+				if (s->get_type() == socket_t::SOUT && s->get_name() != "status")
 					s->dataptr = nullptr;
 		}
 		else
 		{
 			for (auto& s : sockets)
-				if (get_socket_type(*s) == socket_t::SOUT && s->get_name() != "status")
+				if (s->get_type() == socket_t::SOUT && s->get_name() != "status")
 				{
 					out_buffers.push_back(std::vector<uint8_t>(s->databytes));
 					s->dataptr = out_buffers.back().data();
@@ -275,7 +274,7 @@ void Task
 
 			for (size_t sid = 0; sid < this->sockets.size() -1; sid++)
 			{
-				if (socket_type[sid] == socket_t::SIN)
+				if (sockets[sid]->get_type() == socket_t::SIN)
 					std::copy(sockets_dataptr_init[sid] + ((frame_id % n_frames) + 0) * sockets_databytes_per_frame[sid],
 					          sockets_dataptr_init[sid] + ((frame_id % n_frames) + 1) * sockets_databytes_per_frame[sid],
 					          sockets_data[sid].begin() + w_pos                       * sockets_databytes_per_frame[sid]);
@@ -285,7 +284,7 @@ void Task
 			status[w] = this->codelet(*this->module, *this, w * n_frames_per_wave);
 
 			for (size_t sid = 0; sid < this->sockets.size() -1; sid++)
-				if (socket_type[sid] == socket_t::SOUT)
+				if (sockets[sid]->get_type() == socket_t::SOUT)
 					std::copy(sockets_data[sid].begin() + (w_pos + 0)           * sockets_databytes_per_frame[sid],
 					          sockets_data[sid].begin() + (w_pos + 1)           * sockets_databytes_per_frame[sid],
 					          sockets_dataptr_init[sid] + (frame_id % n_frames) * sockets_databytes_per_frame[sid]);
@@ -321,7 +320,7 @@ void Task
 				{
 					for (size_t sid = 0; sid < this->sockets.size() -1; sid++)
 					{
-						if (socket_type[sid] == socket_t::SIN)
+						if (sockets[sid]->get_type() == socket_t::SIN)
 							std::copy(sockets_dataptr_init[sid] + w * n_frames_per_wave * sockets_databytes_per_frame[sid],
 							          sockets_dataptr_init[sid] +     n_frames          * sockets_databytes_per_frame[sid],
 							          sockets_data[sid].begin());
@@ -331,7 +330,7 @@ void Task
 					status[w] = this->codelet(*this->module, *this, w * n_frames_per_wave);
 
 					for (size_t sid = 0; sid < this->sockets.size() -1; sid++)
-						if (socket_type[sid] == socket_t::SOUT)
+						if (sockets[sid]->get_type() == socket_t::SOUT)
 							std::copy(sockets_data[sid].begin(),
 							          sockets_data[sid].begin() + n_frames_per_wave_rest * sockets_databytes_per_frame[sid],
 							          sockets_dataptr_init[sid] + w * n_frames_per_wave  * sockets_databytes_per_frame[sid]);
@@ -381,7 +380,7 @@ const std::vector<int>& Task
 			for (auto i = 0; i < (int)sockets.size() -1; i++)
 			{
 				auto &s = *sockets[i];
-				auto s_type = get_socket_type(s);
+				auto s_type = s.get_type();
 				auto n_elmts = s.get_databytes() / (size_t)s.get_datatype_size();
 				std::cout << rang::style::bold << rang::fg::blue << (s_type == socket_t::SIN ? "const " : "")
 				          << s.get_datatype_string() << rang::style::reset
@@ -395,7 +394,7 @@ const std::vector<int>& Task
 
 			for (auto& s : sockets)
 			{
-				auto s_type = get_socket_type(*s);
+				auto s_type = s->get_type();
 				if (s_type == socket_t::SIN || s_type == socket_t::SFWD)
 				{
 					std::string spaces; for (size_t ss = 0; ss < max_n_chars - s->get_name().size(); ss++) spaces += " ";
@@ -452,7 +451,7 @@ const std::vector<int>& Task
 			auto n_fra_per_w = this->module->get_n_frames_per_wave();
 			for (auto& s : sockets)
 			{
-				auto s_type = get_socket_type(*s);
+				auto s_type = s->get_type();
 				if ((s_type == socket_t::SOUT) && s->get_name() != "status")
 				{
 					std::string spaces; for (size_t ss = 0; ss < max_n_chars - s->get_name().size(); ss++) spaces += " ";
@@ -576,13 +575,11 @@ size_t Task
 ::create_2d_socket_in(const std::string &name, const size_t n_rows, const size_t n_cols)
 {
 	auto &s = create_2d_socket<T>(name, n_rows, n_cols, socket_t::SIN);
-	socket_type.push_back(socket_t::SIN);
 	last_input_socket = &s;
 
-	this->set_no_input_socket(false);
 	this->n_input_sockets++;
 
-	return socket_type.size() -1;
+	return sockets.size() -1;
 }
 
 size_t Task
@@ -635,8 +632,6 @@ size_t Task
 ::create_2d_socket_out(const std::string &name, const size_t n_rows, const size_t n_cols, const bool hack_status)
 {
 	auto &s = create_2d_socket<T>(name, n_rows, n_cols, socket_t::SOUT, hack_status);
-	socket_type.push_back(socket_t::SOUT);
-
 	this->n_output_sockets++;
 
 	// memory allocation
@@ -646,7 +641,7 @@ size_t Task
 		s.dataptr = out_buffers.back().data(); // memory allocation
 	}
 
-	return socket_type.size() -1;
+	return sockets.size() -1;
 }
 
 size_t Task
@@ -700,13 +695,11 @@ size_t Task
 ::create_2d_socket_fwd(const std::string &name, const size_t n_rows, const size_t n_cols)
 {
 	auto &s = create_2d_socket<T>(name, n_rows, n_cols, socket_t::SFWD);
-	socket_type.push_back(socket_t::SFWD);
-	last_input_socket = &s; 
+	last_input_socket = &s;
 
-	this->set_no_input_socket(false);
 	this->n_fwd_sockets++;
 
-	return socket_type.size() -1;
+	return sockets.size() -1;
 }
 
 size_t Task
@@ -768,7 +761,6 @@ void Task
 void Task
 ::update_n_frames(const size_t old_n_frames, const size_t new_n_frames)
 {
-	size_t s_id = 0;
 	size_t sout_id = 0;
 	for (auto &s : this->sockets)
 	{
@@ -790,14 +782,13 @@ void Task
 			const size_t prev_n_rows_wo_nfra = s->get_n_rows() / old_n_frames;
 			s->set_n_rows(prev_n_rows_wo_nfra * new_n_frames);
 
-			if (this->is_autoalloc() && this->socket_type[s_id] == socket_t::SOUT)
+			if (this->is_autoalloc() && s->get_type() == socket_t::SOUT)
 			{
 				this->out_buffers[sout_id].resize(new_databytes);
 				s->set_dataptr((void*)this->out_buffers[sout_id].data());
 				sout_id++;
 			}
 		}
-		s_id++;
 	}
 }
 
@@ -889,19 +880,6 @@ const std::vector<std::chrono::nanoseconds>& Task
 	return this->timers_max;
 }
 
-socket_t Task
-::get_socket_type(const Socket &s) const
-{
-	for (size_t i = 0; i < sockets.size(); i++)
-		if (sockets[i].get() == &s)
-			return socket_type[i];
-
-	std::stringstream message;
-	message << "The socket does not exist ('s.name' = " << s.get_name() << ", 'task.name' = " << this->get_name()
-	        << ", 'module.name' = " << module->get_name() << ").";
-	throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
-}
-
 size_t Task
 ::get_n_input_sockets() const
 {
@@ -956,7 +934,7 @@ Task* Task
 	for (auto s : this->sockets)
 	{
 		void *dataptr = nullptr;
-		if (this->get_socket_type(*s) == socket_t::SOUT && this->is_autoalloc())
+		if (s->get_type() == socket_t::SOUT && this->is_autoalloc())
 		{
 			if (s->get_name() == "status")
 			{
@@ -966,7 +944,7 @@ Task* Task
 			else
 				dataptr = (void*)t->out_buffers[out_buffers_counter++].data();
 		}
-		else if (this->get_socket_type(*s) == socket_t::SIN || this->get_socket_type(*s) == socket_t::SFWD)
+		else if (s->get_type() == socket_t::SIN || s->get_type() == socket_t::SFWD)
 			dataptr = s->get_dataptr();
 
 		const std::pair<size_t,size_t> databytes_per_dim = { s->get_n_rows(), s->get_databytes() / s->get_n_rows() };
@@ -979,23 +957,11 @@ Task* Task
 		                                                dataptr));
 		t->sockets.push_back(s_new);
 
-		if (t->get_socket_type(*s_new) == socket_t::SIN || t->get_socket_type(*s_new) == socket_t::SFWD)
+		if (s_new->get_type() == socket_t::SIN || s_new->get_type() == socket_t::SFWD)
 			t->last_input_socket = s_new.get();
 	}
 
 	return t;
-}
-
-bool Task
-::is_no_input_socket() const
-{
-	return this->no_input_socket;
-}
-
-void Task
-::set_no_input_socket(const bool no_input_socket)
-{
-	this->no_input_socket = no_input_socket;
 }
 
 void Task

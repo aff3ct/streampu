@@ -65,7 +65,7 @@ std::string aff3ct::tools::get_help(const aff3ct::runtime::Task& tsk, const bool
 		for (size_t i = 0 ; i < tsk.sockets.size() ; i++)
 		{
 			std::string sck_msg = get_help(*tsk.sockets[i], verbose);
-			auto sck_type = tsk.get_socket_type(*tsk.sockets[i]);
+			auto sck_type = tsk.sockets[i]->get_type();
 			std::string line;
 			std::istringstream isstr(sck_msg);
 			if (sck_type == aff3ct::runtime::socket_t::SIN || sck_type == aff3ct::runtime::socket_t::SFWD)

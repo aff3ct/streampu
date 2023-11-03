@@ -58,7 +58,6 @@ protected:
 	bool fast;
 	bool debug;
 	bool debug_hex;
-	bool no_input_socket;
 	int32_t debug_limit;
 	uint8_t debug_precision;
 	int32_t debug_frame_max;
@@ -83,7 +82,6 @@ protected:
 	std::vector<std::chrono::nanoseconds> timers_max;
 
 	Socket* last_input_socket;
-	std::vector<socket_t> socket_type;
 
 	// precomputed values to speedup the task execution
 	std::vector            <int8_t*>  sockets_dataptr_init;
@@ -122,10 +120,9 @@ public:
 	inline bool is_last_input_socket(const Socket &s_in) const;
 	       bool can_exec            (                  ) const;
 
-	inline module::Module& get_module     (               ) const;
-	inline std::string     get_name       (               ) const;
-	inline uint32_t        get_n_calls    (               ) const;
-	       socket_t        get_socket_type(const Socket &s) const;
+	inline module::Module& get_module () const;
+	inline std::string     get_name   () const;
+	inline uint32_t        get_n_calls() const;
 
 	// get stats
 	std::chrono::nanoseconds                     get_duration_total() const;
@@ -162,11 +159,7 @@ public:
 	void   operator=(Task &t_out                         );
 	size_t unbind   (Task &t_out                         );
 
-	bool is_no_input_socket() const;
-
 protected:
-	void set_no_input_socket(const bool no_input_socket);
-
 	void _exec(const int frame_id = -1, const bool managed_memory = true);
 
 	void register_timer(const std::string &key);
