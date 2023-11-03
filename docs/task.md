@@ -21,13 +21,6 @@ std::vector<std::shared_ptr<runtime::Socket>> sockets;
 The list of sockets that are attached to this task.
 
 ```cpp
-std::vector<runtime::socket_t> socket_type;
-```
-The socket types corresponding to the previous `sockets` attribute, in the 
-same order. Can be `socket_t::SIN`, `socket_t::SOUT` or `socket_t::SFWD` for 
-input socket, output socket and forward socket, respectively.
-
-```cpp
 std::vector<std::vector<uint8_t>> out_buffers;
 ```
 The allocated data of the output sockets of this task. If the `autoalloc` 
