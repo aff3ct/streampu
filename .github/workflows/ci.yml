@@ -89,6 +89,7 @@ jobs:
         with:
           name: build-linux-clang
           path: build_linux_clang
+  # # Takes too much HDD space to be run on the GitHub runners
   # build-linux-icpc:
   #   runs-on: ubuntu-latest
   #   needs: [analysis-headers]
@@ -131,27 +132,26 @@ jobs:
           chmod +x ./build/bin/*
           ./ci/test-coverage-regression.sh
         shell: bash
+      - name: Generate Code Coverage Report Files
+        run: ./ci/coverage-linux.sh
+        shell: bash
       - name: Upload Artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: code-coverage-files
-          path: code_coverage_files/
+          name: code-coverage-report
+          path: code_coverage_report/
   coverage:
     runs-on: ubuntu-latest
     needs: [test-coverage-regression]
-    container: registry.gitlab.com/aff3ct/aff3ct/x86_64_ubuntu_coverage
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
       - name: Download Artifacts
         uses: actions/download-artifact@v3
         with:
-          name: code-coverage-files
-          path: code_coverage_files/
-      - name: Generate Code Coverage Report Files
-        run: ./ci/coverage-linux.sh
-        shell: bash
-      - name: Produce the coverage report
+          name: code-coverage-report
+          path: code_coverage_report/
+      - name: Produce the Coverage Report
         uses: insightsengineering/coverage-action@v2
         with:
           # Path to the Cobertura XML report.
@@ -178,11 +178,6 @@ jobs:
           # A custom title that can be added to the code
           # coverage summary in the PR comment.
           coverage-summary-title: "Code Coverage Summary"
-      - name: Upload Artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: code-coverage-report
-          path: code_coverage_report/
   deploy:
     if: contains( github.ref, 'development')
     runs-on: ubuntu-latest
