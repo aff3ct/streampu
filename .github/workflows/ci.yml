@@ -1,10 +1,10 @@
 name: ci
-on: push
+on: [push]
 permissions:
   contents: write
 jobs:
   analysis-headers:
-    runs-on: ubuntu-latest
+    # runs-on: ubuntu-latest
     container: ubuntu:20.04
     steps:
       - name: Checkout Code
@@ -19,7 +19,7 @@ jobs:
           name: analysis-headers
           path: aff3ct-core.hpp
   build-linux-gcc-x64-avx2:
-    runs-on: ubuntu-latest
+    # runs-on: ubuntu-latest
     needs: [analysis-headers]
     container: registry.gitlab.com/aff3ct/aff3ct/x86_64_ubuntu_gcc:v9.3.0
     steps:
@@ -40,7 +40,7 @@ jobs:
           name: build-linux-gcc-x64-avx2
           path: build_linux_gcc_x64_avx2
   build-linux-gcc-coverage:
-    runs-on: ubuntu-latest
+    # runs-on: ubuntu-latest
     needs: [analysis-headers]
     container: registry.gitlab.com/aff3ct/aff3ct/x86_64_ubuntu_gcc:v9.3.0
     steps:
@@ -60,7 +60,7 @@ jobs:
           name: build
           path: build
   build-linux-clang:
-    runs-on: ubuntu-latest
+    # runs-on: ubuntu-latest
     needs: [analysis-headers]
     container: registry.gitlab.com/aff3ct/aff3ct/x86_64_ubuntu_clang:v10.0.0
     steps:
@@ -80,7 +80,7 @@ jobs:
           name: build-linux-clang
           path: build_linux_clang
   build-linux-icpc:
-    runs-on: ubuntu-latest
+    # runs-on: ubuntu-latest
     needs: [analysis-headers]
     container: intel/oneapi-hpckit:2022.2-devel-ubuntu20.04
     steps:
@@ -100,7 +100,7 @@ jobs:
           name: build-linux-icpc
           path: build_linux_icpc
   test-coverage-regression:
-    runs-on: ubuntu-latest
+    # runs-on: ubuntu-latest
     needs: [build-linux-gcc-coverage]
     container: registry.gitlab.com/aff3ct/aff3ct/x86_64_ubuntu_coverage
     steps:
@@ -114,7 +114,7 @@ jobs:
           name: code-coverage-files
           path: code_coverage_files/
   coverage:
-    runs-on: ubuntu-latest
+    # runs-on: ubuntu-latest
     needs: [test-coverage-regression]
     container: registry.gitlab.com/aff3ct/aff3ct/x86_64_ubuntu_coverage
     steps:
