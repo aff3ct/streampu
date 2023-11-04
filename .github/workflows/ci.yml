@@ -7,8 +7,9 @@ jobs:
     runs-on: ubuntu-latest
     container: ubuntu:20.04
     steps:
-      - name: Checkout Code, Generate Headers & Compare
+      - name: Checkout Code
         uses: actions/checkout@v4
+      - name: Generate Headers & Compare
         run: ./scripts/generate_aff3ct_header.sh aff3ct-core.hpp
         run: diff aff3ct-core.hpp include/aff3ct-core.hpp
       - name: Upload Artifacs
@@ -21,8 +22,9 @@ jobs:
     needs: [analysis-headers]
     container: registry.gitlab.com/aff3ct/aff3ct/x86_64_ubuntu_gcc:v9.3.0
     steps:
-      - name: Checkout Code & Build
+      - name: Checkout Code
         uses: actions/checkout@v4
+      - name: Build
         run: export CXX="g++"
         run: export CFLAGS="-Wall -funroll-loops -m64 -mavx2 -mfma"
         run: export LFLAGS="-static -static-libgcc -static-libstdc++ -Wl,--whole-archive -lrt -lpthread -Wl,--no-whole-archive"
@@ -40,8 +42,9 @@ jobs:
     needs: [analysis-headers]
     container: registry.gitlab.com/aff3ct/aff3ct/x86_64_ubuntu_gcc:v9.3.0
     steps:
-      - name: Checkout Code & Build
+      - name: Checkout Code
         uses: actions/checkout@v4
+      - name: Build
         run: export CXX="g++"
         run: export CFLAGS="-Wall -funroll-loops -msse4.2 --coverage"
         run: export LFLAGS="--coverage"
@@ -58,8 +61,9 @@ jobs:
     needs: [analysis-headers]
     container: registry.gitlab.com/aff3ct/aff3ct/x86_64_ubuntu_clang:v10.0.0
     steps:
-      - name: Checkout Code & Build
+      - name: Checkout Code
         uses: actions/checkout@v4
+      - name: Build
         run: export CXX="clang++"
         run: export CFLAGS="-Wall -Wno-overloaded-virtual -funroll-loops"
         run: export CMAKE_OPT="-DAFF3CT_CORE_TESTS=ON -DAFF3CT_CORE_COMPILE_STATIC_LIB=ON -DAFF3CT_CORE_COMPILE_SHARED_LIB=ON"
@@ -76,8 +80,9 @@ jobs:
     needs: [analysis-headers]
     container: intel/oneapi-hpckit:2022.2-devel-ubuntu20.04
     steps:
-      - name: Checkout Code & Build
+      - name: Checkout Code
         uses: actions/checkout@v4
+      - name: Build
         run: export CXX="icpc"
         run: export CFLAGS="-Wall -funroll-loops -march=native -std=c++11"
         run: export CMAKE_OPT="-DAFF3CT_CORE_TESTS=ON -DAFF3CT_CORE_COMPILE_STATIC_LIB=ON -DAFF3CT_CORE_COMPILE_SHARED_LIB=ON"
@@ -94,8 +99,9 @@ jobs:
     needs: [build-linux-gcc-coverage]
     container: registry.gitlab.com/aff3ct/aff3ct/x86_64_ubuntu_coverage
     steps:
-      - name: Checkout Code, Run Tests & Collect Code Coverage
+      - name: Checkout Code
         uses: actions/checkout@v4
+      - name: Run Tests & Collect Code Coverage
         run: ./ci/test-coverage-regression.sh
       - name: Upload Artifacs
         uses: actions/upload-artifact@v3
@@ -107,8 +113,9 @@ jobs:
     needs: [test-coverage-regression]
     container: registry.gitlab.com/aff3ct/aff3ct/x86_64_ubuntu_coverage
     steps:
-      - name: Checkout Code & Generate Code Coverage Report Files
+      - name: Checkout Code
         uses: actions/checkout@v4
+      - name: Generate Code Coverage Report Files
         run: ./ci/coverage-linux.sh
       - name: Produce the coverage report
         uses: insightsengineering/coverage-action@v2
