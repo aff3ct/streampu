@@ -14,7 +14,7 @@ jobs:
           ./scripts/generate_aff3ct_header.sh aff3ct-core.hpp
           diff aff3ct-core.hpp include/aff3ct-core.hpp
         shell: bash
-      - name: Upload Artifacs
+      - name: Upload Artifacts
         uses: actions/upload-artifact@v3
         with:
           name: analysis-headers
@@ -38,7 +38,7 @@ jobs:
           source ./ci/tools/threads.sh
           ./ci/build-linux-macos.sh
         shell: bash
-      - name: Upload Artifacs
+      - name: Upload Artifacts
         uses: actions/upload-artifact@v3
         with:
           name: build-linux-gcc-x64-avx2
@@ -61,7 +61,7 @@ jobs:
           source ./ci/tools/threads.sh
           ./ci/build-linux-macos.sh
         shell: bash
-      - name: Upload Artifacs
+      - name: Upload Artifacts
         uses: actions/upload-artifact@v3
         with:
           name: build
@@ -84,7 +84,7 @@ jobs:
           source ./ci/tools/threads.sh
           ./ci/build-linux-macos.sh
         shell: bash
-      - name: Upload Artifacs
+      - name: Upload Artifacts
         uses: actions/upload-artifact@v3
         with:
           name: build-linux-clang
@@ -107,7 +107,7 @@ jobs:
           source ./ci/tools/threads.sh
           ./ci/build-linux-macos.sh
         shell: bash
-      - name: Upload Artifacs
+      - name: Upload Artifacts
         uses: actions/upload-artifact@v3
         with:
           name: build-linux-icpc
@@ -119,10 +119,15 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+      - name: Download Artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: build
+          path: build/
       - name: Run Tests & Collect Code Coverage
         run: ./ci/test-coverage-regression.sh
         shell: bash
-      - name: Upload Artifacs
+      - name: Upload Artifacts
         uses: actions/upload-artifact@v3
         with:
           name: code-coverage-files
@@ -134,6 +139,11 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+      - name: Download Artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: code-coverage-files
+          path: code_coverage_files/
       - name: Generate Code Coverage Report Files
         run: ./ci/coverage-linux.sh
         shell: bash
@@ -164,7 +174,7 @@ jobs:
           # A custom title that can be added to the code
           # coverage summary in the PR comment.
           coverage-summary-title: "Code Coverage Summary"
-      - name: Upload Artifacs
+      - name: Upload Artifacts
         uses: actions/upload-artifact@v3
         with:
           name: code-coverage-report
