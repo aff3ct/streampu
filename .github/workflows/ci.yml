@@ -128,6 +128,7 @@ jobs:
         run: |
           ls -lah ./build/
           ls -lah ./build/bin/
+          chmod +x ./build/bin/*
           ./ci/test-coverage-regression.sh
         shell: bash
       - name: Upload Artifacts
