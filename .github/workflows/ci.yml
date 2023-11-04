@@ -23,13 +23,13 @@ jobs:
     steps:
       - name: Checkout Code & Build
         uses: actions/checkout@v4
-          run: export CXX="g++"
-          run: export CFLAGS="-Wall -funroll-loops -m64 -mavx2 -mfma"
-          run: export LFLAGS="-static -static-libgcc -static-libstdc++ -Wl,--whole-archive -lrt -lpthread -Wl,--no-whole-archive"
-          run: export CMAKE_OPT="-DAFF3CT_CORE_TESTS=ON -DAFF3CT_CORE_COMPILE_STATIC_LIB=ON -DAFF3CT_CORE_COMPILE_SHARED_LIB=ON"
-          run: export NAME="build_linux_gcc_x64_avx2"
-          run: source ./ci/tools/threads.sh
-          run: ./ci/build-linux-macos.sh
+        run: export CXX="g++"
+        run: export CFLAGS="-Wall -funroll-loops -m64 -mavx2 -mfma"
+        run: export LFLAGS="-static -static-libgcc -static-libstdc++ -Wl,--whole-archive -lrt -lpthread -Wl,--no-whole-archive"
+        run: export CMAKE_OPT="-DAFF3CT_CORE_TESTS=ON -DAFF3CT_CORE_COMPILE_STATIC_LIB=ON -DAFF3CT_CORE_COMPILE_SHARED_LIB=ON"
+        run: export NAME="build_linux_gcc_x64_avx2"
+        run: source ./ci/tools/threads.sh
+        run: ./ci/build-linux-macos.sh
       - name: Upload Artifacs
         uses: actions/upload-artifact@v3
         with:
@@ -42,12 +42,12 @@ jobs:
     steps:
       - name: Checkout Code & Build
         uses: actions/checkout@v4
-          run: export CXX="g++"
-          run: export CFLAGS="-Wall -funroll-loops -msse4.2 --coverage"
-          run: export LFLAGS="--coverage"
-          run: export CMAKE_OPT="-DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS_DEBUG=-O0 -DAFF3CT_CORE_TESTS=ON -DAFF3CT_CORE_COMPILE_STATIC_LIB=ON -DAFF3CT_CORE_COMPILE_SHARED_LIB=ON"
-          run: source ./ci/tools/threads.sh
-          run: ./ci/build-linux-macos.sh
+        run: export CXX="g++"
+        run: export CFLAGS="-Wall -funroll-loops -msse4.2 --coverage"
+        run: export LFLAGS="--coverage"
+        run: export CMAKE_OPT="-DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS_DEBUG=-O0 -DAFF3CT_CORE_TESTS=ON -DAFF3CT_CORE_COMPILE_STATIC_LIB=ON -DAFF3CT_CORE_COMPILE_SHARED_LIB=ON"
+        run: source ./ci/tools/threads.sh
+        run: ./ci/build-linux-macos.sh
       - name: Upload Artifacs
         uses: actions/upload-artifact@v3
         with:
@@ -60,12 +60,12 @@ jobs:
     steps:
       - name: Checkout Code & Build
         uses: actions/checkout@v4
-          run: export CXX="clang++"
-          run: export CFLAGS="-Wall -Wno-overloaded-virtual -funroll-loops"
-          run: export CMAKE_OPT="-DAFF3CT_CORE_TESTS=ON -DAFF3CT_CORE_COMPILE_STATIC_LIB=ON -DAFF3CT_CORE_COMPILE_SHARED_LIB=ON"
-          run: export NAME="build_linux_clang"
-          run: source ./ci/tools/threads.sh
-          run: ./ci/build-linux-macos.sh
+        run: export CXX="clang++"
+        run: export CFLAGS="-Wall -Wno-overloaded-virtual -funroll-loops"
+        run: export CMAKE_OPT="-DAFF3CT_CORE_TESTS=ON -DAFF3CT_CORE_COMPILE_STATIC_LIB=ON -DAFF3CT_CORE_COMPILE_SHARED_LIB=ON"
+        run: export NAME="build_linux_clang"
+        run: source ./ci/tools/threads.sh
+        run: ./ci/build-linux-macos.sh
       - name: Upload Artifacs
         uses: actions/upload-artifact@v3
         with:
@@ -78,12 +78,12 @@ jobs:
     steps:
       - name: Checkout Code & Build
         uses: actions/checkout@v4
-          run: export CXX="icpc"
-          run: export CFLAGS="-Wall -funroll-loops -march=native -std=c++11"
-          run: export CMAKE_OPT="-DAFF3CT_CORE_TESTS=ON -DAFF3CT_CORE_COMPILE_STATIC_LIB=ON -DAFF3CT_CORE_COMPILE_SHARED_LIB=ON"
-          run: export NAME="build_linux_icpc"
-          run: source ./ci/tools/threads.sh
-          run: ./ci/build-linux-macos.sh
+        run: export CXX="icpc"
+        run: export CFLAGS="-Wall -funroll-loops -march=native -std=c++11"
+        run: export CMAKE_OPT="-DAFF3CT_CORE_TESTS=ON -DAFF3CT_CORE_COMPILE_STATIC_LIB=ON -DAFF3CT_CORE_COMPILE_SHARED_LIB=ON"
+        run: export NAME="build_linux_icpc"
+        run: source ./ci/tools/threads.sh
+        run: ./ci/build-linux-macos.sh
       - name: Upload Artifacs
         uses: actions/upload-artifact@v3
         with:
@@ -96,7 +96,7 @@ jobs:
     steps:
       - name: Checkout Code, Run Tests & Collect Code Coverage
         uses: actions/checkout@v4
-          run: ./ci/test-coverage-regression.sh
+        run: ./ci/test-coverage-regression.sh
       - name: Upload Artifacs
         uses: actions/upload-artifact@v3
         with:
@@ -109,7 +109,7 @@ jobs:
     steps:
       - name: Checkout Code & Generate Code Coverage Report Files
         uses: actions/checkout@v4
-          run: ./ci/coverage-linux.sh
+        run: ./ci/coverage-linux.sh
       - name: Produce the coverage report
         uses: insightsengineering/coverage-action@v2
         with:
