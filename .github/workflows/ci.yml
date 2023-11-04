@@ -1,12 +1,149 @@
 name: ci
-on:
-  push:
-    branches:
-      - development
+on: push
 permissions:
   contents: write
 jobs:
+  analysis-headers:
+    runs-on: ubuntu-latest
+    container: ubuntu:20.04
+    steps:
+      - name: Checkout Code, Generate Headers & Compare
+        uses: actions/checkout@v4
+        run: ./scripts/generate_aff3ct_header.sh aff3ct-core.hpp
+        run: diff aff3ct-core.hpp include/aff3ct-core.hpp
+      - name: Upload Artifacs
+        uses: actions/upload-artifact@v3
+        with:
+          name: analysis-headers
+          path: aff3ct-core.hpp
+  build-linux-gcc-x64-avx2:
+    runs-on: ubuntu-latest
+    needs: [analysis-headers]
+    container: registry.gitlab.com/aff3ct/aff3ct/x86_64_ubuntu_gcc:v9.3.0
+    steps:
+      - name: Checkout Code & Build
+        uses: actions/checkout@v4
+          run: export CXX="g++"
+          run: export CFLAGS="-Wall -funroll-loops -m64 -mavx2 -mfma"
+          run: export LFLAGS="-static -static-libgcc -static-libstdc++ -Wl,--whole-archive -lrt -lpthread -Wl,--no-whole-archive"
+          run: export CMAKE_OPT="-DAFF3CT_CORE_TESTS=ON -DAFF3CT_CORE_COMPILE_STATIC_LIB=ON -DAFF3CT_CORE_COMPILE_SHARED_LIB=ON"
+          run: export NAME="build_linux_gcc_x64_avx2"
+          run: source ./ci/tools/threads.sh
+          run: ./ci/build-linux-macos.sh
+      - name: Upload Artifacs
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-linux-gcc-x64-avx2
+          path: build_linux_gcc_x64_avx2
+  build-linux-gcc-coverage:
+    runs-on: ubuntu-latest
+    needs: [analysis-headers]
+    container: registry.gitlab.com/aff3ct/aff3ct/x86_64_ubuntu_gcc:v9.3.0
+    steps:
+      - name: Checkout Code & Build
+        uses: actions/checkout@v4
+          run: export CXX="g++"
+          run: export CFLAGS="-Wall -funroll-loops -msse4.2 --coverage"
+          run: export LFLAGS="--coverage"
+          run: export CMAKE_OPT="-DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS_DEBUG=-O0 -DAFF3CT_CORE_TESTS=ON -DAFF3CT_CORE_COMPILE_STATIC_LIB=ON -DAFF3CT_CORE_COMPILE_SHARED_LIB=ON"
+          run: source ./ci/tools/threads.sh
+          run: ./ci/build-linux-macos.sh
+      - name: Upload Artifacs
+        uses: actions/upload-artifact@v3
+        with:
+          name: build
+          path: build
+  build-linux-clang:
+    runs-on: ubuntu-latest
+    needs: [analysis-headers]
+    container: registry.gitlab.com/aff3ct/aff3ct/x86_64_ubuntu_clang:v10.0.0
+    steps:
+      - name: Checkout Code & Build
+        uses: actions/checkout@v4
+          run: export CXX="clang++"
+          run: export CFLAGS="-Wall -Wno-overloaded-virtual -funroll-loops"
+          run: export CMAKE_OPT="-DAFF3CT_CORE_TESTS=ON -DAFF3CT_CORE_COMPILE_STATIC_LIB=ON -DAFF3CT_CORE_COMPILE_SHARED_LIB=ON"
+          run: export NAME="build_linux_clang"
+          run: source ./ci/tools/threads.sh
+          run: ./ci/build-linux-macos.sh
+      - name: Upload Artifacs
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-linux-clang
+          path: build_linux_clang
+  build-linux-icpc:
+    runs-on: ubuntu-latest
+    needs: [analysis-headers]
+    container: intel/oneapi-hpckit:2022.2-devel-ubuntu20.04
+    steps:
+      - name: Checkout Code & Build
+        uses: actions/checkout@v4
+          run: export CXX="icpc"
+          run: export CFLAGS="-Wall -funroll-loops -march=native -std=c++11"
+          run: export CMAKE_OPT="-DAFF3CT_CORE_TESTS=ON -DAFF3CT_CORE_COMPILE_STATIC_LIB=ON -DAFF3CT_CORE_COMPILE_SHARED_LIB=ON"
+          run: export NAME="build_linux_icpc"
+          run: source ./ci/tools/threads.sh
+          run: ./ci/build-linux-macos.sh
+      - name: Upload Artifacs
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-linux-icpc
+          path: build_linux_icpc
+  test-coverage-regression:
+    runs-on: ubuntu-latest
+    needs: [build-linux-gcc-coverage]
+    container: registry.gitlab.com/aff3ct/aff3ct/x86_64_ubuntu_coverage
+    steps:
+      - name: Checkout Code, Run Tests & Collect Code Coverage
+        uses: actions/checkout@v4
+          run: ./ci/test-coverage-regression.sh
+      - name: Upload Artifacs
+        uses: actions/upload-artifact@v3
+        with:
+          name: code-coverage-files
+          path: code_coverage_files/
+  coverage:
+    runs-on: ubuntu-latest
+    needs: [test-coverage-regression]
+    container: registry.gitlab.com/aff3ct/aff3ct/x86_64_ubuntu_coverage
+    steps:
+      - name: Checkout Code & Generate Code Coverage Report Files
+        uses: actions/checkout@v4
+          run: ./ci/coverage-linux.sh
+      - name: Produce the coverage report
+        uses: insightsengineering/coverage-action@v2
+        with:
+          # Path to the Cobertura XML report.
+          path: ./code_coverage_report/aff3ct-core.xml
+          # Minimum total coverage, if you want to the
+          # workflow to enforce it as a standard.
+          # This has no effect if the `fail` arg is set to `false`.
+          threshold: 50.000
+          # Fail the workflow if the minimum code coverage
+          # reuqirements are not satisfied.
+          fail: true
+          # Publish the rendered output as a PR comment
+          publish: true
+          # Create a coverage diff report.
+          diff: true
+          # Branch to diff against.
+          # Compare the current coverage to the coverage
+          # determined on this branch.
+          diff-branch: master
+          # This is where the coverage reports for the
+          # `diff-branch` are stored.
+          # Branch is created if it doesn't already exist'.
+          diff-storage: _xml_coverage_reports
+          # A custom title that can be added to the code
+          # coverage summary in the PR comment.
+          coverage-summary-title: "Code Coverage Summary"
+      - name: Upload Artifacs
+        uses: actions/upload-artifact@v3
+        with:
+          name: code-coverage-report
+          path: code_coverage_report/
   deploy:
+    if: contains( github.ref, 'development')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
