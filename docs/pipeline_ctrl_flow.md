@@ -7,7 +7,7 @@ the use of [switcher](switcher.md), however sequences are often used within the
 context of [pipelines](pipeline.md) and thus some slight behavior adjustments 
 were required for them to consistently work.
 
-## Technical Improvement
+## Technical Improvements
 
 ### Finding the Last Sub-sequence
 

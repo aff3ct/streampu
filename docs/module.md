@@ -12,7 +12,7 @@ the use of [sockets](socket.md)). By definition,
 - a **stateful task** is a task that have inner data and, thus, a task that 
   need to be part of a module. 
 
-Each time we need to create a **statful** task, we will create a new C++ class 
+Each time we need to create a **stateful** task, we will create a new C++ class 
 that inherit from the `aff3ct::module::Module` class. The `Module` class 
 provides `protected` methods to create new tasks and `public` methods to 
 manipulate the module instances.

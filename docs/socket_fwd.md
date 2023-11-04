@@ -17,7 +17,7 @@ C(FWD)-->F(FWD); C(FWD)-.->K{MEM};
 F(FWD)-.->K{MEM};
 ```
 
-## Technical Improvement
+## Technical Improvements
 
 The implementation of the forward socket for [sequences](sequence.md) was mainly 
 straightforward because it behaves the same way as the input and output sockets. 
@@ -28,7 +28,7 @@ one stage to an other.
 
 ### Forward Sockets and Pipelines
 
-As explained in the [adaptor's](pipeline.md#Adaptor) section, a pool of buffers 
+As explained in the [Adaptor](pipeline.md#Adaptor) section, a pool of buffers 
 is used between each stage of the pipeline. The adaptor gets a buffer from 
 this pool and uses it to update the output socket of its `pull` task 
 (`dataptr` attribute). This output socket is then bound to the input socket of 

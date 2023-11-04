@@ -24,15 +24,15 @@ The list of sockets that are attached to this task.
 std::vector<std::vector<uint8_t>> out_buffers;
 ```
 The allocated data of the output sockets of this task. If the `autoalloc` 
-attribute is set to `True` (see below) then the data are allocated here, 
+attribute is set to `true` (see below) then the data are allocated here, 
 otherwise this vector is left empty.
 
 ```cpp
 std::function<int(module::Module &m, runtime::Task& t, const size_t frame_id)> codelet;
 ```
 The function called by `_exec()` method (see below), thus dictating the 
-task's behavior. Usually set in the module's constructor, should return a 
-`status_t`.
+task's behavior. Usually set in the [module](module.md)'s constructor and should 
+return a `status_t`.
 
 ```cpp
 std::shared_ptr<runtime::Socket> fake_input_sockets;
@@ -45,48 +45,48 @@ sockets are ignored during the codelet execution.
 ```cpp
 bool autoalloc;
 ```
-If set to `True`, let `AFF3CT-core` allocate and reallocate memory needed by 
+If set to `true`, let `AFF3CT-core` allocate and reallocate memory needed by 
 the task. Data are only allocated in the output sockets. By default this 
-attribute is set to `True`.
+attribute is set to `true`.
 
 ```cpp
 bool stats;
 ```
-If true, records statistics regarding the task's execution, such as the 
-`duration`. By default this attribute is set to `False`.
+If `true`, records statistics regarding the task's execution, such as the 
+`duration`. By default this attribute is set to `false`.
 
 ```cpp
 bool fast;
 ```
-If true, skips `can_exec()` runtime check, thus, improving performance. 
+If `true`, skips `can_exec()` runtime check, thus, improving performance. 
 Sockets bound to this task will also be set to `fast`. By default this 
-attribute is set to `False`.
+attribute is set to `false`.
 
 ```cpp
 bool debug;
 ```
 If set to true, displays the task's sockets data and its status upon 
 execution (on the standard output). By default this attribute is set to 
-`False`.
+`false`.
 
 ```cpp
 module::Module *module;
 ```
-A pointer to the corresponding Module. See bellow for more information about
-what is precisely a Module.
+A pointer to the corresponding module. See the [Module](module.md) section for 
+more information about what is a module.
 
 ```cpp
 const std::string name;
 ```
-A name to identify the task in the Module. This name is unique in the Module.
+A name to identify the task. This name is unique in the module.
 
 ## Main Methods
 
 ```cpp
 const std::vector<int>& exec(const int frame_id = -1, const bool managed_memory = true);
 ```
-Calls `_exec()` method, records execution statistics (if `stats == True`) and 
-prints the debug logs (if `debug == True`).
+Calls `_exec()` method, records execution statistics (if `stats == true`) and 
+prints the debug logs (if `debug == true`).
 
 ```cpp
 void _exec(const int frame_id = -1, const bool managed_memory = true);
@@ -97,9 +97,9 @@ Called by `exec()` (see the above method).
 ```cpp
 bool can_exec() const;
 ```
-Returns `True` if all the sockets are associated to an allocated buffer, 
-otherwise returns `False`. Called by `exec()` method if `fast` is set to 
-`True`, skipped otherwise.
+Returns `true` if all the sockets are associated to an allocated buffer, 
+otherwise returns `false`. Called by `exec()` method if `fast` is set to 
+`true`, skipped otherwise.
 
 ```cpp
 void bind(runtime::Task &t_out, const int priority = -1);

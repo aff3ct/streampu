@@ -1,10 +1,10 @@
 <a name="Sequence"></a>
 # Sequence
 
-A **sequence** is a set of bound [tasks](task.md). A sequence represents the 
-graph to execute for each new frame (= new stream). When a sequence is built, 
-the tasks execution order is fixed. For each frame, the tasks will be executed 
-in the same order.
+A **sequence** is a set of bound [tasks](task.md). It represents the graph to 
+execute for each new frame (= new stream). When a sequence is built, the tasks 
+execution order is fixed. Thus, for each frame, the graph is executed following 
+a fixed "sequence" of tasks.
 
 <figure markdown>
   ![Simple sequence](./assets/simple_sequence.svg){ width="600" }
