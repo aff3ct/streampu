@@ -26,6 +26,8 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+        with:
+          submodules: true
       - name: Build
         run: |
           export CXX="g++"
@@ -48,6 +50,8 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+        with:
+          submodules: true
       - name: Build
         run: |
           export CXX="g++"
@@ -69,6 +73,8 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+        with:
+          submodules: true
       - name: Build
         run: |
           export CXX="clang++"
@@ -90,6 +96,8 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+        with:
+          submodules: true
       - name: Build
         run: |
           export CXX="icpc"
