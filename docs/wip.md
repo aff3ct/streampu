@@ -8,7 +8,7 @@ they only rebind the first bound sockets while they should use
 `explore_thread_rec()` to update the data pointers of every linked `SFWD`. **For 
 now, tasks bound to switchers should be `SIO`.**
 
-## Id Updates
+## Task IDs Update
 
 When `push` and `pull` tasks are inserted into the pipeline the 
 `update_tasks_id()` method is called to assert that the task IDs are still 

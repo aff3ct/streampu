@@ -107,9 +107,9 @@ template <>
 inline void Sequence
 ::_init(tools::Digraph_node<runtime::Sub_sequence> *root)
 {
-	std::function<void(tools::Digraph_node<runtime::Sub_sequence>*, size_t &dec_ssid,
+	std::function<void(tools::Digraph_node<runtime::Sub_sequence>*,
 	                   std::vector<tools::Digraph_node<runtime::Sub_sequence>*>&)> remove_useless_nodes;
-	remove_useless_nodes = [&](tools::Digraph_node<runtime::Sub_sequence> *node, size_t &dec_ssid,
+	remove_useless_nodes = [&](tools::Digraph_node<runtime::Sub_sequence> *node,
 	                           std::vector<tools::Digraph_node<runtime::Sub_sequence>*> &already_parsed_nodes)
 	{
 		if (node != nullptr &&
@@ -180,7 +180,6 @@ inline void Sequence
 				node = child;
 				if (child != nullptr)
 					node_contents = node->get_c();
-				dec_ssid++;
 			}
 
 			if (node != nullptr &&
@@ -190,8 +189,6 @@ inline void Sequence
 			{
 				already_parsed_nodes.push_back(node);
 
-				node_contents->id = node_contents->id - dec_ssid;
-
 				size_t min_depth = 0;
 				if (node->get_fathers().size())
 				{
@@ -199,16 +196,73 @@ inline void Sequence
 					for (size_t f = 1; f < node->get_fathers().size(); f++)
 						min_depth = std::min(min_depth, node->get_fathers()[f]->get_depth());
 				}
-				node->set_depth(min_depth);
+				node->set_depth(min_depth + 1);
 
 				for (auto c : node->get_children())
-					remove_useless_nodes(c, dec_ssid, already_parsed_nodes);
+					remove_useless_nodes(c, already_parsed_nodes);
 			}
 		}
 	};
 	std::vector<tools::Digraph_node<runtime::Sub_sequence>*> already_parsed_nodes1;
-	size_t dec_ssid = 0;
-	remove_useless_nodes(root, dec_ssid, already_parsed_nodes1);
+	remove_useless_nodes(root, already_parsed_nodes1);
+
+	std::function<void(tools::Digraph_node<runtime::Sub_sequence>*, size_t&,
+	                   std::vector<tools::Digraph_node<runtime::Sub_sequence>*>&,
+	                   std::map<tools::Digraph_node<runtime::Sub_sequence>*, std::pair<size_t,size_t>> &)> init_ss_ids_rec;
+	init_ss_ids_rec = [&](tools::Digraph_node<runtime::Sub_sequence> *node, size_t &ssid,
+	                      std::vector<tools::Digraph_node<runtime::Sub_sequence>*> &already_parsed_nodes,
+	                      std::map<tools::Digraph_node<runtime::Sub_sequence>*, std::pair<size_t,size_t>> &select_fathers)
+	{
+		if (node != nullptr &&
+		    std::find(already_parsed_nodes.begin(),
+		              already_parsed_nodes.end(),
+		              node) == already_parsed_nodes.end())
+		{
+			already_parsed_nodes.push_back(node);
+			auto node_contents = node->get_c();
+			node_contents->id = ssid++;
+
+			for (auto c : node->get_children())
+				switch (c->get_c()->type) {
+					case subseq_t::SELECT:
+					{
+						if (select_fathers.find(c) == select_fathers.end())
+						{
+							size_t n_fathers = 0;
+							for (auto f : c->get_fathers())
+								if (f->get_depth() < c->get_depth())
+									n_fathers++;
+							select_fathers[c] = std::make_pair(0, n_fathers);
+						}
+						std::get<0>(select_fathers[c]) += 1;
+
+						if (std::get<0>(select_fathers[c]) == std::get<1>(select_fathers[c]))
+							init_ss_ids_rec(c, ssid, already_parsed_nodes, select_fathers);
+						break;
+					}
+					case subseq_t::COMMUTE:
+					{
+						init_ss_ids_rec(c, ssid, already_parsed_nodes, select_fathers);
+						break;
+					}
+					case subseq_t::STD:
+					{
+						init_ss_ids_rec(c, ssid, already_parsed_nodes, select_fathers);
+						break;
+					}
+					default:
+					{
+						std::stringstream message;
+						message << "This should never happen.";
+						throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
+					}
+				};
+		}
+	};
+	std::map<tools::Digraph_node<runtime::Sub_sequence>*, std::pair<size_t,size_t>> select_fathers;
+	std::vector<tools::Digraph_node<runtime::Sub_sequence>*> already_parsed_nodes2;
+	size_t ssid = 0;
+	init_ss_ids_rec(root, ssid, already_parsed_nodes2, select_fathers);
 
 	this->sequences[0] = root;
 
@@ -231,8 +285,8 @@ inline void Sequence
 				collect_modules_list(c, already_parsed_nodes);
 		}
 	};
-	std::vector<const tools::Digraph_node<runtime::Sub_sequence>*> already_parsed_nodes2;
-	collect_modules_list(root, already_parsed_nodes2);
+	std::vector<const tools::Digraph_node<runtime::Sub_sequence>*> already_parsed_nodes3;
+	collect_modules_list(root, already_parsed_nodes3);
 
 	for (auto m : modules_set)
 		this->all_modules[0].push_back(m);

@@ -322,7 +322,7 @@ int main(int argc, char** argv)
 	// verification of the sequence execution
 	auto tests_passed = true;
 	auto tid = 0;
-	if(force_sequence) {
+	if (force_sequence) {
 		for (auto cur_finalizer : sequence_nested_loops->get_cloned_modules<module::Finalizer<uint8_t>>(finalizer))
 		{
 			for (size_t f = 0; f < n_inter_frames; f++)
