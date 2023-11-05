@@ -872,7 +872,7 @@ tools::Digraph_node<SS>* Sequence
 	if (cur_subseq->get_contents() == nullptr)
 	{
 		cur_subseq->set_contents(new SS());
-		cur_subseq->get_c()->id = ssid++; // this sub-sequence indexing is wrong, it is fixed later in _init()
+		ssid++;
 	}
 
 	bool is_last = true;
@@ -891,7 +891,7 @@ tools::Digraph_node<SS>* Sequence
 			node_commute->get_c()->tasks.push_back(&current_task);
 			node_commute->get_c()->tasks_id.push_back(taid++);
 			node_commute->get_c()->type = subseq_t::COMMUTE;
-			node_commute->get_c()->id = ssid++; // this sub-sequence indexing is wrong, it is fixed later in _init()
+			ssid++;
 
 			cur_subseq->add_child(node_commute);
 
@@ -901,8 +901,7 @@ tools::Digraph_node<SS>* Sequence
 					node_commute->get_depth() +1);
 
 				node_commute_son->set_contents(new SS());
-				node_commute_son->get_c()->id = ssid++; // this sub-sequence indexing is wrong, it is fixed later in
-				                                        // _init()
+				ssid++;
 
 				node_commute->add_child(node_commute_son);
 
@@ -1003,15 +1002,14 @@ tools::Digraph_node<SS>* Sequence
 			node_selector->get_c()->tasks.push_back(&current_task);
 			node_selector->get_c()->tasks_id.push_back(taid++);
 			node_selector->get_c()->type = subseq_t::SELECT;
-			node_selector->get_c()->id = ssid++; // this sub-sequence indexing is wrong, it is fixed later in _init()
+			ssid++;
 
 			cur_subseq->add_child(node_selector);
 
 			auto node_selector_son = new tools::Digraph_node<SS>({node_selector}, {}, nullptr, node_selector->get_depth() +1);
 
 			node_selector_son->set_contents(new SS());
-			node_selector_son->get_c()->id = ssid++; // this sub-sequence indexing is wrong, it is fixed later in
-			                                         // _init()
+			ssid++;
 
 			node_selector->add_child(node_selector_son);
 
