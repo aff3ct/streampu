@@ -119,17 +119,17 @@ inline void Sequence
 		{
 			auto node_contents = node->get_c();
 
-			if (node->get_fathers ().size() == 1 &&
+			if (node->get_parents ().size() == 1 &&
 			    node->get_children().size() == 1 &&
 			    node_contents->tasks.size() == 0)
 			{
-				auto father = node->get_fathers ().size() ? node->get_fathers ()[0] : nullptr;
+				auto parent = node->get_parents ().size() ? node->get_parents ()[0] : nullptr;
 				auto child  = node->get_children().size() ? node->get_children()[0] : nullptr;
 
 				auto child_pos = -1;
-				if (father != nullptr)
+				if (parent != nullptr)
 				{
-					child_pos = node->get_child_pos(*father);
+					child_pos = node->get_child_pos(*parent);
 					if (child_pos == -1)
 					{
 						std::stringstream message;
@@ -137,29 +137,29 @@ inline void Sequence
 						throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
 					}
 
-					if (!father->cut_child((size_t)child_pos))
+					if (!parent->cut_child((size_t)child_pos))
 					{
 						std::stringstream message;
-						message << "'father->cut_child(child_pos)' should return true ('child_pos' = " << child_pos << ").";
+						message << "'parent->cut_child(child_pos)' should return true ('child_pos' = " << child_pos << ").";
 						throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
 					}
 				}
 
-				auto father_pos = -1;
+				auto parent_pos = -1;
 				if (child != nullptr)
 				{
-					father_pos = node->get_father_pos(*child);
-					if (father_pos == -1)
+					parent_pos = node->get_parent_pos(*child);
+					if (parent_pos == -1)
 					{
 						std::stringstream message;
-						message << "'father_pos' should be different from '-1'.";
+						message << "'parent_pos' should be different from '-1'.";
 						throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
 					}
 
-					if (!child->cut_father((size_t)father_pos))
+					if (!child->cut_parent((size_t)parent_pos))
 					{
 						std::stringstream message;
-						message << "'child->cut_father(father_pos)' should return true ('father_pos' = " << father_pos
+						message << "'child->cut_parent(parent_pos)' should return true ('parent_pos' = " << parent_pos
 						        << ").";
 						throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
 					}
@@ -171,10 +171,10 @@ inline void Sequence
 				delete node_contents;
 				delete node;
 
-				if (child != nullptr && father != nullptr)
+				if (child != nullptr && parent != nullptr)
 				{
-					father->add_child (child,  child_pos );
-					child ->add_father(father, father_pos);
+					parent->add_child (child,  child_pos );
+					child ->add_parent(parent, parent_pos);
 				}
 
 				node = child;
@@ -189,14 +189,15 @@ inline void Sequence
 			{
 				already_parsed_nodes.push_back(node);
 
-				size_t min_depth = 0;
-				if (node->get_fathers().size())
+				if (node->get_parents().size())
 				{
-					min_depth = node->get_fathers()[0]->get_depth();
-					for (size_t f = 1; f < node->get_fathers().size(); f++)
-						min_depth = std::min(min_depth, node->get_fathers()[f]->get_depth());
+					size_t min_depth = node->get_parents()[0]->get_depth();
+					for (size_t f = 1; f < node->get_parents().size(); f++)
+						min_depth = std::min(min_depth, node->get_parents()[f]->get_depth());
+					node->set_depth(min_depth + 1);
 				}
-				node->set_depth(min_depth + 1);
+				else
+					node->set_depth(0);
 
 				for (auto c : node->get_children())
 					remove_useless_nodes(c, already_parsed_nodes);
@@ -211,7 +212,7 @@ inline void Sequence
 	                   std::map<tools::Digraph_node<runtime::Sub_sequence>*, std::pair<size_t,size_t>> &)> init_ss_ids_rec;
 	init_ss_ids_rec = [&](tools::Digraph_node<runtime::Sub_sequence> *node, size_t &ssid,
 	                      std::vector<tools::Digraph_node<runtime::Sub_sequence>*> &already_parsed_nodes,
-	                      std::map<tools::Digraph_node<runtime::Sub_sequence>*, std::pair<size_t,size_t>> &select_fathers)
+	                      std::map<tools::Digraph_node<runtime::Sub_sequence>*, std::pair<size_t,size_t>> &select_parents)
 	{
 		if (node != nullptr &&
 		    std::find(already_parsed_nodes.begin(),
@@ -226,28 +227,29 @@ inline void Sequence
 				switch (c->get_c()->type) {
 					case subseq_t::SELECT:
 					{
-						if (select_fathers.find(c) == select_fathers.end())
+						if (select_parents.find(c) == select_parents.end())
 						{
-							size_t n_fathers = 0;
-							for (auto f : c->get_fathers())
+							size_t n_parents = 0;
+							for (auto f : c->get_parents()) {
 								if (f->get_depth() < c->get_depth())
-									n_fathers++;
-							select_fathers[c] = std::make_pair(0, n_fathers);
+									n_parents++;
+							}
+							select_parents[c] = std::make_pair(0, n_parents);
 						}
-						std::get<0>(select_fathers[c]) += 1;
+						std::get<0>(select_parents[c]) += 1;
 
-						if (std::get<0>(select_fathers[c]) == std::get<1>(select_fathers[c]))
-							init_ss_ids_rec(c, ssid, already_parsed_nodes, select_fathers);
+						if (std::get<0>(select_parents[c]) == std::get<1>(select_parents[c]))
+							init_ss_ids_rec(c, ssid, already_parsed_nodes, select_parents);
 						break;
 					}
 					case subseq_t::COMMUTE:
 					{
-						init_ss_ids_rec(c, ssid, already_parsed_nodes, select_fathers);
+						init_ss_ids_rec(c, ssid, already_parsed_nodes, select_parents);
 						break;
 					}
 					case subseq_t::STD:
 					{
-						init_ss_ids_rec(c, ssid, already_parsed_nodes, select_fathers);
+						init_ss_ids_rec(c, ssid, already_parsed_nodes, select_parents);
 						break;
 					}
 					default:
@@ -259,10 +261,10 @@ inline void Sequence
 				};
 		}
 	};
-	std::map<tools::Digraph_node<runtime::Sub_sequence>*, std::pair<size_t,size_t>> select_fathers;
+	std::map<tools::Digraph_node<runtime::Sub_sequence>*, std::pair<size_t,size_t>> select_parents;
 	std::vector<tools::Digraph_node<runtime::Sub_sequence>*> already_parsed_nodes2;
 	size_t ssid = 0;
-	init_ss_ids_rec(root, ssid, already_parsed_nodes2, select_fathers);
+	init_ss_ids_rec(root, ssid, already_parsed_nodes2, select_parents);
 
 	this->sequences[0] = root;
 

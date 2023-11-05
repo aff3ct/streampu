@@ -1177,7 +1177,8 @@ void Pipeline
 				this->stages[sta]->export_dot_subsequence(cur_node->get_c()->tasks,
 				                                          cur_node->get_c()->tasks_id,
 				                                          cur_node->get_c()->type,
-				                                          "Sub-sequence "+std::to_string(cur_node->get_c()->id),
+				                                          "Sub-sequence " + std::to_string(cur_node->get_c()->id)
+				                                          + " (depth = " + std::to_string(cur_node->get_depth()) + ")",
 				                                          tab,
 				                                          stream);
 

@@ -9,11 +9,11 @@ namespace tools
 
 template <typename T>
 Digraph_node<T>
-::Digraph_node(std::vector<Digraph_node<T>*> fathers,
+::Digraph_node(std::vector<Digraph_node<T>*> parents,
                std::vector<Digraph_node<T>*> children,
                T* content,
                const size_t depth)
-: fathers(fathers), children(children), contents(content), depth(depth)
+: parents(parents), children(children), contents(content), depth(depth)
 {
 }
 
@@ -25,9 +25,9 @@ Digraph_node<T>
 
 template <typename T>
 bool Digraph_node<T>
-::is_no_father() const
+::is_no_parent() const
 {
-	return !this->fathers.size();
+	return !this->parents.size();
 }
 
 template <typename T>
@@ -46,9 +46,9 @@ bool Digraph_node<T>
 
 template <typename T>
 const std::vector<Digraph_node<T>*>& Digraph_node<T>
-::get_fathers() const
+::get_parents() const
 {
-	return this->fathers;
+	return this->parents;
 }
 
 template <typename T>
@@ -95,24 +95,24 @@ size_t Digraph_node<T>
 
 template <typename T>
 int Digraph_node<T>
-::get_child_pos(const Digraph_node<T>& father) const
+::get_child_pos(const Digraph_node<T>& parent) const
 {
-	const auto father_it = std::find(this->fathers.begin(), this->fathers.end(), &father);
-	if (father_it != this->fathers.end())
-		for (auto c = 0; c < (int)father.get_children().size(); c++)
-			if (father.get_children()[c] == this)
+	const auto parent_it = std::find(this->parents.begin(), this->parents.end(), &parent);
+	if (parent_it != this->parents.end())
+		for (auto c = 0; c < (int)parent.get_children().size(); c++)
+			if (parent.get_children()[c] == this)
 				return c;
 	return -1;
 }
 
 template <typename T>
 int Digraph_node<T>
-::get_father_pos(const Digraph_node<T>& child) const
+::get_parent_pos(const Digraph_node<T>& child) const
 {
 	const auto child_it = std::find(this->children.begin(), this->children.end(), &child);
 	if (child_it != this->children.end())
-		for (auto f = 0; f < (int)child.get_fathers().size(); f++)
-			if (child.get_fathers()[f] == this)
+		for (auto f = 0; f < (int)child.get_parents().size(); f++)
+			if (child.get_parents()[f] == this)
 				return f;
 	return -1;
 }
@@ -132,11 +132,11 @@ bool Digraph_node<T>
 
 template <typename T>
 bool Digraph_node<T>
-::cut_father(const size_t pos)
+::cut_parent(const size_t pos)
 {
-	if (pos < this->fathers.size())
+	if (pos < this->parents.size())
 	{
-		this->fathers.erase(this->fathers.begin() + pos);
+		this->parents.erase(this->parents.begin() + pos);
 		return true;
 	}
 	else
@@ -170,12 +170,12 @@ void Digraph_node<T>
 
 template <typename T>
 void Digraph_node<T>
-::add_father(Digraph_node<T>* father, const int pos)
+::add_parent(Digraph_node<T>* parent, const int pos)
 {
-	if ((size_t)pos > this->fathers.size() || pos == -1)
-		this->fathers.push_back(father);
+	if ((size_t)pos > this->parents.size() || pos == -1)
+		this->parents.push_back(parent);
 	else
-		this->fathers.insert(this->fathers.begin() + pos, father);
+		this->parents.insert(this->parents.begin() + pos, parent);
 }
 
 }

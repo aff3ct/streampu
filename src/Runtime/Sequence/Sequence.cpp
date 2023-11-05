@@ -947,7 +947,7 @@ tools::Digraph_node<SS>* Sequence
 								selectors.push_back({&t, node_selector});
 							}
 							else
-								node_selector->add_father(node_commute_son);
+								node_selector->add_parent(node_commute_son);
 							node_commute_son->add_child(node_selector);
 						}
 					}
@@ -1060,8 +1060,7 @@ tools::Digraph_node<SS>* Sequence
 									node_selector_son->get_depth() +1);
 								selectors.push_back({&t, node_selector});
 							}
-							else
-								node_selector->add_father(node_selector_son);
+							node_selector->add_parent(node_selector_son);
 							node_selector_son->add_child(node_selector);
 						}
 					}
@@ -1120,8 +1119,7 @@ tools::Digraph_node<SS>* Sequence
 										cur_subseq->get_depth() +1);
 									selectors.push_back({&t, node_selector});
 								}
-								else
-									node_selector->add_father(cur_subseq);
+								node_selector->add_parent(cur_subseq);
 								cur_subseq->add_child(node_selector);
 							}
 						}
@@ -1566,7 +1564,8 @@ void Sequence
 				this->export_dot_subsequence(cur_node->get_c()->tasks,
 				                             cur_node->get_c()->tasks_id,
 				                             cur_node->get_c()->type,
-				                             "Sub-sequence "+std::to_string(cur_node->get_c()->id),
+				                             "Sub-sequence " + std::to_string(cur_node->get_c()->id) + " (depth = " +
+				                             std::to_string(cur_node->get_depth()) + ")",
 				                             tab,
 				                             stream);
 
