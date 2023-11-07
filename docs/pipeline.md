@@ -95,7 +95,8 @@ consecutive stages, the target sockets to bind are stored in the vector
 stages when creating a pipeline and serve as "bridges" between them, they are 
 bound to first and last tasks of the consecutive stages. The purpose of adaptors 
 is to synchronize data exchange between each stage using pre-allocated buffer 
-pools. There are 4 tasks performed by adaptors:
+pools. In other words, this is **an implementation of the producer-consumer 
+algorithm**. There are 4 tasks performed by adaptors:
 
 - `push_1`: when the $S$ stage is executed on one thread and the $(S+1)$ stage 
   is executed on multiple threads. The function gets an empty buffer and fills 

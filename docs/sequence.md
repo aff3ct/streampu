@@ -59,7 +59,7 @@ graph and to perform some operations that can modify the user bindings.
 Additionally, some tasks can be optimized and/or interpreted as a DSEL keyword. 
 
 !!! warning
-    Before reading the following paragraphs you should be familiar with the 
+    Before reading the following paragraph you should be familiar with the 
     [Adaptor](pipeline.md#Adaptor) and [Switcher](switcher.md) modules.
 
 Here is a list of the transformations that are performed during the 
@@ -79,6 +79,7 @@ Here is a list of the transformations that are performed during the
  - Other tasks: a dumb `process` will be created for each task and it will only 
    call its corresponding task.
 
+<a name="Explore_thread_rec"></a>
 ```cpp
 void explore_thread_rec(Socket* socket, std::vector<runtime::Socket*>& list_fwd);
 ```
@@ -88,11 +89,24 @@ called recursively on this new socket (see the
 [Forward socket and pipeline](socket_fwd.md) section). This call is performed 
 once at sequence build.
 
+!!! warning
+    This function is no longer a method of the `runtime::Sequence` class, it is 
+    now integrated as an anonymous (= lambda) function in the `gen_processes` 
+    method. This is because `explore_thread_rec` is only used in 
+    `gen_processes`.
+
+<a name="Explore_thread_rec_reverse"></a>
 ```cpp
 void explore_thread_rec_reverse(runtime::Socket* socket, std::vector<runtime::Socket*>& list_fwd);
 ```
 The function does the same thing as the previous one, but in the other sense
 (previous).
+
+!!! warning
+    This function is no longer a method of the `runtime::Sequence` class, it is 
+    now integrated as an anonymous (= lambda) function in the `gen_processes` 
+    method. This is because `explore_thread_rec_reverse` is only used in 
+    `gen_processes`.
 
 <a name="Sub-sequence"></a>
 ## Sub-sequence
@@ -162,7 +176,7 @@ sub-sequences themselves do not contain information regarding the graph.
 ### Main Attributes
 
 ```cpp
-std::vector<tools::Digraph_node<T>*> fathers;
+std::vector<tools::Digraph_node<T>*> parents;
 std::vector<tools::Digraph_node<T>*> children;
 ```
 The nodes pointing to this node and the ones it points to respectively.

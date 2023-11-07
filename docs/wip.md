@@ -4,9 +4,10 @@
 
 Currently when `gen_processes()` is called, `select` and `commute` tasks do not 
 behave properly with `SFWD` tasks bound directly on their data sockets, indeed 
-they only rebind the first bound sockets while they should use 
-`explore_thread_rec()` to update the data pointers of every linked `SFWD`. **For 
-now, tasks bound to switchers should be `SIO`.**
+they only rebind the first bound sockets while they should use the
+[`explore_thread_rec()`](sequence.md#Explore_thread_rec) function to update the 
+data pointers of every linked `SFWD`. **For now, tasks bound to switchers should 
+be `SIO`.**
 
 ## Task IDs Update
 

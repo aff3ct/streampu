@@ -3,10 +3,9 @@
 Sockets are used to exchange data between [tasks](task.md). There are 3 
 different types of sockets:
 
-- Input socket (`socket_t::SIN`),
-- Output socket (`socket_t::SOUT`),
-- Forward socket (`socket_t::SFWD`): read and write data (see the [forward 
-  socket](socket_fwd.md) section).
+- Input socket (`socket_t::SIN`): read only data,
+- Output socket (`socket_t::SOUT`): write only data,
+- Forward socket (`socket_t::SFWD`): read and write data.
 
 A task can have multiple sockets of different types (input, output and forward).
 This is illustrated in the following figure:
