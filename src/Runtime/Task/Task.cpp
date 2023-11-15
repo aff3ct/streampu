@@ -268,13 +268,12 @@ void Task
 
 		if (frame_id > 0 && managed_memory == true && n_frames_per_wave > 1)
 		{
-			// We don't have to check for forward because it shares the same dataptr as the input sockets
 			const size_t w = (frame_id % n_frames) / n_frames_per_wave;
 			const size_t w_pos = frame_id % n_frames_per_wave;
 
 			for (size_t sid = 0; sid < this->sockets.size() -1; sid++)
 			{
-				if (sockets[sid]->get_type() == socket_t::SIN)
+				if (sockets[sid]->get_type() == socket_t::SIN || sockets[sid]->get_type() == socket_t::SFWD)
 					std::copy(sockets_dataptr_init[sid] + ((frame_id % n_frames) + 0) * sockets_databytes_per_frame[sid],
 					          sockets_dataptr_init[sid] + ((frame_id % n_frames) + 1) * sockets_databytes_per_frame[sid],
 					          sockets_data[sid].begin() + w_pos                       * sockets_databytes_per_frame[sid]);
@@ -284,12 +283,12 @@ void Task
 			status[w] = this->codelet(*this->module, *this, w * n_frames_per_wave);
 
 			for (size_t sid = 0; sid < this->sockets.size() -1; sid++)
-				if (sockets[sid]->get_type() == socket_t::SOUT)
+				if (sockets[sid]->get_type() == socket_t::SOUT || sockets[sid]->get_type() == socket_t::SFWD)
 					std::copy(sockets_data[sid].begin() + (w_pos + 0)           * sockets_databytes_per_frame[sid],
 					          sockets_data[sid].begin() + (w_pos + 1)           * sockets_databytes_per_frame[sid],
 					          sockets_dataptr_init[sid] + (frame_id % n_frames) * sockets_databytes_per_frame[sid]);
 		}
-		else // if (frame_id < 0 || n_frames_per_wave == 1)
+		else // if (frame_id <= 0 || n_frames_per_wave == 1)
 		{
 			const size_t w_start = (frame_id < 0) ? 0 : frame_id % n_waves;
 			const size_t w_stop  = (frame_id < 0) ? n_waves : w_start +1;
@@ -320,7 +319,7 @@ void Task
 				{
 					for (size_t sid = 0; sid < this->sockets.size() -1; sid++)
 					{
-						if (sockets[sid]->get_type() == socket_t::SIN)
+						if (sockets[sid]->get_type() == socket_t::SIN || sockets[sid]->get_type() == socket_t::SFWD)
 							std::copy(sockets_dataptr_init[sid] + w * n_frames_per_wave * sockets_databytes_per_frame[sid],
 							          sockets_dataptr_init[sid] +     n_frames          * sockets_databytes_per_frame[sid],
 							          sockets_data[sid].begin());
@@ -330,7 +329,7 @@ void Task
 					status[w] = this->codelet(*this->module, *this, w * n_frames_per_wave);
 
 					for (size_t sid = 0; sid < this->sockets.size() -1; sid++)
-						if (sockets[sid]->get_type() == socket_t::SOUT)
+						if (sockets[sid]->get_type() == socket_t::SOUT || sockets[sid]->get_type() == socket_t::SFWD)
 							std::copy(sockets_data[sid].begin(),
 							          sockets_data[sid].begin() + n_frames_per_wave_rest * sockets_databytes_per_frame[sid],
 							          sockets_dataptr_init[sid] + w * n_frames_per_wave  * sockets_databytes_per_frame[sid]);
