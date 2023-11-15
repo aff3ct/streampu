@@ -131,7 +131,7 @@ void** Socket
 	assert(start_col < n_cols);
 
 	this->rowsptr -= this->start_row;
-	uint8_t* dptr = this->template get_dataptr<uint8_t>() + start_col;
+	uint8_t* dptr = (uint8_t*)get_dataptr() + start_col;
 	for (size_t r = 0; r < this->get_n_rows(); r++)
 	{
 		this->rowsptr[r] = (void*)dptr;
