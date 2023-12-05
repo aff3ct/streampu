@@ -13,9 +13,11 @@ using proto_uop = TO (*)(const TI a);
 // ------------------------------------------------------------------------------------------- special function headers
 
 template <typename TI, typename TO> inline TO uop_abs    (const TI a);
+template <typename TI, typename TO> inline TO uop_cast   (const TI a);
+template <typename TI, typename TO> inline TO uop_neg    (const TI a);
 template <typename TI, typename TO> inline TO uop_not    (const TI a);
-template <typename TI, typename TO> inline TO uop_not_abs(const TI a);
 template <typename TI, typename TO> inline TO uop_sign   (const TI a);
+template <typename TI, typename TO> inline TO uop_not_abs(const TI a);
 
 template <typename TI, typename TO, proto_uop<TI,TO> UOP>
 std::string uop_get_name();
