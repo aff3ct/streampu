@@ -21,6 +21,13 @@ runtime::Socket& Binaryop<TI,TO,BOP>
 
 template <typename TI, typename TO, tools::proto_bop<TI,TO> BOP>
 runtime::Socket& Binaryop<TI,TO,BOP>
+::operator[](const bop::sck::fwd_perform s)
+{
+	return Module::operator[]((size_t)bop::tsk::fwd_perform)[(size_t)s];
+}
+
+template <typename TI, typename TO, tools::proto_bop<TI,TO> BOP>
+runtime::Socket& Binaryop<TI,TO,BOP>
 ::operator[](const std::string &tsk_sck)
 {
 	return Module::operator[](tsk_sck);
@@ -28,24 +35,65 @@ runtime::Socket& Binaryop<TI,TO,BOP>
 
 template <typename TI, typename TO, tools::proto_bop<TI,TO> BOP>
 Binaryop<TI,TO,BOP>
-::Binaryop(const size_t n_elmts)
-: Module(), n_elmts(n_elmts)
+::Binaryop(const size_t n_in1, const size_t n_in2)
+: Module(), n_elmts(n_in1>n_in2?n_in1:n_in2)
 {
 	const std::string name = "Binaryop";
 	this->set_name(name + "<" + tools::bop_get_name<TI,TO,BOP>() + ">");
 	this->set_short_name(name);
 
-	if (n_elmts == 0)
+	if (n_in1 == 0)
 	{
 		std::stringstream message;
-		message << "'n_elmts' has to be greater than 0 ('n_elmts' = " << n_elmts << ").";
+		message << "'n_in1' has to be greater than 0 ('n_in1' = " << n_in1 << ").";
+		throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
+	}
+
+	if (n_in2 == 0)
+	{
+		std::stringstream message;
+		message << "'n_in2' has to be greater than 0 ('n_in2' = " << n_in2 << ").";
+		throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
+	}
+
+	if (n_in1 != n_in2 && n_in1 != 1 && n_in2 != 1)
+	{
+		std::stringstream message;
+		message << "'n_in1' and 'n_in2' have to be equal, or one the two should be 1 ('n_in1' = " << n_in1 << ",'n_in2' = " << n_in2 << ").";
 		throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
 	}
 
 	auto &p = this->create_task("perform");
-	auto ps1_in = this->template create_socket_in <TI>(p, "in0", this->n_elmts);
-	auto ps2_in = this->template create_socket_in <TI>(p, "in1", this->n_elmts);
+	auto ps1_in = this->template create_socket_in <TI>(p, "in0", n_in1);
+	auto ps2_in = this->template create_socket_in <TI>(p, "in1", n_in2);
 	auto ps_out = this->template create_socket_out<TO>(p, "out", this->n_elmts);
+
+	if (n_in1 == 1)
+	{
+	this->create_codelet(p, [ps1_in, ps2_in, ps_out](Module &m, runtime::Task &t, const size_t frame_id) -> int
+	{
+		auto &bop = static_cast<Binaryop&>(m);
+		bop._perform(*static_cast<const TI*>(t[ps1_in].get_dataptr()),
+		              static_cast<const TI*>(t[ps2_in].get_dataptr()),
+		              static_cast<      TO*>(t[ps_out].get_dataptr()),
+		             frame_id);
+		return runtime::status_t::SUCCESS;
+	});
+	}
+	else if (n_in2 == 1)
+	{
+	this->create_codelet(p, [ps1_in, ps2_in, ps_out](Module &m, runtime::Task &t, const size_t frame_id) -> int
+	{
+		auto &bop = static_cast<Binaryop&>(m);
+		bop._perform( static_cast<const TI*>(t[ps1_in].get_dataptr()),
+		             *static_cast<const TI*>(t[ps2_in].get_dataptr()),
+		              static_cast<      TO*>(t[ps_out].get_dataptr()),
+		              frame_id);
+		return runtime::status_t::SUCCESS;
+	});
+	}
+	else
+	{
 	this->create_codelet(p, [ps1_in, ps2_in, ps_out](Module &m, runtime::Task &t, const size_t frame_id) -> int
 	{
 		auto &bop = static_cast<Binaryop&>(m);
@@ -55,6 +103,41 @@ Binaryop<TI,TO,BOP>
 		             frame_id);
 		return runtime::status_t::SUCCESS;
 	});
+	}
+
+	auto &p2 = this->create_task("fwd_perform");
+	auto p2_in1 = this->template create_socket_fwd <TI>(p2, "in0", n_in1  );
+	auto p2_in2 = this->template create_socket_in  <TI>(p2, "in1", n_in2  );
+
+	if (n_in2 == 1)
+	{
+	this->create_codelet(p2, [p2_in1, p2_in2](Module &m, runtime::Task &t, const size_t frame_id) -> int
+	{
+		auto &bop = static_cast<Binaryop&>(m);
+		bop._perform( static_cast<      TI*>(t[p2_in1].get_dataptr()),
+		             *static_cast<const TI*>(t[p2_in2].get_dataptr()),
+		             frame_id);
+		return runtime::status_t::SUCCESS;
+	});
+	}
+	else
+	{
+	this->create_codelet(p2, [p2_in1, p2_in2](Module &m, runtime::Task &t, const size_t frame_id) -> int
+	{
+		auto &bop = static_cast<Binaryop&>(m);
+		bop._perform(static_cast<      TI*>(t[p2_in1].get_dataptr()),
+		             static_cast<const TI*>(t[p2_in2].get_dataptr()),
+		             frame_id);
+		return runtime::status_t::SUCCESS;
+	});
+	}
+}
+
+template <typename TI, typename TO, tools::proto_bop<TI,TO> BOP>
+Binaryop<TI,TO,BOP>
+::Binaryop(const size_t n_elmts)
+: Binaryop<TI,TO,BOP>(n_elmts,n_elmts)
+{
 }
 
 template <typename TI, typename TO, tools::proto_bop<TI,TO> BOP>
@@ -106,5 +189,36 @@ void Binaryop<TI,TO,BOP>
 		out[e] = BOP(in1[e], in2[e]);
 }
 
+template <typename TI, typename TO, tools::proto_bop<TI,TO> BOP>
+void Binaryop<TI,TO,BOP>
+::_perform(TI *in1, const TI *in2, const size_t frame_id)
+{
+	for (size_t e = 0; e < this->n_elmts; e++)
+		in1[e] = BOP(in1[e], in2[e]);
+}
+
+template <typename TI, typename TO, tools::proto_bop<TI,TO> BOP>
+void Binaryop<TI,TO,BOP>
+::_perform(const TI in1, const TI *in2, TO *out, const size_t frame_id)
+{
+	for (size_t e = 0; e < this->n_elmts; e++)
+		out[e] = BOP(in1, in2[e]);
+}
+
+template <typename TI, typename TO, tools::proto_bop<TI,TO> BOP>
+void Binaryop<TI,TO,BOP>
+::_perform(const TI *in1, const TI in2, TO *out, const size_t frame_id)
+{
+	for (size_t e = 0; e < this->n_elmts; e++)
+		out[e] = BOP(in1[e], in2);
+}
+
+template <typename TI, typename TO, tools::proto_bop<TI,TO> BOP>
+void Binaryop<TI,TO,BOP>
+::_perform(TI *in1, const TI in2, const size_t frame_id)
+{
+	for (size_t e = 0; e < this->n_elmts; e++)
+		in1[e] = BOP(in1[e], in2);
+}
 }
 }
