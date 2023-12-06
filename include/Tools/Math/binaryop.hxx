@@ -115,14 +115,14 @@ std::string bop_get_name()
 	else if ((uintptr_t)BOP == (uintptr_t)bop_eq <TI,TO>) op = "eq" ;
 	else if ((uintptr_t)BOP == (uintptr_t)bop_min<TI,TO>) op = "min";
 	else if ((uintptr_t)BOP == (uintptr_t)bop_max<TI,TO>) op = "max";
-	#ifdef __cpp_if_constexpr
-		if constexpr (std::is_integral_v<TI>)
-		{
-			     if ((uintptr_t)BOP == (uintptr_t)bop_xor<TI,TO>) op = "xor";
-			else if ((uintptr_t)BOP == (uintptr_t)bop_or <TI,TO>) op = "or";
-			else if ((uintptr_t)BOP == (uintptr_t)bop_and<TI,TO>) op = "and";
-		}
-	#endif
+#ifdef __cpp_if_constexpr
+	if constexpr (std::is_integral_v<TI>)
+	{
+		     if ((uintptr_t)BOP == (uintptr_t)bop_xor<TI,TO>) op = "xor";
+		else if ((uintptr_t)BOP == (uintptr_t)bop_or <TI,TO>) op = "or";
+		else if ((uintptr_t)BOP == (uintptr_t)bop_and<TI,TO>) op = "and";
+	}
+#endif
 #endif
 	return op;
 }

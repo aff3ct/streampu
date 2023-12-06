@@ -21,12 +21,12 @@ namespace module
 {
 	namespace bop
 	{
-		enum class tsk : size_t { perform, fwd_perform, SIZE };
+		enum class tsk : size_t { perform, performf, SIZE };
 
 		namespace sck
 		{
-			enum class perform : size_t { in0, in1, out, status };
-			enum class fwd_perform : size_t { in0, in1, status };
+			enum class perform  : size_t { in0, in1, out, status };
+			enum class performf : size_t { in0, in1, status };
 		}
 	}
 
@@ -34,16 +34,16 @@ template <typename TI, typename TO, tools::proto_bop<TI,TO> BOP>
 class Binaryop : public Module
 {
 public:
-	inline runtime::Task&   operator[](const bop::tsk              t      );
-	inline runtime::Socket& operator[](const bop::sck::perform     s      );
-	inline runtime::Socket& operator[](const bop::sck::fwd_perform s      );
-	inline runtime::Socket& operator[](const std::string&          tsk_sck);
+	inline runtime::Task&   operator[](const bop::tsk           t      );
+	inline runtime::Socket& operator[](const bop::sck::perform  s      );
+	inline runtime::Socket& operator[](const bop::sck::performf s      );
+	inline runtime::Socket& operator[](const std::string&       tsk_sck);
 
 protected:
 	const size_t n_elmts;
 
 public:
-	Binaryop(const size_t n_in1, const size_t n_in2);
+	Binaryop(const size_t n_in0, const size_t n_in1);
 	Binaryop(const size_t n_elmts);
 	virtual ~Binaryop() = default;
 	virtual Binaryop<TI,TO,BOP>* clone() const;
@@ -51,20 +51,20 @@ public:
 	size_t get_n_elmts() const;
 
 	template <class AI = std::allocator<TI>, class AO = std::allocator<TO>>
-	void perform(const std::vector<TI,AI>& in1,
-	             const std::vector<TI,AI>& in2,
+	void perform(const std::vector<TI,AI>& in0,
+	             const std::vector<TI,AI>& in1,
 	                   std::vector<TO,AO>& out,
 	             const int frame_id = -1,
 	             const bool managed_memory = true);
 
-	void perform(const TI *in1, const TI *in2, TO *out, const int frame_id = -1, const bool managed_memory = true);
+	void perform(const TI *in0, const TI *in1, TO *out, const int frame_id = -1, const bool managed_memory = true);
 
 protected:
-	virtual void _perform(const TI *in1, const TI *in2, TO *out, const size_t frame_id);
-	virtual void _perform(const TI  in1, const TI *in2, TO *out, const size_t frame_id);
-	virtual void _perform(const TI *in1, const TI  in2, TO *out, const size_t frame_id);
-	virtual void _perform(      TI *in1, const TI *in2,          const size_t frame_id);
-	virtual void _perform(      TI *in1, const TI  in2,          const size_t frame_id);
+	virtual void _perform(const TI *in0, const TI *in1, TO *out, const size_t frame_id);
+	virtual void _perform(const TI  in0, const TI *in1, TO *out, const size_t frame_id);
+	virtual void _perform(const TI *in0, const TI  in1, TO *out, const size_t frame_id);
+	virtual void _perform(      TI *in0, const TI *in1,          const size_t frame_id);
+	virtual void _perform(      TI *in0, const TI  in1,          const size_t frame_id);
 };
 
 template <typename TI, typename TO = TI> using Binaryop_add = Binaryop<TI,TO,tools::bop_add<TI,TO>>;
