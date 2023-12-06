@@ -65,7 +65,7 @@ Binaryop<TI,TO,BOP>
 
 	auto &p = this->create_task("perform");
 	auto ps_in0 = this->template create_socket_in <TI>(p, "in0", n_in0);
-	auto ps_in1 = this->template create_socket_in <TI>(p, "in0", n_in1);
+	auto ps_in1 = this->template create_socket_in <TI>(p, "in1", n_in1);
 	auto ps_out = this->template create_socket_out<TO>(p, "out", this->n_elmts);
 
 	if (n_in0 == 1)
@@ -107,7 +107,7 @@ Binaryop<TI,TO,BOP>
 
 	auto &p2 = this->create_task("performf");
 	auto p2_in0 = this->template create_socket_fwd <TI>(p2, "in0", n_in0  );
-	auto p2_in1 = this->template create_socket_in  <TI>(p2, "in0", n_in1  );
+	auto p2_in1 = this->template create_socket_in  <TI>(p2, "in1", n_in1  );
 
 	if (n_in1 == 1)
 	{
