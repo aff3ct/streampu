@@ -63,8 +63,8 @@ protected:
 	virtual void _perform(const TI *in0, const TI *in1, TO *out, const size_t frame_id);
 	virtual void _perform(const TI  in0, const TI *in1, TO *out, const size_t frame_id);
 	virtual void _perform(const TI *in0, const TI  in1, TO *out, const size_t frame_id);
-	virtual void _perform(      TI *in0, const TI *in1,          const size_t frame_id);
-	virtual void _perform(      TI *in0, const TI  in1,          const size_t frame_id);
+	virtual void _perform(const TI *in,        TI *fwd,          const size_t frame_id);
+	virtual void _perform(const TI  in,        TI *fwd,          const size_t frame_id);
 };
 
 template <typename TI, typename TO = TI> using Binaryop_add = Binaryop<TI,TO,tools::bop_add<TI,TO>>;

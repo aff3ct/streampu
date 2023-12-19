@@ -106,27 +106,27 @@ Binaryop<TI,TO,BOP>
 	}
 
 	auto &p2 = this->create_task("performf");
-	auto p2_in0 = this->template create_socket_fwd <TI>(p2, "in0", n_in0  );
-	auto p2_in1 = this->template create_socket_in  <TI>(p2, "in1", n_in1  );
+	auto p2_in  = this->template create_socket_in  <TI>(p2, "in",  n_in0);
+	auto p2_fwd = this->template create_socket_fwd <TI>(p2, "fwd", n_in1);
 
 	if (n_in1 == 1)
 	{
-	this->create_codelet(p2, [p2_in0, p2_in1](Module &m, runtime::Task &t, const size_t frame_id) -> int
+	this->create_codelet(p2, [p2_in, p2_fwd](Module &m, runtime::Task &t, const size_t frame_id) -> int
 	{
 		auto &bop = static_cast<Binaryop&>(m);
-		bop._perform( static_cast<      TI*>(t[p2_in0].get_dataptr()),
-		             *static_cast<const TI*>(t[p2_in1].get_dataptr()),
+		bop._perform(*static_cast<const TI*>(t[p2_in ].get_dataptr()),
+		              static_cast<      TI*>(t[p2_fwd].get_dataptr()),
 		             frame_id);
 		return runtime::status_t::SUCCESS;
 	});
 	}
 	else
 	{
-	this->create_codelet(p2, [p2_in0, p2_in1](Module &m, runtime::Task &t, const size_t frame_id) -> int
+	this->create_codelet(p2, [p2_in, p2_fwd](Module &m, runtime::Task &t, const size_t frame_id) -> int
 	{
 		auto &bop = static_cast<Binaryop&>(m);
-		bop._perform(static_cast<      TI*>(t[p2_in0].get_dataptr()),
-		             static_cast<const TI*>(t[p2_in1].get_dataptr()),
+		bop._perform(static_cast<const TI*>(t[p2_in ].get_dataptr()),
+		             static_cast<      TI*>(t[p2_fwd].get_dataptr()),
 		             frame_id);
 		return runtime::status_t::SUCCESS;
 	});
@@ -191,10 +191,10 @@ void Binaryop<TI,TO,BOP>
 
 template <typename TI, typename TO, tools::proto_bop<TI,TO> BOP>
 void Binaryop<TI,TO,BOP>
-::_perform(TI *in0, const TI *in1, const size_t frame_id)
+::_perform(const TI *in, TI *fwd, const size_t frame_id)
 {
 	for (size_t e = 0; e < this->n_elmts; e++)
-		in0[e] = BOP(in0[e], in1[e]);
+		fwd[e] = BOP(fwd[e], in[e]);
 }
 
 template <typename TI, typename TO, tools::proto_bop<TI,TO> BOP>
@@ -215,10 +215,10 @@ void Binaryop<TI,TO,BOP>
 
 template <typename TI, typename TO, tools::proto_bop<TI,TO> BOP>
 void Binaryop<TI,TO,BOP>
-::_perform(TI *in0, const TI in1, const size_t frame_id)
+::_perform(const TI in, TI *fwd, const size_t frame_id)
 {
 	for (size_t e = 0; e < this->n_elmts; e++)
-		in0[e] = BOP(in0[e], in1);
+		fwd[e] = BOP(fwd[e], in);
 }
 }
 }
