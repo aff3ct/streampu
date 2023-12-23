@@ -17,6 +17,7 @@
 
 #include "Tools/Interface/Interface_clone.hpp"
 #include "Tools/Interface/Interface_reset.hpp"
+#include "Tools/System/memory.hpp"
 
 namespace aff3ct
 {
@@ -66,8 +67,9 @@ protected:
 	size_t n_output_sockets;
 	size_t n_fwd_sockets; 
 
+	typedef std::vector<uint8_t, tools::aligned_allocator<uint8_t>> buffer;
 	std::vector<int> status;
-	std::vector<std::vector<uint8_t>> out_buffers;
+	std::vector<buffer> out_buffers;
 
 	// stats
 	uint32_t                 n_calls;

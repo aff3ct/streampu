@@ -79,7 +79,7 @@ void Task
 			for (auto& s : sockets)
 				if (s->get_type() == socket_t::SOUT && s->get_name() != "status")
 				{
-					out_buffers.push_back(std::vector<uint8_t>(s->databytes));
+					out_buffers.push_back(buffer(s->databytes));
 					s->dataptr = out_buffers.back().data();
 				}
 		}
@@ -636,7 +636,7 @@ size_t Task
 	// memory allocation
 	if (is_autoalloc())
 	{
-		out_buffers.push_back(std::vector<uint8_t>(s.get_databytes()));
+		out_buffers.push_back(buffer(s.get_databytes()));
 		s.dataptr = out_buffers.back().data(); // memory allocation
 	}
 
