@@ -234,6 +234,9 @@
 #ifndef REPORTER_HPP__
 #include <Tools/Reporter/Reporter.hpp>
 #endif
+#ifndef SYSTEM_MEMORY_HPP__
+#include <Tools/System/memory.hpp>
+#endif
 #ifndef THREAD_PINNING_HPP
 #include <Tools/Thread_pinning/Thread_pinning.hpp>
 #endif
