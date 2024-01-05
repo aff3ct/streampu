@@ -1,0 +1,79 @@
+\documentclass{standalone}
+
+\usepackage{tikz}
+\usetikzlibrary{aff3ct}
+
+\newcommand{\legendLight}[1][]{
+  \begin{scope}[#1]
+    \node[draw=Paired-1, rounded corners=0pt, minimum height=0.3cm, minimum width=0.7cm, text=Paired-1, fill=white, label={right:task}] (l2) at (-0.4, 1) {};
+    \node[sin,  label={right:Input socket} ] (l5) at (1.1, 1.0) {};
+    \node[sout, label={right:Output socket}] (l6) at (3.65, 1.0) {};
+    \node[sfwd, label={right:Forward socket}] (l3) at (6.5, 1.0) {};
+    \node[] (l9) at (8.85, 1.0) {};
+    \node[draw, fit= (l2) (l3) (l5) (l6) (l9)] (legend) {};
+  \end{scope}
+}
+
+\begin{document}
+  \begin{tikzpicture}[background rectangle/.style={thick, draw=gray!60, fill=white, fill opacity=1.0, rounded corners=2px}, show background rectangle]
+    %%%%%%%%%%%%%%%%%%
+    %% create tasks %%
+    %%%%%%%%%%%%%%%%%%
+    %     options                              id    coords  label     sin sout sfwd attributes
+    %     -------                              --    ------  -----     --- ---- ---- ----------
+    \task                                      {t1}  {0, 0} {$t_1$}    {0} {1}  {0}  {};
+    \task [right=1.0cm of t1]                  {t2}  {}     {$t_2$}    {1} {0}  {0}  {};
+    \task [below=1.75cm of t1]                 {t3}  {}     {$t_3$}    {0} {1}  {0}  {};
+    \task [right=1.0cm of t3]                  {t4}  {}     {$t_4$}    {0} {0}  {1}  {};
+    \task [right=1.0cm of t2]                  {t5}  {}     {$t_5$}    {0} {0}  {1}  {};
+    \task [right=1.0cm of t5]                  {t6}  {}     {$t_6$}    {1} {0}  {0}  {};
+    \task [right=1.0cm of t4]                  {t7}  {}     {$t_7$}    {0} {0}  {1}  {};
+    \task [right=1.0cm of t7]                  {t8}  {}     {$t_8$}    {0} {0}  {1}  {};
+    \task [right=1.0cm of t6]                  {t9}  {}     {$t_9$}    {0} {0}  {1}  {};
+    \task [right=1.0cm of t9, yshift=+0.55cm]  {t10} {}     {$t_{10}$} {1} {0}  {0}  {};
+    \task [right=1.0cm of t9, yshift=-0.55cm]  {t11} {}     {$t_{11}$} {0} {0}  {1}  {};
+    \task [right=1.0cm of t8]                  {t12} {}     {$t_{12}$} {0} {1}  {0}  {};
+    \task [right=1.0cm of t12, yshift=+0.55cm] {t13} {}     {$t_{13}$} {1} {0}  {0}  {};
+    \task [right=1.0cm of t12, yshift=-0.55cm] {t14} {}     {$t_{14}$} {0} {0}  {1}  {};
+    \task [right=1.0cm of t10]                 {t15} {}     {$t_{15}$} {0} {1}  {0}  {};
+    \task [right=1.0cm of t11]                 {t16} {}     {$t_{16}$} {0} {1}  {0}  {};
+    \task [right=1.0cm of t16, yshift=+0.55cm] {t17} {}     {$t_{17}$} {2} {0}  {0}  {};
+    \task [right=1.0cm of t13]                 {t18} {}     {$t_{18}$} {0} {0}  {1}  {};
+    \task [right=1.0cm of t14]                 {t19} {}     {$t_{19}$} {0} {1}  {0}  {};
+    \task [right=1.0cm of t19, yshift=+0.55cm] {t20} {}     {$t_{20}$} {1} {0}  {1}  {};
+
+    %%%%%%%%%%%%%%%%
+    %% bind tasks %%
+    %%%%%%%%%%%%%%%%
+    %     options   start id    path    end@ id
+    %     -------   --------    ----    ------
+    \draw [bind]    (t1_so1)    --      (t2_si1);
+    \draw [bind]    (t3_so1)    --      (t4_si1);
+    \draw [bind]    (t5_so1)    --      (t6_si1);
+    \draw [bind]    (t7_so1)    --      (t8_si1);
+    \draw [bind]    (t9_so1)    --      (t10_si1);
+    \draw [bind]    (t9_so1)    --      (t11_si1);
+    \draw [bind]    (t12_so1)   --      (t13_si1);
+    \draw [bind]    (t12_so1)   --      (t14_si1);
+    \draw [bind]    (t15_so1)   --      (t17_si1);
+    \draw [bind]    (t16_so1)   --      (t17_si2);
+    \draw [bind]    (t18_so1)   --      (t20_si1);
+    \draw [bind]    (t19_so1)   --      (t20_si2);
+
+    \node[Paired-5, fill=Paired-5, fill opacity=0.1, draw, dashed, minimum width=3.5cm, fit=(t1) (t2)] (vb1) {};
+    \node[Paired-5, fill=Paired-5, fill opacity=0.1, draw, dashed, minimum width=3.5cm, fit=(t3) (t4)] (vb2) {};
+    \node[Paired-5, fill=Paired-5, fill opacity=0.1, draw, dashed, minimum width=3.5cm, fit=(t5) (t6)] (vb3) {};
+    \node[Paired-5, fill=Paired-5, fill opacity=0.1, draw, dashed, minimum width=3.5cm, fit=(t7) (t8)] (vb4) {};
+
+    \node[Paired-5, fill=Paired-5, fill opacity=0.1, draw, dashed, minimum width=3.5cm, fit=(t9) (t10) (t11)] (vb5) {};
+    \node[Paired-5, fill=Paired-5, fill opacity=0.1, draw, dashed, minimum width=3.5cm, fit=(t12) (t13) (t14)] (vb6) {};
+
+    \node[Paired-5, fill=Paired-5, fill opacity=0.1, draw, dashed, minimum width=3.5cm, fit=(t15) (t16) (t17)] (vb7) {};
+    \node[Paired-5, fill=Paired-5, fill opacity=0.1, draw, dashed, minimum width=3.5cm, fit=(t18) (t19) (t20)] (vb8) {};
+
+    %%%%%%%%%%%%%%%%%%%%%
+    %% draw the legend %%
+    %%%%%%%%%%%%%%%%%%%%%
+   \legendLight [shift={(0.35,0.75)}]
+  \end{tikzpicture}
+\end{document}

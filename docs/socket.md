@@ -69,13 +69,15 @@ Below some examples of valid and invalids socket bindings :
 
 === "Valid bindings"
     <figure markdown>
-        ![Valid bindings](./assets/valid_bindings.svg){ width=750 }
+        ![Valid bindings](./assets/valid_bindings.svg#only-light){ width=750 }
+        ![Valid bindings](./assets/valid_bindings_neg.svg#only-dark){ width=750 }
         <figcaption>Examples of **valid** socket bindings.</figcaption>
     </figure>
 
 === "Invalid bindings"
     <figure markdown>
-        ![Invalid bindings](./assets/invalid_bindings.svg){ width=487 }
+        ![Invalid bindings](./assets/invalid_bindings.svg#only-light){ width=487 }
+        ![Invalid bindings](./assets/invalid_bindings_neg.svg#only-dark){ width=487 }
         <figcaption>Examples of **invalid** socket bindings.</figcaption>
     </figure>
 

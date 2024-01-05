@@ -1,0 +1,57 @@
+\documentclass{standalone}
+
+\usepackage{tikz}
+\usetikzlibrary{aff3ct}
+
+\newcommand{\legendLight}[1][]{
+  \begin{scope}[#1]
+    \node[draw=Paired-1, rounded corners=0pt, minimum height=0.3cm, minimum width=0.7cm, text=Paired-1, label={right:task}, fill=white] (l2) at (-0.4, 1) {};
+    \node[sin,  label={right:Input socket} ] (l5) at (1.1, 1.0) {};
+    \node[sout, label={right:Output socket}] (l6) at (3.65, 1.0) {};
+    \node[sfwd, label={right:Forward socket}] (l3) at (6.5, 1.0) {};
+    \node[] (l9) at (8.85, 1.0) {};
+    \node[draw, fit= (l2) (l3) (l5) (l6) (l9)] (legend) {};
+  \end{scope}
+}
+
+\begin{document}
+  \begin{tikzpicture}[background rectangle/.style={thick, draw=gray!60, fill=white, fill opacity=1.0, rounded corners=2px}, show background rectangle]
+    %%%%%%%%%%%%%%%%%%
+    %% create tasks %%
+    %%%%%%%%%%%%%%%%%%
+    %     options                            id    coords  label      sin sout sfwd attributes
+    %     -------                            --    ------  -----      --- ---- ---- ----------
+    \task []                                 {t3}  {0,0}   {$t_3$}    {1} {0}  {0}  {};
+    \task [left=1.0cm of t3, yshift=+0.55cm] {t1}  {}      {$t_1$}    {0} {1}  {0}  {};
+    \task [left=1.0cm of t3, yshift=-0.55cm] {t2}  {}      {$t_2$}    {0} {1}  {0}  {};
+    \task [below=1.75cm of t3]               {t6}  {}      {$t_6$}    {0} {0}  {1}  {};
+    \task [left=1.0cm of t6, yshift=+0.55cm] {t4}  {}      {$t_4$}    {0} {1}  {0}  {};
+    \task [left=1.0cm of t6, yshift=-0.55cm] {t5}  {}      {$t_5$}    {0} {1}  {0}  {};
+    \task [right=1.0cm of t3]                {t7}  {}      {$t_7$}    {1} {0}  {0}  {};
+    \task [right=1.0cm of t7]                {t8}  {}      {$t_8$}    {1} {0}  {0}  {};
+    \task [right=1.0cm of t6]                {t9}  {}      {$t_9$}    {0} {1}  {0}  {};
+    \task [right=1.0cm of t9]                {t10} {}      {$t_{10}$} {0} {1}  {0}  {};
+
+    %%%%%%%%%%%%%%%%
+    %% bind tasks %%
+    %%%%%%%%%%%%%%%%
+    %     options  start id                          path                                      end id
+    %     -------  --------                          ----                                      ------
+    \draw [bind]   (t1_so1)                           --                                       (t3_si1);
+    \draw [bind]   (t2_so1)                           --                                       (t3_si1);
+    \draw [bind]   (t7_si1) --++ (-0.25,0.0) --++ (0.0,0.75) --++(1.75,0.0) --++(0.0,-0.75) |- (t8_si1);
+    \draw [bind]   (t9_so1) --++ (0.25,0.0) --++ (0.0,0.75) --++ (2.15,0.0) --++(0.0,-0.75) |- (t10_so1);
+    \draw [bind]   (t4_so1)                           --                                       (t6_si1);
+    \draw [bind]   (t5_so1)                           --                                       (t6_si1);
+
+    \node[Paired-3, fill=Paired-3, fill opacity=0.1, draw, dashed, minimum width=3.5cm, fit=(t1) (t2) (t3)] (ib1) {};
+    \node[Paired-3, fill=Paired-3, fill opacity=0.1, draw, dashed, minimum width=3.5cm, fit=(t4) (t5) (t6)] (ib2) {};
+    \node[Paired-3, fill=Paired-3, fill opacity=0.1, draw, dashed, minimum width=4.05cm, minimum height=2.cm, fit=(t7) (t8)] (ib3) {};
+    \node[Paired-3, fill=Paired-3, fill opacity=0.1, draw, dashed, minimum width=4.05cm, minimum height=2.cm, fit=(t9) (t10)] (ib4) {};
+
+    %%%%%%%%%%%%%%%%%%%%%
+    %% draw the legend %%
+    %%%%%%%%%%%%%%%%%%%%%
+   \legendLight [shift={(-2.9,0.75)}]
+  \end{tikzpicture}
+\end{document}
