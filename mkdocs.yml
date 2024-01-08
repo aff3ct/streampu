@@ -45,6 +45,8 @@ theme:
 repo_url: https://github.com/aff3ct/aff3ct-core
 
 markdown_extensions:
+  - toc:
+      permalink: true
   - pymdownx.highlight:
       anchor_linenums: true
       line_spans: __span
