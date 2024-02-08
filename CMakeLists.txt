@@ -119,7 +119,7 @@ if(AFF3CT_CORE_TESTS)
     add_executable(aff3ct-core-test-simple-chain-fwd $<TARGET_OBJECTS:aff3ct-core-obj>
                                                  ${CMAKE_CURRENT_SOURCE_DIR}/tests/bootstrap/simple_chain_fwd.cpp)
     set_target_properties(aff3ct-core-test-simple-chain-fwd PROPERTIES
-                                                        OUTPUT_NAME test-simple-chain-io
+                                                        OUTPUT_NAME test-simple-chain-fwd
                                                         POSITION_INDEPENDENT_CODE ON) # set -fpie
     list(APPEND aff3ct_core_tests_list aff3ct-core-test-simple-chain-fwd)
     list(APPEND aff3ct_core_targets_list aff3ct-core-test-simple-chain-fwd)
@@ -397,7 +397,7 @@ if(AFF3CT_CORE_TESTS)
 
     macro(aff3ct_core_run_1t_tests targets)
         foreach(_target IN ITEMS ${targets})
-             add_test(NAME run-1t::${_target} COMMAND ${_target} -e 100 -t 1)
+             add_test(NAME run-1t::${_target} COMMAND ${_target} -d 2048 -s 5 -e 100 -t 1)
         endforeach()
     endmacro()
 
@@ -405,7 +405,7 @@ if(AFF3CT_CORE_TESTS)
 
     macro(aff3ct_core_run_tests targets)
         foreach(_target IN ITEMS ${targets})
-             add_test(NAME run::${_target} COMMAND ${_target} -e 100)
+             add_test(NAME run::${_target} COMMAND ${_target} -d 2048 -s 5 -e 100)
         endforeach()
     endmacro()
 
@@ -413,7 +413,7 @@ if(AFF3CT_CORE_TESTS)
 
     macro(aff3ct_core_inter_frames_tests targets)
         foreach(_target IN ITEMS ${targets})
-             add_test(NAME inter-frames::${_target} COMMAND ${_target} -e 100 -f 13)
+             add_test(NAME inter-frames::${_target} COMMAND ${_target} -d 2048 -s 5 -e 100 -f 13)
         endforeach()
     endmacro()
 
@@ -421,7 +421,7 @@ if(AFF3CT_CORE_TESTS)
 
     macro(aff3ct_core_step_by_step_tests targets)
         foreach(_target IN ITEMS ${targets})
-             add_test(NAME step-by-step::${_target} COMMAND ${_target} -e 51 -f 13 -b)
+             add_test(NAME step-by-step::${_target} COMMAND ${_target} -d 2048 -s 5 -e 51 -f 13 -b)
         endforeach()
     endmacro()
 
@@ -429,7 +429,7 @@ if(AFF3CT_CORE_TESTS)
 
     macro(aff3ct_core_copy_mode_tests targets)
         foreach(_target IN ITEMS ${targets})
-             add_test(NAME copy-mode::${_target} COMMAND ${_target} -e 142 -f 13 -c)
+             add_test(NAME copy-mode::${_target} COMMAND ${_target} -d 2048 -s 5 -e 142 -f 13 -c)
         endforeach()
     endmacro()
 
@@ -437,7 +437,7 @@ if(AFF3CT_CORE_TESTS)
 
     macro(aff3ct_core_graph_dot_tests targets)
         foreach(_target IN ITEMS ${targets})
-             add_test(NAME graph-dot::${_target} COMMAND ${_target} -e 142 -f 13 -o graph.dot)
+             add_test(NAME graph-dot::${_target} COMMAND ${_target} -d 2048 -s 5 -e 142 -f 13 -o graph.dot)
         endforeach()
     endmacro()
 
@@ -445,13 +445,13 @@ if(AFF3CT_CORE_TESTS)
 
     set(INPUT_FILE "../src/Runtime/Sequence/Sequence.cpp")
 
-    add_test(NAME subseq0::aff3ct-core-test-simple-chain COMMAND aff3ct-core-test-simple-chain -e 142 -f 13 -u)
-    add_test(NAME subseq1::aff3ct-core-test-simple-chain COMMAND aff3ct-core-test-simple-chain -v)
+    add_test(NAME subseq0::aff3ct-core-test-simple-chain COMMAND aff3ct-core-test-simple-chain -d 2048 -s 5 -e 142 -f 13 -u)
+    add_test(NAME subseq1::aff3ct-core-test-simple-chain COMMAND aff3ct-core-test-simple-chain -d 2048 -s 5 -v)
 
-    add_test(NAME path0::aff3ct-core-test-exclusive-paths COMMAND aff3ct-core-test-exclusive-paths -e 142 -f 13 -a 0)
-    add_test(NAME path1::aff3ct-core-test-exclusive-paths COMMAND aff3ct-core-test-exclusive-paths -e 142 -f 13 -a 1)
-    add_test(NAME path2::aff3ct-core-test-exclusive-paths COMMAND aff3ct-core-test-exclusive-paths -e 142 -f 13 -a 2)
-    add_test(NAME cyclic::aff3ct-core-test-exclusive-paths COMMAND aff3ct-core-test-exclusive-paths -e 142 -f 13 -y)
+    add_test(NAME path0::aff3ct-core-test-exclusive-paths COMMAND aff3ct-core-test-exclusive-paths -d 2048 -s 5 -e 142 -f 13 -a 0)
+    add_test(NAME path1::aff3ct-core-test-exclusive-paths COMMAND aff3ct-core-test-exclusive-paths -d 2048 -s 5 -e 142 -f 13 -a 1)
+    add_test(NAME path2::aff3ct-core-test-exclusive-paths COMMAND aff3ct-core-test-exclusive-paths -d 2048 -s 5 -e 142 -f 13 -a 2)
+    add_test(NAME cyclic::aff3ct-core-test-exclusive-paths COMMAND aff3ct-core-test-exclusive-paths -d 2048 -s 5 -e 142 -f 13 -y)
 
     add_test(NAME sequence0::aff3ct-core-test-simple-pipeline COMMAND aff3ct-core-test-simple-pipeline -q -t 1 -i ${INPUT_FILE})
     add_test(NAME sequence1::aff3ct-core-test-simple-pipeline COMMAND aff3ct-core-test-simple-pipeline -q -t 1 -i ${INPUT_FILE} -p -g)
@@ -503,7 +503,7 @@ if(AFF3CT_CORE_TESTS)
     add_test(NAME exclusive-pipeline3::aff3ct-core-test-exclusive-paths-pipeline COMMAND aff3ct-core-test-exclusive-paths-pipeline -t 8 -u 15 -i ${INPUT_FILE})
     add_test(NAME exclusive-pipeline4::aff3ct-core-test-exclusive-paths-pipeline COMMAND aff3ct-core-test-exclusive-paths-pipeline -t 1 -u 13 -q -b -i ${INPUT_FILE})
 
-    add_test(NAME nested-loops-pipeline0::aff3ct-core-test-nest-loops-pipeline COMMAND aff3ct-core-test-nest-loops-pipeline -e 100 -f 13 -i 20 -j 50 -t 8)
+    add_test(NAME nested-loops-pipeline0::aff3ct-core-test-nest-loops-pipeline COMMAND aff3ct-core-test-nest-loops-pipeline -e 10 -f 13 -i 20 -j 50 -t 8)
     add_test(NAME nested-loops-pipeline1::aff3ct-core-test-nest-loops-pipeline COMMAND aff3ct-core-test-nest-loops-pipeline -e 10 -a -i 20 -j 50 -t 1)
     add_test(NAME nested-loops-pipeline2::aff3ct-core-test-nest-loops-pipeline COMMAND aff3ct-core-test-nest-loops-pipeline -e 200 -i 20 -j 10 -t 2)
     add_test(NAME nested-loops-pipeline3::aff3ct-core-test-nest-loops-pipeline COMMAND aff3ct-core-test-nest-loops-pipeline -e 200 -f 13)
