@@ -30,9 +30,9 @@ int main(int argc, char** argv)
 
 	size_t n_threads = std::thread::hardware_concurrency();
 	size_t n_inter_frames = 1;
-	size_t sleep_time_us = 0;
-	size_t data_length = 1000000;
-	size_t n_exec = 100;
+	size_t sleep_time_us = 5;
+	size_t data_length = 2048;
+	size_t n_exec = 100000;
 	std::string dot_filepath;
 	bool no_copy_mode = true;
 	bool print_stats = false;
@@ -149,8 +149,8 @@ int main(int argc, char** argv)
 	module::Initializer<uint8_t> initializer(data_length);
 	module::Finalizer  <uint8_t> finalizer  (data_length);
 
-	std::vector<std::shared_ptr<module::Incrementer<uint8_t>>> incs_fwd(6);
-	std::vector<std::shared_ptr<module::Incrementer<uint8_t>>> incs(6);
+	std::vector<std::shared_ptr<module::Incrementer<uint8_t>>> incs(2);
+	std::vector<std::shared_ptr<module::Incrementer<uint8_t>>> incs_fwd(4);
 
 	for (size_t s = 0; s < incs.size(); s++)
 	{
@@ -270,6 +270,8 @@ int main(int argc, char** argv)
 
 	size_t chain_sleep_time = 0;
 	for (auto &inc : incs)
+		chain_sleep_time += inc->get_ns();
+	for (auto &inc : incs_fwd)
 		chain_sleep_time += inc->get_ns();
 
 	auto theoretical_time = (chain_sleep_time * n_exec * n_inter_frames) / 1000.f / 1000.f / n_threads;
