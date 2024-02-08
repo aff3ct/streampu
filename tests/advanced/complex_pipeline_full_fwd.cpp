@@ -132,8 +132,10 @@ int main(int argc, char** argv)
 	module::Initializer<uint8_t> initializer(data_length);
 	module::Finalizer  <uint8_t> finalizer  (data_length);
 
+	initializer.set_init_data(40);
+
 	// Incrementers construction
-	std::vector<std::shared_ptr<module::Incrementer<uint8_t>>> incs(6);
+	std::vector<std::shared_ptr<module::Incrementer<uint8_t>>> incs(2);
 	for (size_t s = 0; s < incs.size(); s++)
 	{
 		incs[s].reset(new module::Incrementer<uint8_t>(data_length));
@@ -142,7 +144,7 @@ int main(int argc, char** argv)
 	}
 
 	// Relayers construction
-	std::vector<std::shared_ptr<module::Relayer<uint8_t>>> rlys(6);
+	std::vector<std::shared_ptr<module::Relayer<uint8_t>>> rlys(2);
 	for (size_t s = 0; s < rlys.size(); s++)
 	{
 		rlys[s].reset(new module::Relayer<uint8_t>(data_length));
@@ -222,18 +224,6 @@ int main(int argc, char** argv)
 		}));
 	pipeline_chain->set_n_frames(n_inter_frames);
 
-	// Getting the input data
-	auto tid = 0;
-	for (auto cur_initializer :
-		pipeline_chain.get()->get_stages()[0]->get_cloned_modules<module::Initializer<uint8_t>>(initializer))
-	{
-		std::vector<std::vector<uint8_t>> init_data(n_inter_frames, std::vector<uint8_t>(data_length, 0));
-		for (size_t f = 0; f < n_inter_frames; f++)
-			std::fill(init_data[f].begin(), init_data[f].end(), 0);
-		cur_initializer->set_init_data(init_data);
-		tid++;
-	}
-
 	if (!dot_filepath.empty())
 	{
 		std::ofstream file(dot_filepath);
@@ -258,7 +248,7 @@ int main(int argc, char** argv)
 
 	// verification of the sequence execution
 	bool tests_passed = true;
-	tid = 0;
+	auto tid = 0;
 
 	for (auto cur_finalizer :
 		pipeline_chain.get()->get_stages()[pipeline_chain.get()->get_stages().size()-1]
@@ -269,7 +259,7 @@ int main(int argc, char** argv)
 			const auto &final_data = cur_finalizer->get_final_data()[f];
 			for (size_t d = 0; d < final_data.size(); d++)
 			{
-				auto expected = (int)(1);
+				auto expected = (int)(42);
 				expected = expected % 256;
 				if (final_data[d] != expected)
 				{
