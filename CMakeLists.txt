@@ -393,6 +393,9 @@ endif()
 # ---------------------------------------------------------------------------------------------------------------------
 
 if(AFF3CT_CORE_TESTS)
+    find_program(MEMORYCHECK_COMMAND valgrind)
+    set(MEMORYCHECK_COMMAND_OPTIONS "--trace-children=yes --leak-check=full")
+    include(CTest)
     enable_testing()
 
     macro(aff3ct_core_run_1t_tests targets)
