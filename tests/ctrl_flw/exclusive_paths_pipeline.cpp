@@ -260,6 +260,7 @@ int main(int argc, char** argv)
 			uint8_t* unpacked = unpack(packed - 32);
 			for (size_t i = 0; i < 8; i++)
 				t[s_out_up].get_dataptr<uint8_t>()[i] = unsigned(unpacked[i]);
+			delete[] unpacked;
 		}
 		return 0;
 	});
@@ -276,6 +277,7 @@ int main(int argc, char** argv)
 			uint8_t* unpacked = unpack(packed + 32);
 			for (size_t i = 0; i < 8; i++)
 				t[s_out_low].get_dataptr<uint8_t>()[i] = unsigned(unpacked[i]);
+			delete[] unpacked;
 		} 
 		return 0;
 	});
