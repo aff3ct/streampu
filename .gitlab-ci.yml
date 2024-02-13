@@ -180,6 +180,7 @@ test-coverage-regression:
      name: code-coverage-files
      when: always
      paths:
+      - build/Testing
       - code_coverage_files/
   script:
     # - tar -xvvf build.tar.gz
