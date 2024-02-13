@@ -446,7 +446,7 @@ if(AFF3CT_CORE_TESTS)
 
     aff3ct_core_graph_dot_tests("${aff3ct_core_tests_list}")
 
-    set(INPUT_FILE "../src/Runtime/Sequence/Sequence.cpp")
+    set(INPUT_FILE "../mkdocs.yml")
 
     add_test(NAME subseq0::aff3ct-core-test-simple-chain COMMAND aff3ct-core-test-simple-chain -d 2048 -s 5 -e 15 -f 13 -u)
     add_test(NAME subseq1::aff3ct-core-test-simple-chain COMMAND aff3ct-core-test-simple-chain -d 2048 -s 5 -v)
