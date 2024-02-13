@@ -212,7 +212,7 @@ test-memcheck-regression:
     - source ./ci/tools/threads.sh
     - ./ci/build-linux-macos.sh
     - cd build
-    - ctest -T memcheck
+    - ctest -LE "^nomemcheck$" -T memcheck
 
 coverage-linux:
   image: registry.gitlab.com/aff3ct/aff3ct/x86_64_ubuntu_coverage
