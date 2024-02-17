@@ -568,7 +568,7 @@ void Pipeline
 	// ----------------------------------------------------------------------------------------------------------------
 	// ------------------------------------------------------------------------------------------------ create adaptors
 	// ----------------------------------------------------------------------------------------------------------------
-	auto sck_orphan_binds = this->sck_orphan_binds;
+	auto sck_orphan_binds_cpy = this->sck_orphan_binds;
 	module::Adaptor* adp = nullptr;
 	std::map<runtime::Socket*, size_t> sck_to_adp_sck_id;
 	for (size_t sta = 0; sta < this->stages.size(); sta++)
@@ -582,7 +582,11 @@ void Pipeline
 		if (sta > 0)
 		{
 			assert(adp != nullptr);
-			auto sck_orphan_binds_new = sck_orphan_binds;
+			//                               sck out addr      stage   tsk id  sck id  unbind_pos
+			std::vector<std::pair<std::tuple<runtime::Socket*, size_t, size_t, size_t, size_t>,
+	        //                               sck in addr       stage   tsk id  sck id
+	                              std::tuple<runtime::Socket*, size_t, size_t, size_t>>> sck_orphan_binds_new;
+
 			auto n_threads_prev_sta = this->stages[sta -1]->get_n_threads();
 			for (size_t t = 0; t < n_threads; t++)
 			{
@@ -600,7 +604,7 @@ void Pipeline
 				                                           &(*cur_adp)[(int)module::adp::tsk::pull_1];
 
 				sck_orphan_binds_new.clear();
-				for (auto &bind : sck_orphan_binds)
+				for (auto &bind : sck_orphan_binds_cpy)
 				{
 					auto tsk_out_sta = std::get<1>(bind.first);
 					if (tsk_out_sta < sta)
@@ -614,9 +618,9 @@ void Pipeline
 							auto sck_in_id = std::get<3>(bind.second);
 							auto sck_in = tasks_per_threads[t][tsk_in_id]->sockets[sck_in_id];
 							this->adaptors_binds.push_back(
-								std::make_tuple(task_pull->sockets[sck_to_adp_sck_id[sck_out_ptr]].get(),
-								                sck_in.get(),
-								                priority));
+							    std::make_tuple(task_pull->sockets[sck_to_adp_sck_id[sck_out_ptr]].get(),
+							                    sck_in.get(),
+							                    priority));
 						}
 						else
 							sck_orphan_binds_new.push_back(bind);
@@ -629,7 +633,7 @@ void Pipeline
 					this->stages[sta]->all_modules[t].push_back(cur_adp);
 			}
 			this->saved_firsts_tasks_id[sta] = this->stages[sta]->firsts_tasks_id;
-			sck_orphan_binds = sck_orphan_binds_new;
+			sck_orphan_binds_cpy = sck_orphan_binds_new;
 		}
 
 		// ------------------------------------------------------------------------------------------------------------
@@ -645,8 +649,11 @@ void Pipeline
 			                                                  synchro_active_waiting[sta] : false;
 			size_t                       adp_n_frames = 1;
 
+			// a map to remember if a passed socket points already to the same memory space
+			std::map<void*, size_t> fwd_source;
+
 			std::vector<runtime::Socket*> passed_scks_out;
-			for (auto &bind : sck_orphan_binds)
+			for (auto &bind : sck_orphan_binds_cpy)
 			{
 				auto tsk_out_sta = std::get<1>(bind.first);
 				if (tsk_out_sta <= sta)
@@ -654,9 +661,16 @@ void Pipeline
 					auto sck_out = std::get<0>(bind.first);
 					if (std::find(passed_scks_out.begin(), passed_scks_out.end(), sck_out) == passed_scks_out.end())
 					{
-						adp_n_frames = sck_out->get_task().get_module().get_n_frames();
-						adp_n_elmts.push_back(sck_out->get_n_elmts() / adp_n_frames);
-						adp_datatype.push_back(sck_out->get_datatype());
+						// avoid the creation of new adaptor sockets for forward sockets pointing to the same memory
+						// space
+						auto sck_out_dptr = sck_out->get_dataptr();
+						if (fwd_source.find(sck_out_dptr) == fwd_source.end())
+						{
+							fwd_source[sck_out_dptr] = 1;
+							adp_n_frames = sck_out->get_task().get_module().get_n_frames();
+							adp_n_elmts.push_back(sck_out->get_n_elmts() / adp_n_frames);
+							adp_datatype.push_back(sck_out->get_datatype());
+						}
 						passed_scks_out.push_back(sck_out);
 					}
 				}
@@ -684,50 +698,59 @@ void Pipeline
 				auto task_push = n_threads == 1 ? &(*cur_adp)[(int)module::adp::tsk::push_1] :
 				                                  &(*cur_adp)[(int)module::adp::tsk::push_n];
 
+				std::map<void*, size_t> fwd_source;
 				sck_to_adp_sck_id_new.clear();
 				size_t adp_sck_id = 0;
-				for (auto &bind : sck_orphan_binds) // bind standard task to last adaptor
+				for (auto &bind : sck_orphan_binds_cpy) // bind standard task to last adaptor
 				{
 					auto tsk_out_sta = std::get<1>(bind.first);
-					if (tsk_out_sta == sta)
+
+					if (tsk_out_sta <= sta)
 					{
 						auto sck_out_ptr = std::get<0>(bind.first);
+						auto sck_out_dptr = sck_out_ptr->get_dataptr();
+
 						if (std::find(passed_scks_out.begin(),
 						              passed_scks_out.end(),
-						              sck_out_ptr) == passed_scks_out.end())
+						              sck_out_ptr) == passed_scks_out.end() &&
+							fwd_source.find(sck_out_dptr) == fwd_source.end()) // <= the latest condition is here to
+							                                                   //    avoid to bind adaptor sockets two
+							                                                   //    times the same memory space
+							                                                   //    (usefull in the case of multiple
+							                                                   //    fwd sockets pointing to the same
+							                                                   //    memory address)
 						{
-							auto tsk_out_id = std::get<2>(bind.first);
-							auto sck_out_id = std::get<3>(bind.first);
-							auto sck_out = tasks_per_threads[t][tsk_out_id]->sockets[sck_out_id];
-							auto priority = std::get<4>(bind.first);
-							sck_to_adp_sck_id_new[sck_out_ptr] = adp_sck_id;
-							this->adaptors_binds.push_back(
-								std::make_tuple(sck_out.get(),
-								                task_push->sockets[adp_sck_id++].get(),
-								                priority));
-							passed_scks_out.push_back(sck_out_ptr);
-						}
-					}
-					else if (tsk_out_sta < sta) // bind prev. adaptor to last adaptor
-					{
-						auto n_threads_prev_sta = this->stages[sta -1]->get_n_threads();
-						auto sck_out_ptr = std::get<0>(bind.first);
-						if (std::find(passed_scks_out.begin(),
-						              passed_scks_out.end(),
-						              sck_out_ptr) == passed_scks_out.end())
-						{
-							auto tsk_out_id = (n_threads_prev_sta == 1) ? (size_t)module::adp::tsk::pull_n :
-							                                              (size_t)module::adp::tsk::pull_1;
-							auto sck_out_id = sck_to_adp_sck_id[sck_out_ptr];
-							sck_to_adp_sck_id_new[sck_out_ptr] = adp_sck_id;
-							auto adp_prev = t == 0 ? this->adaptors[sta -1].first [   0] :
-							                         this->adaptors[sta -1].second[t -1];
-							auto sck_out = (*adp_prev)[tsk_out_id].sockets[sck_out_id];
-							auto priority = std::get<4>(bind.first);
-							this->adaptors_binds.push_back(
-								std::make_tuple(sck_out.get(),
-								                task_push->sockets[adp_sck_id++].get(),
-								                priority));
+							if (tsk_out_sta == sta)
+							{
+								auto tsk_out_id = std::get<2>(bind.first);
+								auto sck_out_id = std::get<3>(bind.first);
+								auto sck_out = tasks_per_threads[t][tsk_out_id]->sockets[sck_out_id];
+								auto priority = std::get<4>(bind.first);
+								sck_to_adp_sck_id_new[sck_out_ptr] = adp_sck_id;
+								this->adaptors_binds.push_back(
+									std::make_tuple(sck_out.get(),
+									                task_push->sockets[adp_sck_id++].get(),
+									                priority));
+							}
+							else // if (tsk_out_sta < sta) // bind prev. adaptor to last adaptor
+							{
+								auto n_threads_prev_sta = this->stages[sta -1]->get_n_threads();
+								auto tsk_out_id = (n_threads_prev_sta == 1) ? (size_t)module::adp::tsk::pull_n :
+								                                              (size_t)module::adp::tsk::pull_1;
+								auto sck_out_id = sck_to_adp_sck_id[sck_out_ptr];
+								sck_to_adp_sck_id_new[sck_out_ptr] = adp_sck_id;
+								auto adp_prev = t == 0 ? this->adaptors[sta -1].first [   0] :
+								                         this->adaptors[sta -1].second[t -1];
+								auto sck_out = (*adp_prev)[tsk_out_id].sockets[sck_out_id];
+								auto priority = std::get<4>(bind.first);
+								this->adaptors_binds.push_back(
+									std::make_tuple(sck_out.get(),
+									                task_push->sockets[adp_sck_id++].get(),
+									                priority));
+							}
+
+							fwd_source[sck_out_dptr] = 1; // remember that this memory space has been connected to the
+							                              // adaptor once
 							passed_scks_out.push_back(sck_out_ptr);
 						}
 					}

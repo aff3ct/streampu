@@ -538,7 +538,7 @@ void Sequence
 		tools::exception::no_backtrace = save;
 
 		if (std::find(this->prev_exception_messages.begin(), this->prev_exception_messages.end(), msg) ==
-			this->prev_exception_messages.end())
+		    this->prev_exception_messages.end())
 		{
 			this->prev_exception_messages.push_back(msg); // save only the function signature
 			this->prev_exception_messages_to_display.push_back(e.what()); // with backtrace if debug mode
@@ -617,7 +617,7 @@ void Sequence
 		tools::exception::no_backtrace = save;
 
 		if (std::find(this->prev_exception_messages.begin(), this->prev_exception_messages.end(), msg) ==
-			this->prev_exception_messages.end())
+		    this->prev_exception_messages.end())
 		{
 			this->prev_exception_messages.push_back(msg); // save only the function signature
 			this->prev_exception_messages_to_display.push_back(e.what()); // with backtrace if debug mode
@@ -1749,7 +1749,7 @@ void Sequence
 
 							// rebind input sockets on the fly
 							for (size_t sin_id = 0; sin_id < contents->rebind_sockets[rebind_id][path].size(); sin_id++)
-									contents->rebind_sockets[rebind_id][path][sin_id]->dataptr = in_dataptr;
+								contents->rebind_sockets[rebind_id][path][sin_id]->dataptr = in_dataptr;
 
 							return status;
 						};
@@ -1842,7 +1842,7 @@ void Sequence
 									explore_thread_rec_reverse(bound_socket, bound_sockets);
 
 								for (auto sck : bound_sockets)
-										dataptrs.push_back(sck->get_dataptr());
+									dataptrs.push_back(sck->get_dataptr());
 
 								contents->rebind_sockets[rebind_id].push_back(bound_sockets);
 								contents->rebind_dataptrs[rebind_id].push_back(dataptrs);
