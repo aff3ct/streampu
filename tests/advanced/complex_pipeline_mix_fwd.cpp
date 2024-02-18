@@ -135,9 +135,9 @@ int main(int argc, char** argv)
 		}
 	}
 
-	std::cout << "############################################################" << std::endl;
-	std::cout << "# Micro-benchmark: Complexe pipeline increment and compare #" << std::endl;
-	std::cout << "############################################################" << std::endl;
+	std::cout << "#########################################################" << std::endl;
+	std::cout << "# Micro-benchmark: Mixed pipeline increment and compare #" << std::endl;
+	std::cout << "#########################################################" << std::endl;
 	std::cout << "#" << std::endl;
 
 	std::cout << "# Command line arguments:" << std::endl;
@@ -159,7 +159,8 @@ int main(int argc, char** argv)
 		std::clog << rang::tag::warning << "'step_by_step' is not available with pipeline" << std::endl;
 
 	module::Initializer<uint8_t> initializer(data_length);
-	module::Finalizer  <uint8_t> finalizer  (data_length);
+	module::Finalizer  <uint8_t> finalizer1 (data_length);
+	module::Finalizer  <uint8_t> finalizer2 (data_length);
 
 	// Incrementers construction
 	std::vector<std::shared_ptr<module::Incrementer<uint8_t>>> incs(2);
@@ -185,35 +186,45 @@ int main(int argc, char** argv)
 	auto& task_comp = comp.create_task("compare");
 	auto sock_0 = comp.create_socket_fwd<uint8_t>(task_comp, "fwd_0", data_length);
 	auto sock_1 = comp.create_socket_fwd<uint8_t>(task_comp, "fwd_1", data_length);
+	auto sock_2 = comp.create_socket_fwd<uint8_t>(task_comp, "fwd_2", data_length);
+	comp.create_socket_fwd<uint8_t>(task_comp, "fwd_3", data_length);
 
 	comp.create_codelet(task_comp,
-		[sock_0, sock_1,data_length,incs](module::Module &m, runtime::Task &t, const size_t frame_id) -> int
+		[sock_0,sock_1,sock_2,data_length,incs](module::Module &m, runtime::Task &t, const size_t frame_id) -> int
 	{
 		auto tab_0 = t[sock_0].get_dataptr<const uint8_t>();
 		auto tab_1 = t[sock_1].get_dataptr<const uint8_t>();
+		auto tab_2 = t[sock_2].get_dataptr<const uint8_t>();
 		for (size_t i = 0; i < data_length; i++)
-			if (tab_0[i] != tab_1[i])
+		{
+			if (tab_0[i] != tab_1[i] || tab_0[i] != tab_2[i])
 			{
 				std::stringstream message;
 				message << "Found different values => " << " Tab_0 : " << +tab_0[i] <<  ", Tab_1 : "
-				        << +tab_1[i] << std::endl;
+				        << +tab_1[i] << ", Tab_2 : " << +tab_2[i] << std::endl;
 				throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
 			}
+		}
 		return runtime::status_t::SUCCESS;
 	});
 
 	// sockets binding
 	(*rlys[0])[module::rly::sck::relayf::fwd] = initializer[module::ini::sck::initialize::out];
+	(*rlys[0])[module::rly::sck::relay::in] = initializer[module::ini::sck::initialize::out];
 	(*incs[0])[module::inc::sck::incrementf::fwd] = (*rlys[0])[module::rly::sck::relayf::fwd];
 	(*incs[1])[module::inc::sck::incrementf::fwd] = (*rlys[0])[module::rly::sck::relayf::fwd];
+	(*incs[1])[module::inc::tsk::incrementf] = (*rlys[0])[module::rly::sck::relay::status];
 	(*rlys[1])[module::rly::sck::relayf::fwd] = (*incs[0])[module::inc::sck::incrementf::fwd];
 	comp["compare::fwd_0"] = (*rlys[1])[module::rly::sck::relayf::fwd];
 	comp["compare::fwd_1"] = (*incs[1])[module::inc::sck::incrementf::fwd];
-	finalizer[module::fin::sck::finalize::in] = comp["compare::fwd_1"];
+	comp["compare::fwd_2"] = initializer[module::ini::sck::initialize::out];
+	comp["compare::fwd_3"] = (*rlys[0])[module::rly::sck::relay::out];
+	finalizer1[module::fin::sck::finalize::in] = comp["compare::fwd_1"];
+	finalizer2[module::fin::sck::finalize::in] = comp["compare::fwd_3"];
 
 	std::unique_ptr<runtime::Sequence> sequence_chain;
 	std::unique_ptr<runtime::Pipeline> pipeline_chain;
-	std::vector<module::Finalizer<uint8_t>*> finalizer_list;
+	std::vector<module::Finalizer<uint8_t>*> finalizer1_list, finalizer2_list;
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////////////////////////////////////// SEQUENCE EXEC //
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -222,7 +233,7 @@ int main(int argc, char** argv)
 		sequence_chain.reset(new runtime::Sequence(initializer[module::ini::tsk::initialize], n_threads));
 		sequence_chain->set_n_frames(n_inter_frames);
 
-		// initialize the input data
+		// initialize input data
 		auto tid = 0;
 		for (auto cur_initializer : sequence_chain.get()->get_cloned_modules<module::Initializer<uint8_t>>(initializer))
 		{
@@ -267,7 +278,8 @@ int main(int argc, char** argv)
 		auto elapsed_time = duration.count() / 1000.f / 1000.f;
 		std::cout << "Sequence elapsed time: " << elapsed_time << " ms" << std::endl;
 
-		finalizer_list = sequence_chain.get()->get_cloned_modules<module::Finalizer<uint8_t>>(finalizer);
+		finalizer1_list = sequence_chain.get()->get_cloned_modules<module::Finalizer<uint8_t>>(finalizer1);
+		finalizer2_list = sequence_chain.get()->get_cloned_modules<module::Finalizer<uint8_t>>(finalizer2);
 	}
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////////////////////////////////////// PIPELINE EXEC //
@@ -275,22 +287,29 @@ int main(int argc, char** argv)
 	else
 	{
 		pipeline_chain.reset(new runtime::Pipeline(
-			initializer[module::ini::tsk::initialize], // first task of the sequence
+			{ &initializer[module::ini::tsk::initialize] }, // first task of the sequence
 			{  // pipeline stage 0
-			   { { &initializer[module::ini::tsk::initialize] },  // first tasks of stage 0
-			     { &(*rlys[0])[module::rly::tsk::relayf] } },     // last  tasks of stage 0
+			   { { &initializer[module::ini::tsk::initialize] },    // first tasks of stage 0
+			     { &(*rlys[0])[module::rly::tsk::relayf],     },    // last  tasks of stage 0
+			     { &(*rlys[0])[module::rly::tsk::relay]       }, }, // excep tasks of stage 0
 			   // pipeline stage 1
-			   { { &(*incs[0])[module::inc::tsk::incrementf] },   // first tasks of stage 1
-			     { &(*incs[0])[module::inc::tsk::incrementf] } }, // last  tasks of stage 1
+			   { { &(*incs[0])[module::inc::tsk::incrementf],       // first tasks of stage 1
+			       &(*rlys[0])[module::rly::tsk::relay],      },    // last  tasks of stage 1
+			     { &(*incs[0])[module::inc::tsk::incrementf]  },
+			     {                                            }, }, // excep tasks of stage 1
 			   // pipeline stage 2
-			   { { &(*rlys[1])[module::rly::tsk::relayf] },       // first tasks of stage 2
-			     { &(*rlys[1])[module::rly::tsk::relayf]} },      // last  tasks of stage 2
+			   { { &(*rlys[1])[module::rly::tsk::relayf]      },    // first tasks of stage 2
+			     { &(*rlys[1])[module::rly::tsk::relayf]      },    // last  tasks of stage 2
+			     {                                            }, }, // excep tasks of stage 2
 			   // pipeline stage 3
-			   { { &(*incs[1])[module::inc::tsk::incrementf] },   // first tasks of stage 3
-			     { &(*incs[1])[module::inc::tsk::incrementf] } }, // last  tasks of stage 3
+			   { { &(*incs[1])[module::inc::tsk::incrementf]  },    // first tasks of stage 3
+			     { &(*incs[1])[module::inc::tsk::incrementf]  },    // last  tasks of stage 3
+			     {                                            } },  // excep tasks of stage 3
 			   // pipeline stage 4
-			   { { &task_comp },                                  // first tasks of stage 4
-			     { &finalizer[module::fin::tsk::finalize] } },    // last  tasks of stage 4
+			   { { &task_comp },                                    // first tasks of stage 4
+			     { &finalizer1[module::fin::tsk::finalize],         // last  tasks of stage 4
+			       &finalizer2[module::fin::tsk::finalize]    },
+			     {                                            }, }, // excep tasks of stage 4
 			},
 			{
 			   1,                         // number of threads in the stage 0
@@ -348,15 +367,17 @@ int main(int argc, char** argv)
 		auto elapsed_time = duration.count() / 1000.f / 1000.f;
 		std::cout << "Sequence elapsed time: " << elapsed_time << " ms" << std::endl;
 
-		finalizer_list = pipeline_chain.get()->get_stages()[pipeline_chain.get()->get_stages().size()-1]
-			->get_cloned_modules<module::Finalizer<uint8_t>>(finalizer);
+		finalizer1_list = pipeline_chain.get()->get_stages()[pipeline_chain.get()->get_stages().size()-1]
+			->get_cloned_modules<module::Finalizer<uint8_t>>(finalizer1);
+		finalizer2_list = pipeline_chain.get()->get_stages()[pipeline_chain.get()->get_stages().size()-1]
+			->get_cloned_modules<module::Finalizer<uint8_t>>(finalizer2);
 	}
 
-	// verification of the pipeline/sequence execution
+	// verification of the sequence execution
 	bool tests_passed = true;
 	auto tid = 0;
 
-	for (auto cur_finalizer : finalizer_list)
+	for (auto cur_finalizer : finalizer1_list)
 	{
 		for (size_t f = 0; f < n_inter_frames; f++)
 		{
@@ -364,6 +385,27 @@ int main(int argc, char** argv)
 			for (size_t d = 0; d < final_data.size(); d++)
 			{
 				auto expected = (int)(42 + n_inter_frames * tid + f);
+				expected = expected % 256;
+				if (final_data[d] != expected)
+				{
+					std::cout << "# expected = " << +expected << " - obtained = "
+					          << +final_data[d] << " (d = " << d << ", tid = " << tid << ")" << std::endl;
+					tests_passed = false;
+				}
+			}
+		}
+		tid++;
+	}
+
+	tid = 0;
+	for (auto cur_finalizer : finalizer2_list)
+	{
+		for (size_t f = 0; f < n_inter_frames; f++)
+		{
+			const auto &final_data = cur_finalizer->get_final_data()[f];
+			for (size_t d = 0; d < final_data.size(); d++)
+			{
+				auto expected = (int)(41 + n_inter_frames * tid + f);
 				expected = expected % 256;
 				if (final_data[d] != expected)
 				{
@@ -386,9 +428,7 @@ int main(int argc, char** argv)
 	unsigned int test_results = !tests_passed;
 
 	if (force_sequence)
-	{
 		sequence_chain->set_n_frames(1);
-	}
 	else
 	{
 		pipeline_chain->set_n_frames(1);
@@ -396,12 +436,17 @@ int main(int argc, char** argv)
 	}
 
 	(*rlys[0])[module::rly::sck::relayf::fwd].unbind(initializer[module::ini::sck::initialize::out]);
+	(*rlys[0])[module::rly::sck::relay::in].unbind(initializer[module::ini::sck::initialize::out]);
 	(*incs[0])[module::inc::sck::incrementf::fwd].unbind((*rlys[0])[module::rly::sck::relayf::fwd]);
 	(*incs[1])[module::inc::sck::incrementf::fwd].unbind((*rlys[0])[module::rly::sck::relayf::fwd]);
+	(*incs[1])[module::inc::tsk::incrementf].unbind((*rlys[0])[module::rly::sck::relay::status]);
 	(*rlys[1])[module::rly::sck::relayf::fwd].unbind((*incs[0])[module::inc::sck::incrementf::fwd]);
 	comp["compare::fwd_1"].unbind((*incs[1])[module::inc::sck::incrementf::fwd]);
 	comp["compare::fwd_0"].unbind((*rlys[1])[module::rly::sck::relayf::fwd]);
-	finalizer[module::fin::sck::finalize::in].unbind(comp["compare::fwd_1"]);
+	comp["compare::fwd_2"].unbind(initializer[module::ini::sck::initialize::out]);
+	comp["compare::fwd_3"].unbind((*rlys[0])[module::rly::sck::relay::out]);
+	finalizer1[module::fin::sck::finalize::in].unbind(comp["compare::fwd_1"]);
+	finalizer2[module::fin::sck::finalize::in].unbind(comp["compare::fwd_3"]);
 
 	return test_results;
 }

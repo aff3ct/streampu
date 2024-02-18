@@ -28,11 +28,11 @@ protected:
 
 	//                               sck out addr      stage   tsk id  sck id  unbind_pos
 	std::vector<std::pair<std::tuple<runtime::Socket*, size_t, size_t, size_t, size_t>,
-	//                               sck in addr       stage   tsk id  sck id
-	                      std::tuple<runtime::Socket*, size_t, size_t, size_t>>> sck_orphan_binds;
+	//                               sck in addr       stage   tsk id  sck id  tsk in addr
+	                      std::tuple<runtime::Socket*, size_t, size_t, size_t, runtime::Task*>>> sck_orphan_binds;
 
-	//                     sck out addr      sck in addr      priority
-	std::vector<std::tuple<runtime::Socket*, runtime::Socket*, size_t>> adaptors_binds;
+	//                     sck out addr      sck in addr       priority  tsk in addr
+	std::vector<std::tuple<runtime::Socket*, runtime::Socket*, size_t,   runtime::Task*>> adaptors_binds;
 
 	std::vector<std::vector<size_t>> saved_firsts_tasks_id;
 	std::vector<std::vector<size_t>> saved_lasts_tasks_id;

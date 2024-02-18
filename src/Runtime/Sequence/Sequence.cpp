@@ -2131,43 +2131,63 @@ void Sequence
 ::_set_n_frames_unbind(std::vector<std::pair<runtime::Socket*, runtime::Socket*>> &unbind_sockets,
                        std::vector<std::pair<runtime::Task*,   runtime::Socket*>> &unbind_tasks)
 {
-	std::function<void(const std::vector<runtime::Task*>, runtime::Task*)> unbind_sockets_recursive =
-	[&unbind_sockets, &unbind_tasks, &unbind_sockets_recursive](const std::vector<runtime::Task*> possessed_tsks,
-	                                                            runtime::Task* tsk_out)
-	{
-		for (auto sck_out : tsk_out->sockets)
+	std::function<void(const std::vector<runtime::Task*>&,
+		               tools::Digraph_node<Sub_sequence>*,
+		               std::vector<tools::Digraph_node<Sub_sequence>*> &)> graph_traversal =
+		[&graph_traversal,&unbind_sockets, &unbind_tasks](
+			const std::vector<runtime::Task*>& possessed_tsks,
+			tools::Digraph_node<Sub_sequence>* cur_node,
+			std::vector<tools::Digraph_node<Sub_sequence>*> &already_parsed_nodes)
 		{
-			if (sck_out->get_type() == socket_t::SOUT || sck_out->get_type() == socket_t::SFWD)
+			if (cur_node != nullptr &&
+			    std::find(already_parsed_nodes.begin(),
+			              already_parsed_nodes.end(),
+			              cur_node) == already_parsed_nodes.end())
 			{
-				for (auto sck_in : sck_out->get_bound_sockets())
+				already_parsed_nodes.push_back(cur_node);
+				Sub_sequence* ss = cur_node->get_contents();
+				for (auto tsk_out : ss->tasks)
 				{
-					auto tsk_in = &sck_in->get_task();
-					// if the task of the current input socket is in the tasks of the sequence
-					if (std::find(possessed_tsks.begin(), possessed_tsks.end(), tsk_in) != possessed_tsks.end())
+					for (auto sck_out : tsk_out->sockets)
 					{
-						try
+						if (sck_out->get_type() == socket_t::SOUT || sck_out->get_type() == socket_t::SFWD)
 						{
-							tsk_in->unbind(*sck_out);
-							unbind_tasks.push_back(std::make_pair(tsk_in, sck_out.get()));
+							auto sck_out_bound_sockets_cpy = sck_out->get_bound_sockets();
+							for (auto sck_in : sck_out_bound_sockets_cpy)
+							{
+								auto tsk_in = &sck_in->get_task();
+								// if the task of the current input socket is in the tasks of the sequence
+								if (std::find(possessed_tsks.begin(), possessed_tsks.end(), tsk_in) !=
+								    possessed_tsks.end())
+								{
+									try
+									{
+										tsk_in->unbind(*sck_out);
+										unbind_tasks.push_back(std::make_pair(tsk_in, sck_out.get()));
+									}
+									catch (...)
+									{
+										sck_in->unbind(*sck_out);
+										// memorize the unbinds to rebind after!
+										unbind_sockets.push_back(std::make_pair(sck_in, sck_out.get()));
+									}
+								}
+							}
 						}
-						catch (...)
-						{
-							sck_in->unbind(*sck_out);
-							// memorize the unbinds to rebind after!
-							unbind_sockets.push_back(std::make_pair(sck_in, sck_out.get()));
-						}
-						// do the same operation recursively on the current "tsk_in"
-						unbind_sockets_recursive(possessed_tsks, tsk_in);
 					}
 				}
+				for (auto c : cur_node->get_children())
+					graph_traversal(possessed_tsks, c, already_parsed_nodes);
 			}
-		}
-	};
+		};
 
 	auto tsks_per_threads = this->get_tasks_per_threads();
+	std::vector<tools::Digraph_node<Sub_sequence>*> already_parsed_nodes;
 	for (size_t t = 0; t < this->get_n_threads(); t++)
-		for (auto &tsk : this->firsts_tasks[t])
-			unbind_sockets_recursive(tsks_per_threads[t], tsk);
+	{
+		already_parsed_nodes.clear();
+		graph_traversal(tsks_per_threads[t], this->sequences[t], already_parsed_nodes);
+	}
 }
 
 void Sequence

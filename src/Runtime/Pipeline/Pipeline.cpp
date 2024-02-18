@@ -475,6 +475,7 @@ void Pipeline
 			for (size_t tsk_id = 0; tsk_id < tasks_per_threads[t].size(); tsk_id++)
 			{
 				auto tsk = tasks_per_threads[t][tsk_id];
+				// ----------------------------------------- manage socket to socket bindings (with fake input sockets)
 				// for all the sockets of the tasks
 				for (size_t sck_id = 0; sck_id < tsk->sockets.size(); sck_id++)
 				{
@@ -516,12 +517,64 @@ void Pipeline
 									                                                 std::get<3>(out_sck_orphans[pos]),
 									                                                 std::get<4>(out_sck_orphans[pos]),
 									                                                 unbind_sout_pos),
-									                                 std::make_tuple(sck_in, sta +1, tsk_id, sck_id)));
+									                                 std::make_tuple(sck_in,
+									                                 	             sta +1,
+									                                 	             tsk_id,
+									                                 	             sck_id,
+									                                 	             nullptr)));
 								}
 							}
 						}
 					}
 				}
+				// ------------------------------------------- manage socket to task bindings (with fake input sockets)
+				for (size_t sck_id = 0; sck_id < tsk->fake_input_sockets.size(); sck_id++)
+				{
+					auto sck = tsk->fake_input_sockets[sck_id];
+					runtime::Socket* bsck = nullptr;
+					try
+					{
+						// get output bounded socket
+						bsck = &sck->get_bound_socket(); // can throw if there is no bounded socket
+					}
+					catch (const std::exception&) {}
+					if (bsck != nullptr)
+					{
+						// check if the task of the bounded socket is not in the current stage
+						if (std::find(tasks_per_threads[t].begin(),
+						              tasks_per_threads[t].end(),
+						              &bsck->get_task()) == tasks_per_threads[t].end())
+						{
+							// check the position of the bounded socket in the orphans
+							size_t pos = 0;
+							for (; pos < out_sck_orphans.size(); pos++)
+								if (std::get<0>(out_sck_orphans[pos]) == bsck)
+									break;
+
+							if (pos < out_sck_orphans.size())
+							{
+								auto sck_out = std::get<0>(out_sck_orphans[pos]);
+								auto sck_in = sck.get();
+								auto unbind_sout_pos = std::distance(sck_out->get_bound_sockets().begin(),
+								                                     std::find(sck_out->get_bound_sockets().begin(),
+								                                               sck_out->get_bound_sockets().end(),
+								                                               sck_in));
+								this->sck_orphan_binds.push_back(std::make_pair(
+								                                 std::make_tuple(std::get<0>(out_sck_orphans[pos]),
+								                                                 std::get<2>(out_sck_orphans[pos]),
+								                                                 std::get<3>(out_sck_orphans[pos]),
+								                                                 std::get<4>(out_sck_orphans[pos]),
+								                                                 unbind_sout_pos),
+								                                 std::make_tuple(nullptr,
+								                                 	             sta +1,
+								                                 	             tsk_id,
+								                                 	             sck_id,
+								                                 	             tsk)));
+							}
+						}
+					}
+				}
+				// ----------------------------------------------------------------------------------------------------
 			}
 		}
 	}
@@ -584,8 +637,9 @@ void Pipeline
 			assert(adp != nullptr);
 			//                               sck out addr      stage   tsk id  sck id  unbind_pos
 			std::vector<std::pair<std::tuple<runtime::Socket*, size_t, size_t, size_t, size_t>,
-			//                               sck in addr       stage   tsk id  sck id
-			                      std::tuple<runtime::Socket*, size_t, size_t, size_t>>> sck_orphan_binds_new;
+			//                               sck in addr       stage   tsk id  sck id  tsk in addr
+			                      std::tuple<runtime::Socket*, size_t, size_t, size_t, runtime::Task*>>>
+				sck_orphan_binds_new;
 
 			auto n_threads_prev_sta = this->stages[sta -1]->get_n_threads();
 			for (size_t t = 0; t < n_threads; t++)
@@ -616,11 +670,17 @@ void Pipeline
 							auto priority = std::get<4>(bind.first);
 							auto tsk_in_id = std::get<2>(bind.second);
 							auto sck_in_id = std::get<3>(bind.second);
-							auto sck_in = tasks_per_threads[t][tsk_in_id]->sockets[sck_in_id];
+							runtime::Socket* sck_in = nullptr;
+							runtime::Task* tsk_in = nullptr;
+							if (std::get<0>(bind.second) != nullptr) // if socket to socket binding
+								sck_in = tasks_per_threads[t][tsk_in_id]->sockets[sck_in_id].get();
+							else // if socket to task binding
+								tsk_in = tasks_per_threads[t][tsk_in_id];
 							this->adaptors_binds.push_back(
 							    std::make_tuple(task_pull->sockets[sck_to_adp_sck_id[sck_out_ptr]].get(),
-							                    sck_in.get(),
-							                    priority));
+							                    sck_in,
+							                    priority,
+							                    tsk_in));
 						}
 						else
 							sck_orphan_binds_new.push_back(bind);
@@ -664,6 +724,7 @@ void Pipeline
 						// avoid the creation of new adaptor sockets for forward sockets pointing to the same memory
 						// space
 						auto sck_out_dptr = sck_out->get_dataptr();
+						assert(sck_out_dptr != nullptr);
 						if (fwd_source.find(sck_out_dptr) == fwd_source.end())
 						{
 							fwd_source[sck_out_dptr] = 1;
@@ -709,6 +770,7 @@ void Pipeline
 					{
 						auto sck_out_ptr = std::get<0>(bind.first);
 						auto sck_out_dptr = sck_out_ptr->get_dataptr();
+						assert(sck_out_dptr != nullptr);
 
 						if (std::find(passed_scks_out.begin(),
 						              passed_scks_out.end(),
@@ -730,7 +792,8 @@ void Pipeline
 								this->adaptors_binds.push_back(
 									std::make_tuple(sck_out.get(),
 									                task_push->sockets[adp_sck_id++].get(),
-									                priority));
+									                priority,
+									                nullptr)); // <= only socket to socket binding is possible here
 							}
 							else // if (tsk_out_sta < sta) // bind prev. adaptor to last adaptor
 							{
@@ -746,7 +809,8 @@ void Pipeline
 								this->adaptors_binds.push_back(
 									std::make_tuple(sck_out.get(),
 									                task_push->sockets[adp_sck_id++].get(),
-									                priority));
+									                priority,
+									                nullptr)); // <= only socket to socket binding is possible here
 							}
 
 							fwd_source[sck_out_dptr] = 1; // remember that this memory space has been connected to the
@@ -853,7 +917,14 @@ void Pipeline
 		{
 			auto sck_out = std::get<0>(bind.first);
 			auto sck_in  = std::get<0>(bind.second);
-			sck_in->unbind(*sck_out);
+			if (sck_in != nullptr) // if socket to socket unbinding
+				sck_in->unbind(*sck_out);
+			else // if socket to task unbinding
+			{
+				auto tsk_in = std::get<4>(bind.second);
+				assert(tsk_in != nullptr);
+				tsk_in->unbind(*sck_out);
+			}
 		}
 
 		if (bind_adaptors)
@@ -863,7 +934,14 @@ void Pipeline
 				auto sck_out  = std::get<0>(bind);
 				auto sck_in   = std::get<1>(bind);
 				auto priority = std::get<2>(bind);
-				sck_in->bind(*sck_out, priority);
+				if (sck_in != nullptr) // if socket to socket binding
+					sck_in->bind(*sck_out, priority);
+				else // if socket to task binding
+				{
+					auto tsk_in = std::get<3>(bind);
+					assert(tsk_in != nullptr);
+					tsk_in->bind(*sck_out, priority);
+				}
 			}
 		}
 
@@ -935,7 +1013,14 @@ void Pipeline
 		{
 			auto sck_out = std::get<0>(bind);
 			auto sck_in  = std::get<1>(bind);
-			sck_in->unbind(*sck_out);
+			if (sck_in != nullptr) // if socket to socket unbinding
+				sck_in->unbind(*sck_out);
+			else // if socket to task unbinding
+			{
+				auto tsk_in = std::get<3>(bind);
+				assert(tsk_in != nullptr);
+				tsk_in->unbind(*sck_out);
+			}
 		}
 
 		if (bind_orphans)
@@ -945,7 +1030,14 @@ void Pipeline
 				auto sck_out  = std::get<0>(bind.first);
 				auto priority = std::get<4>(bind.first);
 				auto sck_in   = std::get<0>(bind.second);
-				sck_in->bind(*sck_out, priority);
+				if (sck_in != nullptr) // if socket to socket binding
+					sck_in->bind(*sck_out, priority);
+				else // if socket to task binding
+				{
+					auto tsk_in = std::get<4>(bind.second);
+					assert(tsk_in != nullptr);
+					tsk_in->bind(*sck_out, priority);
+				}
 			}
 		}
 
@@ -1350,7 +1442,14 @@ void Pipeline
 		auto sck_out  = std::get<0>(bind.first);
 		auto priority = std::get<4>(bind.first);
 		auto sck_in   = std::get<0>(bind.second);
-		sck_in->bind(*sck_out, priority);
+		if (sck_in != nullptr)
+			sck_in->bind(*sck_out, priority);
+		else
+		{
+			auto tsk_in = std::get<4>(bind.second);
+			assert(tsk_in != nullptr);
+			tsk_in->bind(*sck_out, priority);
+		}
 	}
 
 	if (save_bound_adaptors)

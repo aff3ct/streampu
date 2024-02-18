@@ -109,7 +109,7 @@ endif(AFF3CT_CORE_COMPILE_STATIC_LIB)
 # Tests
 if(AFF3CT_CORE_TESTS)
     add_executable(aff3ct-core-test-simple-chain $<TARGET_OBJECTS:aff3ct-core-obj>
-                                                 ${CMAKE_CURRENT_SOURCE_DIR}/tests/bootstrap/simple_chain.cpp)
+                   ${CMAKE_CURRENT_SOURCE_DIR}/tests/bootstrap/simple_chain.cpp)
     set_target_properties(aff3ct-core-test-simple-chain PROPERTIES
                                                         OUTPUT_NAME test-simple-chain
                                                         POSITION_INDEPENDENT_CODE ON) # set -fpie
@@ -117,7 +117,7 @@ if(AFF3CT_CORE_TESTS)
     list(APPEND aff3ct_core_targets_list aff3ct-core-test-simple-chain)
 
     add_executable(aff3ct-core-test-simple-chain-fwd $<TARGET_OBJECTS:aff3ct-core-obj>
-                                                 ${CMAKE_CURRENT_SOURCE_DIR}/tests/bootstrap/simple_chain_fwd.cpp)
+                   ${CMAKE_CURRENT_SOURCE_DIR}/tests/bootstrap/simple_chain_fwd.cpp)
     set_target_properties(aff3ct-core-test-simple-chain-fwd PROPERTIES
                                                         OUTPUT_NAME test-simple-chain-fwd
                                                         POSITION_INDEPENDENT_CODE ON) # set -fpie
@@ -125,7 +125,7 @@ if(AFF3CT_CORE_TESTS)
     list(APPEND aff3ct_core_targets_list aff3ct-core-test-simple-chain-fwd)
 
     add_executable(aff3ct-core-test-simple-chain-hybrid $<TARGET_OBJECTS:aff3ct-core-obj>
-                                                 ${CMAKE_CURRENT_SOURCE_DIR}/tests/bootstrap/simple_chain_hybrid.cpp)
+                   ${CMAKE_CURRENT_SOURCE_DIR}/tests/bootstrap/simple_chain_hybrid.cpp)
     set_target_properties(aff3ct-core-test-simple-chain-hybrid PROPERTIES
                                                         OUTPUT_NAME test-simple-chain-hybrid
                                                         POSITION_INDEPENDENT_CODE ON) # set -fpie
@@ -133,7 +133,7 @@ if(AFF3CT_CORE_TESTS)
     list(APPEND aff3ct_core_targets_list aff3ct-core-test-simple-chain-hybrid)
 
     add_executable(aff3ct-core-test-for-loop $<TARGET_OBJECTS:aff3ct-core-obj>
-                                                 ${CMAKE_CURRENT_SOURCE_DIR}/tests/bootstrap/for_loop.cpp)
+                   ${CMAKE_CURRENT_SOURCE_DIR}/tests/bootstrap/for_loop.cpp)
     set_target_properties(aff3ct-core-test-for-loop PROPERTIES
                                                     OUTPUT_NAME test-for-loop
                                                     POSITION_INDEPENDENT_CODE ON) # set -fpie
@@ -141,7 +141,7 @@ if(AFF3CT_CORE_TESTS)
     list(APPEND aff3ct_core_targets_list aff3ct-core-test-for-loop)
 
     add_executable(aff3ct-core-test-do-while-loop $<TARGET_OBJECTS:aff3ct-core-obj>
-                                                  ${CMAKE_CURRENT_SOURCE_DIR}/tests/bootstrap/do_while_loop.cpp)
+                   ${CMAKE_CURRENT_SOURCE_DIR}/tests/bootstrap/do_while_loop.cpp)
     set_target_properties(aff3ct-core-test-do-while-loop PROPERTIES
                                                          OUTPUT_NAME test-do-while-loop
                                                          POSITION_INDEPENDENT_CODE ON) # set -fpie
@@ -149,7 +149,7 @@ if(AFF3CT_CORE_TESTS)
     list(APPEND aff3ct_core_targets_list aff3ct-core-test-do-while-loop)
 
     add_executable(aff3ct-core-test-exclusive-paths $<TARGET_OBJECTS:aff3ct-core-obj>
-                                                    ${CMAKE_CURRENT_SOURCE_DIR}/tests/bootstrap/exclusive_paths.cpp)
+                   ${CMAKE_CURRENT_SOURCE_DIR}/tests/bootstrap/exclusive_paths.cpp)
     set_target_properties(aff3ct-core-test-exclusive-paths PROPERTIES
                                                            OUTPUT_NAME test-exclusive-paths
                                                            POSITION_INDEPENDENT_CODE ON) # set -fpie
@@ -157,7 +157,7 @@ if(AFF3CT_CORE_TESTS)
     list(APPEND aff3ct_core_targets_list aff3ct-core-test-exclusive-paths)
 
     add_executable(aff3ct-core-test-nested-loops $<TARGET_OBJECTS:aff3ct-core-obj>
-                                                 ${CMAKE_CURRENT_SOURCE_DIR}/tests/bootstrap/nested_loops.cpp)
+                   ${CMAKE_CURRENT_SOURCE_DIR}/tests/bootstrap/nested_loops.cpp)
     set_target_properties(aff3ct-core-test-nested-loops PROPERTIES
                                                         OUTPUT_NAME test-nested-loops
                                                         POSITION_INDEPENDENT_CODE ON) # set -fpie
@@ -165,42 +165,49 @@ if(AFF3CT_CORE_TESTS)
     list(APPEND aff3ct_core_targets_list aff3ct-core-test-nested-loops)
 
     add_executable(aff3ct-core-test-simple-pipeline $<TARGET_OBJECTS:aff3ct-core-obj>
-                                                    ${CMAKE_CURRENT_SOURCE_DIR}/tests/bootstrap/simple_pipeline.cpp)
+                   ${CMAKE_CURRENT_SOURCE_DIR}/tests/bootstrap/simple_pipeline.cpp)
     set_target_properties(aff3ct-core-test-simple-pipeline PROPERTIES
                                                            OUTPUT_NAME test-simple-pipeline
                                                            POSITION_INDEPENDENT_CODE ON) # set -fpie
     list(APPEND aff3ct_core_targets_list aff3ct-core-test-simple-pipeline)
 
     add_executable(aff3ct-core-test-complex-pipeline-inter-stage $<TARGET_OBJECTS:aff3ct-core-obj>
-                                                    ${CMAKE_CURRENT_SOURCE_DIR}/tests/advanced/complex_pipeline_inter_stage.cpp)
+                   ${CMAKE_CURRENT_SOURCE_DIR}/tests/advanced/complex_pipeline_inter_stage.cpp)
     set_target_properties(aff3ct-core-test-complex-pipeline-inter-stage PROPERTIES
                                                            OUTPUT_NAME test-complex-pipeline-inter-stage
                                                            POSITION_INDEPENDENT_CODE ON) # set -fpie
     list(APPEND aff3ct_core_targets_list aff3ct-core-test-complex-pipeline-inter-stage)
 
     add_executable(aff3ct-core-test-simple-pipeline-double-chain $<TARGET_OBJECTS:aff3ct-core-obj>
-                                                    ${CMAKE_CURRENT_SOURCE_DIR}/tests/advanced/pipeline_double_chain.cpp)
+                   ${CMAKE_CURRENT_SOURCE_DIR}/tests/advanced/pipeline_double_chain.cpp)
     set_target_properties(aff3ct-core-test-simple-pipeline-double-chain PROPERTIES
                                                            OUTPUT_NAME test-simple-pipeline-double-chain
                                                            POSITION_INDEPENDENT_CODE ON) # set -fpie
     list(APPEND aff3ct_core_targets_list aff3ct-core-test-simple-pipeline-double-chain)
 
     add_executable(aff3ct-core-test-complex-pipeline-full-fwd $<TARGET_OBJECTS:aff3ct-core-obj>
-                                                    ${CMAKE_CURRENT_SOURCE_DIR}/tests/advanced/complex_pipeline_full_fwd.cpp)
+                   ${CMAKE_CURRENT_SOURCE_DIR}/tests/advanced/complex_pipeline_full_fwd.cpp)
     set_target_properties(aff3ct-core-test-complex-pipeline-full-fwd PROPERTIES
                                                            OUTPUT_NAME test-complex-pipeline-full-fwd
                                                            POSITION_INDEPENDENT_CODE ON) # set -fpie
     list(APPEND aff3ct_core_targets_list aff3ct-core-test-complex-pipeline-full-fwd)
 
+    add_executable(aff3ct-core-test-complex-pipeline-mix-fwd $<TARGET_OBJECTS:aff3ct-core-obj>
+                   ${CMAKE_CURRENT_SOURCE_DIR}/tests/advanced/complex_pipeline_mix_fwd.cpp)
+    set_target_properties(aff3ct-core-test-complex-pipeline-mix-fwd PROPERTIES
+                                                           OUTPUT_NAME test-complex-pipeline-mix-fwd
+                                                           POSITION_INDEPENDENT_CODE ON) # set -fpie
+    list(APPEND aff3ct_core_targets_list aff3ct-core-test-complex-pipeline-mix-fwd)
+
     add_executable(aff3ct-core-test-generic-pipeline $<TARGET_OBJECTS:aff3ct-core-obj>
-                                                    ${CMAKE_CURRENT_SOURCE_DIR}/tests/advanced/simple_generic_pipeline.cpp)
+                   ${CMAKE_CURRENT_SOURCE_DIR}/tests/advanced/simple_generic_pipeline.cpp)
     set_target_properties(aff3ct-core-test-generic-pipeline PROPERTIES
                                                            OUTPUT_NAME test-generic-pipeline
                                                            POSITION_INDEPENDENT_CODE ON) # set -fpie
     list(APPEND aff3ct_core_targets_list aff3ct-core-test-generic-pipeline)
 
     add_executable(aff3ct-core-test-exclusive-paths-pipeline $<TARGET_OBJECTS:aff3ct-core-obj>
-                                                    ${CMAKE_CURRENT_SOURCE_DIR}/tests/ctrl_flw/exclusive_paths_pipeline.cpp)
+                   ${CMAKE_CURRENT_SOURCE_DIR}/tests/ctrl_flw/exclusive_paths_pipeline.cpp)
     set_target_properties(aff3ct-core-test-exclusive-paths-pipeline PROPERTIES
                                                            OUTPUT_NAME test-exclusive-paths-pipeline
                                                            POSITION_INDEPENDENT_CODE ON) # set -fpie
@@ -208,7 +215,7 @@ if(AFF3CT_CORE_TESTS)
     list(APPEND aff3ct_core_targets_list aff3ct-core-test-exclusive-paths-pipeline)
 
     add_executable(aff3ct-core-test-nest-loops-pipeline $<TARGET_OBJECTS:aff3ct-core-obj>
-                                                    ${CMAKE_CURRENT_SOURCE_DIR}/tests/ctrl_flw/nested_loops_pipeline.cpp)
+                   ${CMAKE_CURRENT_SOURCE_DIR}/tests/ctrl_flw/nested_loops_pipeline.cpp)
     set_target_properties(aff3ct-core-test-nest-loops-pipeline PROPERTIES
                                                            OUTPUT_NAME test-nested-loops-pipeline
                                                            POSITION_INDEPENDENT_CODE ON) # set -fpie
@@ -489,7 +496,7 @@ if(AFF3CT_CORE_TESTS)
     add_test(NAME pipeline5::aff3ct-core-test-simple-pipeline COMMAND aff3ct-core-test-simple-pipeline -i ${INPUT_FILE} -u 128 -o graph.dot)
     set_tests_properties(pipeline5::aff3ct-core-test-simple-pipeline PROPERTIES LABELS simple-pipeline)
 
-    #Complex pipeline interstage
+    # complex pipeline interstage
     add_test(NAME pipeline0::aff3ct-core-test-complex-pipeline-inter-stage COMMAND aff3ct-core-test-complex-pipeline-inter-stage -i ${INPUT_FILE})
     set_tests_properties(pipeline0::aff3ct-core-test-complex-pipeline-inter-stage PROPERTIES LABELS complex-pipeline-inter-stage)
     add_test(NAME pipeline1::aff3ct-core-test-complex-pipeline-inter-stage COMMAND aff3ct-core-test-complex-pipeline-inter-stage -q -t 1 -i ${INPUT_FILE} -p -g)
@@ -497,22 +504,56 @@ if(AFF3CT_CORE_TESTS)
     add_test(NAME pipeline2::aff3ct-core-test-complex-pipeline-inter-stage COMMAND aff3ct-core-test-complex-pipeline-inter-stage -i ${INPUT_FILE} -u 1)
     set_tests_properties(pipeline2::aff3ct-core-test-complex-pipeline-inter-stage PROPERTIES LABELS complex-pipeline-inter-stage)
 
-    #Pipeline double-chain
+    # pipeline double-chain
     add_test(NAME pipeline0::aff3ct-core-test-simple-pipeline-double-chain COMMAND aff3ct-core-test-simple-pipeline-double-chain)
     set_tests_properties(pipeline0::aff3ct-core-test-simple-pipeline-double-chain PROPERTIES LABELS simple-pipeline-double-chain)
     add_test(NAME pipeline1::aff3ct-core-test-simple-pipeline-double-chain COMMAND aff3ct-core-test-simple-pipeline-double-chain -u 1024)
     set_tests_properties(pipeline1::aff3ct-core-test-simple-pipeline-double-chain PROPERTIES LABELS simple-pipeline-double-chain)
 
-    #Complex pipeline fwd
-    add_test(NAME pipeline0::aff3ct-core-test-complex-pipeline-full-fwd COMMAND aff3ct-core-test-complex-pipeline-full-fwd)
+    # complex pipeline fwd
+    add_test(NAME sequence0::aff3ct-core-test-complex-pipeline-full-fwd COMMAND aff3ct-core-test-complex-pipeline-full-fwd -e 100 -q -t 1)
+    set_tests_properties(sequence0::aff3ct-core-test-complex-pipeline-full-fwd PROPERTIES LABELS complex-pipeline-full-fwd)
+    add_test(NAME sequence1::aff3ct-core-test-complex-pipeline-full-fwd COMMAND aff3ct-core-test-complex-pipeline-full-fwd -e 100 -q)
+    set_tests_properties(sequence1::aff3ct-core-test-complex-pipeline-full-fwd PROPERTIES LABELS complex-pipeline-full-fwd)
+    add_test(NAME sequence2::aff3ct-core-test-complex-pipeline-full-fwd COMMAND aff3ct-core-test-complex-pipeline-full-fwd -e 100 -q -b -o graph.dot)
+    set_tests_properties(sequence2::aff3ct-core-test-complex-pipeline-full-fwd PROPERTIES LABELS complex-pipeline-full-fwd)
+    add_test(NAME sequence3::aff3ct-core-test-complex-pipeline-full-fwd COMMAND aff3ct-core-test-complex-pipeline-full-fwd -e 100 -q -b -f 5 -t 3)
+    set_tests_properties(sequence3::aff3ct-core-test-complex-pipeline-full-fwd PROPERTIES LABELS complex-pipeline-full-fwd)
+    add_test(NAME pipeline0::aff3ct-core-test-complex-pipeline-full-fwd COMMAND aff3ct-core-test-complex-pipeline-full-fwd -e 10 -t 1)
     set_tests_properties(pipeline0::aff3ct-core-test-complex-pipeline-full-fwd PROPERTIES LABELS complex-pipeline-full-fwd)
-    add_test(NAME pipeline1::aff3ct-core-test-complex-pipeline-full-fwd COMMAND aff3ct-core-test-complex-pipeline-full-fwd -u 128 -o graph.dot)
+    add_test(NAME pipeline1::aff3ct-core-test-complex-pipeline-full-fwd COMMAND aff3ct-core-test-complex-pipeline-full-fwd -e 10)
     set_tests_properties(pipeline1::aff3ct-core-test-complex-pipeline-full-fwd PROPERTIES LABELS complex-pipeline-full-fwd)
+    add_test(NAME pipeline2::aff3ct-core-test-complex-pipeline-full-fwd COMMAND aff3ct-core-test-complex-pipeline-full-fwd -e 1000 -u 128 -o graph.dot)
+    set_tests_properties(pipeline2::aff3ct-core-test-complex-pipeline-full-fwd PROPERTIES LABELS complex-pipeline-full-fwd)
+    add_test(NAME pipeline3::aff3ct-core-test-complex-pipeline-full-fwd COMMAND aff3ct-core-test-complex-pipeline-full-fwd -e 1000 -u 49 -f 13)
+    set_tests_properties(pipeline3::aff3ct-core-test-complex-pipeline-full-fwd PROPERTIES LABELS complex-pipeline-full-fwd)
+    add_test(NAME pipeline4::aff3ct-core-test-complex-pipeline-full-fwd COMMAND aff3ct-core-test-complex-pipeline-full-fwd -e 1000 -u 413 -w)
+    set_tests_properties(pipeline4::aff3ct-core-test-complex-pipeline-full-fwd PROPERTIES LABELS "complex-pipeline-full-fwd;skip-memcheck") # to exclude this previous test from memchecks, active waiting is too long in Valgrind :-(
 
-    #Simple pipeline example
+    # complex mix pipeline (fwd + in-out)
+    add_test(NAME sequence0::aff3ct-core-test-complex-pipeline-mix-fwd COMMAND aff3ct-core-test-complex-pipeline-mix-fwd -e 100 -q -t 1)
+    set_tests_properties(sequence0::aff3ct-core-test-complex-pipeline-mix-fwd PROPERTIES LABELS complex-pipeline-mix-fwd)
+    add_test(NAME sequence1::aff3ct-core-test-complex-pipeline-mix-fwd COMMAND aff3ct-core-test-complex-pipeline-mix-fwd -e 100 -q)
+    set_tests_properties(sequence1::aff3ct-core-test-complex-pipeline-mix-fwd PROPERTIES LABELS complex-pipeline-mix-fwd)
+    add_test(NAME sequence2::aff3ct-core-test-complex-pipeline-mix-fwd COMMAND aff3ct-core-test-complex-pipeline-mix-fwd -e 100 -q -b -o graph.dot)
+    set_tests_properties(sequence2::aff3ct-core-test-complex-pipeline-mix-fwd PROPERTIES LABELS complex-pipeline-mix-fwd)
+    add_test(NAME sequence3::aff3ct-core-test-complex-pipeline-mix-fwd COMMAND aff3ct-core-test-complex-pipeline-mix-fwd -e 100 -q -f 5 -t 3)
+    set_tests_properties(sequence3::aff3ct-core-test-complex-pipeline-mix-fwd PROPERTIES LABELS complex-pipeline-mix-fwd)
+    add_test(NAME pipeline0::aff3ct-core-test-complex-pipeline-mix-fwd COMMAND aff3ct-core-test-complex-pipeline-mix-fwd -e 10 -t 1)
+    set_tests_properties(pipeline0::aff3ct-core-test-complex-pipeline-mix-fwd PROPERTIES LABELS complex-pipeline-mix-fwd)
+    add_test(NAME pipeline1::aff3ct-core-test-complex-pipeline-mix-fwd COMMAND aff3ct-core-test-complex-pipeline-mix-fwd -e 10)
+    set_tests_properties(pipeline1::aff3ct-core-test-complex-pipeline-mix-fwd PROPERTIES LABELS complex-pipeline-mix-fwd)
+    add_test(NAME pipeline2::aff3ct-core-test-complex-pipeline-mix-fwd COMMAND aff3ct-core-test-complex-pipeline-mix-fwd -e 1000 -u 128 -o graph.dot)
+    set_tests_properties(pipeline2::aff3ct-core-test-complex-pipeline-mix-fwd PROPERTIES LABELS complex-pipeline-mix-fwd)
+    add_test(NAME pipeline3::aff3ct-core-test-complex-pipeline-mix-fwd COMMAND aff3ct-core-test-complex-pipeline-mix-fwd -e 1000 -u 49 -f 13)
+    set_tests_properties(pipeline3::aff3ct-core-test-complex-pipeline-mix-fwd PROPERTIES LABELS complex-pipeline-mix-fwd)
+    add_test(NAME pipeline4::aff3ct-core-test-complex-pipeline-mix-fwd COMMAND aff3ct-core-test-complex-pipeline-mix-fwd -e 1000 -u 413 -w)
+    set_tests_properties(pipeline4::aff3ct-core-test-complex-pipeline-mix-fwd PROPERTIES LABELS "complex-pipeline-mix-fwd;skip-memcheck") # to exclude this previous test from memchecks, active waiting is too long in Valgrind :-(
+
+    # simple pipeline example
     add_test(NAME pipeline0::aff3ct-core-test-generic-pipeline COMMAND aff3ct-core-test-generic-pipeline -i ${INPUT_FILE} -n "(3)" -t "(3)" -R "(SIO)")
     set_tests_properties(pipeline0::aff3ct-core-test-generic-pipeline PROPERTIES LABELS generic-pipeline)
-    #simple pipeline FWD example
+    # simple pipeline FWD example
     add_test(NAME pipeline1::aff3ct-core-test-generic-pipeline COMMAND aff3ct-core-test-generic-pipeline -i ${INPUT_FILE} -n "(3)" -t "(3)" -R "(SFWD)")
     set_tests_properties(pipeline1::aff3ct-core-test-generic-pipeline PROPERTIES LABELS generic-pipeline)
     add_test(NAME pipeline2::aff3ct-core-test-generic-pipeline COMMAND aff3ct-core-test-generic-pipeline -i ${INPUT_FILE} -n "(3)" -t "(3)" -R "(SFWD)" -p)
@@ -523,7 +564,7 @@ if(AFF3CT_CORE_TESTS)
     set_tests_properties(pipeline4::aff3ct-core-test-generic-pipeline PROPERTIES LABELS generic-pipeline)
     add_test(NAME pipeline5::aff3ct-core-test-generic-pipeline COMMAND aff3ct-core-test-generic-pipeline -i ${INPUT_FILE} -n "(3)" -t "(3)" -R "(SFWD)" -u 1024)
     set_tests_properties(pipeline5::aff3ct-core-test-generic-pipeline PROPERTIES LABELS generic-pipeline)
-    #simple pipeline hybrid
+    # simple pipeline hybrid
     add_test(NAME pipeline6::aff3ct-core-test-generic-pipeline COMMAND aff3ct-core-test-generic-pipeline -i ${INPUT_FILE} -n "(4)" -t "(3)" -r "((SFWD,SIO,SFWD,SIO))")
     set_tests_properties(pipeline6::aff3ct-core-test-generic-pipeline PROPERTIES LABELS generic-pipeline)
     add_test(NAME pipeline7::aff3ct-core-test-generic-pipeline COMMAND aff3ct-core-test-generic-pipeline -i ${INPUT_FILE} -n "(4)" -t "(3)" -r "((SFWD,SIO,SFWD,SIO))" -u 1024)
@@ -539,7 +580,7 @@ if(AFF3CT_CORE_TESTS)
     set_tests_properties(pipeline11::aff3ct-core-test-generic-pipeline PROPERTIES LABELS generic-pipeline)
     add_test(NAME pipeline12::aff3ct-core-test-generic-pipeline COMMAND aff3ct-core-test-generic-pipeline -i ${INPUT_FILE} -n "(4,1,2)" -t "(3,1,3)" -r "((SFWD,SIO,SFWD,SIO),(SFWD),(SIO,SIO))" -u 1024)
     set_tests_properties(pipeline12::aff3ct-core-test-generic-pipeline PROPERTIES LABELS generic-pipeline)
-    #pipeline with socket type per stage
+    # pipeline with socket type per stage
     add_test(NAME pipeline13::aff3ct-core-test-generic-pipeline COMMAND aff3ct-core-test-generic-pipeline -i ${INPUT_FILE} -n "(4,1,2)" -t "(3,1,3)" -R "(SFWD,SIO,SFWD)")
     set_tests_properties(pipeline13::aff3ct-core-test-generic-pipeline PROPERTIES LABELS generic-pipeline)
 
