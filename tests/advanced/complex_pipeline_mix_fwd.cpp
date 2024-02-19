@@ -187,7 +187,6 @@ int main(int argc, char** argv)
 	auto sock_0 = comp.create_socket_fwd<uint8_t>(task_comp, "fwd_0", data_length);
 	auto sock_1 = comp.create_socket_fwd<uint8_t>(task_comp, "fwd_1", data_length);
 	auto sock_2 = comp.create_socket_fwd<uint8_t>(task_comp, "fwd_2", data_length);
-	comp.create_socket_fwd<uint8_t>(task_comp, "fwd_3", data_length);
 
 	comp.create_codelet(task_comp,
 		[sock_0,sock_1,sock_2,data_length,incs](module::Module &m, runtime::Task &t, const size_t frame_id) -> int
@@ -218,9 +217,9 @@ int main(int argc, char** argv)
 	comp["compare::fwd_0"] = (*rlys[1])[module::rly::sck::relayf::fwd];
 	comp["compare::fwd_1"] = (*incs[1])[module::inc::sck::incrementf::fwd];
 	comp["compare::fwd_2"] = initializer[module::ini::sck::initialize::out];
-	comp["compare::fwd_3"] = (*rlys[0])[module::rly::sck::relay::out];
-	finalizer1[module::fin::sck::finalize::in] = comp["compare::fwd_1"];
-	finalizer2[module::fin::sck::finalize::in] = comp["compare::fwd_3"];
+	finalizer1[module::fin::sck::finalize::in] = comp["compare::fwd_2"];
+	finalizer2[module::fin::sck::finalize::in] = (*rlys[0])[module::rly::sck::relay::out];
+	finalizer2[module::fin::tsk::finalize] = finalizer1[module::fin::sck::finalize::status];
 
 	std::unique_ptr<runtime::Sequence> sequence_chain;
 	std::unique_ptr<runtime::Pipeline> pipeline_chain;
@@ -306,9 +305,9 @@ int main(int argc, char** argv)
 			     { &(*incs[1])[module::inc::tsk::incrementf]  },    // last  tasks of stage 3
 			     {                                            } },  // excep tasks of stage 3
 			   // pipeline stage 4
-			   { { &task_comp },                                    // first tasks of stage 4
-			     { &finalizer1[module::fin::tsk::finalize],         // last  tasks of stage 4
+			   { { &task_comp,                                      // first tasks of stage 4
 			       &finalizer2[module::fin::tsk::finalize]    },
+			     {                                            },    // last  tasks of stage 4
 			     {                                            }, }, // excep tasks of stage 4
 			},
 			{
@@ -444,9 +443,9 @@ int main(int argc, char** argv)
 	comp["compare::fwd_1"].unbind((*incs[1])[module::inc::sck::incrementf::fwd]);
 	comp["compare::fwd_0"].unbind((*rlys[1])[module::rly::sck::relayf::fwd]);
 	comp["compare::fwd_2"].unbind(initializer[module::ini::sck::initialize::out]);
-	comp["compare::fwd_3"].unbind((*rlys[0])[module::rly::sck::relay::out]);
-	finalizer1[module::fin::sck::finalize::in].unbind(comp["compare::fwd_1"]);
-	finalizer2[module::fin::sck::finalize::in].unbind(comp["compare::fwd_3"]);
+    finalizer1[module::fin::sck::finalize::in].unbind(comp["compare::fwd_2"]);
+	finalizer2[module::fin::sck::finalize::in].unbind((*rlys[0])[module::rly::sck::relay::out]);
+	finalizer2[module::fin::tsk::finalize].unbind(finalizer1[module::fin::sck::finalize::status]);
 
 	return test_results;
 }

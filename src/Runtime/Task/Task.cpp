@@ -979,11 +979,17 @@ void Task
 	if (!already_bound)
 		for (auto &s : this->sockets)
 			if (s->get_type() == socket_t::SIN || s->get_type() == socket_t::SFWD)
-				if (&s->get_bound_socket() == &s_out)
+			{
+				try // because 's->get_bound_socket()' can throw if s->bound_socket == 'nullptr'
 				{
-					already_bound = true;
-					break;
+					if (&s->get_bound_socket() == &s_out)
+					{
+						already_bound = true;
+						break;
+					}
 				}
+				catch(...) {}
+			}
 
 	// if the s_out socket is not already bound, then create a new fake input socket
 	if (!already_bound)

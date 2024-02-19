@@ -62,7 +62,7 @@ the forward socket implementation.
     The purpose of this graph is to test the buffer exchange with `SIO` and
     `SFWD`, both on the same stage.
 
-=== "Pipeline with distant stage binding" 
+=== "Pipeline with distant stage binding (only SFWD)" 
     <figure markdown>
       ![forward inter stage](./assets/pipeline_inter_stage_fwd.svg){ width="900" }
       <figcaption>`test-complex-pipeline-full-fwd`.</figcaption>
@@ -72,7 +72,26 @@ the forward socket implementation.
     ``` 
     The purpose of this graph is to test a `SFWD` bound to two `SFWD` in two
     different stages, and how the buffer exchange behave with connections
-    between distant stages $S1$ and $S4$.  
+    between distant stages $S1$ and $S4$.
+
+=== "Pipeline with distant stage binding (SIN, SOUT & SFWD)" 
+    <figure markdown>
+      ![forward inter stage](./assets/complex_pipeline_mix_fwd.svg){ width="900" }
+      <figcaption>`test-complex-pipeline-mix-fwd`.</figcaption>
+    </figure>
+    ```bash
+    test-complex-pipeline-mix-fwd -t 3
+    ``` 
+    The purpose of this graph is to test a `SFWD` bound to three `SFWD` in three
+    different stages ($S1 \rightarrow S2$, $S1 \rightarrow S4$ and $S1 
+    \rightarrow S5$), and how the buffer exchange behave with connections
+    between distant stages. Additionally, a traditional relay task ($t4$ with 
+    an input and an output socket) has been added in stage $S2$. The $t7$ 
+    *compare* task ensures that all the 3 `SFWD` have the same contents.
+    It is expected that the final values in $t8$ are $init + 2$ and the final
+    values in $t9$ are $init + 1$. In this test, *task to task* binding is used 
+    to ensure that $t4$ is executed before $t6$ and $t8$ is executed before 
+    $t9$ (see the oriented dashed lines).
 
 === "Pipeline with distant stage binding and mix of SIN, SOUT & SFWD"
     <figure markdown>
