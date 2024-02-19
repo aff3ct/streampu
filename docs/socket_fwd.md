@@ -37,7 +37,7 @@ output socket need to be updated with the new `dataptr` address.
 
 The forward sockets are all pointing to the same `dataptr`, so getting a new 
 buffer means that we have to update the `dataptr` of all the consecutive bound 
-forward sockets to this new memory space. The same update need to be done in the
+forward sockets to this new memory space. The same update needs to be done in the
 reversed way when the `dataptr` is exchanged at the end of the stage. For that, 
 we added two recursive methods as explained in the [sequence](sequence.md) 
 section (see [`explore_thread_rec()`](sequence.md#Explore_thread_rec) and 
@@ -71,7 +71,7 @@ the forward socket implementation.
     test-complex-pipeline-full-fwd -t 3
     ``` 
     The purpose of this graph is to test a `SFWD` bound to two `SFWD` in two
-    different stages, and how the buffer exchange behave with connections
+    different stages, and how the buffer exchange behaves with connections
     between distant stages $S1$ and $S4$.
 
 === "Pipeline with distant stage binding (SIN, SOUT & SFWD)" 

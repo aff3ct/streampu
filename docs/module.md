@@ -29,8 +29,8 @@ allocated (no `nullptr`).
 std::vector<std::shared_ptr<runtime::Task>> tasks_with_nullptr;
 ```
 The tasks list of the current module where the tasks have a fixed position in
-the vector. This is useful when a task in conditionally created. In the case
-of a task is not created in the current module, its value is set to 
+the vector. This is useful when a task is conditionally created. In the case
+of a task that is not created in the current module, its value is set to 
 `nullptr`.
 
 ```cpp
@@ -38,7 +38,7 @@ size_t n_frames;
 ```
 Number of frames/streams to process each time a task is executed. For 
 instance, if `n_frames == 2`, all the tasks of the current module will 
-process 2 frames each time there are triggered.
+process 2 frames each time they are triggered.
 
 ```cpp
 std::string name;

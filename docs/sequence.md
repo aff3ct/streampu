@@ -8,7 +8,7 @@ a fixed "sequence" of tasks.
 
 <figure markdown>
   ![Simple sequence](./assets/simple_sequence.svg){ width="600" }
-  <figcaption>Example a simple sequence of tasks (single threaded).</figcaption>
+  <figcaption>Example of a simple sequence of tasks (single threaded).</figcaption>
 </figure>
 
 A sequence is a C++ object of the `aff3ct::runtime::Sequence` class. The 
@@ -69,12 +69,12 @@ Here is a list of the transformations that are performed during the
    [adaptor's](pipeline.md#Adaptor) section, tasks change their `dataptr` when 
    they get the new buffers from the inter-stage pool, the new pointer needs to 
    be updated for each socket bound to the old one. This behavior is added 
-   through a `process` (noting to do with OS processes) that encapsulates `push` 
+   through a `process` (nothing to do with OS processes) that encapsulates `push` 
    and `pull` tasks. This `process` is triggered each time there is a `pull` or
    `push` task execution in the sequence.
- - `commute` & `select` tasks (from `Switcher` module): this two tasks are used 
+ - `commute` & `select` tasks (from `Switcher` module): these two tasks are used 
    to select which path to flow for the execution, when a path is selected the 
-   bound sockets needs to update their `dataptr` to follow the right one. Same 
+   bound sockets need to update their `dataptr` to follow the right one. Same 
    as before, a dedicated `process` is created and triggered.
  - Other tasks: a dumb `process` will be created for each task and it will only 
    call its corresponding task.
@@ -114,19 +114,19 @@ The function does the same thing as the previous one, but in the other sense
 When [control flow tasks](switcher.md) are introduced into a sequence, the
 execution is not only defined by the tasks binding but also by their output 
 sockets. For this purpose, tasks are grouped into sub-sequences. Sub-sequences 
-are organized in a [directed graph](#Digraph) with 2 nodes designated as begin 
+are organized in a [directed graph](#Digraph) with two nodes designated as begin 
 and end, respectively. This graph is recursively built during a sequence 
 initialization from the first task and going from bound `output`/`forward` 
 socket to bound `input`/`forward` socket. When a control flow task (`select` or 
 `commute`) is reached, a new control flow node is created and new children nodes 
 for each of its *paths*. **Only a single of those paths can be taken during 
-execution** hence why they are referred to as **exclusive paths**. This also 
+execution**, hence why they are referred to as **exclusive paths**. This also 
 means that a sequence with no control flow task will always have a single 
 sub-sequence, because it has a single path.
 
 Upon execution the sequence will iterate over its sub-sequences and execute 
 every task they contain, if one of those tasks happens to be a `commute` it will
-select the children node designated by its *path* attribute thus branching in
+select the children node designated by its *path* attribute, thus branching in
 the execution.
 
 `aff3ct::runtime::Sub_sequence` (not to be confused with 
@@ -153,7 +153,7 @@ contained in this list, there is one for each task in the sub-sequence. Refer to
 std::vector<size_t> tasks_id;
 ```
 The ids of the tasks the `processes` were generated from, `tasks_id[0]` is the
-id of task `processes[0]` was made with.
+id of the task that `processes[0]` was made with.
 
 ```cpp
 size_t id;
@@ -170,7 +170,7 @@ and their `dataptr` to update during the runtime rebinding.
 ## Digraph Node
 
 [Sub-sequences](#Sub-sequence) make up a directed graph. Whenever a sub-sequence 
-is accessed it is through this class (`aff3ct::tools::Digraph_node`) as 
+is accessed, it is through this class (`aff3ct::tools::Digraph_node`) as 
 sub-sequences themselves do not contain information regarding the graph.
 
 ### Main Attributes
