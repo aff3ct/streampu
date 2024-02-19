@@ -1,0 +1,81 @@
+\documentclass{standalone}
+
+\usepackage{tikz}
+\usetikzlibrary{aff3ct}
+
+\begin{document}
+  \begin{tikzpicture}[background rectangle/.style={thick, draw=gray!60, fill=white, fill opacity=1.0, rounded corners=2px}, show background rectangle]
+    %%%%%%%%%%%%%%%%%%
+    %% create tasks %%
+    %%%%%%%%%%%%%%%%%%
+    %     options                                           id   coords  label                 sin sout sfwd attributes
+    %     -------                                           --   ------  -----                 --- ---- ---- ----------
+    \task                                                   {t1} {0, 0}  {initialize\\($t_1$)} {0} {1}  {0}  {"seq"};
+    \task [right=1.0cm of t1                              ] {t2} {}      {relayf\\($t_2$)}     {0} {0}  {1}  {};
+    \task [right=1.0cm of t2, yshift=+1.2cm               ] {t3} {}      {incrementf\\($t_3$)} {0} {0}  {1}  {};
+    \task [right=1.0cm of t2, yshift=-1.2cm, xshift=+0.4cm] {t4} {}      {relay\\($t_4$)}      {1} {1}  {0}  {};
+    \task [right=1.0cm of t3, yshift=-1.2cm               ] {t5} {}      {relayf\\($t_5$)}     {0} {0}  {1}  {};
+    \task [right=1.0cm of t5                              ] {t6} {}      {incrementf\\($t_6$)} {0} {0}  {1}  {};
+    \task [right=1.0cm of t6                              ] {t7} {}      {compare\\($t_7$)}    {0} {0}  {4}  {};
+    \task [right=1.0cm of t7, yshift=+1.2cm               ] {t8} {}      {finalize\\($t_8$)}   {1} {0}  {0}  {"seq"};
+    \task [right=1.0cm of t7, yshift=-1.2cm               ] {t9} {}      {finalize\\($t_9$)}   {1} {0}  {0}  {"seq"};
+
+    %%%%%%%%%%%%%%%%%%%%
+    %% create modules %%
+    %%%%%%%%%%%%%%%%%%%%
+    %       options task ids id   label
+    %       ------- -------- --   -----
+    \module         {"t1"}   {m1} {Initializer};
+    \module         {"t2"}   {m2} {Relayer};
+    \module         {"t3"}   {m3} {Incrementer};
+    \module         {"t4"}   {m4} {Relayer};
+    \module         {"t5"}   {m5} {Relayer};
+    \module         {"t6"}   {m6} {Incrementer};
+    \module         {"t7"}   {m7} {Comparator};
+    \module         {"t8"}   {m8} {Finalizer1};
+    \module         {"t9"}   {m9} {Finalizer2};
+
+    %%%%%%%%%%%%%%%%
+    %% bind tasks %%
+    %%%%%%%%%%%%%%%%
+    %     options start id               path                                end id
+    %     ------- --------               ----                                ------
+    \draw [bind]  (t1_so1)                                                -- (t2_si1);
+    \draw [bind]  (t2_so1) --++ (0.50,0)                                  |- (t3_si1);
+    \draw [bind]  (t1_so1) --++ (0.50,0) --++ (0.0,-1.5) --++ (2.750,0.0) |- (t4_si1);
+    \draw [bind]  (t2_so1) --++ (0.50,0) --++ (0.0,2.25) --++ (5.625,0.0) |- (t6_si1);
+    \draw [bind]  (t3_so1) --++ (0.50,0)                                  |- (t5_si1);
+    \draw [bind]  (t5_so1) --++ (0.35,0) --++ (0.0,+1.2) --++ (3.175,0.0) |- (t7_si2);
+    \draw [bind]  (t6_so1) --++ (0.5,0)                                   |- (t7_si1);
+    \draw [bind]  (t2_so1) --++ (0.5,0) --++ (0.0,-2.5) --++ (8.8,0.0)    |- (t7_si3);
+
+    \draw [bind, dashed]  (t4.south) --++ (0.0,-0.25) --++ (5.65,0.0)  -- (t6.south);
+
+    \draw [bind]  (t4_so1) --++ (0.50,0) --++ (0.0,-0.55) --++ (6.2,0.0)  |- (t7_si4);
+    \draw [bind]  (t7_so2) --++ (0.5,0)                                   |- (t8_si1);
+    \draw [bind]  (t7_so4) --++ (0.5,0)                                   |- (t9_si1);
+    
+    %%%%%%%%%%%%%%%%%%%
+    %% create stages %%
+    %%%%%%%%%%%%%%%%%%%
+    %      options                 object ids       id   label     n threads
+    %      -------                 ----------       --   -----     ---------
+    \stage [minimum height=5.25cm] {"m1","m2"}      {s1} {Stage 1} {1}
+    \stage [minimum height=5.25cm] {"m3","m4"}      {s2} {Stage 2} {3}
+    \stage [minimum height=5.25cm] {"m5"}           {s3} {Stage 3} {1}
+    \stage [minimum height=5.25cm] {"m6"}           {s4} {Stage 4} {3}
+    \stage [minimum height=5.25cm] {"m7","m8","m9"} {s5} {Stage 5} {1}
+
+     %%%%%%%%%%%%%%%%%%%%%
+    %% clone the tasks %%
+    %%%%%%%%%%%%%%%%%%%%%
+    %      options task ids    n clones
+    %      ------- --------    --------
+    \clone []      {"t3","t5"} {2}
+
+    %%%%%%%%%%%%%%%%%%%%%
+    %% draw the legend %%
+    %%%%%%%%%%%%%%%%%%%%%
+    \legend [shift={(-0.5,2.75)}]
+  \end{tikzpicture}
+\end{document}

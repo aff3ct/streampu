@@ -550,6 +550,15 @@ if(AFF3CT_CORE_TESTS)
     add_test(NAME pipeline4::aff3ct-core-test-complex-pipeline-mix-fwd COMMAND aff3ct-core-test-complex-pipeline-mix-fwd -e 1000 -u 413 -w)
     set_tests_properties(pipeline4::aff3ct-core-test-complex-pipeline-mix-fwd PROPERTIES LABELS "complex-pipeline-mix-fwd;skip-memcheck") # to exclude this previous test from memchecks, active waiting is too long in Valgrind :-(
 
+    # simple sequence example
+    add_test(NAME sequence0::aff3ct-core-test-generic-pipeline COMMAND aff3ct-core-test-generic-pipeline -i ${INPUT_FILE} -n "(3)" -t "(3)" -R "(SIO)" -q)
+    set_tests_properties(sequence0::aff3ct-core-test-generic-pipeline PROPERTIES LABELS generic-pipeline)
+    add_test(NAME sequence1::aff3ct-core-test-generic-pipeline COMMAND aff3ct-core-test-generic-pipeline -i ${INPUT_FILE} -n "(3)" -t "(3)" -R "(SFWD)" -q -b)
+    set_tests_properties(sequence1::aff3ct-core-test-generic-pipeline PROPERTIES LABELS generic-pipeline)
+    add_test(NAME sequence2::aff3ct-core-test-generic-pipeline COMMAND aff3ct-core-test-generic-pipeline -i ${INPUT_FILE} -n "(4)" -t "(3)" -r "((SFWD,SIO,SFWD,SIO))" -q)
+    set_tests_properties(sequence2::aff3ct-core-test-generic-pipeline PROPERTIES LABELS generic-pipeline)
+    add_test(NAME sequence3::aff3ct-core-test-generic-pipeline COMMAND aff3ct-core-test-generic-pipeline -i ${INPUT_FILE} -n "(4,1,2)" -t "(3,1,3)" -r "((SFWD,SIO,SFWD,SIO),(SFWD),(SIO,SIO))" -q -b)
+    set_tests_properties(sequence3::aff3ct-core-test-generic-pipeline PROPERTIES LABELS generic-pipeline)
     # simple pipeline example
     add_test(NAME pipeline0::aff3ct-core-test-generic-pipeline COMMAND aff3ct-core-test-generic-pipeline -i ${INPUT_FILE} -n "(3)" -t "(3)" -R "(SIO)")
     set_tests_properties(pipeline0::aff3ct-core-test-generic-pipeline PROPERTIES LABELS generic-pipeline)
