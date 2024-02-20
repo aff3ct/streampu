@@ -170,7 +170,7 @@ the control flow inside a pipelie stage.
 
 === "Switch-case inside a parallel stage"
     <figure markdown>
-      ![double chain](./assets/exclusive_paths_pipeline.svg){ width="950" }
+      ![double chain](./assets/test_exclusive_paths_pipeline.svg){ width="950" }
       <figcaption>`test-exclusive-paths-pipeline`.</figcaption>
     </figure>
     ```bash
@@ -184,7 +184,7 @@ the control flow inside a pipelie stage.
 
 === "Nested loops inside a parallel stage"
     <figure markdown>
-      ![double chain](./assets/nested_loops_pipeline.svg){ width="1200" }
+      ![double chain](./assets/test_nested_loops_pipeline.svg){ width="1200" }
       <figcaption>`test-nested-loops-pipeline`.</figcaption>
     </figure>
     ```bash

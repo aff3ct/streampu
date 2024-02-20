@@ -37,12 +37,21 @@ output socket need to be updated with the new `dataptr` address.
 
 The forward sockets are all pointing to the same `dataptr`, so getting a new 
 buffer means that we have to update the `dataptr` of all the consecutive bound 
-forward sockets to this new memory space. The same update need to be done in the
-reversed way when the `dataptr` is exchanged at the end of the stage. For that, 
-we added two recursive methods as explained in the [sequence](sequence.md) 
-section (see [`explore_thread_rec()`](sequence.md#Explore_thread_rec) and 
+forward sockets to this new memory space. In the [sequence](sequence.md), the 
+same update need to be done in the reversed way when the `dataptr` is exchanged 
+at the end of the stage. For that, we added two recursive methods as explained 
+in the [sequence](sequence.md) section (see 
+[`explore_thread_rec()`](sequence.md#Explore_thread_rec) and 
 [`explore_thread_rec_reverse()`](sequence.md#Explore_thread_rec_reverse) 
 methods).
+
+Moreover, when multiple forward sockets are crossing [pipeline](pipeline.md) 
+stages, we need to check if these forward sockets are pointing to a same 
+`dataptr` or to different `dataptr`s. In the case where multiple forward sockets 
+are crossing [pipeline](pipeline.md) stages and are pointing to the same 
+`dataptr`, only one buffer need to be created in the 
+[adaptors](pipeline.md#Adaptor). To detect this, a map to record the previous 
+`dataptr` is used (see the `fwd_source` variable in the code).
 
 ### Tests
 
@@ -53,30 +62,30 @@ the forward socket implementation.
 
 === "Pipeline with two different chains"
     <figure markdown>
-      ![double chain](./assets/pipeline_double_chain.svg){ width="700" }
-      <figcaption>`test-simple-pipeline-double-chain`.</figcaption>
+      ![double chain](./assets/test_pipeline_double_chain.svg){ width="700" }
+      <figcaption>`test-pipeline-double-chain`.</figcaption>
     </figure>
     ```bash
-    test-simple-pipeline-double-chain -t 3
+    test-pipeline-double-chain -t 3
     ```  
     The purpose of this graph is to test the buffer exchange with `SIO` and
     `SFWD`, both on the same stage.
 
 === "Pipeline with distant stage binding (only SFWD)" 
     <figure markdown>
-      ![forward inter stage](./assets/pipeline_inter_stage_fwd.svg){ width="900" }
+      ![forward inter stage](./assets/test_complex_pipeline_full_fwd.svg){ width="900" }
       <figcaption>`test-complex-pipeline-full-fwd`.</figcaption>
     </figure>
     ```bash
     test-complex-pipeline-full-fwd -t 3
     ``` 
     The purpose of this graph is to test a `SFWD` bound to two `SFWD` in two
-    different stages, and how the buffer exchange behave with connections
+    different stages, and how the buffer exchange behaves with connections
     between distant stages $S1$ and $S4$.
 
 === "Pipeline with distant stage binding (SIN, SOUT & SFWD)" 
     <figure markdown>
-      ![forward inter stage](./assets/complex_pipeline_mix_fwd.svg){ width="900" }
+      ![forward inter stage](./assets/test_complex_pipeline_mix_fwd.svg){ width="900" }
       <figcaption>`test-complex-pipeline-mix-fwd`.</figcaption>
     </figure>
     ```bash
@@ -84,7 +93,7 @@ the forward socket implementation.
     ``` 
     The purpose of this graph is to test a `SFWD` bound to three `SFWD` in three
     different stages ($S1 \rightarrow S2$, $S1 \rightarrow S4$ and $S1 
-    \rightarrow S5$), and how the buffer exchange behave with connections
+    \rightarrow S5$), and how the buffer exchange behaves with connections
     between distant stages. Additionally, a traditional relay task ($t4$ with 
     an input and an output socket) has been added in stage $S2$. The $t7$ 
     *compare* task ensures that all the 3 `SFWD` have the same contents.
@@ -95,14 +104,14 @@ the forward socket implementation.
 
 === "Pipeline with distant stage binding and mix of SIN, SOUT & SFWD"
     <figure markdown>
-      ![double inter stage](./assets/pipeline_inter_stage_complex.svg){ width="950" }
+      ![double inter stage](./assets/test_complex_pipeline_inter_stage.svg){ width="950" }
       <figcaption>`test-complex-pipeline-inter-stage`.</figcaption>
     </figure>
     ```bash
     test-complex-pipeline-inter-stage -t 3
     ```  
-    This test is a combination of the two previous tests, we have a `SOUT` bound
-    to a `SIN` in stage $S2$ and a `SFWD` in stage $S4$.
+    This test is a combination of the previous tests, we have a `SOUT` bound to 
+    a `SIN` in stage $S2$ and a `SFWD` in stage $S4$.
 
 ----
 
@@ -128,7 +137,7 @@ Here are some examples of generated pipelines:
 
 === "Simple pipeline" 
     <figure markdown>
-      ![simple pipeline io](./assets/simple_pipeline_io.svg){ width="600" }
+      ![simple pipeline io](./assets/test_generic_pipeline_io.svg){ width="600" }
       <figcaption>`test-generic-pipeline`: input/output sockets & 3-stage pipeline.</figcaption>
     </figure>
     ```bash
@@ -137,7 +146,7 @@ Here are some examples of generated pipelines:
 
 === "Simple pipeline forward"
     <figure markdown>
-      ![simple pipeline fwd](./assets/simple_pipeline_fwd.svg){ width="600" }
+      ![simple pipeline fwd](./assets/test_generic_pipeline_fwd.svg){ width="600" }
       <figcaption>`test-generic-pipeline`: forward sockets & 3-stage pipeline.</figcaption>
     </figure>
     ```bash
@@ -146,7 +155,7 @@ Here are some examples of generated pipelines:
 
 === "Simple pipeline hybrid"
     <figure markdown>
-      ![simple pipeline hybrid](./assets/simple_pipeline_hybrid.svg){ width="600" }
+      ![simple pipeline hybrid](./assets/test_generic_pipeline_hybrid.svg){ width="600" }
       <figcaption>`test-generic-pipeline`: hybrid in/out and forward sockets & 3-stage pipeline.</figcaption>
     </figure>
     ```bash
@@ -155,7 +164,7 @@ Here are some examples of generated pipelines:
 
 === "Simple pipeline hybrid with a 5-stage pipeline"
     <figure markdown>
-      ![simple pipeline hybrid](./assets/simple_pipeline_hybrid_5_stages.svg){ width="1100" }
+      ![simple pipeline hybrid](./assets/test_generic_pipeline_hybrid_5_stages.svg){ width="1100" }
       <figcaption>`test-generic-pipeline`: hybrid in/out and forward sockets & 5-stage pipeline.</figcaption>
     </figure>
     ```bash

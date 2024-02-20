@@ -178,12 +178,12 @@ if(AFF3CT_CORE_TESTS)
                                                            POSITION_INDEPENDENT_CODE ON) # set -fpie
     list(APPEND aff3ct_core_targets_list aff3ct-core-test-complex-pipeline-inter-stage)
 
-    add_executable(aff3ct-core-test-simple-pipeline-double-chain $<TARGET_OBJECTS:aff3ct-core-obj>
+    add_executable(aff3ct-core-test-pipeline-double-chain $<TARGET_OBJECTS:aff3ct-core-obj>
                    ${CMAKE_CURRENT_SOURCE_DIR}/tests/advanced/pipeline_double_chain.cpp)
-    set_target_properties(aff3ct-core-test-simple-pipeline-double-chain PROPERTIES
-                                                           OUTPUT_NAME test-simple-pipeline-double-chain
+    set_target_properties(aff3ct-core-test-pipeline-double-chain PROPERTIES
+                                                           OUTPUT_NAME test-pipeline-double-chain
                                                            POSITION_INDEPENDENT_CODE ON) # set -fpie
-    list(APPEND aff3ct_core_targets_list aff3ct-core-test-simple-pipeline-double-chain)
+    list(APPEND aff3ct_core_targets_list aff3ct-core-test-pipeline-double-chain)
 
     add_executable(aff3ct-core-test-complex-pipeline-full-fwd $<TARGET_OBJECTS:aff3ct-core-obj>
                    ${CMAKE_CURRENT_SOURCE_DIR}/tests/advanced/complex_pipeline_full_fwd.cpp)
@@ -200,7 +200,7 @@ if(AFF3CT_CORE_TESTS)
     list(APPEND aff3ct_core_targets_list aff3ct-core-test-complex-pipeline-mix-fwd)
 
     add_executable(aff3ct-core-test-generic-pipeline $<TARGET_OBJECTS:aff3ct-core-obj>
-                   ${CMAKE_CURRENT_SOURCE_DIR}/tests/advanced/simple_generic_pipeline.cpp)
+                   ${CMAKE_CURRENT_SOURCE_DIR}/tests/advanced/generic_pipeline.cpp)
     set_target_properties(aff3ct-core-test-generic-pipeline PROPERTIES
                                                            OUTPUT_NAME test-generic-pipeline
                                                            POSITION_INDEPENDENT_CODE ON) # set -fpie
@@ -505,10 +505,10 @@ if(AFF3CT_CORE_TESTS)
     set_tests_properties(pipeline2::aff3ct-core-test-complex-pipeline-inter-stage PROPERTIES LABELS complex-pipeline-inter-stage)
 
     # pipeline double-chain
-    add_test(NAME pipeline0::aff3ct-core-test-simple-pipeline-double-chain COMMAND aff3ct-core-test-simple-pipeline-double-chain)
-    set_tests_properties(pipeline0::aff3ct-core-test-simple-pipeline-double-chain PROPERTIES LABELS simple-pipeline-double-chain)
-    add_test(NAME pipeline1::aff3ct-core-test-simple-pipeline-double-chain COMMAND aff3ct-core-test-simple-pipeline-double-chain -u 1024)
-    set_tests_properties(pipeline1::aff3ct-core-test-simple-pipeline-double-chain PROPERTIES LABELS simple-pipeline-double-chain)
+    add_test(NAME pipeline0::aff3ct-core-test-pipeline-double-chain COMMAND aff3ct-core-test-pipeline-double-chain)
+    set_tests_properties(pipeline0::aff3ct-core-test-pipeline-double-chain PROPERTIES LABELS simple-pipeline-double-chain)
+    add_test(NAME pipeline1::aff3ct-core-test-pipeline-double-chain COMMAND aff3ct-core-test-pipeline-double-chain -u 1024)
+    set_tests_properties(pipeline1::aff3ct-core-test-pipeline-double-chain PROPERTIES LABELS simple-pipeline-double-chain)
 
     # complex pipeline fwd
     add_test(NAME sequence0::aff3ct-core-test-complex-pipeline-full-fwd COMMAND aff3ct-core-test-complex-pipeline-full-fwd -e 100 -q -t 1)
