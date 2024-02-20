@@ -44,3 +44,7 @@ New features and discussions:
 1. [Forward sockets](socket_fwd.md)
 2. [Pipeline & Control Flow](pipeline_ctrl_flow.md)
 3. [Work in Progress](wip.md)
+
+Tests:
+
+1. [Bootstrap](tests_bootstrap.md)

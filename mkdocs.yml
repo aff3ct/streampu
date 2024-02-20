@@ -96,3 +96,5 @@ nav:
       - socket_fwd.md
       - pipeline_ctrl_flow.md
       - wip.md
+  - Tests:
+      - tests_bootstrap.md

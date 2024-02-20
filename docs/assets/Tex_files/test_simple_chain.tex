@@ -1,0 +1,68 @@
+\documentclass{standalone}
+
+\usepackage{tikz}
+\usetikzlibrary{aff3ct}
+
+\begin{document}
+  \begin{tikzpicture}[background rectangle/.style={thick, draw=gray!60, fill=white, fill opacity=1.0, rounded corners=2px}, show background rectangle]
+    %%%%%%%%%%%%%%%%%%
+    %% create tasks %%
+    %%%%%%%%%%%%%%%%%%
+    %     options             id   coords      label                 sin sout sfwd attributes
+    %     -------             --   ------      -----                 --- ---- ---- ----------
+    \task                     {t1} {-0.5, 0}   {initialize\\($t_1$)} {0} {1}  {0}  {};
+    \task [right=1.0cm of t1] {t2} {}          {increment\\($t_2$)}  {1} {1}  {0}  {};
+    \task [right=1.0cm of t2] {t3} {}          {increment\\($t_3$)}  {1} {1}  {0}  {};
+    \task [right=1.0cm of t3] {t4} {}          {increment\\($t_4$)}  {1} {1}  {0}  {};
+    \task [right=1.0cm of t4] {t5} {}          {increment\\($t_5$)}  {1} {1}  {0}  {};
+    \task [right=1.0cm of t5] {t6} {}          {increment\\($t_6$)}  {1} {1}  {0}  {};
+    \task [right=1.0cm of t6] {t7} {}          {increment\\($t_7$)}  {1} {1}  {0}  {};
+    \task [right=1.0cm of t7] {t8} {}          {finalize\\($t_8$)}   {1} {0}  {0}  {};
+
+    %%%%%%%%%%%%%%%%%%%%
+    %% create modules %%
+    %%%%%%%%%%%%%%%%%%%%
+    %       options  task ids id   label
+    %       -------  -------- --   -----
+    \module          {"t1"}   {m1} {Initializer};
+    \module          {"t2"}   {m2} {Incrementer};
+    \module          {"t3"}   {m3} {Incrementer};
+    \module          {"t4"}   {m4} {Incrementer};
+    \module          {"t5"}   {m5} {Incrementer};
+    \module          {"t6"}   {m6} {Incrementer};
+    \module          {"t7"}   {m7} {Incrementer};
+    \module          {"t8"}   {m8} {Finalizer};
+
+    %%%%%%%%%%%%%%%%
+    %% bind tasks %%
+    %%%%%%%%%%%%%%%%
+    %     options start id path end id
+    %     ------- -------- ---- ------
+    \draw [bind]  (t1_so1) --   (t2_si1);
+    \draw [bind]  (t2_so1) --   (t3_si1);
+    \draw [bind]  (t3_so1) --   (t4_si1);
+    \draw [bind]  (t4_so1) --   (t5_si1);
+    \draw [bind]  (t5_so1) --   (t6_si1);
+    \draw [bind]  (t6_so1) --   (t7_si1);
+    \draw [bind]  (t7_so1) --   (t8_si1);
+
+    % %%%%%%%%%%%%%%%%%%%
+    % %% create stages %%
+    % %%%%%%%%%%%%%%%%%%%
+    %      options                 object ids  id   label      n_threads
+    %      -------                 ----------  --   -----      ---------
+    \stage [minimum height=3.00cm] {"m1","m8"} {s1} {Sequence} {1}
+
+    %%%%%%%%%%%%%%%%%%%%%
+    %% clone the tasks %%
+    %%%%%%%%%%%%%%%%%%%%%
+    %      options task ids         n clones
+    %      ------- --------         --------
+    % \clone []      {"t2","t3","t4"} {3}
+
+    %%%%%%%%%%%%%%%%%%%%%
+    %% draw the legend %%
+    %%%%%%%%%%%%%%%%%%%%%
+    \legend [shift={(-1.3,1.75)}]
+  \end{tikzpicture}
+\end{document}

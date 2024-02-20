@@ -11,13 +11,13 @@
     %     options                            id   coords      label                 sin sout sfwd attributes
     %     -------                            --   ------      -----                 --- ---- ---- ----------
     \task                                    {t1} {-0.55, 0}  {initialize\\($t_1$)} {0} {1}  {0}  {"seq"};
-    \task [right=1.2cm of t1, yshift=1.15cm] {t2} {}          {increment\\($t_2$)}  {1} {1}  {0}  {};
-    \task [below=1.0cm of t2]                {t3} {}          {incrementf\\($t_5$)} {0} {0}  {1}  {};
-    \task [right=1.0cm of t2]                {t4} {}          {increment\\($t_3$)}  {1} {1}  {0}  {};
-    \task [below=1.0cm of t4]                {t5} {}          {incrementf\\($t_6$)} {0} {0}  {1}  {};
-    \task [right=1.0cm of t4]                {t6} {}          {increment\\($t_4$)}  {1} {1}  {0}  {};
-    \task [below=1.0cm of t6]                {t7} {}          {incrementf\\($t_7$)} {0} {0}  {1}  {};
-    \task [right=1.2cm of t7, yshift=1.2cm]  {t8} {}          {finalize\\($t_8$)}   {2} {0}  {0}  {"seq"};
+    \task [right=1.2cm of t1, yshift=1.15cm] {t2} {}          {incrementf\\($t_2$)} {0} {0}  {1}  {};
+    \task [below=1.0cm of t2]                {t3} {}          {increment\\($t_5$)}  {1} {1}  {0}  {};
+    \task [right=1.0cm of t2]                {t4} {}          {incrementf\\($t_3$)} {0} {0}  {1}  {};
+    \task [below=1.0cm of t4]                {t5} {}          {increment\\($t_6$)}  {1} {1}  {0}  {};
+    \task [right=1.0cm of t4]                {t6} {}          {incrementf\\($t_4$)} {0} {0}  {1}  {};
+    \task [below=1.0cm of t6]                {t7} {}          {increment\\($t_7$)}  {1} {1}  {0}  {};
+    \task [right=1.2cm of t7, yshift=1.2cm]  {t8} {}          {finalize\\($t_8$)}   {1} {0}  {0}  {"seq"};
    
     %%%%%%%%%%%%%%%%%%%%%
     %% clone the tasks %%
@@ -49,10 +49,9 @@
     \draw [bind]  (t1_so1)  --  (t3_si1);
     \draw [bind]  (t2_so1)  --  (t4_si1);
     \draw [bind]  (t4_so1)  --  (t6_si1);
-    \draw [bind]  (t6_so1)  --  (t8_si1);
     \draw [bind]  (t3_so1)  --  (t5_si1);
     \draw [bind]  (t5_so1)  --  (t7_si1);
-    \draw [bind]  (t7_so1)  --  (t8_si2);
+    \draw [bind]  (t7_so1)  --  (t8_si1);
 
     %%%%%%%%%%%%%%%%%%%
     %% create stages %%
