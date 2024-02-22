@@ -1,9 +1,9 @@
 # Task
 
 A **task** represents **the code executed by a node in the data flow graph**. In 
-other languages, a **task** can be refereed as a *job* or a *filter*. 
+other languages, a **task** can be referred to as a *job* or a *filter*. 
 A task is defined by its input and output data and the code to execute when 
-triggered. In other word, a task comes with a set of data called 
+triggered. In other words, a task comes with a set of data called 
 [sockets](socket.md) (not to be confused with network and system sockets). The 
 sockets model the data that are consumed (input socket) and produced (output 
 socket) by the current task. Finally, the code to execute is stored in a 
@@ -38,7 +38,7 @@ return a `status_t`.
 std::shared_ptr<runtime::Socket> fake_input_sockets;
 ```
 Fake input sockets are used when specifying dependencies between tasks
-directly. Thus, in intern, these dependencies are managed through "fake input
+directly. Thus, internally, these dependencies are managed through "fake input
 sockets" that are created on-the-fly over the current task. The data of these
 sockets are ignored during the codelet execution.
 
@@ -99,14 +99,14 @@ bool can_exec() const;
 ```
 Returns `true` if all the sockets are associated to an allocated buffer, 
 otherwise returns `false`. Called by `exec()` method if `fast` is set to 
-`true`, skipped otherwise.
+`false`, skipped otherwise.
 
 ```cpp
 void bind(runtime::Task &t_out, const int priority = -1);
 ```
 Add a fake input socket to the current task (see above `fake_input_sockets` 
 attribute) and binds it to the output `status` socket of the `t_out` task in 
-parameter. The new socket's `datatype` and `databytes` matches the output 
+parameter. The new socket's `datatype` and `databytes` match the output 
 `status` socket of `t_out`. `fake_input_sockets` is always `fast`. This 
 method has to be manually called by the user.
 

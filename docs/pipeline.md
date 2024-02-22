@@ -8,7 +8,7 @@ of **a producer/consumer algorithm**.
 
 <figure markdown>
   ![Sequence and pipeline](./assets/sequence_to_pipeline.svg){ width=1200 }
-  <figcaption>Example a sequence on the left and a pipeline on the right.</figcaption>
+  <figcaption>Example of a sequence on the left and a pipeline on the right.</figcaption>
 </figure>
 
 A pipeline is a C++ object of the `aff3ct::runtime::Pipeline` class. The 

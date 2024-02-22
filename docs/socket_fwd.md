@@ -38,7 +38,7 @@ output socket need to be updated with the new `dataptr` address.
 The forward sockets are all pointing to the same `dataptr`, so getting a new 
 buffer means that we have to update the `dataptr` of all the consecutive bound 
 forward sockets to this new memory space. In the [sequence](sequence.md), the 
-same update need to be done in the reversed way when the `dataptr` is exchanged 
+same update needs to be done in the reversed way when the `dataptr` is exchanged 
 at the end of the stage. For that, we added two recursive methods as explained 
 in the [sequence](sequence.md) section (see 
 [`explore_thread_rec()`](sequence.md#Explore_thread_rec) and 

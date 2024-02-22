@@ -15,7 +15,7 @@ methods to facilitate the code understanding.
 size_t path;
 ```
 The *exclusive path* to take when the `commute` task is reached. Read on the
-[`ctrl socket`](#Commute) of `commute` task each time it is executed. The 
+[`ctrl socket`](#Commute) of the `commute` task each time it is executed. The 
 initial `path` value is set to `n_data_sockets - 1` prior to the first 
 execution.
 
@@ -49,8 +49,8 @@ bytes expected on each data socket.
 ## Tasks
 
 Since those tasks have a variable number of sockets they are accessed through
-the subcript `operator[]` with a numerical index or a `std::string` unlike 
-regular tasks which use namespaces and enumators.
+the subscript `operator[]` with a numerical index or a `std::string` unlike 
+regular tasks which use namespaces and enumerators.
 
 <u>Examples:</u>
 
@@ -97,7 +97,7 @@ then copies the bytes from its `data` input socket to the `data{path}` output
 socket. Then it sets the path attribute of the module to the one read.
 
 Any task bound to its output sockets **before `status`** will be considered in a
-diffferent *exclusive path*.
+different *exclusive path*.
  
 <u>Sockets</u>
 
@@ -111,7 +111,7 @@ diffferent *exclusive path*.
 <a name="Select"></a>
 ### Select
 
-The `select` task is ued to join exclusive paths.
+The `select` task is used to join exclusive paths.
 
 When a `select` task is executed it gets the [`path`](#Path) from the module and
 copies the bytes from its `data{path}` input to its `data` output socket. Any 
@@ -131,7 +131,7 @@ path*.
 | Type        | Name            | Index    |
 | ----------- | --------------- | -------- |
 | `Input`     | data{0..N-1}    | {0..N-1} |
-| `output`    | data            | N        |
+| `Output`    | data            | N        |
 | `Output`    | status          | N+1      |
 
 <a name="Examples"><a/>
