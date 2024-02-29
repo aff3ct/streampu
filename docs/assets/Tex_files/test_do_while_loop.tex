@@ -1,0 +1,71 @@
+\documentclass{standalone}
+
+\usepackage{tikz}
+\usetikzlibrary{aff3ct}
+
+\begin{document}
+  \begin{tikzpicture}[background rectangle/.style={thick, draw=gray!60, fill=white, fill opacity=1.0, rounded corners=2px}, show background rectangle]
+    %%%%%%%%%%%%%%%%%%
+    %% create tasks %%
+    %%%%%%%%%%%%%%%%%%
+    %       options                              id    coords label                  sin sout sfwd attributes
+    %       -------                              --    ------ -----                  --- ---- ---- ----------
+    \task   []                                   {t1}  {0, 0} {initialize\\($t_1$)}  {0} {1}  {0}  {};
+    \select [right=6.50cm of t1                ] {t2}  {}     {select\\($t_2$)}      {2}           {};
+    \task   [right=0.65cm of t2, yshift=-2.50cm] {t9}  {}     {iterate\\($t_9$)}     {0} {1}  {0}  {};
+    \commute[right=2.50cm of t9, yshift=+2.50cm] {t10} {}     {commute\\($t_{10}$)}  {2}           {};
+    \task   [above=1.50cm of t2, xshift=-4.50cm] {t3}  {}     {increment\\($t_3$)}   {1} {1}  {0}  {};
+    \task   [right=1.00cm of t3                ] {t4}  {}     {increment\\($t_4$)}   {1} {1}  {0}  {};
+    \task   [right=1.00cm of t4                ] {t5}  {}     {increment\\($t_5$)}   {1} {1}  {0}  {};
+    \task   [right=1.00cm of t5                ] {t6}  {}     {increment\\($t_6$)}   {1} {1}  {0}  {};
+    \task   [right=1.00cm of t6                ] {t7}  {}     {increment\\($t_7$)}   {1} {1}  {0}  {};
+    \task   [right=1.00cm of t7                ] {t8}  {}     {increment\\($t_8$)}   {1} {1}  {0}  {};
+    \task   [right=6.00cm of t10               ] {t11} {}     {finalize\\($t_{11}$)} {1} {0}  {0}  {};
+
+    %%%%%%%%%%%%%%%%%%%%
+    %% create modules %%
+    %%%%%%%%%%%%%%%%%%%%
+    %       options  task ids     id    label          attributes
+    %       -------  --------     --    -----          ----------
+    \module          {"t1"}       {m1}  {Initializer}  {};
+    \module          {"t2","t10"} {m2}  {Switcher}     {"lbup"};
+    \module          {"t9"}       {m3}  {Iterator}     {};
+    \module          {"t3"}       {m4}  {Incrementer}  {};
+    \module          {"t4"}       {m5}  {Incrementer}  {};
+    \module          {"t5"}       {m6}  {Incrementer}  {};
+    \module          {"t6"}       {m7}  {Incrementer}  {};
+    \module          {"t7"}       {m8}  {Incrementer}  {};
+    \module          {"t8"}       {m9}  {Incrementer}  {};
+    \module          {"t11"}      {m10} {Finalizer}    {"lbup"};
+
+    %%%%%%%%%%%%%%%%
+    %% bind tasks %%
+    %%%%%%%%%%%%%%%%
+    %     options                     start id    path                                        end id
+    %     -------                     --------    ----                                        ------
+    \draw [bind, densely dashdotted]  (t1_so1)    --++ (0.95,0)                               |- (t2_si2);
+    \draw [bind                    ]  (t2_so1)    --++ (0.50,0) --++ (0,1.00) --++ (-7.5,0)   |- (t3_si1);
+    \draw [bind, dashed            ]  (t2.south)                                              |- (t9.west);
+    \draw [bind                    ]  (t9_so1)    --++ (1.3,0)                                |- (t10_si2);
+    \draw [bind                    ]  (t3_so1)                                                -- (t4_si1);
+    \draw [bind                    ]  (t4_so1)                                                -- (t5_si1);
+    \draw [bind                    ]  (t5_so1)                                                -- (t6_si1);
+    \draw [bind                    ]  (t6_so1)                                                -- (t7_si1);
+    \draw [bind                    ]  (t7_so1)                                                -- (t8_si1);
+    \draw [bind                    ]  (t8_so1)    --++ (0.50,0) --++ (0,-1.85) --++ (-7.75,0) |- (t10_si1);
+    \draw [bind, densely dashdotted]  (t10_so2)   --++ (5.25,0)                               |- (t11_si1);
+    \draw [bind, densely dashdotted]  (t10_so1)   --++ (0.50,0) --++ (0,+1.15) --++ (-9.20,0) |- (t2_si1);
+
+    %%%%%%%%%%%%%%%%%%%
+    %% create stages %%
+    %%%%%%%%%%%%%%%%%%%
+    %      options                 object ids                  id   label      n threads
+    %      -------                 ----------                  --   -----      ---------
+    \stage [minimum height=9.00cm] {"m1","m3","m4","m9","m10"} {s1} {Sequence} {1}
+
+    %%%%%%%%%%%%%%%%%%%%%
+    %% draw the legend %%
+    %%%%%%%%%%%%%%%%%%%%%
+    \legend [shift={(-0.75,4.50)}]
+  \end{tikzpicture}
+\end{document}

@@ -1,0 +1,73 @@
+\documentclass{standalone}
+
+\usepackage{tikz}
+\usetikzlibrary{aff3ct}
+
+\begin{document}
+  \begin{tikzpicture}[background rectangle/.style={thick, draw=gray!60, fill=white, fill opacity=1.0, rounded corners=2px}, show background rectangle]
+    %%%%%%%%%%%%%%%%%%
+    %% create tasks %%
+    %%%%%%%%%%%%%%%%%%
+    %     options             id   coords  label                 sin sout sfwd attributes
+    %     -------             --   ------  -----                 --- ---- ---- ----------
+    \task                     {t1} {0,0}  {generate\\($t_1$)}    {0} {2}  {0}  {"seq","sckn"};
+    \task [right=1.0cm of t1] {t2} {}     {relay\\$t_2$}         {1} {1}  {0}  {};
+    \task [right=1.0cm of t2] {t3} {}     {relay\\$t_3$}         {1} {1}  {0}  {};
+    \task [right=1.0cm of t3] {t4} {}     {relay\\$t_4$}         {1} {1}  {0}  {};
+    \task [right=1.0cm of t4] {t5} {}     {relay\\$t_5$}         {1} {1}  {0}  {};
+    \task [right=1.0cm of t5] {t6} {}     {relay\\$t_6$}         {1} {1}  {0}  {};
+    \task [right=1.0cm of t6] {t7} {}     {relay\\$t_7$}         {1} {1}  {0}  {};
+    \task [right=1.0cm of t7] {t8} {}     {send\_count\\($t_8$)} {2} {0}  {0}  {"seq","sckn"};
+
+    %%%%%%%%%%%%%%%%%%%%
+    %% create modules %%
+    %%%%%%%%%%%%%%%%%%%%
+    %       options task ids id    label
+    %       ------- -------- --    -----
+    \module         {"t1"}  {m1} {Source};
+    \module         {"t2"}  {m2} {Relayer};
+    \module         {"t3"}  {m3} {Relayer};
+    \module         {"t4"}  {m4} {Relayer};
+    \module         {"t5"}  {m5} {Relayer};
+    \module         {"t6"}  {m6} {Relayer};
+    \module         {"t7"}  {m7} {Relayer};
+    \module         {"t8"}  {m8} {Sink};
+ 
+    %%%%%%%%%%%%%%%%
+    %% bind tasks %%
+    %%%%%%%%%%%%%%%%
+    %     options start id                                         path end id
+    %     ------- --------                                         ---- ------
+    \draw [bind]  (t1_so1) --++ (0.5,0)                            |- (t2_si1);
+    \draw [bind]  (t2_so1)                                         -- (t3_si1);
+    \draw [bind]  (t3_so1)                                         -- (t4_si1);
+    \draw [bind]  (t4_so1)                                         -- (t5_si1);
+    \draw [bind]  (t5_so1)                                         -- (t6_si1);
+    \draw [bind]  (t6_so1)                                         -- (t7_si1);
+    \draw [bind]  (t7_so1) --++ (0.5,0)                            |- (t8_si1);
+    \draw [bind]  (t1_so2) --++ (0.5,0) --++ (0,-1.85) --++ (14,0) |- (t8_si2);
+
+    %%%%%%%%%%%%%%%%%%%
+    %% create stages %%
+    %%%%%%%%%%%%%%%%%%%
+    %      options                  object ids  id   label      n_threads
+    %      -------                  ----------  --   -----      ---------
+    \stage [minimum height=3.00cm] {"m1"}       {s1} {Stage 1 } {1}
+    \stage [minimum height=3.00cm] {"m2","m7"}  {s2} {Stage 2 } {3}
+    \stage [minimum height=3.00cm] {"m8"}       {s3} {Stage 3 } {1}
+
+    \stage [dashdotted, minimum height=4.75cm,minimum width=20.50cm, Paired-9, label={[Paired-9,align=center]below:3-stage pipeline}] {"s1","s2","s3"} {pip} {} {0}
+
+    %%%%%%%%%%%%%%%%%%%%%
+    %% clone the tasks %%
+    %%%%%%%%%%%%%%%%%%%%%
+    %      options task ids         n clones
+    %      ------- --------         --------
+    \clone []      {"t2","t3","t4"} {2}
+
+    %%%%%%%%%%%%%%%%%%%%%
+    %% draw the legend %%
+    %%%%%%%%%%%%%%%%%%%%%
+    \legend [shift={(-1,2.25)}]
+  \end{tikzpicture}
+\end{document}

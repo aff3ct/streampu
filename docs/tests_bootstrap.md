@@ -34,24 +34,37 @@ chain made from *increment* tasks that simply perform "$+1$" on the data.
 
 ## Looping
 
-TODO
-
 ### `For` Loop
 
-TODO
+<figure markdown>
+  ![Simple sequence](./assets/test_for_loop.svg){ width="1000" }
+  <figcaption>test-for-loop.</figcaption>
+</figure>
 
 ### `Do-while` loop
 
-TODO
+<figure markdown>
+  ![Simple sequence](./assets/test_do_while_loop.svg){ width="1000" }
+  <figcaption>test-do-while-loop.</figcaption>
+</figure>
 
 ### Nested Loops
 
-TODO
+<figure markdown>
+  ![Simple sequence](./assets/test_nested_loops.svg){ width="1000" }
+  <figcaption>test-nested-loops.</figcaption>
+</figure>
 
 ## `Switch-case` with Exclusive Paths
 
-TODO
+<figure markdown>
+  ![Simple sequence](./assets/test_exclusive_paths.svg){ width="1000" }
+  <figcaption>test-exclusive-paths.</figcaption>
+</figure>
 
 ## Simple Pipeline
 
-TODO
+<figure markdown>
+  ![Simple sequence](./assets/test_simple_pipeline.svg){ width="1000" }
+  <figcaption>test-simple-pipeline.</figcaption>
+</figure>
