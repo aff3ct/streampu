@@ -140,6 +140,30 @@ jobs:
         with:
           name: code-coverage-report
           path: code_coverage_report/
+  test-memcheck-regression:
+    runs-on: ubuntu-latest
+    needs: [analysis-headers]
+    container: registry.gitlab.com/aff3ct/aff3ct/x86_64_ubuntu_valgrind
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+      - name: Build
+        run: |
+          export CXX="g++"
+          export CFLAGS="-Wall -funroll-loops -m64 -mavx2 -mfma"
+          export CMAKE_OPT="-DCMAKE_BUILD_TYPE=RelWithDebInfo -DAFF3CT_CORE_TESTS=ON -DAFF3CT_CORE_COMPILE_STATIC_LIB=ON -DAFF3CT_CORE_COMPILE_SHARED_LIB=ON"
+          source ./ci/tools/threads.sh
+          ./ci/build-linux-macos.sh
+          cd build
+          ctest -LE "^skip-memcheck$" -T memcheck
+        shell: bash
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-memcheck-regression
+          path: build/Testing
   coverage:
     runs-on: ubuntu-latest
     needs: [test-coverage-regression]
