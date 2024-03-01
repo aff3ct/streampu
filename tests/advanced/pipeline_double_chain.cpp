@@ -122,7 +122,7 @@ int main(int argc, char** argv)
 				          << "[" << (print_stats ? "true" : "false") << "]" << std::endl;
 				std::cout << "  -c, --copy-mode       "
 				          << "Enable to copy data in sequence (performance will be reduced)         "
-				          << "[" << (no_copy_mode ? "true" : "false") << "]" << std::endl;
+				          << "[" << (no_copy_mode ? "false" : "true") << "]" << std::endl;
 				std::cout << "  -g, --debug           "
 				          << "Enable task debug mode (print socket data)                            "
 				          << "[" << (debug ? "true" : "false") << "]" << std::endl;

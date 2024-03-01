@@ -150,7 +150,7 @@ int main(int argc, char** argv)
 				          << "[" << (out_filepath.empty() ? "empty" : "\"" + out_filepath + "\"") << "]" << std::endl;
 				std::cout << "  -c, --copy-mode       "
 				          << "Enable to copy data in sequence (performance will be reduced)         "
-				          << "[" << (no_copy_mode ? "true" : "false") << "]" << std::endl;
+				          << "[" << (no_copy_mode ? "false" : "true") << "]" << std::endl;
 				std::cout << "  -b, --step-by-step    "
 				          << "Enable step-by-step sequence execution (performance will be reduced)  "
 				          << "[" << (step_by_step ? "true" : "false") << "]" << std::endl;
