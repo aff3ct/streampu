@@ -15,7 +15,7 @@ jobs:
           diff aff3ct-core.hpp include/aff3ct-core.hpp
         shell: bash
       - name: Upload Artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: analysis-headers
           path: aff3ct-core.hpp
@@ -39,7 +39,7 @@ jobs:
           ./ci/build-linux-macos.sh
         shell: bash
       - name: Upload Artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: build-linux-gcc-x64-avx2
           path: build_linux_gcc_x64_avx2
@@ -62,7 +62,7 @@ jobs:
           ./ci/build-linux-macos.sh
         shell: bash
       - name: Upload Artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: build
           path: build
@@ -85,7 +85,7 @@ jobs:
           ./ci/build-linux-macos.sh
         shell: bash
       - name: Upload Artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: build-linux-clang
           path: build_linux_clang
@@ -109,7 +109,7 @@ jobs:
   #         ./ci/build-linux-macos.sh
   #       shell: bash
   #     - name: Upload Artifacts
-  #       uses: actions/upload-artifact@v3
+  #       uses: actions/upload-artifact@v4
   #       with:
   #         name: build-linux-icpc
   #         path: build_linux_icpc
@@ -121,7 +121,7 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
       - name: Download Artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: build
           path: build/
@@ -136,7 +136,7 @@ jobs:
         run: ./ci/coverage-linux.sh
         shell: bash
       - name: Upload Artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: test-regression-code-coverage-report
           path: |
@@ -162,7 +162,7 @@ jobs:
           ctest -LE "^skip-memcheck$" -T memcheck
         shell: bash
       - name: Upload Artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: test-memcheck-regression
           path: build/Testing
@@ -173,7 +173,7 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
       - name: Download Artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: test-regression-code-coverage-report
           path: test_regression_code_coverage_report/
