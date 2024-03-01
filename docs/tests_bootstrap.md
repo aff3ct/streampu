@@ -11,7 +11,7 @@ At some point we have to start with something :-). The following graphs are a
 very simple chains made from `increment`/`incrementf` tasks that simply perform 
 "$+1$" on the data. Each time there are 6 `Incrementer` ($t_{[2:7]}$) so the 
 final expected values in the `Finalizer` ($t_8$) is equal to the values from the 
-`Initilizer` ($t_1$) "$+6$".
+`Initializer` ($t_1$) "$+6$".
 
 === "With Input and Output Sockets"
 
