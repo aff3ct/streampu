@@ -149,7 +149,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: true
-      - name: Build
+      - name: Build & Memcheck
         run: |
           export CXX="g++"
           export CFLAGS="-Wall -funroll-loops -m64 -mavx2 -mfma"
