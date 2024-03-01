@@ -176,12 +176,12 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: test-regression-code-coverage-report
-          path: code_coverage_report/
+          path: test_regression_code_coverage_report/
       - name: Produce the Coverage Report
         uses: insightsengineering/coverage-action@v2
         with:
           # Path to the Cobertura XML report.
-          path: ./code_coverage_report/aff3ct-core.xml
+          path: ./test_regression_code_coverage_report/code_coverage_report/aff3ct-core.xml
           # Minimum total coverage, if you want to the
           # workflow to enforce it as a standard.
           # This has no effect if the `fail` arg is set to `false`.
