@@ -5,22 +5,21 @@ always a good way to bootstrap when you want to write your first code with the
 DSEL. The source codes of the following tests are located in the 
 `tests/bootstrap` folder. Each file corresponds to an executable test.
 
-## Simple Chain
+## Simple Chains
 
-At some point we have to start with something :-). The following graphs are a 
-very simple chains made from `increment`/`incrementf` tasks that simply perform 
+At some point we have to start somewhere :-). The following graphs are a very 
+simple chains made from `increment`/`incrementf` tasks that simply perform 
 "$+1$" on the data. Each time there are 6 `Incrementer` ($t_{[2:7]}$) so the 
-final expected values in the `Finalizer` ($t_8$) is equal to the values from the 
-`Initializer` ($t_1$) "$+6$".
+final expected values in the `Finalizer` ($t_8$) are equal to the values from 
+the `Initializer` ($t_1$) "$+6$".
 
 === "With Input and Output Sockets"
 
     <figure markdown>
       ![Simple sequence](./assets/test_simple_chain.svg){ width="1000" }
-      <figcaption>`test-simple-chain`.</figcaption>
     </figure>
     ```bash
-    test-simple-chain -t 1
+    ./bin/test-simple-chain -t 1
     ```  
     This version of the simple chain is based on `increment` tasks that have one
     input socket and one output socket.
@@ -51,10 +50,9 @@ final expected values in the `Finalizer` ($t_8$) is equal to the values from the
 
     <figure markdown>
       ![Simple sequence](./assets/test_simple_chain_fwd.svg){ width="1000" }
-      <figcaption>`test-simple-chain-fwd`.</figcaption>
     </figure>
     ```bash
-    test-simple-chain-fwd -t 1
+    ./bin/test-simple-chain-fwd -t 1
     ```  
     This version of the simple chain is based on `incrementf` tasks that have
     only one forward socket.
@@ -81,14 +79,13 @@ final expected values in the `Finalizer` ($t_8$) is equal to the values from the
       -h, --help            This help                                                             [false]
     ```
 
-=== "With Input, Output Sockets and Forward Sockets"
+=== "With Input, Output and Forward Sockets"
 
     <figure markdown>
       ![Simple sequence](./assets/test_simple_chain_hybrid.svg){ width="1000" }
-      <figcaption>`test-simple-chain-hybrid`.</figcaption>
     </figure>
     ```bash
-    test-simple-chain-hybrid -t 1
+    ./bin/test-simple-chain-hybrid -t 1
     ```  
     This version of the simple chain is based on a combination of `increment` 
     and `incrementf` tasks.
@@ -127,14 +124,18 @@ create two different paths, one for the loop and the other for the exit (the
 `iterate` task controls if the commute should execute the 6 `increment` tasks or 
 the end the stream by executing the `finalize` task.
 
+Each time there are 6 `Incrementer` in the innermost loop so the final expected 
+values in the `Finalizer` are equal to the values from the `Initializer` ($t_1$) 
+"$+(i \times j\times 6)$" ($j = 1$ in the `for` loop and `do-while` loop 
+examples). 
+
 === "`For` Loop"
 
     <figure markdown>
       ![Simple sequence](./assets/test_for_loop.svg){ width="1000" }
-      <figcaption>`test-for-loop`.</figcaption>
     </figure>
     ```bash
-    test-for-loop -t 1 -i 10
+    ./bin/test-for-loop -t 1 -i 10
     ```
     This test implements a classic `for-loop` where the condition is evaluated
     first in $t_3$ (a basic loop counter) and the the body of the loop is 
@@ -169,10 +170,9 @@ the end the stream by executing the `finalize` task.
 
     <figure markdown>
       ![Simple sequence](./assets/test_do_while_loop.svg){ width="1000" }
-      <figcaption>`test-do-while-loop`.</figcaption>
     </figure>
     ```bash
-    test-do-while-loop -t 1 -i 10
+    ./bin/test-do-while-loop -t 1 -i 10
     ```
     An implementation of a `do-while` loop where the condition $t_9$ is 
     evaluated after the body of the loop ($t_{[3:8]}$).
@@ -204,11 +204,10 @@ the end the stream by executing the `finalize` task.
 
     <figure markdown>
       ![Simple sequence](./assets/test_nested_loops.svg){ width="1000" }
-      <figcaption>`test-nested-loops`.</figcaption>
     </figure>
 
     ```bash
-    test-do-while-loop -t 1 -i 5 -j 2
+    ./bin/test-do-while-loop -t 1 -i 5 -j 2
     ```
 
     Implementation of 2 nested `for-loop`s. `-j 2` controls the number of times
@@ -238,21 +237,27 @@ the end the stream by executing the `finalize` task.
 
 ----
 
-## `Switch-case`
+## Switch-case
 
 The following test implements a `switch-case` pattern based on `increment` 
 tasks ($t_{[4;9]}$). Depending on the `control` task ($t_2$), one of the three 
-different paths will be executed. The first path is composed by $t_4$, $t_5$ and 
-$t_6$ tasks, the second path is composed by $t_7$ and $t_8$ tasks while the 
-third path is only composed by the $t_9$ task.
+different paths (or cases in the `switch-case` pattern) will be executed. The 
+first path (or `case 0`) is composed by $t_4$, $t_5$ and $t_6$ tasks, the second 
+path (or `case 1`) is composed by $t_7$ and $t_8$ tasks while the 
+third path (or `case 2`) is only composed by the $t_9$ task.
+
+The final expected values in the `Finalizer` depends on the selected path. If 
+the first path is chosen ($t_{[4:6]}$), "$+3$" is added to the values from the 
+`Initializer` ($t_1$). If the second path is chosen ($t_{[7:8]}$), "$+2$" is 
+added to the values from the `Initializer` ($t_1$). Finally, if the last path is 
+chosen ($t_{9}$), "$+1$" is added to the values from the `Initializer` ($t_1$).
 
 <figure markdown>
   ![Simple sequence](./assets/test_exclusive_paths.svg){ width="1000" }
-  <figcaption>test-exclusive-paths.</figcaption>
 </figure>
 
 ```bash
-test-exclusive-paths -t 1 -y
+./bin/test-exclusive-paths -t 1 -y
 ```
 
 The `-y` option indicates that the `Controller` is cyclic: for the first stream
@@ -289,23 +294,28 @@ usage: ./bin/test-exclusive-paths [options]
   -h, --help            This help                                                             [false]
 ```
 
+----
+
 ## Simple Pipeline
 
 This test is an implementation of a 3 stages pipeline. The first stage 
-$S_1 = t_1$ reads data from a file. Thus, the `generate` task ($t_1$) is 
+$S1 = t_1$ reads data from a file. Thus, the `generate` task ($t_1$) is 
 intrinsically sequential (= executes on a single thread). The second stage 
-$S_2 = t_{[2:7]}$ just copies the data from the stage $S_1$ through `relay` 
+$S2 = t_{[2:7]}$ just copies the data from the stage $S_1$ through `relay` 
 tasks. The `relay` tasks can be replicated and ran over multiple threads. 
-Finally, the last stage $S_3 = t_8$ is a `Sink` that writes the data on the 
+Finally, the last stage $S3 = t_8$ is a `Sink` that writes the data on the 
 file system. This operation is also intrinsically sequential.
+
+The purpose of this test is to validate that buffer exchanges between the 
+pipeline stages are working well. At the end, the code checks that the input 
+file and the output file are the same.
 
 <figure markdown>
   ![Simple sequence](./assets/test_simple_pipeline.svg){ width="1000" }
-  <figcaption>test-simple-pipeline.</figcaption>
 </figure>
 
 ```bash
-test-simple-pipeline -t 3 --in-filepath ~/.bashrc --out-filepath output_file
+./bin/test-simple-pipeline -t 3 --in-filepath ~/.bashrc --out-filepath output_file
 ```
 
 !!! note
