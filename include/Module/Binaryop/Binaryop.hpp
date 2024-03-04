@@ -67,6 +67,23 @@ protected:
 	virtual void _perform(const TI  in,        TI *fwd,          const size_t frame_id);
 };
 
+#ifdef _MSC_VER // Hack for MSVC compilation /!\ "Unaryop::getname" does not work correctly on MSVC
+template <typename TI, typename TO = TI, tools::proto_bop<TI,TO> BOP = tools::bop_add<TI,TO>> using Binaryop_add = Binaryop<TI,TO,BOP>;
+template <typename TI, typename TO = TI, tools::proto_bop<TI,TO> BOP = tools::bop_sub<TI,TO>> using Binaryop_sub = Binaryop<TI,TO,BOP>;
+template <typename TI, typename TO = TI, tools::proto_bop<TI,TO> BOP = tools::bop_mul<TI,TO>> using Binaryop_mul = Binaryop<TI,TO,BOP>;
+template <typename TI, typename TO = TI, tools::proto_bop<TI,TO> BOP = tools::bop_div<TI,TO>> using Binaryop_div = Binaryop<TI,TO,BOP>;
+template <typename TI, typename TO = TI, tools::proto_bop<TI,TO> BOP = tools::bop_or <TI,TO>> using Binaryop_or  = Binaryop<TI,TO,BOP>;
+template <typename TI, typename TO = TI, tools::proto_bop<TI,TO> BOP = tools::bop_xor<TI,TO>> using Binaryop_xor = Binaryop<TI,TO,BOP>;
+template <typename TI, typename TO = TI, tools::proto_bop<TI,TO> BOP = tools::bop_and<TI,TO>> using Binaryop_and = Binaryop<TI,TO,BOP>;
+template <typename TI, typename TO = TI, tools::proto_bop<TI,TO> BOP = tools::bop_min<TI,TO>> using Binaryop_min = Binaryop<TI,TO,BOP>;
+template <typename TI, typename TO = TI, tools::proto_bop<TI,TO> BOP = tools::bop_max<TI,TO>> using Binaryop_max = Binaryop<TI,TO,BOP>;
+template <typename TI, typename TO = TI, tools::proto_bop<TI,TO> BOP = tools::bop_gt <TI,TO>> using Binaryop_gt  = Binaryop<TI,TO,BOP>;
+template <typename TI, typename TO = TI, tools::proto_bop<TI,TO> BOP = tools::bop_ge <TI,TO>> using Binaryop_ge  = Binaryop<TI,TO,BOP>;
+template <typename TI, typename TO = TI, tools::proto_bop<TI,TO> BOP = tools::bop_lt <TI,TO>> using Binaryop_lt  = Binaryop<TI,TO,BOP>;
+template <typename TI, typename TO = TI, tools::proto_bop<TI,TO> BOP = tools::bop_le <TI,TO>> using Binaryop_le  = Binaryop<TI,TO,BOP>;
+template <typename TI, typename TO = TI, tools::proto_bop<TI,TO> BOP = tools::bop_ne <TI,TO>> using Binaryop_ne  = Binaryop<TI,TO,BOP>;
+template <typename TI, typename TO = TI, tools::proto_bop<TI,TO> BOP = tools::bop_eq <TI,TO>> using Binaryop_eq  = Binaryop<TI,TO,BOP>;
+#else // Standard code
 template <typename TI, typename TO = TI> using Binaryop_add = Binaryop<TI,TO,tools::bop_add<TI,TO>>;
 template <typename TI, typename TO = TI> using Binaryop_sub = Binaryop<TI,TO,tools::bop_sub<TI,TO>>;
 template <typename TI, typename TO = TI> using Binaryop_mul = Binaryop<TI,TO,tools::bop_mul<TI,TO>>;
@@ -82,7 +99,7 @@ template <typename TI, typename TO = TI> using Binaryop_lt  = Binaryop<TI,TO,too
 template <typename TI, typename TO = TI> using Binaryop_le  = Binaryop<TI,TO,tools::bop_le <TI,TO>>;
 template <typename TI, typename TO = TI> using Binaryop_ne  = Binaryop<TI,TO,tools::bop_ne <TI,TO>>;
 template <typename TI, typename TO = TI> using Binaryop_eq  = Binaryop<TI,TO,tools::bop_eq <TI,TO>>;
-
+#endif
 }
 }
 
