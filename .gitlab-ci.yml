@@ -57,7 +57,7 @@ build-linux-gcc-x64-avx2:
     - ./ci/build-linux-macos.sh
 
 build-linux-gcc-coverage-regression:
-  image: registry.gitlab.com/aff3ct/aff3ct/x86_64_ubuntu_gcc:v9.3.0
+  image: registry.gitlab.com/aff3ct/aff3ct/x86_64_ubuntu_coverage
   stage: build
   variables:
     GIT_SUBMODULE_STRATEGY: recursive
