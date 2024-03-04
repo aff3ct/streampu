@@ -33,7 +33,7 @@ jobs:
           export CXX="g++"
           export CFLAGS="-Wall -funroll-loops -m64 -mavx2 -mfma"
           export LFLAGS="-static -static-libgcc -static-libstdc++ -Wl,--whole-archive -lrt -lpthread -Wl,--no-whole-archive"
-          export CMAKE_OPT="-DAFF3CT_CORE_TESTS=ON -DAFF3CT_CORE_COMPILE_STATIC_LIB=ON -DAFF3CT_CORE_COMPILE_SHARED_LIB=ON"
+          export CMAKE_OPT="-DAFF3CT_CORE_TESTS=ON -DAFF3CT_CORE_COMPILE_STATIC_LIB=ON -DAFF3CT_CORE_COMPILE_SHARED_LIB=ON -DAFF3CT_CORE_STACKTRACE=OFF"
           export NAME="build_linux_gcc_x64_avx2"
           source ./ci/tools/threads.sh
           ./ci/build-linux-macos.sh
