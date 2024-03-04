@@ -34,7 +34,7 @@ runtime::Socket& Module
 	if ((int)pos < 0)
 	{
 		std::stringstream message;
-		message << "Invalid socket name, it should be of the form task::socket.";
+		message << "Invalid socket name, it should be of the form task::socket ('tsk_sck' = " << tsk_sck << ").";
 		throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
 	}
 	std::string tsk_name = tsk_sck.substr(0, pos);
