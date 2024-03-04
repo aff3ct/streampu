@@ -59,13 +59,21 @@ protected:
 	virtual void _perform(const TI *in, TO *out, const size_t frame_id);
 };
 
+#ifdef _MSC_VER // Hack for MSVC compilation /!\ "Unaryop::getname" does not work correctly on MSVC
+template <typename TI, typename TO = TI, tools::proto_uop<TI,TO> UOP = tools::uop_abs    <TI,TO>> using Unaryop_abs     = Unaryop<TI,TO,UOP>;
+template <typename TI, typename TO = TI, tools::proto_uop<TI,TO> UOP = tools::uop_cast   <TI,TO>> using Unaryop_cast    = Unaryop<TI,TO,UOP>;
+template <typename TI, typename TO = TI, tools::proto_uop<TI,TO> UOP = tools::uop_neg    <TI,TO>> using Unaryop_neg     = Unaryop<TI,TO,UOP>;
+template <typename TI, typename TO = TI, tools::proto_uop<TI,TO> UOP = tools::uop_not    <TI,TO>> using Unaryop_not     = Unaryop<TI,TO,UOP>;
+template <typename TI, typename TO = TI, tools::proto_uop<TI,TO> UOP = tools::uop_not_abs<TI,TO>> using Unaryop_not_abs = Unaryop<TI,TO,UOP>;
+template <typename TI, typename TO = TI, tools::proto_uop<TI,TO> UOP = tools::uop_sign   <TI,TO>> using Unaryop_sign    = Unaryop<TI,TO,UOP>;
+#else // Standard code
 template <typename TI, typename TO = TI> using Unaryop_abs     = Unaryop<TI,TO,tools::uop_abs    <TI,TO>>;
 template <typename TI, typename TO = TI> using Unaryop_cast    = Unaryop<TI,TO,tools::uop_cast   <TI,TO>>;
 template <typename TI, typename TO = TI> using Unaryop_neg     = Unaryop<TI,TO,tools::uop_neg    <TI,TO>>;
 template <typename TI, typename TO = TI> using Unaryop_not     = Unaryop<TI,TO,tools::uop_not    <TI,TO>>;
 template <typename TI, typename TO = TI> using Unaryop_not_abs = Unaryop<TI,TO,tools::uop_not_abs<TI,TO>>;
 template <typename TI, typename TO = TI> using Unaryop_sign    = Unaryop<TI,TO,tools::uop_sign   <TI,TO>>;
-
+#endif
 }
 }
 
