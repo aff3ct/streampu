@@ -3,4 +3,4 @@
 	url = https://github.com/agauniyal/rang.git
 [submodule "lib/cpptrace"]
 	path = lib/cpptrace
-	url = https://github.com/jeremy-rifkin/cpptrace.git
+	url = https://github.com/kouchy/cpptrace.git
