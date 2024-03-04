@@ -89,30 +89,6 @@ jobs:
         with:
           name: build-linux-clang
           path: build_linux_clang
-  # # Takes too much HDD space to be run on the GitHub runners
-  # build-linux-icpc:
-  #   runs-on: ubuntu-latest
-  #   needs: [analysis-headers]
-  #   container: intel/oneapi-hpckit:2022.2-devel-ubuntu20.04
-  #   steps:
-  #     - name: Checkout Code
-  #       uses: actions/checkout@v4
-  #       with:
-  #         submodules: true
-  #     - name: Build
-  #       run: |
-  #         export CXX="icpc"
-  #         export CFLAGS="-Wall -funroll-loops -march=native -std=c++11"
-  #         export CMAKE_OPT="-DAFF3CT_CORE_TESTS=ON -DAFF3CT_CORE_COMPILE_STATIC_LIB=ON -DAFF3CT_CORE_COMPILE_SHARED_LIB=ON"
-  #         export NAME="build_linux_icpc"
-  #         source ./ci/tools/threads.sh
-  #         ./ci/build-linux-macos.sh
-  #       shell: bash
-  #     - name: Upload Artifacts
-  #       uses: actions/upload-artifact@v4
-  #       with:
-  #         name: build-linux-icpc
-  #         path: build_linux_icpc
   test-coverage-regression:
     runs-on: ubuntu-latest
     needs: [build-linux-gcc-coverage]

@@ -51,12 +51,12 @@ build-linux-gcc-x64-avx2:
     - export CXX="g++"
     - export CFLAGS="-Wall -funroll-loops -m64 -mavx2 -mfma"
     - export LFLAGS="-static -static-libgcc -static-libstdc++ -Wl,--whole-archive -lrt -lpthread -Wl,--no-whole-archive"
-    - export CMAKE_OPT="-DAFF3CT_CORE_TESTS=ON -DAFF3CT_CORE_COMPILE_STATIC_LIB=ON -DAFF3CT_CORE_COMPILE_SHARED_LIB=ON"
+    - export CMAKE_OPT="-DAFF3CT_CORE_TESTS=ON -DAFF3CT_CORE_COMPILE_STATIC_LIB=ON -DAFF3CT_CORE_COMPILE_SHARED_LIB=ON -DAFF3CT_CORE_STACKTRACE=OFF"
     - export NAME="build_linux_gcc_x64_avx2"
     - source ./ci/tools/threads.sh
     - ./ci/build-linux-macos.sh
 
-build-linux-gcc-coverage:
+build-linux-gcc-coverage-regression:
   image: registry.gitlab.com/aff3ct/aff3ct/x86_64_ubuntu_gcc:v9.3.0
   stage: build
   variables:
@@ -69,10 +69,10 @@ build-linux-gcc-coverage:
     - linux
     - docker
   artifacts:
-    name: build
+    name: regression-code-coverage-files
     paths:
-      - build
-      # - build.tar.gz
+      - build/
+      - code_coverage_files/
   script:
     - export CXX="g++"
     - export CFLAGS="-Wall -funroll-loops -msse4.2 --coverage"
@@ -80,7 +80,9 @@ build-linux-gcc-coverage:
     - export CMAKE_OPT="-DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS_DEBUG=-O0 -DAFF3CT_CORE_TESTS=ON -DAFF3CT_CORE_COMPILE_STATIC_LIB=ON -DAFF3CT_CORE_COMPILE_SHARED_LIB=ON"
     - source ./ci/tools/threads.sh
     - ./ci/build-linux-macos.sh
-    # - tar -zcvf build.tar.gz build
+    - ./ci/test-coverage-regression.sh
+    - rm -rf build/bin
+    - rm -rf build/lib
 
 build-linux-clang:
   image: registry.gitlab.com/aff3ct/aff3ct/x86_64_ubuntu_clang:v10.0.0
@@ -134,31 +136,6 @@ build-linux-icpc:
     - source ./ci/tools/threads.sh
     - ./ci/build-linux-macos.sh
 
-test-coverage-regression:
-  image: registry.gitlab.com/aff3ct/aff3ct/x86_64_ubuntu_coverage
-  stage: test
-  variables:
-    GIT_SUBMODULE_STRATEGY: recursive
-  except:
-    - schedules
-  needs:
-    - job: build-linux-gcc-coverage
-      artifacts: true
-  tags:
-    - x86_64
-    - sse4.2
-    - linux
-    - docker
-  artifacts:
-     name: code-coverage-files
-     when: always
-     paths:
-      - build/Testing
-      - code_coverage_files/
-  script:
-    # - tar -xvvf build.tar.gz
-    - ./ci/test-coverage-regression.sh
-
 test-memcheck-regression:
   image: registry.gitlab.com/aff3ct/aff3ct/x86_64_ubuntu_valgrind
   stage: test
@@ -194,7 +171,7 @@ coverage-linux:
   except:
     - schedules
   needs:
-    - job: test-coverage-regression
+    - job: build-linux-gcc-coverage-regression
       artifacts: true
   tags:
     - x86_64
