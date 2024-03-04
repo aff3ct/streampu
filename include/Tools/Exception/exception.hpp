@@ -7,6 +7,9 @@
 
 #include <exception>
 #include <string>
+#ifdef AFF3CT_CORE_STACKTRACE
+#include <cpptrace/cpptrace.hpp>
+#endif
 
 namespace aff3ct
 {
@@ -15,17 +18,16 @@ namespace tools
 class exception : public std::exception
 {
 public:
-	static bool no_backtrace;
-	static bool no_addr_to_line;
+	static bool no_stacktrace;
 
 protected:
 	static const std::string empty_string;
+	static       std::string messagebuff;
 
 private:
 	std::string message;   // the message only
-#ifdef AFF3CT_CORE_BACKTRACE
-	std::string backtrace; // the message + the backtrace
-	std::string backtrace_a2l; // the message + the backtrace with addr_to_line conversion
+#ifdef AFF3CT_CORE_STACKTRACE
+	cpptrace::raw_trace raw_trace; // raw stack trace
 #endif
 
 public:

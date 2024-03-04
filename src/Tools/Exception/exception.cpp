@@ -4,8 +4,8 @@
 using namespace aff3ct::tools;
 
 const std::string aff3ct::tools::exception::empty_string = "";
-bool aff3ct::tools::exception::no_backtrace = false;
-bool aff3ct::tools::exception::no_addr_to_line = true;
+bool aff3ct::tools::exception::no_stacktrace = false;
+std::string aff3ct::tools::exception::messagebuff;
 
 exception
 ::exception() throw()
@@ -15,8 +15,8 @@ exception
 exception
 ::exception(const std::string &message) throw()
 : message(message)
-#ifdef AFF3CT_CORE_BACKTRACE
-,backtrace(message + "\n" + get_back_trace(3))
+#ifdef AFF3CT_CORE_STACKTRACE
+, raw_trace(cpptrace::generate_raw_trace(2))
 #endif
 {
 }
@@ -36,26 +36,29 @@ exception
 	this->message += ": ";
 	this->message += "\"" + _message + "\"";
 
-#ifdef AFF3CT_CORE_BACKTRACE
-	backtrace = this->message + "\n" + get_back_trace(3);
+#ifdef AFF3CT_CORE_STACKTRACE
+	raw_trace = cpptrace::generate_raw_trace(2);
 #endif
 }
 
 const char* exception
 ::what() const throw()
 {
-#ifdef AFF3CT_CORE_BACKTRACE
-	if (no_backtrace)
+#ifdef AFF3CT_CORE_STACKTRACE
+	if (no_stacktrace)
+	{
 		return message.c_str();
-	else if (no_addr_to_line)
-		return backtrace.c_str();
-
-	std::string* bt_a2l = const_cast<std::string*>(&backtrace_a2l);
-
-	if (bt_a2l->empty())
-		*bt_a2l = tools::addr_to_line(backtrace);
-
-	return bt_a2l->c_str();
+	}
+	else
+	{
+#ifdef AFF3CT_CORE_COLORS
+		std::string stacktrace_str = raw_trace.resolve().to_string(true);
+#else
+		std::string stacktrace_str = raw_trace.resolve().to_string(false);
+#endif
+		messagebuff = message + "\n" + stacktrace_str;
+		return messagebuff.c_str();
+	}
 #else
 	return message.c_str();
 #endif

@@ -20,17 +20,12 @@ option(AFF3CT_CORE_COMPILE_SHARED_LIB "Compile the shared library"              
 option(AFF3CT_CORE_LINK_HWLOC         "Link with the hwloc library (used for threads pinning)" OFF)
 option(AFF3CT_CORE_COLORS             "Enable the colors in the terminal"                      ON )
 option(AFF3CT_CORE_TESTS              "Enable the compilation of the tests"                    ON )
+option(AFF3CT_CORE_STACKTRACE         "Print the stack trace when an exception is raised"      ON )
 
 if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/.git" AND NOT AFF3CT_CORE_OVERRIDE_VERSION)
     message(FATAL_ERROR "The '.git' folder can't be found, AFF3CT_CORE can't be compiled if it is not cloned "
                         "from a Git repository. Please do not download archives from GitHub and make a Git "
                         "clone instead (git clone https://github.com/aff3ct-core/aff3ct-core.git).")
-endif()
-
-if(NOT (WIN32 OR APPLE))
-    option(AFF3CT_CORE_BACKTRACE "Enable the backtrace display when an exception is raised" ON)
-else()
-    set(AFF3CT_CORE_BACKTRACE OFF)
 endif()
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -225,6 +220,20 @@ if(AFF3CT_CORE_TESTS)
 endif()
 
 # ---------------------------------------------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------------------------------- SUB-PROJECTS
+# ---------------------------------------------------------------------------------------------------------------------
+
+# cpptrace
+if (AFF3CT_CORE_STACKTRACE)
+    if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/lib/cpptrace/include/cpptrace/cpptrace.hpp")
+        add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/lib/cpptrace/)
+    else()
+        message(FATAL_ERROR "'cpptrace' can't be found, try to init the submodule with the following cmd:\n"
+                            "$ git submodule update --init -- ../lib/cpptrace/")
+    endif()
+endif()
+
+# ---------------------------------------------------------------------------------------------------------------------
 # ------------------------------------------------------------------------------------------------ COMPILER DEFINITIONS
 # ---------------------------------------------------------------------------------------------------------------------
 
@@ -253,11 +262,11 @@ if(AFF3CT_CORE_COLORS)
 else()
     message(STATUS "AFF3CT-core - Terminal colors: off")
 endif()
-if(AFF3CT_CORE_BACKTRACE)
-    aff3ct_core_target_compile_definitions("${aff3ct_core_targets_list}" PUBLIC AFF3CT_CORE_BACKTRACE)
-    message(STATUS "AFF3CT-core - Backtrace: on")
+if(AFF3CT_CORE_STACKTRACE)
+    aff3ct_core_target_compile_definitions("${aff3ct_core_targets_list}" PUBLIC AFF3CT_CORE_STACKTRACE)
+    message(STATUS "AFF3CT-core - Stacktrace: on")
 else()
-    message(STATUS "AFF3CT-core - Backtrace: off")
+    message(STATUS "AFF3CT-core - Stacktrace: off")
 endif()
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -314,6 +323,11 @@ if(AFF3CT_CORE_LINK_HWLOC)
     endif(Hwloc_FOUND)
 endif(AFF3CT_CORE_LINK_HWLOC)
 
+# cpptrace
+if(AFF3CT_CORE_STACKTRACE)
+    aff3ct_core_target_link_libraries("${aff3ct_core_targets_list}" PUBLIC "cpptrace::cpptrace")
+endif(AFF3CT_CORE_STACKTRACE)
+
 # Threads
 set(CMAKE_THREAD_PREFER_PTHREAD ON)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
@@ -325,25 +339,53 @@ aff3ct_core_target_link_libraries("${aff3ct_core_targets_list}" PUBLIC Threads::
 # ---------------------------------------------------------------------------------------------------------------------
 
 if (AFF3CT_CORE_COMPILE_SHARED_LIB AND NOT AFF3CT_CORE_COMPILE_STATIC_LIB)
-    export(TARGETS
-           aff3ct-core-shared-lib
-           NAMESPACE aff3ct-core::
-           FILE "lib/cmake/aff3ct-core/aff3ct-core-config.cmake")
+    if(AFF3CT_CORE_STACKTRACE)
+        export(TARGETS
+               aff3ct-core-shared-lib
+               cpptrace-lib
+               dwarf
+               NAMESPACE aff3ct-core::
+               FILE "lib/cmake/aff3ct-core/aff3ct-core-config.cmake")
+    else()
+        export(TARGETS
+               aff3ct-core-shared-lib
+               NAMESPACE aff3ct-core::
+               FILE "lib/cmake/aff3ct-core/aff3ct-core-config.cmake")
+    endif()
 endif()
 
 if (AFF3CT_CORE_COMPILE_STATIC_LIB AND NOT AFF3CT_CORE_COMPILE_SHARED_LIB)
-    export(TARGETS
-           aff3ct-core-static-lib
-           NAMESPACE aff3ct-core::
-           FILE "lib/cmake/aff3ct-core/aff3ct-core-config.cmake")
+    if(AFF3CT_CORE_STACKTRACE)
+        export(TARGETS
+               aff3ct-core-static-lib
+               cpptrace-lib
+               dwarf
+               NAMESPACE aff3ct-core::
+               FILE "lib/cmake/aff3ct-core/aff3ct-core-config.cmake")
+    else()
+        export(TARGETS
+               aff3ct-core-static-lib
+               NAMESPACE aff3ct-core::
+               FILE "lib/cmake/aff3ct-core/aff3ct-core-config.cmake")
+    endif()
 endif()
 
 if(AFF3CT_CORE_COMPILE_SHARED_LIB AND AFF3CT_CORE_COMPILE_STATIC_LIB)
-    export(TARGETS
-           aff3ct-core-shared-lib
-           aff3ct-core-static-lib
-           NAMESPACE aff3ct-core::
-           FILE "lib/cmake/aff3ct-core/aff3ct-core-config.cmake")
+    if(AFF3CT_CORE_STACKTRACE)
+        export(TARGETS
+               aff3ct-core-shared-lib
+               aff3ct-core-static-lib
+               cpptrace-lib
+               dwarf
+               NAMESPACE aff3ct-core::
+               FILE "lib/cmake/aff3ct-core/aff3ct-core-config.cmake")
+    else()
+        export(TARGETS
+               aff3ct-core-shared-lib
+               aff3ct-core-static-lib
+               NAMESPACE aff3ct-core::
+               FILE "lib/cmake/aff3ct-core/aff3ct-core-config.cmake")
+    endif()
 endif()
 
 # ---------------------------------------------------------------------------------------------------------------------

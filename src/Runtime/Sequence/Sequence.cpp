@@ -532,16 +532,16 @@ void Sequence
 
 		this->mtx_exception->lock();
 
-		auto save = tools::exception::no_backtrace;
-		tools::exception::no_backtrace = true;
+		auto save = tools::exception::no_stacktrace;
+		tools::exception::no_stacktrace = true;
 		std::string msg = e.what(); // get only the function signature
-		tools::exception::no_backtrace = save;
+		tools::exception::no_stacktrace = save;
 
 		if (std::find(this->prev_exception_messages.begin(), this->prev_exception_messages.end(), msg) ==
 		    this->prev_exception_messages.end())
 		{
 			this->prev_exception_messages.push_back(msg); // save only the function signature
-			this->prev_exception_messages_to_display.push_back(e.what()); // with backtrace if debug mode
+			this->prev_exception_messages_to_display.push_back(e.what()); // with stacktrace if debug mode
 		}
 		else if (std::strlen(e.what()) > this->prev_exception_messages_to_display.back().size())
 			this->prev_exception_messages_to_display[prev_exception_messages_to_display.size() -1] = e.what();
@@ -611,16 +611,16 @@ void Sequence
 
 		this->mtx_exception->lock();
 
-		auto save = tools::exception::no_backtrace;
-		tools::exception::no_backtrace = true;
+		auto save = tools::exception::no_stacktrace;
+		tools::exception::no_stacktrace = true;
 		std::string msg = e.what(); // get only the function signature
-		tools::exception::no_backtrace = save;
+		tools::exception::no_stacktrace = save;
 
 		if (std::find(this->prev_exception_messages.begin(), this->prev_exception_messages.end(), msg) ==
 		    this->prev_exception_messages.end())
 		{
 			this->prev_exception_messages.push_back(msg); // save only the function signature
-			this->prev_exception_messages_to_display.push_back(e.what()); // with backtrace if debug mode
+			this->prev_exception_messages_to_display.push_back(e.what()); // with stacktrace if debug mode
 		}
 		else if (std::strlen(e.what()) > this->prev_exception_messages_to_display.back().size())
 			this->prev_exception_messages_to_display[prev_exception_messages_to_display.size() -1] = e.what();
