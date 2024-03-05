@@ -414,6 +414,12 @@ if (AFF3CT_CORE_COMPILE_SHARED_LIB OR AFF3CT_CORE_COMPILE_STATIC_LIB)
             DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/aff3ct-core/rang
             COMPONENT headers
             FILES_MATCHING PATTERN "*.hpp")
+    if(AFF3CT_CORE_STACKTRACE)
+        install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/lib/cpptrace/include/"
+                DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/aff3ct-core/cpptrace
+                COMPONENT headers
+                FILES_MATCHING PATTERN "*.hpp")
+    endif()
 endif()
 
 # ---------------------------------------------------------------------------------------------------------------------
