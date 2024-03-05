@@ -101,6 +101,13 @@ if(AFF3CT_CORE_COMPILE_STATIC_LIB)
     message(STATUS "AFF3CT-core - Compile: static library")
 endif(AFF3CT_CORE_COMPILE_STATIC_LIB)
 
+if(AFF3CT_CORE_STACKTRACE)
+    add_executable(aff3ct-core-signal-tracer ${CMAKE_CURRENT_SOURCE_DIR}/signal_tracer/main.cpp)
+    set_target_properties(aff3ct-core-signal-tracer PROPERTIES
+                                                    OUTPUT_NAME aff3ct-core-signal-tracer
+                                                    POSITION_INDEPENDENT_CODE ON) # set -fpie
+endif(AFF3CT_CORE_STACKTRACE)
+
 # Tests
 if(AFF3CT_CORE_TESTS)
     add_executable(aff3ct-core-test-simple-chain $<TARGET_OBJECTS:aff3ct-core-obj>
@@ -328,6 +335,7 @@ endif(AFF3CT_CORE_LINK_HWLOC)
 # cpptrace
 if(AFF3CT_CORE_STACKTRACE)
     aff3ct_core_target_link_libraries("${aff3ct_core_targets_list}" PUBLIC "cpptrace::cpptrace")
+    target_link_libraries(aff3ct-core-signal-tracer PRIVATE "cpptrace::cpptrace")
 endif(AFF3CT_CORE_STACKTRACE)
 
 # Threads

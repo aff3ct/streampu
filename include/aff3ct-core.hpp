@@ -201,6 +201,9 @@
 #ifndef HELP_HPP_
 #include <Tools/Help/Help.hpp>
 #endif
+#ifndef INIT_H_
+#include <Tools/init.h>
+#endif
 #ifndef INTERFACE_CLONE_HPP__
 #include <Tools/Interface/Interface_clone.hpp>
 #endif
