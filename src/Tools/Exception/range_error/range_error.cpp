@@ -1,26 +1,25 @@
+#include <utility>
+
 #include "Tools/Exception/range_error/range_error.hpp"
 
 using namespace aff3ct::tools;
 
-const std::string range_error::default_message = "Range error.";
+#define DEFAULT_MESSAGE "Range error."
 
 range_error
-::range_error() throw()
-: exception()
+::range_error() noexcept
+: exception(DEFAULT_MESSAGE)
 {
 }
 
 range_error
-::range_error(const std::string &message) throw()
-: exception(message.empty() ? default_message : message)
+::range_error(std::string &&message) noexcept
+: exception(message.empty() ? DEFAULT_MESSAGE : message)
 {
 }
 
 range_error
-::range_error(const std::string &filename,
-              const int line_num,
-              const std::string &funcname,
-              const std::string &message) throw()
-: exception(filename, line_num, funcname, message.empty() ? default_message : message)
+::range_error(std::string &&filename, int &&line_num, std::string &&funcname, std::string &&message) noexcept
+: exception(std::move(filename), std::move(line_num), std::move(funcname), message.empty() ? DEFAULT_MESSAGE : message)
 {
 }

@@ -1,26 +1,25 @@
+#include <utility>
+
 #include "Tools/Exception/processing_aborted/processing_aborted.hpp"
 
 using namespace aff3ct::tools;
 
-const std::string processing_aborted::default_message = "Processing has been aborted.";
+#define DEFAULT_MESSAGE "Processing aborted."
 
 processing_aborted
-::processing_aborted() throw()
-: exception()
+::processing_aborted() noexcept
+: exception(DEFAULT_MESSAGE)
 {
 }
 
 processing_aborted
-::processing_aborted(const std::string &message) throw()
-: exception(message.empty() ? default_message : message)
+::processing_aborted(std::string &&message) noexcept
+: exception(message.empty() ? DEFAULT_MESSAGE : message)
 {
 }
 
 processing_aborted
-::processing_aborted(const std::string &filename,
-                     const int line_num,
-                     const std::string &funcname,
-                     const std::string &message) throw()
-: exception(filename, line_num, funcname, message.empty() ? default_message : message)
+::processing_aborted(std::string &&filename, int &&line_num, std::string &&funcname, std::string &&message) noexcept
+: exception(std::move(filename), std::move(line_num), std::move(funcname), message.empty() ? DEFAULT_MESSAGE : message)
 {
 }

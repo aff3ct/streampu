@@ -15,17 +15,10 @@ namespace tools
 {
 class out_of_range : public exception
 {
-	static const std::string default_message;
-
 public:
-	out_of_range() throw();
-
-	explicit out_of_range(const std::string &message) throw();
-
-	out_of_range(const std::string &filename,
-	             const int line_num,
-	             const std::string &funcname = exception::empty_string,
-	             const std::string &message = exception::empty_string) throw();
+	out_of_range() noexcept;
+	explicit out_of_range(std::string &&message) noexcept;
+	out_of_range(std::string &&filename, int &&line_num, std::string &&funcname = "", std::string &&message = "") noexcept;
 
 	virtual ~out_of_range() = default;
 };

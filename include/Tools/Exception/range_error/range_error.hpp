@@ -15,17 +15,10 @@ namespace tools
 {
 class range_error : public exception
 {
-	static const std::string default_message;
-
 public:
-	range_error() throw();
-
-	explicit range_error(const std::string &message) throw();
-
-	range_error(const std::string &filename,
-	            const int line_num,
-	            const std::string &funcname = exception::empty_string,
-	            const std::string &message = exception::empty_string) throw();
+	range_error() noexcept;
+	explicit range_error(std::string &&message) noexcept;
+	range_error(std::string &&filename, int &&line_num, std::string &&funcname = "", std::string &&message = "") noexcept;
 
 	virtual ~range_error() = default;
 };

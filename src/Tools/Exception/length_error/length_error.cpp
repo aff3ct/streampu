@@ -1,26 +1,25 @@
+#include <utility>
+
 #include "Tools/Exception/length_error/length_error.hpp"
 
 using namespace aff3ct::tools;
 
-const std::string length_error::default_message = "Length error.";
+#define DEFAULT_MESSAGE "Length error."
 
 length_error
-::length_error() throw()
-: exception()
+::length_error() noexcept
+: exception(DEFAULT_MESSAGE)
 {
 }
 
 length_error
-::length_error(const std::string &message) throw()
-: exception(message.empty() ? default_message : message)
+::length_error(std::string &&message) noexcept
+: exception(message.empty() ? DEFAULT_MESSAGE : message)
 {
 }
 
 length_error
-::length_error(const std::string &filename,
-               const int line_num,
-               const std::string &funcname,
-               const std::string &message) throw()
-: exception(filename, line_num, funcname, message.empty() ? default_message : message)
+::length_error(std::string &&filename, int &&line_num, std::string &&funcname, std::string &&message) noexcept
+: exception(std::move(filename), std::move(line_num), std::move(funcname), message.empty() ? DEFAULT_MESSAGE : message)
 {
 }

@@ -15,34 +15,29 @@ namespace aff3ct
 {
 namespace tools
 {
+#ifdef AFF3CT_CORE_STACKTRACE
+class exception : public cpptrace::exception_with_message
+{
+#else
 class exception : public std::exception
 {
+#endif
 public:
 	static bool no_stacktrace;
 
-protected:
-	static const std::string empty_string;
-	static       std::string messagebuff;
-
 private:
-	std::string message;   // the message only
-#ifdef AFF3CT_CORE_STACKTRACE
-	cpptrace::raw_trace raw_trace; // raw stack trace
+#ifndef AFF3CT_CORE_STACKTRACE
+	std::string message; // the message only
 #endif
 
 public:
-	exception() throw();
-
-	explicit exception(const std::string &message) throw();
-
-	exception(const std::string &filename,
-	          const int line_num,
-	          const std::string &funcname,
-	          const std::string &message) throw();
+	exception() noexcept;
+	explicit exception(std::string&& message) noexcept;
+	exception(std::string &&filename, int &&line_num, std::string &&funcname = "", std::string &&message = "") noexcept;
 
 	virtual ~exception() = default;
 
-	virtual const char* what() const throw(); // return the message and the back trace if enabled
+	const char* what() const noexcept override; // return the message and the back trace if enabled
 };
 }
 }

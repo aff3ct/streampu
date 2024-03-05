@@ -15,17 +15,10 @@ namespace tools
 {
 class overflow_error : public exception
 {
-	static const std::string default_message;
-
 public:
-	overflow_error() throw();
-
-	explicit overflow_error(const std::string &message) throw();
-
-	overflow_error(const std::string &filename,
-	               const int line_num,
-	               const std::string &funcname = exception::empty_string,
-	               const std::string &message = exception::empty_string) throw();
+	overflow_error() noexcept;
+	explicit overflow_error(std::string &&message) noexcept;
+	overflow_error(std::string &&filename, int &&line_num, std::string &&funcname = "", std::string &&message = "") noexcept;
 
 	virtual ~overflow_error() = default;
 };

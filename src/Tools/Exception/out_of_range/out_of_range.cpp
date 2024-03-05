@@ -1,26 +1,25 @@
+#include <utility>
+
 #include "Tools/Exception/out_of_range/out_of_range.hpp"
 
 using namespace aff3ct::tools;
 
-const std::string out_of_range::default_message = "Out of range.";
+#define DEFAULT_MESSAGE "Out of range."
 
 out_of_range
-::out_of_range() throw()
-: exception()
+::out_of_range() noexcept
+: exception(DEFAULT_MESSAGE)
 {
 }
 
 out_of_range
-::out_of_range(const std::string &message) throw()
-: exception(message.empty() ? default_message : message)
+::out_of_range(std::string &&message) noexcept
+: exception(message.empty() ? DEFAULT_MESSAGE : message)
 {
 }
 
 out_of_range
-::out_of_range(const std::string &filename,
-               const int line_num,
-               const std::string &funcname,
-               const std::string &message) throw()
-: exception(filename, line_num, funcname, message.empty() ? default_message : message)
+::out_of_range(std::string &&filename, int &&line_num, std::string &&funcname, std::string &&message) noexcept
+: exception(std::move(filename), std::move(line_num), std::move(funcname), message.empty() ? DEFAULT_MESSAGE : message)
 {
 }

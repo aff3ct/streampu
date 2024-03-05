@@ -15,17 +15,10 @@ namespace tools
 {
 class logic_error : public exception
 {
-	static const std::string default_message;
-
 public:
-	logic_error() throw();
-
-	explicit logic_error(const std::string &message) throw();
-
-	logic_error(const std::string &filename,
-	            const int line_num,
-	            const std::string &funcname = exception::empty_string,
-	            const std::string &message = exception::empty_string) throw();
+	logic_error() noexcept;
+	explicit logic_error(std::string &&message) noexcept;
+	logic_error(std::string &&filename, int &&line_num, std::string &&funcname = "", std::string &&message = "") noexcept;
 
 	virtual ~logic_error() = default;
 };

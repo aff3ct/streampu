@@ -15,17 +15,10 @@ namespace tools
 {
 class waiting_canceled : public exception
 {
-	static const std::string default_message;
-
 public:
-	waiting_canceled() throw();
-
-	explicit waiting_canceled(const std::string &message) throw();
-
-	waiting_canceled(const std::string &filename,
-	                    const int line_num,
-	                    const std::string &funcname = exception::empty_string,
-	                    const std::string &message = exception::empty_string) throw();
+	waiting_canceled() noexcept;
+	explicit waiting_canceled(std::string &&message) noexcept;
+	waiting_canceled(std::string &&filename, int &&line_num, std::string &&funcname = "", std::string &&message = "") noexcept;
 
 	virtual ~waiting_canceled() = default;
 };

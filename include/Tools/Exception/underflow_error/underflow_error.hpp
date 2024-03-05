@@ -15,17 +15,10 @@ namespace tools
 {
 class underflow_error : public exception
 {
-	static const std::string default_message;
-
 public:
-	underflow_error() throw();
-
-	explicit underflow_error(const std::string &message) throw();
-
-	underflow_error(const std::string &filename,
-	                const int line_num,
-	                const std::string &funcname = exception::empty_string,
-	                const std::string &message = exception::empty_string) throw();
+	underflow_error() noexcept;
+	explicit underflow_error(std::string &&message) noexcept;
+	underflow_error(std::string &&filename, int &&line_num, std::string &&funcname = "", std::string &&message = "") noexcept;
 
 	virtual ~underflow_error() = default;
 };

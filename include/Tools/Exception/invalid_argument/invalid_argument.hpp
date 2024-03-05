@@ -15,17 +15,10 @@ namespace tools
 {
 class invalid_argument : public exception
 {
-	static const std::string default_message;
-
 public:
-	invalid_argument() throw();
-
-	explicit invalid_argument(const std::string &message) throw();
-
-	invalid_argument(const std::string &filename,
-	                 const int line_num,
-	                 const std::string &funcname = exception::empty_string,
-	                 const std::string &message = exception::empty_string) throw();
+	invalid_argument() noexcept;
+	explicit invalid_argument(std::string &&message) noexcept;
+	invalid_argument(std::string &&filename, int &&line_num, std::string &&funcname = "", std::string &&message = "") noexcept;
 
 	virtual ~invalid_argument() = default;
 };
