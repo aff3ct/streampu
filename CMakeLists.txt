@@ -350,26 +350,19 @@ else()
 endif()
 
 if (AFF3CT_CORE_COMPILE_SHARED_LIB AND NOT AFF3CT_CORE_COMPILE_STATIC_LIB)
-    export(TARGETS
-           aff3ct-core-shared-lib
-           ${CPPTRACE_TARGETS}
+    export(TARGETS aff3ct-core-shared-lib ${CPPTRACE_TARGETS}
            NAMESPACE aff3ct-core::
            FILE "lib/cmake/aff3ct-core/aff3ct-core-config.cmake")
 endif()
 
 if (AFF3CT_CORE_COMPILE_STATIC_LIB AND NOT AFF3CT_CORE_COMPILE_SHARED_LIB)
-    export(TARGETS
-           aff3ct-core-static-lib
-           ${CPPTRACE_TARGETS}
+    export(TARGETS aff3ct-core-static-lib ${CPPTRACE_TARGETS}
            NAMESPACE aff3ct-core::
            FILE "lib/cmake/aff3ct-core/aff3ct-core-config.cmake")
 endif()
 
 if(AFF3CT_CORE_COMPILE_SHARED_LIB AND AFF3CT_CORE_COMPILE_STATIC_LIB)
-    export(TARGETS
-           aff3ct-core-shared-lib
-           aff3ct-core-static-lib
-           ${CPPTRACE_TARGETS}
+    export(TARGETS aff3ct-core-shared-lib aff3ct-core-static-lib ${CPPTRACE_TARGETS}
            NAMESPACE aff3ct-core::
            FILE "lib/cmake/aff3ct-core/aff3ct-core-config.cmake")
 endif()
@@ -380,20 +373,20 @@ endif()
 
 if(AFF3CT_CORE_COMPILE_SHARED_LIB)
     if(WIN32)
-        install(TARGETS aff3ct-core-shared-lib ${CPPTRACE_TARGETS}
+        install(TARGETS aff3ct-core-shared-lib
                 EXPORT aff3ct-core-config
                 RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR}/
                 LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/
                 COMPONENT library)
     else()
-        install(TARGETS aff3ct-core-shared-lib ${CPPTRACE_TARGETS}
+        install(TARGETS aff3ct-core-shared-lib
                 EXPORT aff3ct-core-config
                 LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/
                 COMPONENT library)
     endif()
 endif()
 if(AFF3CT_CORE_COMPILE_STATIC_LIB)
-    install(TARGETS aff3ct-core-static-lib ${CPPTRACE_TARGETS}
+    install(TARGETS aff3ct-core-static-lib
             EXPORT aff3ct-core-config
             ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/
             COMPONENT library)
