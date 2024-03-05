@@ -8,6 +8,7 @@
 #include <csignal>
 #include <cstdlib>
 #include <cstdio>
+#include <cstring>
 #include <unistd.h>
 #include <sys/wait.h>
 
@@ -62,7 +63,7 @@ void signal_handler(int signo, siginfo_t* info, void* context)
 {
 	 // print basic message
 	char message[64];
-	snprintf(message, sizeof(message), "[sig%s] occurred:\n", sys_signame[info->si_signo]);
+	snprintf(message, sizeof(message), "Signal \"%s\" occurred:\n", strsignal(info->si_signo));
 	write(STDERR_FILENO, message, strlen(message));
 
 	// generate trace
@@ -79,7 +80,7 @@ void warmup_cpptrace()
 {
 	// This is done for any dynamic-loading shenanigans
 	cpptrace::frame_ptr buffer[10];
-	std::size_t count = cpptrace::safe_generate_raw_trace(buffer, 10);
+	cpptrace::safe_generate_raw_trace(buffer, 10);
 	cpptrace::safe_object_frame frame;
 	cpptrace::get_safe_object_frame(buffer[0], &frame);
 }

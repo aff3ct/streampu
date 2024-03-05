@@ -12,14 +12,9 @@ int main()
 	{
 		cpptrace::safe_object_frame frame;
 		// fread used over read because a read() from a pipe might not read the full frame
-		std::size_t res = fread(&frame, sizeof(frame), 1, stdin);
+		size_t res = fread(&frame, sizeof(frame), 1, stdin);
 		if (res == 0)
 		{
-			break;
-		}
-		else if (res == -1)
-		{
-			perror("Something went wrong while reading from the pipe");
 			break;
 		}
 		else if (res != 1)
