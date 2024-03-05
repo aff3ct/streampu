@@ -15,12 +15,13 @@ project(aff3ct-core CXX)
 # ------------------------------------------------------------------------------------------------------- CMAKE OPTIONS
 # ---------------------------------------------------------------------------------------------------------------------
 
-option(AFF3CT_CORE_COMPILE_STATIC_LIB "Compile the static library"                             ON )
-option(AFF3CT_CORE_COMPILE_SHARED_LIB "Compile the shared library"                             OFF)
-option(AFF3CT_CORE_LINK_HWLOC         "Link with the hwloc library (used for threads pinning)" OFF)
-option(AFF3CT_CORE_COLORS             "Enable the colors in the terminal"                      ON )
-option(AFF3CT_CORE_TESTS              "Enable the compilation of the tests"                    ON )
-option(AFF3CT_CORE_STACKTRACE         "Print the stack trace when an exception is raised"      ON )
+option(AFF3CT_CORE_COMPILE_STATIC_LIB  "Compile the static library"                             ON )
+option(AFF3CT_CORE_COMPILE_SHARED_LIB  "Compile the shared library"                             OFF)
+option(AFF3CT_CORE_LINK_HWLOC          "Link with the hwloc library (used for threads pinning)" OFF)
+option(AFF3CT_CORE_COLORS              "Enable the colors in the terminal"                      ON )
+option(AFF3CT_CORE_TESTS               "Enable the compilation of the tests"                    ON )
+option(AFF3CT_CORE_STACKTRACE          "Print the stack trace when an exception is raised"      ON )
+option(AFF3CT_CORE_STACKTRACE_SEGFAULT "Try to print the stack trace when a segfault occurs"    OFF)
 
 if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/.git" AND NOT AFF3CT_CORE_OVERRIDE_VERSION)
     message(FATAL_ERROR "The '.git' folder can't be found, AFF3CT_CORE can't be compiled if it is not cloned "
@@ -101,12 +102,12 @@ if(AFF3CT_CORE_COMPILE_STATIC_LIB)
     message(STATUS "AFF3CT-core - Compile: static library")
 endif(AFF3CT_CORE_COMPILE_STATIC_LIB)
 
-if(AFF3CT_CORE_STACKTRACE)
+if(AFF3CT_CORE_STACKTRACE_SEGFAULT AND CPPTRACE_UNWIND_WITH_LIBUNWIND)
     add_executable(aff3ct-core-signal-tracer ${CMAKE_CURRENT_SOURCE_DIR}/signal_tracer/main.cpp)
     set_target_properties(aff3ct-core-signal-tracer PROPERTIES
                                                     OUTPUT_NAME aff3ct-core-signal-tracer
                                                     POSITION_INDEPENDENT_CODE ON) # set -fpie
-endif(AFF3CT_CORE_STACKTRACE)
+endif()
 
 # Tests
 if(AFF3CT_CORE_TESTS)
@@ -231,7 +232,7 @@ endif()
 # ---------------------------------------------------------------------------------------------------------------------
 
 # cpptrace
-if (AFF3CT_CORE_STACKTRACE)
+if (AFF3CT_CORE_STACKTRACE OR AFF3CT_CORE_STACKTRACE_SEGFAULT)
     if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/lib/cpptrace/include/cpptrace/cpptrace.hpp")
         option(CPPTRACE_GET_SYMBOLS_WITH_LIBDWARF "" OFF)
         option(CPPTRACE_GET_SYMBOLS_WITH_ADDR2LINE "" ON)
@@ -271,11 +272,27 @@ if(AFF3CT_CORE_COLORS)
 else()
     message(STATUS "AFF3CT-core - Terminal colors: off")
 endif()
+
 if(AFF3CT_CORE_STACKTRACE)
     aff3ct_core_target_compile_definitions("${aff3ct_core_targets_list}" PUBLIC AFF3CT_CORE_STACKTRACE)
     message(STATUS "AFF3CT-core - Stacktrace: on")
 else()
     message(STATUS "AFF3CT-core - Stacktrace: off")
+endif()
+
+if (AFF3CT_CORE_STACKTRACE_SEGFAULT)
+    aff3ct_core_target_compile_definitions("${aff3ct_core_targets_list}" PUBLIC AFF3CT_CORE_STACKTRACE_SEGFAULT)
+    if(CPPTRACE_UNWIND_WITH_LIBUNWIND)
+        aff3ct_core_target_compile_definitions("${aff3ct_core_targets_list}" PUBLIC AFF3CT_CORE_STACKTRACE_SEGFAULT_LIBUNWIND)
+        if(AFF3CT_CORE_COLORS)
+            target_compile_definitions(aff3ct-core-signal-tracer private AFF3CT_CORE_COLORS)
+        endif()
+        message(STATUS "AFF3CT-core - Stacktrace segfault: on [with libunwind -> experimental]")
+    else()
+        message(STATUS "AFF3CT-core - Stacktrace segfault: on [unsafe method]")
+    endif(CPPTRACE_UNWIND_WITH_LIBUNWIND)
+else()
+    message(STATUS "AFF3CT-core - Stacktrace segfault: off")
 endif()
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -333,10 +350,12 @@ if(AFF3CT_CORE_LINK_HWLOC)
 endif(AFF3CT_CORE_LINK_HWLOC)
 
 # cpptrace
-if(AFF3CT_CORE_STACKTRACE)
+if(AFF3CT_CORE_STACKTRACE OR AFF3CT_CORE_STACKTRACE_SEGFAULT)
     aff3ct_core_target_link_libraries("${aff3ct_core_targets_list}" PUBLIC "cpptrace::cpptrace")
-    target_link_libraries(aff3ct-core-signal-tracer PRIVATE "cpptrace::cpptrace")
-endif(AFF3CT_CORE_STACKTRACE)
+    if(AFF3CT_CORE_STACKTRACE_SEGFAULT AND CPPTRACE_UNWIND_WITH_LIBUNWIND)
+        target_link_libraries(aff3ct-core-signal-tracer PRIVATE "cpptrace::cpptrace")
+    endif()
+endif()
 
 # Threads
 set(CMAKE_THREAD_PREFER_PTHREAD ON)
@@ -348,7 +367,7 @@ aff3ct_core_target_link_libraries("${aff3ct_core_targets_list}" PUBLIC Threads::
 # -------------------------------------------------------------------------------------------------------------- EXPORT
 # ---------------------------------------------------------------------------------------------------------------------
 
-if(AFF3CT_CORE_STACKTRACE)
+if(AFF3CT_CORE_STACKTRACE OR AFF3CT_CORE_STACKTRACE_SEGFAULT)
     set(CPPTRACE_TARGETS cpptrace-lib)
     if (CPPTRACE_GET_SYMBOLS_WITH_LIBDWARF)
         set(CPPTRACE_TARGETS ${CPPTRACE_TARGETS} dwarf)
@@ -422,7 +441,7 @@ if (AFF3CT_CORE_COMPILE_SHARED_LIB OR AFF3CT_CORE_COMPILE_STATIC_LIB)
             DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/aff3ct-core/rang
             COMPONENT headers
             FILES_MATCHING PATTERN "*.hpp")
-    if(AFF3CT_CORE_STACKTRACE)
+    if(AFF3CT_CORE_STACKTRACE OR AFF3CT_CORE_STACKTRACE_SEGFAULT)
         install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/lib/cpptrace/include/"
                 DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/aff3ct-core/cpptrace
                 COMPONENT headers
