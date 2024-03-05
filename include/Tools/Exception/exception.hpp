@@ -26,7 +26,9 @@ public:
 	static bool no_stacktrace;
 
 private:
-#ifndef AFF3CT_CORE_STACKTRACE
+#ifdef AFF3CT_CORE_STACKTRACE
+	mutable std::string what_string;
+#else
 	std::string message; // the message only
 #endif
 

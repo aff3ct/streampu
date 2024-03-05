@@ -226,6 +226,8 @@ endif()
 # cpptrace
 if (AFF3CT_CORE_STACKTRACE)
     if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/lib/cpptrace/include/cpptrace/cpptrace.hpp")
+        option(CPPTRACE_GET_SYMBOLS_WITH_LIBDWARF "" OFF)
+        option(CPPTRACE_GET_SYMBOLS_WITH_ADDR2LINE "" ON)
         add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/lib/cpptrace/)
     else()
         message(FATAL_ERROR "'cpptrace' can't be found, try to init the submodule with the following cmd:\n"
@@ -338,54 +340,38 @@ aff3ct_core_target_link_libraries("${aff3ct_core_targets_list}" PUBLIC Threads::
 # -------------------------------------------------------------------------------------------------------------- EXPORT
 # ---------------------------------------------------------------------------------------------------------------------
 
-if (AFF3CT_CORE_COMPILE_SHARED_LIB AND NOT AFF3CT_CORE_COMPILE_STATIC_LIB)
-    if(AFF3CT_CORE_STACKTRACE)
-        export(TARGETS
-               aff3ct-core-shared-lib
-               cpptrace-lib
-               dwarf
-               NAMESPACE aff3ct-core::
-               FILE "lib/cmake/aff3ct-core/aff3ct-core-config.cmake")
-    else()
-        export(TARGETS
-               aff3ct-core-shared-lib
-               NAMESPACE aff3ct-core::
-               FILE "lib/cmake/aff3ct-core/aff3ct-core-config.cmake")
+if(AFF3CT_CORE_STACKTRACE)
+    set(CPPTRACE_TARGETS cpptrace-lib)
+    if (CPPTRACE_GET_SYMBOLS_WITH_LIBDWARF)
+        set(CPPTRACE_TARGETS ${CPPTRACE_TARGETS} dwarf)
     endif()
+else()
+    set(CPPTRACE_TARGETS)
+endif()
+
+if (AFF3CT_CORE_COMPILE_SHARED_LIB AND NOT AFF3CT_CORE_COMPILE_STATIC_LIB)
+    export(TARGETS
+           aff3ct-core-shared-lib
+           ${CPPTRACE_TARGETS}
+           NAMESPACE aff3ct-core::
+           FILE "lib/cmake/aff3ct-core/aff3ct-core-config.cmake")
 endif()
 
 if (AFF3CT_CORE_COMPILE_STATIC_LIB AND NOT AFF3CT_CORE_COMPILE_SHARED_LIB)
-    if(AFF3CT_CORE_STACKTRACE)
-        export(TARGETS
-               aff3ct-core-static-lib
-               cpptrace-lib
-               dwarf
-               NAMESPACE aff3ct-core::
-               FILE "lib/cmake/aff3ct-core/aff3ct-core-config.cmake")
-    else()
-        export(TARGETS
-               aff3ct-core-static-lib
-               NAMESPACE aff3ct-core::
-               FILE "lib/cmake/aff3ct-core/aff3ct-core-config.cmake")
-    endif()
+    export(TARGETS
+           aff3ct-core-static-lib
+           ${CPPTRACE_TARGETS}
+           NAMESPACE aff3ct-core::
+           FILE "lib/cmake/aff3ct-core/aff3ct-core-config.cmake")
 endif()
 
 if(AFF3CT_CORE_COMPILE_SHARED_LIB AND AFF3CT_CORE_COMPILE_STATIC_LIB)
-    if(AFF3CT_CORE_STACKTRACE)
-        export(TARGETS
-               aff3ct-core-shared-lib
-               aff3ct-core-static-lib
-               cpptrace-lib
-               dwarf
-               NAMESPACE aff3ct-core::
-               FILE "lib/cmake/aff3ct-core/aff3ct-core-config.cmake")
-    else()
-        export(TARGETS
-               aff3ct-core-shared-lib
-               aff3ct-core-static-lib
-               NAMESPACE aff3ct-core::
-               FILE "lib/cmake/aff3ct-core/aff3ct-core-config.cmake")
-    endif()
+    export(TARGETS
+           aff3ct-core-shared-lib
+           aff3ct-core-static-lib
+           ${CPPTRACE_TARGETS}
+           NAMESPACE aff3ct-core::
+           FILE "lib/cmake/aff3ct-core/aff3ct-core-config.cmake")
 endif()
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -394,20 +380,20 @@ endif()
 
 if(AFF3CT_CORE_COMPILE_SHARED_LIB)
     if(WIN32)
-        install(TARGETS aff3ct-core-shared-lib
+        install(TARGETS aff3ct-core-shared-lib ${CPPTRACE_TARGETS}
                 EXPORT aff3ct-core-config
                 RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR}/
                 LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/
                 COMPONENT library)
     else()
-        install(TARGETS aff3ct-core-shared-lib
+        install(TARGETS aff3ct-core-shared-lib ${CPPTRACE_TARGETS}
                 EXPORT aff3ct-core-config
                 LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/
                 COMPONENT library)
     endif()
 endif()
 if(AFF3CT_CORE_COMPILE_STATIC_LIB)
-    install(TARGETS aff3ct-core-static-lib
+    install(TARGETS aff3ct-core-static-lib ${CPPTRACE_TARGETS}
             EXPORT aff3ct-core-config
             ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/
             COMPONENT library)

@@ -49,9 +49,22 @@ const char* exception
 {
 #ifdef AFF3CT_CORE_STACKTRACE
 	if (no_stacktrace)
+	{
 		return this->message();
+	}
 	else
+	{
+#ifdef AFF3CT_CORE_COLORS
+		if (what_string.empty())
+		{
+			const bool enable_color = true;
+			what_string = message() + std::string(":\n") + this->trace().to_string(enable_color);
+		}
+		return what_string.c_str();
+#else
 		return cpptrace::exception_with_message::what();
+#endif
+	}
 #else
 	return message.c_str();
 #endif
