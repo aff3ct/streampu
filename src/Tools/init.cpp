@@ -9,6 +9,7 @@
 
 #include <iostream>
 #include <csignal>
+#include <cstring>
 
 #include <cpptrace/cpptrace.hpp>
 
@@ -16,7 +17,6 @@
 
 #include <cstdlib>
 #include <cstdio>
-#include <cstring>
 #include <unistd.h>
 #include <sys/wait.h>
 
