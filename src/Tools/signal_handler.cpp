@@ -161,7 +161,7 @@ int aff3ct::tools::setup_signal_handler()
 #if defined(_WIN64) || defined(_WIN32)
 	signal(SIGSEGV, signal_sigsegv_handler);
 #else
-	struct sigaction action_sigsegv;
+	struct sigaction action_sigsegv = {};
 	action_sigsegv.sa_flags = 0;
 	action_sigsegv.sa_sigaction = &signal_sigsegv_handler;
 	if (sigaction(SIGSEGV, &action_sigsegv, NULL) == -1)
@@ -173,7 +173,7 @@ int aff3ct::tools::setup_signal_handler()
 #if defined(_WIN64) || defined(_WIN32)
 	signal(SIGINT, signal_sigint_handler);
 #else
-	struct sigaction action_sigint;
+	struct sigaction action_sigint = {};
 	action_sigint.sa_flags = 0;
 	action_sigint.sa_sigaction = &signal_sigint_handler;
 	if (sigaction(SIGINT, &action_sigint, NULL) == -1)
