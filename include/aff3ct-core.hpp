@@ -201,9 +201,6 @@
 #ifndef HELP_HPP_
 #include <Tools/Help/Help.hpp>
 #endif
-#ifndef INIT_H_
-#include <Tools/init.h>
-#endif
 #ifndef INTERFACE_CLONE_HPP__
 #include <Tools/Interface/Interface_clone.hpp>
 #endif
@@ -236,6 +233,9 @@
 #endif
 #ifndef REPORTER_HPP__
 #include <Tools/Reporter/Reporter.hpp>
+#endif
+#ifndef SIGNAL_HANDLER_H_
+#include <Tools/signal_handler.h>
 #endif
 #ifndef SYSTEM_MEMORY_HPP__
 #include <Tools/System/memory.hpp>

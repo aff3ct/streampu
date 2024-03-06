@@ -88,6 +88,8 @@ protected:
 	std::vector<tools::Digraph_node<Sub_sequence>*> cur_ss;
 
 public:
+	static bool force_stop_exec; // static variable to stop the current execution used by the signal handler (SIGINT)
+
 	Sequence(const std::vector<const runtime::Task*> &firsts,
 	         const size_t n_threads = 1,
 	         const bool thread_pinning = false,

@@ -22,6 +22,8 @@
 using namespace aff3ct;
 using namespace aff3ct::runtime;
 
+bool aff3ct::runtime::Sequence::force_stop_exec = false;
+
 Sequence
 ::Sequence(const std::vector<const runtime::Task*> &firsts,
            const std::vector<const runtime::Task*> &lasts,
@@ -475,6 +477,8 @@ void Sequence
         std::function<bool(const std::vector<const int*>&)> &stop_condition,
         tools::Digraph_node<Sub_sequence>* sequence)
 {
+	Sequence::force_stop_exec = false;
+
 	if (this->is_thread_pinning())
 		tools::Thread_pinning::pin(this->puids[tid]);
 
@@ -520,7 +524,7 @@ void Sequence
 				// do nothing, this is normal
 			}
 		}
-		while (!*force_exit_loop && !stop_condition(statuses));
+		while (!*force_exit_loop && !stop_condition(statuses) && !Sequence::force_stop_exec);
 	}
 	catch (tools::waiting_canceled const&)
 	{
@@ -558,6 +562,8 @@ void Sequence
                          std::function<bool()> &stop_condition,
                          tools::Digraph_node<Sub_sequence>* sequence)
 {
+	Sequence::force_stop_exec = false;
+
 	if (this->is_thread_pinning())
 		tools::Thread_pinning::pin(this->puids[tid]);
 
@@ -599,7 +605,7 @@ void Sequence
 				// do nothing, this is normal
 			}
 		}
-		while (!*force_exit_loop && !stop_condition());
+		while (!*force_exit_loop && !stop_condition() && !Sequence::force_stop_exec);
 	}
 	catch (tools::waiting_canceled const&)
 	{

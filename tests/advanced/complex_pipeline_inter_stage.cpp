@@ -14,6 +14,8 @@ using namespace aff3ct::runtime;
 
 int main(int argc, char** argv)
 {
+	tools::setup_signal_handler();
+
 	option longopts[] = {
 		{"n-threads", required_argument, NULL, 't'},
 		{"n-inter-frames", required_argument, NULL, 'f'},

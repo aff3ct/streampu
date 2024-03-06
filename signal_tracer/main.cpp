@@ -6,15 +6,12 @@
 #include <cstdio>
 #include <iostream>
 #include <unistd.h>
-#include <chrono>
 
 #include <cpptrace/cpptrace.hpp>
 
 int main()
 {
-	std::cout << "aff3ct-core signal tracer -> running..." << std::endl;
-	auto t_start = std::chrono::steady_clock::now();
-	std::chrono::nanoseconds duration;
+	std::cout << "aff3ct-core signal tracer is running..." << std::endl;
 	cpptrace::object_trace trace;
 	do
 	{
@@ -25,18 +22,23 @@ int main()
 		{
 			break;
 		}
+		else if ((int)res == -1)
+		{
+            perror("Something went wrong while reading from the pipe (res = '-1')");
+            break;
+		}
 		else if (res != 1)
 		{
-			std::cerr << "Something went wrong while reading from the pipe" << res << " " << std::endl;
+			std::cerr << "Something went wrong while reading from the pipe (res = '" << res << "' and "
+			          << "sizeof(frame) = '" << sizeof(frame) << "')" << std::endl;
 			break;
 		}
 		else
 		{
 			trace.frames.push_back(frame.resolve());
 		}
-		duration = std::chrono::steady_clock::now() - t_start;
 	}
-	while ((size_t)duration.count() < 3e9); // 3 seconds timeout
+	while (true);
 
 #ifdef AFF3CT_CORE_COLORS
 	bool enable_color = true;
@@ -44,8 +46,6 @@ int main()
 	bool enable_color = false;
 #endif
 	trace.resolve().print(std::cerr, enable_color);
-
-	std::cout << "aff3ct-core signal tracer -> exit" << std::endl;
 
 	return EXIT_SUCCESS;
 }
