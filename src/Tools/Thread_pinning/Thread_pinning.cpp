@@ -189,8 +189,7 @@ void Thread_pinning::pin(const std::string hwloc_objects)
 			if (obj == nullptr)
 			{
 				std::stringstream message;
-				message << "obj is nullptr ('Type' = " << hwloc_objects_vector[i]
-						<< ", number = " << object_numbers[i].second << ").";
+				message << "obj is nullptr ('Type' = " << hwloc_objects_vector[i] <<").";
 				throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
 			}
 			hwloc_bitmap_or(all_pus, all_pus, obj->cpuset);

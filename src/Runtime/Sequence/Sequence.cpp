@@ -314,6 +314,7 @@ Sequence
   cur_task_id(n_threads,0),
   cur_ss(n_threads, nullptr)
 {
+	
 	if (thread_pinning && !sequence_pinning_policy.empty())
     {
         objects_per_thread = tools::Thread_pinning_utils::stage_parser_unpacker(sequence_pinning_policy, n_threads);
@@ -547,6 +548,13 @@ void Sequence
 	}
 
 	this->thread_pinning = thread_pinning;
+	this->puids = puids;
+}
+
+void Sequence
+::set_thread_pinning(const bool thread_pinning, const std::string &sequence_pinning_policy)
+{
+	this->sequence_pinning_policy = sequence_pinning_policy;
 	this->puids = puids;
 }
 

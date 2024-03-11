@@ -87,7 +87,8 @@ std::vector<std::string> Thread_pinning_utils
 	else if (vector_threads.size() != number_of_threads)
 	{
 		std::stringstream message;
-		message << "The number of threads is not equal to the number of objects in the stage";
+		message << "The number of threads ("<< number_of_threads <<") is not equal to the number of objects ("
+		<< vector_threads.size() <<") in the stage";
 		throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
 	}
 	return vector_threads;
