@@ -13,6 +13,7 @@ public:
 	static void init();
 	static void destroy();
 	static void pin(const size_t puid);
+	static void pin(const std::string hwloc_objects);
 	static void unpin();
 
 	static std::string get_cur_cpuset_str();

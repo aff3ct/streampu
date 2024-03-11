@@ -108,6 +108,60 @@ public:
 	         const std::vector<std::vector<size_t>> &puids = {}/*,
 	         const std::vector<bool> &tasks_inplace = {}*/);
 
+	// Constructors for pinning second version
+	Pipeline(const std::vector<runtime::Task*> &firsts,
+	         const std::vector<runtime::Task*> &lasts,
+	         const std::vector<std::tuple<std::vector<runtime::Task*>, std::vector<runtime::Task*>, std::vector<runtime::Task*>>> &sep_stages,
+	         const std::vector<size_t> &n_threads,
+	         const std::vector<size_t> &synchro_buffer_sizes,
+	         const std::vector<bool> &synchro_active_waiting,
+	         const std::vector<bool> &thread_pinning,
+	         const std::string &pipeline_pinning_policy/*,
+	         const std::vector<bool> &tasks_inplace = {}*/);
+	Pipeline(const std::vector<runtime::Task*> &firsts,
+	         const std::vector<runtime::Task*> &lasts,
+	         const std::vector<std::pair<std::vector<runtime::Task*>, std::vector<runtime::Task*>>> &sep_stages,
+	         const std::vector<size_t> &n_threads,
+	         const std::vector<size_t> &synchro_buffer_sizes,
+	         const std::vector<bool> &synchro_active_waiting,
+	         const std::vector<bool> &thread_pinning,
+	         const std::string &pipeline_pinning_policy/*,
+	         const std::vector<bool> &tasks_inplace = {}*/);
+	Pipeline(const std::vector<runtime::Task*> &firsts,
+	         const std::vector<std::tuple<std::vector<runtime::Task*>, std::vector<runtime::Task*>, std::vector<runtime::Task*>>> &sep_stages,
+	         const std::vector<size_t> &n_threads,
+	         const std::vector<size_t> &synchro_buffer_sizes,
+	         const std::vector<bool> &synchro_active_waiting,
+	         const std::vector<bool> &thread_pinning,
+	         const std::string &pipeline_pinning_policy/*,
+	         const std::vector<bool> &tasks_inplace = {}*/);
+	Pipeline(const std::vector<runtime::Task*> &firsts,
+	         const std::vector<std::pair<std::vector<runtime::Task*>, std::vector<runtime::Task*>>> &sep_stages,
+	         const std::vector<size_t> &n_threads,
+	         const std::vector<size_t> &synchro_buffer_sizes,
+	         const std::vector<bool> &synchro_active_waiting,
+	         const std::vector<bool> &thread_pinning,
+	         const std::string &pipeline_pinning_policy/*,
+	         const std::vector<bool> &tasks_inplace = {}*/);
+	Pipeline(runtime::Task &first,
+	         const std::vector<std::pair<std::vector<runtime::Task*>, std::vector<runtime::Task*>>> &sep_stages,
+	         const std::vector<size_t> &n_threads,
+	         const std::vector<size_t> &synchro_buffer_sizes,
+	         const std::vector<bool> &synchro_active_waiting,
+	         const std::vector<bool> &thread_pinning,
+	         const std::string &pipeline_pinning_policy/*,
+	         const std::vector<bool> &tasks_inplace = {}*/);
+	Pipeline(runtime::Task &first,
+	         runtime::Task &last,
+	         const std::vector<std::pair<std::vector<runtime::Task*>, std::vector<runtime::Task*>>> &sep_stages,
+	         const std::vector<size_t> &n_threads,
+	         const std::vector<size_t> &synchro_buffer_sizes,
+	         const std::vector<bool> &synchro_active_waiting,
+	         const std::vector<bool> &thread_pinning,
+	         const std::string &pipeline_pinning_policy/*,
+	         const std::vector<bool> &tasks_inplace = {}*/);
+
+
 	virtual ~Pipeline();
 
 	void exec(const std::vector<std::function<bool(const std::vector<const int*>&)>> &stop_conditions);
@@ -159,6 +213,17 @@ private:
 	          const std::vector<bool> &synchro_active_waiting = {},
 	          const std::vector<bool> &thread_pinning = {},
 	          const std::vector<std::vector<size_t>> &puids = {}/*,
+	          const std::vector<bool> &tasks_inplace = {}*/);
+	// Init function for pinning second version
+		template <class TA>
+	void init(const std::vector<TA*> &firsts,
+	          const std::vector<TA*> &lasts,
+	          const std::vector<std::tuple<std::vector<TA*>, std::vector<TA*>, std::vector<TA*>>> &sep_stages,
+	          const std::vector<size_t> &n_threads,
+	          const std::vector<size_t> &synchro_buffer_sizes,
+	          const std::vector<bool> &synchro_active_waiting,
+	          const std::vector<bool> &thread_pinning,
+	          const std::string &pipeline_policy_pinning/*,
 	          const std::vector<bool> &tasks_inplace = {}*/);
 };
 }

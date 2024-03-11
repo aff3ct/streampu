@@ -9,6 +9,7 @@
 #include <algorithm>
 
 #include "Tools/Display/rang_format/rang_format.h"
+#include "Tools/Thread_pinning/Thread_pinning_utils.hpp"
 #include "Tools/Thread_pinning/Thread_pinning.hpp"
 #include "Tools/Exception/exception.hpp"
 #include "Module/Module.hpp"
@@ -201,6 +202,186 @@ Sequence
 : Sequence({&first}, n_threads, thread_pinning, puids, tasks_inplace)
 {
 }
+//=======================================New pinning version constructors===============================================
+Sequence
+::Sequence(const std::vector<const runtime::Task*> &firsts,
+           const std::vector<const runtime::Task*> &lasts,
+           const std::vector<const runtime::Task*> &exclusions,
+           const size_t n_threads,
+           const bool thread_pinning,
+           const std::string &sequence_pinning_policy)
+: n_threads(n_threads),
+  sequences(n_threads, nullptr),
+  modules(n_threads),
+  all_modules(n_threads),
+  mtx_exception(new std::mutex()),
+  force_exit_loop(new std::atomic<bool>(false)),
+  tasks_inplace(false),
+  thread_pinning(thread_pinning),
+  puids({}),
+  sequence_pinning_policy(sequence_pinning_policy),
+  no_copy_mode(true),
+  saved_exclusions(exclusions),
+  switchers_reset(n_threads),
+  auto_stop(true),
+  is_part_of_pipeline(false),
+  next_round_is_over(n_threads, false),
+  cur_task_id(n_threads,0),
+  cur_ss(n_threads, nullptr)
+{
+#ifndef AFF3CT_CORE_HWLOC
+	if (thread_pinning)
+		std::clog << rang::tag::warning << "AFF3CT has not been linked with the 'hwloc' library, the 'thread_pinning' "
+		                                   "option of the 'runtime::Sequence' will have no effect." << std::endl;
+#endif
+
+	if (thread_pinning && !sequence_pinning_policy.empty())
+	{
+		objects_per_thread = tools::Thread_pinning_utils::stage_parser_unpacker(sequence_pinning_policy, n_threads);
+	}
+	else if (thread_pinning && sequence_pinning_policy.empty())
+	{
+		std::stringstream message;
+        message << "Pinning is activated but there is no specified policy" << std::endl;
+        throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
+	}
+
+	this->init<runtime::Sub_sequence_const,const runtime::Task>(firsts, lasts, exclusions);
+}
+
+Sequence
+::Sequence(const std::vector<const runtime::Task*> &firsts,
+           const std::vector<const runtime::Task*> &lasts,
+           const size_t n_threads,
+           const bool thread_pinning,
+           const std::string &sequence_pinning_policy)
+: Sequence(firsts, lasts, {}, n_threads, thread_pinning, sequence_pinning_policy)
+{
+}
+
+Sequence
+::Sequence(const std::vector<const runtime::Task*> &firsts,
+           const size_t n_threads,
+           const bool thread_pinning,
+           const std::string &sequence_pinning_policy)
+: Sequence(firsts, {}, {}, n_threads, thread_pinning, sequence_pinning_policy)
+{
+}
+
+Sequence
+::Sequence(const runtime::Task &first,
+           const runtime::Task &last,
+           const size_t n_threads,
+           const bool thread_pinning,
+           const std::string &sequence_pinning_policy)
+: Sequence({&first}, {&last}, n_threads, thread_pinning, sequence_pinning_policy)
+{
+}
+
+Sequence
+::Sequence(const runtime::Task &first,
+           const size_t n_threads,
+           const bool thread_pinning,
+           const std::string &sequence_pinning_policy)
+: Sequence({&first}, n_threads, thread_pinning, sequence_pinning_policy)
+{
+}
+
+Sequence
+::Sequence(const std::vector<runtime::Task*> &firsts,
+           const std::vector<runtime::Task*> &lasts,
+           const std::vector<runtime::Task*> &exclusions,
+           const size_t n_threads,
+           const bool thread_pinning,
+           const std::string &sequence_pinning_policy,
+           const bool tasks_inplace)
+: n_threads(n_threads),
+  sequences(n_threads, nullptr),
+  modules(tasks_inplace ? n_threads -1 : n_threads),
+  all_modules(n_threads),
+  mtx_exception(new std::mutex()),
+  force_exit_loop(new std::atomic<bool>(false)),
+  tasks_inplace(tasks_inplace),
+  thread_pinning(thread_pinning),
+  puids({}),
+  sequence_pinning_policy(sequence_pinning_policy),
+  no_copy_mode(true),
+  saved_exclusions(exclusions_convert_to_const(exclusions)),
+  switchers_reset(n_threads),
+  auto_stop(true),
+  is_part_of_pipeline(false),
+  next_round_is_over(n_threads, false),
+  cur_task_id(n_threads,0),
+  cur_ss(n_threads, nullptr)
+{
+	if (thread_pinning && !sequence_pinning_policy.empty())
+    {
+        objects_per_thread = tools::Thread_pinning_utils::stage_parser_unpacker(sequence_pinning_policy, n_threads);
+    }
+	else if (thread_pinning && sequence_pinning_policy.empty())
+	{
+		std::stringstream message;
+        message << "Pinning is activated but there is no specified policy" << std::endl;
+        throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
+	}
+
+	if (tasks_inplace)
+		this->init<runtime::Sub_sequence,runtime::Task>(firsts, lasts, exclusions);
+	else
+	{
+		std::vector<const runtime::Task*> firsts_bis;
+		for (auto first : firsts) firsts_bis.push_back(first);
+		std::vector<const runtime::Task*> lasts_bis;
+		for (auto last : lasts) lasts_bis.push_back(last);
+		std::vector<const runtime::Task*> exclusions_bis;
+		for (auto exception : exclusions) exclusions_bis.push_back(exception);
+		this->init<runtime::Sub_sequence_const,const runtime::Task>(firsts_bis, lasts_bis, exclusions_bis);
+	}
+}
+
+Sequence
+::Sequence(const std::vector<runtime::Task*> &firsts,
+           const std::vector<runtime::Task*> &lasts,
+           const size_t n_threads,
+           const bool thread_pinning,
+           const std::string &sequence_pinning_policy,
+           const bool tasks_inplace)
+: Sequence(firsts, lasts, {}, n_threads, thread_pinning, sequence_pinning_policy, tasks_inplace)
+{
+}
+
+Sequence
+::Sequence(const std::vector<runtime::Task*> &firsts,
+           const size_t n_threads,
+           const bool thread_pinning,
+           const std::string &sequence_pinning_policy,
+           const bool tasks_inplace)
+: Sequence(firsts, {}, {}, n_threads, thread_pinning, sequence_pinning_policy, tasks_inplace)
+{
+}
+
+Sequence
+::Sequence(runtime::Task &first,
+           runtime::Task &last,
+           const size_t n_threads,
+           const bool thread_pinning,
+           const std::string &sequence_pinning_policy,
+           const bool tasks_inplace)
+: Sequence({&first}, {&last}, n_threads, thread_pinning, sequence_pinning_policy, tasks_inplace)
+{
+}
+
+Sequence
+::Sequence(runtime::Task &first,
+           const size_t n_threads,
+           const bool thread_pinning,
+           const std::string &sequence_pinning_policy,
+           const bool tasks_inplace)
+: Sequence({&first}, n_threads, thread_pinning, sequence_pinning_policy, tasks_inplace)
+{
+}
+
+//======================================================================================================================
 
 Sequence
 ::~Sequence()
@@ -215,7 +396,12 @@ void Sequence
 ::init(const std::vector<TA*> &firsts, const std::vector<TA*> &lasts, const std::vector<TA*> &exclusions)
 {
 	if (this->is_thread_pinning())
-		tools::Thread_pinning::pin(this->puids[0]);
+	{
+		if(!this->puids.empty())
+			tools::Thread_pinning::pin(this->puids[0]);
+		else
+			tools::Thread_pinning::pin(this->objects_per_thread[0]);
+	}
 
 	if (firsts.size() == 0)
 	{
@@ -480,7 +666,12 @@ void Sequence
 	Sequence::force_stop_exec = false;
 
 	if (this->is_thread_pinning())
-		tools::Thread_pinning::pin(this->puids[tid]);
+	{
+		if(!puids.empty())
+			tools::Thread_pinning::pin(this->puids[tid]);
+		else
+			tools::Thread_pinning::pin(this->objects_per_thread[tid]);
+	}
 
 	std::function<void(tools::Digraph_node<Sub_sequence>*, std::vector<const int*>&)> exec_sequence =
 		[&exec_sequence](tools::Digraph_node<Sub_sequence>* cur_ss, std::vector<const int*>& statuses)
@@ -565,7 +756,12 @@ void Sequence
 	Sequence::force_stop_exec = false;
 
 	if (this->is_thread_pinning())
-		tools::Thread_pinning::pin(this->puids[tid]);
+	{
+		if(!puids.empty())
+			tools::Thread_pinning::pin(this->puids[tid]);
+		else
+			tools::Thread_pinning::pin(this->objects_per_thread[tid]);
+	}
 
 	std::function<void(tools::Digraph_node<Sub_sequence>*)> exec_sequence =
 		[&exec_sequence](tools::Digraph_node<Sub_sequence>* cur_ss)
@@ -1191,7 +1387,10 @@ void Sequence
 		if (this->is_thread_pinning())
 		{
 			const auto real_tid = tid + (this->tasks_inplace ? 1 : 0);
-			tools::Thread_pinning::pin(this->puids[real_tid]);
+			if (!this->puids.empty())
+				tools::Thread_pinning::pin(this->puids[real_tid]);
+			else
+				tools::Thread_pinning::pin(this->objects_per_thread[real_tid]);
 		}
 
 		this->modules[tid].resize(modules_vec.size());
@@ -1392,7 +1591,12 @@ void Sequence
 	for (size_t thread_id = (this->tasks_inplace ? 1 : 0); thread_id < this->sequences.size(); thread_id++)
 	{
 		if (this->is_thread_pinning())
-			tools::Thread_pinning::pin(this->puids[thread_id]);
+		{
+			if (!this->puids.empty())
+				tools::Thread_pinning::pin(this->puids[thread_id]);
+			else
+				tools::Thread_pinning::pin(this->objects_per_thread[thread_id]);
+		}
 
 		this->sequences[thread_id] = new tools::Digraph_node<Sub_sequence>({}, {}, nullptr, 0);
 		already_parsed_nodes.clear();
@@ -1898,8 +2102,12 @@ void Sequence
 	for (auto &sequence : this->sequences)
 	{
 		if (this->is_thread_pinning())
-			tools::Thread_pinning::pin(this->puids[thread_id++]);
-
+		{
+			if (!this->puids.empty())
+				tools::Thread_pinning::pin(this->puids[thread_id++]);
+			else
+				tools::Thread_pinning::pin(this->objects_per_thread[thread_id++]);
+		}
 		std::vector<tools::Digraph_node<Sub_sequence>*> already_parsed_nodes;
 		gen_processes_recursive(sequence, already_parsed_nodes);
 

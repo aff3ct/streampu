@@ -75,6 +75,7 @@ protected:
 	bool tasks_inplace;
 	bool thread_pinning;
 	std::vector<size_t> puids;
+	std::string sequence_pinning_policy;
 	bool no_copy_mode;
 	const std::vector<const runtime::Task*> saved_exclusions;
 	std::vector<tools::Interface_is_done*> donners;
@@ -86,6 +87,10 @@ protected:
 	std::vector<bool> next_round_is_over;
 	std::vector<size_t> cur_task_id;
 	std::vector<tools::Digraph_node<Sub_sequence>*> cur_ss;
+
+	// Extra attribute for pinning v2
+	std::vector<std::string> objects_per_thread;
+
 
 public:
 	static bool force_stop_exec; // static variable to stop the current execution used by the signal handler (SIGINT)
@@ -144,11 +149,69 @@ public:
 	         const std::vector<size_t> &puids = {},
 	         const bool tasks_inplace = true);
 
+
+	// Constructors for pinning v2
+	Sequence(const std::vector<const runtime::Task*> &firsts,
+	         const size_t n_threads,
+	         const bool thread_pinning,
+	         const std::string &sequence_pinning_policy);
+	Sequence(const std::vector<const runtime::Task*> &firsts,
+	         const std::vector<const runtime::Task*> &lasts,
+	         const size_t n_threads,
+	         const bool thread_pinning,
+	         const std::string &sequence_pinning_policy);
+	Sequence(const std::vector<const runtime::Task*> &firsts,
+	         const std::vector<const runtime::Task*> &lasts,
+	         const std::vector<const runtime::Task*> &exclusions,
+	         const size_t n_threads,
+	         const bool thread_pinning,
+	         const std::string &sequence_pinning_policy);
+	Sequence(const runtime::Task &first,
+	         const size_t n_threads,
+	         const bool thread_pinning,
+	         const std::string &sequence_pinning_policy);
+	Sequence(const runtime::Task &first,
+	         const runtime::Task &last,
+	         const size_t n_threads,
+	         const bool thread_pinning,
+	         const std::string &sequence_pinning_policy);
+	Sequence(const std::vector<runtime::Task*> &firsts,
+	         const size_t n_threads,
+	         const bool thread_pinning,
+	         const std::string &sequence_pinning_policy,
+	         const bool tasks_inplace = true);
+	Sequence(const std::vector<runtime::Task*> &firsts,
+	         const std::vector<runtime::Task*> &lasts,
+	         const size_t n_threads,
+	         const bool thread_pinning,
+	         const std::string &sequence_pinning_policy,
+	         const bool tasks_inplace = true);
+	Sequence(const std::vector<runtime::Task*> &firsts,
+	         const std::vector<runtime::Task*> &lasts,
+	         const std::vector<runtime::Task*> &exclusions,
+	         const size_t n_threads,
+	         const bool thread_pinning,
+	         const std::string &sequence_pinning_policy,
+	         const bool tasks_inplace = true);
+	Sequence(runtime::Task &first,
+	         const size_t n_threads,
+	         const bool thread_pinning,
+	         const std::string &sequence_pinning_policy,
+	         const bool tasks_inplace = true);
+	Sequence(runtime::Task &first,
+	         runtime::Task &last,
+	         const size_t n_threads,
+	         const bool thread_pinning,
+	         const std::string &sequence_pinning_policy,
+	         const bool tasks_inplace = true);
+
 	virtual ~Sequence();
 	virtual Sequence* clone() const;
 
 	void set_thread_pinning(const bool thread_pinning);
 	void set_thread_pinning(const bool thread_pinning, const std::vector<size_t> &puids = {});
+	// Set pinning for the second version
+	void set_thread_pinning(const bool thread_pinning, const std::string &sequence_pinning_policy);
 	bool is_thread_pinning();
 
 	void           exec     (std::function<bool(const std::vector<const int*>&)> stop_condition);
