@@ -219,7 +219,6 @@ Sequence
   tasks_inplace(false),
   thread_pinning(thread_pinning),
   puids({}),
-  sequence_pinning_policy(sequence_pinning_policy),
   no_copy_mode(true),
   saved_exclusions(exclusions),
   switchers_reset(n_threads),
@@ -237,7 +236,7 @@ Sequence
 
 	if (thread_pinning && !sequence_pinning_policy.empty())
 	{
-		objects_per_thread = tools::Thread_pinning_utils::stage_parser_unpacker(sequence_pinning_policy, n_threads);
+		pin_objects_per_thread = tools::Thread_pinning_utils::stage_parser_unpacker(sequence_pinning_policy, n_threads);
 	}
 	else if (thread_pinning && sequence_pinning_policy.empty())
 	{
@@ -304,7 +303,6 @@ Sequence
   tasks_inplace(tasks_inplace),
   thread_pinning(thread_pinning),
   puids({}),
-  sequence_pinning_policy(sequence_pinning_policy),
   no_copy_mode(true),
   saved_exclusions(exclusions_convert_to_const(exclusions)),
   switchers_reset(n_threads),
@@ -316,7 +314,7 @@ Sequence
 {
 	if (thread_pinning && !sequence_pinning_policy.empty())
 	{
-		objects_per_thread = tools::Thread_pinning_utils::stage_parser_unpacker(sequence_pinning_policy, n_threads);
+		pin_objects_per_thread = tools::Thread_pinning_utils::stage_parser_unpacker(sequence_pinning_policy, n_threads);
 	}
 	else if (thread_pinning && sequence_pinning_policy.empty())
 	{
@@ -402,7 +400,7 @@ void Sequence
 		if (!this->puids.empty())
 			tools::Thread_pinning::pin(this->puids[0]);
 		else
-			tools::Thread_pinning::pin(this->objects_per_thread[0]);
+			tools::Thread_pinning::pin(this->pin_objects_per_thread[0]);
 	}
 
 	if (firsts.size() == 0)
@@ -550,7 +548,7 @@ void Sequence
 
 	this->thread_pinning = thread_pinning;
 	this->puids = puids;
-	this->sequence_pinning_policy = "";
+	this->pin_objects_per_thread = {};
 }
 
 void Sequence
@@ -558,7 +556,7 @@ void Sequence
 {
 	this->thread_pinning = thread_pinning;
 	this->puids = {};
-	this->sequence_pinning_policy = sequence_pinning_policy;
+	this->pin_objects_per_thread = tools::Thread_pinning_utils::stage_parser_unpacker(sequence_pinning_policy, n_threads);
 }
 
 bool Sequence
@@ -681,7 +679,7 @@ void Sequence
 		if (!puids.empty())
 			tools::Thread_pinning::pin(this->puids[tid]);
 		else
-			tools::Thread_pinning::pin(this->objects_per_thread[tid]);
+			tools::Thread_pinning::pin(this->pin_objects_per_thread[tid]);
 	}
 
 	std::function<void(tools::Digraph_node<Sub_sequence>*, std::vector<const int*>&)> exec_sequence =
@@ -771,7 +769,7 @@ void Sequence
 		if (!puids.empty())
 			tools::Thread_pinning::pin(this->puids[tid]);
 		else
-			tools::Thread_pinning::pin(this->objects_per_thread[tid]);
+			tools::Thread_pinning::pin(this->pin_objects_per_thread[tid]);
 	}
 
 	std::function<void(tools::Digraph_node<Sub_sequence>*)> exec_sequence =
@@ -1401,7 +1399,7 @@ void Sequence
 			if (!this->puids.empty())
 				tools::Thread_pinning::pin(this->puids[real_tid]);
 			else
-				tools::Thread_pinning::pin(this->objects_per_thread[real_tid]);
+				tools::Thread_pinning::pin(this->pin_objects_per_thread[real_tid]);
 		}
 
 		this->modules[tid].resize(modules_vec.size());
@@ -1606,7 +1604,7 @@ void Sequence
 			if (!this->puids.empty())
 				tools::Thread_pinning::pin(this->puids[thread_id]);
 			else
-				tools::Thread_pinning::pin(this->objects_per_thread[thread_id]);
+				tools::Thread_pinning::pin(this->pin_objects_per_thread[thread_id]);
 		}
 
 		this->sequences[thread_id] = new tools::Digraph_node<Sub_sequence>({}, {}, nullptr, 0);
@@ -2117,7 +2115,7 @@ void Sequence
 			if (!this->puids.empty())
 				tools::Thread_pinning::pin(this->puids[thread_id++]);
 			else
-				tools::Thread_pinning::pin(this->objects_per_thread[thread_id++]);
+				tools::Thread_pinning::pin(this->pin_objects_per_thread[thread_id++]);
 		}
 		std::vector<tools::Digraph_node<Sub_sequence>*> already_parsed_nodes;
 		gen_processes_recursive(sequence, already_parsed_nodes);

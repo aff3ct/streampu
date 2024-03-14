@@ -75,7 +75,6 @@ protected:
 	bool tasks_inplace;
 	bool thread_pinning;
 	std::vector<size_t> puids;
-	std::string sequence_pinning_policy;
 	bool no_copy_mode;
 	const std::vector<const runtime::Task*> saved_exclusions;
 	std::vector<tools::Interface_is_done*> donners;
@@ -88,8 +87,8 @@ protected:
 	std::vector<size_t> cur_task_id;
 	std::vector<tools::Digraph_node<Sub_sequence>*> cur_ss;
 
-	// Extra attribute for pinning v2
-	std::vector<std::string> objects_per_thread;
+	// extra attribute for pinning v2
+	std::vector<std::string> pin_objects_per_thread;
 
 public:
 	static bool force_stop_exec; // static variable to stop the current execution used by the signal handler (SIGINT)
