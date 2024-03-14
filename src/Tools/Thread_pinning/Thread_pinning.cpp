@@ -249,6 +249,18 @@ void Thread_pinning
 			std::clog << "You can't call the 'unpin' method if you have not call the 'init' method before, nothing "
 			          << "will be done." << std::endl;
 		}
+	}else
+	{
+		hwloc_bitmap_t unpin_set = hwloc_bitmap_alloc();
+		unpin_set = hwloc_get_obj_by_depth(g_topology, 0, 0)->cpuset; // get cpuset of root object
+		if (hwloc_set_cpubind(g_topology, unpin_set, HWLOC_CPUBIND_THREAD))
+		{
+			char *str;
+			hwloc_bitmap_asprintf(&str, unpin_set);
+			printf("Unpin function failed");
+			free(str);
+		}
+		hwloc_bitmap_free(unpin_set);
 	}
 #else
 	if (g_enable_logs)
