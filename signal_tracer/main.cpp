@@ -24,8 +24,8 @@ int main()
 		}
 		else if ((int)res == -1)
 		{
-            perror("Something went wrong while reading from the pipe (res = '-1')");
-            break;
+			perror("Something went wrong while reading from the pipe (res = '-1')");
+			break;
 		}
 		else if (res != 1)
 		{
