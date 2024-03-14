@@ -242,8 +242,8 @@ Sequence
 	else if (thread_pinning && sequence_pinning_policy.empty())
 	{
 		std::stringstream message;
-        message << "Pinning is activated but there is no specified policy" << std::endl;
-        throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
+		message << "Pinning is activated but there is no specified policy." << std::endl;
+		throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
 	}
 
 	this->init<runtime::Sub_sequence_const,const runtime::Task>(firsts, lasts, exclusions);
@@ -314,16 +314,15 @@ Sequence
   cur_task_id(n_threads,0),
   cur_ss(n_threads, nullptr)
 {
-	
 	if (thread_pinning && !sequence_pinning_policy.empty())
-    {
-        objects_per_thread = tools::Thread_pinning_utils::stage_parser_unpacker(sequence_pinning_policy, n_threads);
-    }
+	{
+		objects_per_thread = tools::Thread_pinning_utils::stage_parser_unpacker(sequence_pinning_policy, n_threads);
+	}
 	else if (thread_pinning && sequence_pinning_policy.empty())
 	{
 		std::stringstream message;
-        message << "Pinning is activated but there is no specified policy" << std::endl;
-        throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
+		message << "Pinning is activated but there is no specified policy." << std::endl;
+		throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
 	}
 
 	if (tasks_inplace)
@@ -332,11 +331,13 @@ Sequence
 	{
 		std::vector<const runtime::Task*> firsts_bis;
 		for (auto first : firsts) firsts_bis.push_back(first);
-		std::vector<const runtime::Task*> lasts_bis;
+			std::vector<const runtime::Task*> lasts_bis;
+
 		for (auto last : lasts) lasts_bis.push_back(last);
-		std::vector<const runtime::Task*> exclusions_bis;
+			std::vector<const runtime::Task*> exclusions_bis;
+
 		for (auto exception : exclusions) exclusions_bis.push_back(exception);
-		this->init<runtime::Sub_sequence_const,const runtime::Task>(firsts_bis, lasts_bis, exclusions_bis);
+			this->init<runtime::Sub_sequence_const,const runtime::Task>(firsts_bis, lasts_bis, exclusions_bis);
 	}
 }
 
@@ -382,7 +383,7 @@ Sequence
 {
 }
 
-//======================================================================================================================
+// ====================================================================================================================
 
 Sequence
 ::~Sequence()
@@ -398,7 +399,7 @@ void Sequence
 {
 	if (this->is_thread_pinning())
 	{
-		if(!this->puids.empty())
+		if (!this->puids.empty())
 			tools::Thread_pinning::pin(this->puids[0]);
 		else
 			tools::Thread_pinning::pin(this->objects_per_thread[0]);
@@ -549,13 +550,15 @@ void Sequence
 
 	this->thread_pinning = thread_pinning;
 	this->puids = puids;
+	this->sequence_pinning_policy = "";
 }
 
 void Sequence
 ::set_thread_pinning(const bool thread_pinning, const std::string &sequence_pinning_policy)
 {
+	this->thread_pinning = thread_pinning;
+	this->puids = {};
 	this->sequence_pinning_policy = sequence_pinning_policy;
-	this->puids = puids;
 }
 
 bool Sequence
@@ -675,7 +678,7 @@ void Sequence
 
 	if (this->is_thread_pinning())
 	{
-		if(!puids.empty())
+		if (!puids.empty())
 			tools::Thread_pinning::pin(this->puids[tid]);
 		else
 			tools::Thread_pinning::pin(this->objects_per_thread[tid]);
@@ -765,7 +768,7 @@ void Sequence
 
 	if (this->is_thread_pinning())
 	{
-		if(!puids.empty())
+		if (!puids.empty())
 			tools::Thread_pinning::pin(this->puids[tid]);
 		else
 			tools::Thread_pinning::pin(this->objects_per_thread[tid]);

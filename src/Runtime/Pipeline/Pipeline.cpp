@@ -125,8 +125,8 @@ Pipeline
 	                          n_threads,
 	                          synchro_buffer_sizes,
 	                          synchro_active_waiting,
-	                          thread_pinning, puids
-	                          /*, tasks_inplace*/);
+	                          thread_pinning, puids/*,
+	                          tasks_inplace*/);
 }
 
 Pipeline
@@ -185,9 +185,8 @@ Pipeline
            n_threads,
            synchro_buffer_sizes,
            synchro_active_waiting,
-           thread_pinning,
-           puids
-           /*, tasks_inplace*/)
+           thread_pinning, puids/*,
+           tasks_inplace*/)
 {
 }
 
@@ -205,9 +204,152 @@ Pipeline
            n_threads,
            synchro_buffer_sizes,
            synchro_active_waiting,
+           thread_pinning, puids/*,
+           tasks_inplace*/)
+{
+}
+
+//========================== Pipeline constructors with new version thread pinning =====================================
+Pipeline
+::Pipeline(const std::vector<runtime::Task*> &firsts,
+           const std::vector<runtime::Task*> &lasts,
+           const std::vector<std::tuple<std::vector<runtime::Task*>, std::vector<runtime::Task*>, std::vector<runtime::Task*>>> &sep_stages,
+           const std::vector<size_t> &n_threads,
+           const std::vector<size_t> &synchro_buffer_sizes,
+           const std::vector<bool> &synchro_active_waiting,
+           const std::vector<bool> &thread_pinning,
+           const std::string &pipeline_pinning_policy/*,
+           const std::vector<bool> &tasks_inplace*/)
+: original_sequence(firsts, lasts, 1),
+  stages(sep_stages.size()),
+  adaptors(sep_stages.size() -1),
+  saved_firsts_tasks_id(sep_stages.size()),
+  saved_lasts_tasks_id(sep_stages.size()),
+  bound_adaptors(false),
+  auto_stop(true)
+{
+	this->init<runtime::Task>(firsts,
+	                          lasts,
+	                          sep_stages,
+	                          n_threads,
+	                          synchro_buffer_sizes,
+	                          synchro_active_waiting,
+	                          thread_pinning, {}, pipeline_pinning_policy/*,
+	                          tasks_inplace*/);
+}
+
+Pipeline
+::Pipeline(const std::vector<runtime::Task*> &firsts,
+           const std::vector<runtime::Task*> &lasts,
+           const std::vector<std::pair<std::vector<runtime::Task*>, std::vector<runtime::Task*>>> &sep_stages,
+           const std::vector<size_t> &n_threads,
+           const std::vector<size_t> &synchro_buffer_sizes,
+           const std::vector<bool> &synchro_active_waiting,
+           const std::vector<bool> &thread_pinning,
+           const std::string &pipeline_pinning_policy/*,
+           const std::vector<bool> &tasks_inplace*/)
+: original_sequence(firsts, lasts, 1),
+  stages(sep_stages.size()),
+  adaptors(sep_stages.size() -1),
+  saved_firsts_tasks_id(sep_stages.size()),
+  saved_lasts_tasks_id(sep_stages.size()),
+  bound_adaptors(false),
+  auto_stop(true)
+{
+	std::vector<std::tuple<std::vector<runtime::Task*>,
+	                       std::vector<runtime::Task*>,
+	                       std::vector<runtime::Task*>>> sep_stages_bis;
+	for (auto &sep_stage : sep_stages)
+		sep_stages_bis.push_back(std::make_tuple(sep_stage.first, sep_stage.second, std::vector<runtime::Task*>()));
+
+	this->init<runtime::Task>(firsts,
+	                          lasts,
+	                          sep_stages_bis,
+	                          n_threads,
+	                          synchro_buffer_sizes,
+	                          synchro_active_waiting,
+	                          thread_pinning, {}, pipeline_pinning_policy/*,
+	                          tasks_inplace*/);
+}
+
+Pipeline
+::Pipeline(const std::vector<runtime::Task*> &firsts,
+           const std::vector<std::tuple<std::vector<runtime::Task*>, std::vector<runtime::Task*>, std::vector<runtime::Task*>>> &sep_stages,
+           const std::vector<size_t> &n_threads,
+           const std::vector<size_t> &synchro_buffer_sizes,
+           const std::vector<bool> &synchro_active_waiting,
+           const std::vector<bool> &thread_pinning,
+           const std::string &pipeline_pinning_policy/*,
+           const std::vector<bool> &tasks_inplace*/)
+: Pipeline(firsts,
+           {},
+           sep_stages,
+           n_threads,
+           synchro_buffer_sizes,
+           synchro_active_waiting,
+           thread_pinning, pipeline_pinning_policy/*,
+           tasks_inplace*/)
+{
+}
+
+Pipeline
+::Pipeline(const std::vector<runtime::Task*> &firsts,
+           const std::vector<std::pair<std::vector<runtime::Task*>, std::vector<runtime::Task*>>> &sep_stages,
+           const std::vector<size_t> &n_threads,
+           const std::vector<size_t> &synchro_buffer_sizes,
+           const std::vector<bool> &synchro_active_waiting,
+           const std::vector<bool> &thread_pinning,
+           const std::string &pipeline_pinning_policy/*,
+           const std::vector<bool> &tasks_inplace*/)
+: Pipeline(firsts,
+           {},
+           sep_stages,
+           n_threads,
+           synchro_buffer_sizes,
+           synchro_active_waiting,
+           thread_pinning, pipeline_pinning_policy/*,
+           tasks_inplace*/)
+{
+}
+
+Pipeline
+::Pipeline(runtime::Task &first,
+           runtime::Task &last,
+           const std::vector<std::pair<std::vector<runtime::Task*>, std::vector<runtime::Task*>>> &sep_stages,
+           const std::vector<size_t> &n_threads,
+           const std::vector<size_t> &synchro_buffer_sizes,
+           const std::vector<bool> &synchro_active_waiting,
+           const std::vector<bool> &thread_pinning,
+           const std::string &pipeline_pinning_policy/*,
+           const std::vector<bool> &tasks_inplace*/)
+: Pipeline({&first},
+           {&last},
+           sep_stages,
+           n_threads,
+           synchro_buffer_sizes,
+           synchro_active_waiting,
+           thread_pinning, pipeline_pinning_policy/*,
+           tasks_inplace*/)
+{
+}
+
+Pipeline
+::Pipeline(runtime::Task &first,
+           const std::vector<std::pair<std::vector<runtime::Task*>, std::vector<runtime::Task*>>> &sep_stages,
+           const std::vector<size_t> &n_threads,
+           const std::vector<size_t> &synchro_buffer_sizes,
+           const std::vector<bool> &synchro_active_waiting,
+           const std::vector<bool> &thread_pinning,
+           const std::string &pipeline_pinning_policy/*,
+           const std::vector<bool> &tasks_inplace*/)
+: Pipeline({&first},
+           sep_stages,
+           n_threads,
+           synchro_buffer_sizes,
+           synchro_active_waiting,
            thread_pinning,
-           puids
-           /*, tasks_inplace*/)
+           pipeline_pinning_policy/*,
+           tasks_inplace*/)
 {
 }
 
@@ -268,151 +410,44 @@ Sequence* create_sequence<runtime::Task>(const std::vector<runtime::Task*> &firs
 {
 	return new runtime::Sequence(firsts, lasts, exclusions, n_threads, thread_pinning, puids, tasks_inplace);
 }
-//========================== Pipeline constructors with new version thread pinning =====================================
-Pipeline
-::Pipeline(const std::vector<runtime::Task*> &firsts,
-           const std::vector<runtime::Task*> &lasts,
-           const std::vector<std::tuple<std::vector<runtime::Task*>, std::vector<runtime::Task*>, std::vector<runtime::Task*>>> &sep_stages,
-           const std::vector<size_t> &n_threads,
-           const std::vector<size_t> &synchro_buffer_sizes,
-           const std::vector<bool> &synchro_active_waiting,
-           const std::vector<bool> &thread_pinning,
-           const std::string &pipeline_pinning_policy/*,
-           const std::vector<bool> &tasks_inplace*/)
-: original_sequence(firsts, lasts, 1),
-  stages(sep_stages.size()),
-  adaptors(sep_stages.size() -1),
-  saved_firsts_tasks_id(sep_stages.size()),
-  saved_lasts_tasks_id(sep_stages.size()),
-  bound_adaptors(false),
-  auto_stop(true)
+
+// Init and sequence creation for second pinning version
+template <class TA>
+runtime::Sequence* create_sequence(const std::vector<TA*> &firsts,
+                                   const std::vector<TA*> &lasts,
+                                   const std::vector<TA*> &exclusions,
+                                   const size_t &n_threads,
+                                   const bool &thread_pinning,
+                                   const std::string &pipeline_pinning_policy,
+                                   const bool &tasks_inplace)
 {
-	this->init<runtime::Task>(firsts,
-	                          lasts,
-	                          sep_stages,
-	                          n_threads,
-	                          synchro_buffer_sizes,
-	                          synchro_active_waiting,
-	                          thread_pinning, pipeline_pinning_policy
-	                          /*, tasks_inplace*/);
+	throw tools::unimplemented_error(__FILE__, __LINE__, __func__);
 }
 
-Pipeline
-::Pipeline(const std::vector<runtime::Task*> &firsts,
-           const std::vector<runtime::Task*> &lasts,
-           const std::vector<std::pair<std::vector<runtime::Task*>, std::vector<runtime::Task*>>> &sep_stages,
-           const std::vector<size_t> &n_threads,
-           const std::vector<size_t> &synchro_buffer_sizes,
-           const std::vector<bool> &synchro_active_waiting,
-           const std::vector<bool> &thread_pinning,
-           const std::string &pipeline_pinning_policy/*,
-           const std::vector<bool> &tasks_inplace*/)
-: original_sequence(firsts, lasts, 1),
-  stages(sep_stages.size()),
-  adaptors(sep_stages.size() -1),
-  saved_firsts_tasks_id(sep_stages.size()),
-  saved_lasts_tasks_id(sep_stages.size()),
-  bound_adaptors(false),
-  auto_stop(true)
+template <>
+runtime::Sequence* create_sequence<const runtime::Task>(const std::vector<const runtime::Task*> &firsts,
+                                                        const std::vector<const runtime::Task*> &lasts,
+                                                        const std::vector<const runtime::Task*> &exclusions,
+                                                        const size_t &n_threads,
+                                                        const bool &thread_pinning,
+                                                        const std::string &pipeline_pinning_policy,
+                                                        const bool &tasks_inplace)
 {
-	std::vector<std::tuple<std::vector<runtime::Task*>,
-	                       std::vector<runtime::Task*>,
-	                       std::vector<runtime::Task*>>> sep_stages_bis;
-	for (auto &sep_stage : sep_stages)
-		sep_stages_bis.push_back(std::make_tuple(sep_stage.first, sep_stage.second, std::vector<runtime::Task*>()));
-
-	this->init<runtime::Task>(firsts,
-	                          lasts,
-	                          sep_stages_bis,
-	                          n_threads,
-	                          synchro_buffer_sizes,
-	                          synchro_active_waiting,
-	                          thread_pinning, pipeline_pinning_policy
-	                          /*, tasks_inplace*/);
+	return new runtime::Sequence(firsts, lasts, exclusions, n_threads, thread_pinning, pipeline_pinning_policy);
 }
 
-Pipeline
-::Pipeline(const std::vector<runtime::Task*> &firsts,
-           const std::vector<std::tuple<std::vector<runtime::Task*>, std::vector<runtime::Task*>, std::vector<runtime::Task*>>> &sep_stages,
-           const std::vector<size_t> &n_threads,
-           const std::vector<size_t> &synchro_buffer_sizes,
-           const std::vector<bool> &synchro_active_waiting,
-           const std::vector<bool> &thread_pinning,
-           const std::string &pipeline_pinning_policy/*,
-           const std::vector<bool> &tasks_inplace*/)
-: Pipeline(firsts,
-           {},
-           sep_stages,
-           n_threads,
-           synchro_buffer_sizes,
-           synchro_active_waiting,
-           thread_pinning, pipeline_pinning_policy/*,
-           tasks_inplace*/)
+template <>
+Sequence* create_sequence<runtime::Task>(const std::vector<runtime::Task*> &firsts,
+                                         const std::vector<runtime::Task*> &lasts,
+                                         const std::vector<runtime::Task*> &exclusions,
+                                         const size_t &n_threads,
+                                         const bool &thread_pinning,
+                                         const std::string &pipeline_pinning_policy,
+                                         const bool &tasks_inplace)
 {
+	return new runtime::Sequence(firsts, lasts, exclusions, n_threads, thread_pinning, pipeline_pinning_policy,
+	                             tasks_inplace);
 }
-
-Pipeline
-::Pipeline(const std::vector<runtime::Task*> &firsts,
-           const std::vector<std::pair<std::vector<runtime::Task*>, std::vector<runtime::Task*>>> &sep_stages,
-           const std::vector<size_t> &n_threads,
-           const std::vector<size_t> &synchro_buffer_sizes,
-           const std::vector<bool> &synchro_active_waiting,
-           const std::vector<bool> &thread_pinning,
-           const std::string &pipeline_pinning_policy/*,
-           const std::vector<bool> &tasks_inplace*/)
-: Pipeline(firsts,
-           {},
-           sep_stages,
-           n_threads,
-           synchro_buffer_sizes,
-           synchro_active_waiting,
-           thread_pinning, pipeline_pinning_policy/*,
-           tasks_inplace*/)
-{
-}
-
-Pipeline
-::Pipeline(runtime::Task &first,
-           runtime::Task &last,
-           const std::vector<std::pair<std::vector<runtime::Task*>, std::vector<runtime::Task*>>> &sep_stages,
-           const std::vector<size_t> &n_threads,
-           const std::vector<size_t> &synchro_buffer_sizes,
-           const std::vector<bool> &synchro_active_waiting,
-           const std::vector<bool> &thread_pinning,
-           const std::string &pipeline_pinning_policy/*,
-           const std::vector<bool> &tasks_inplace*/)
-: Pipeline({&first},
-           {&last},
-           sep_stages,
-           n_threads,
-           synchro_buffer_sizes,
-           synchro_active_waiting,
-           thread_pinning,
-           pipeline_pinning_policy
-           /*, tasks_inplace*/)
-{
-}
-
-Pipeline
-::Pipeline(runtime::Task &first,
-           const std::vector<std::pair<std::vector<runtime::Task*>, std::vector<runtime::Task*>>> &sep_stages,
-           const std::vector<size_t> &n_threads,
-           const std::vector<size_t> &synchro_buffer_sizes,
-           const std::vector<bool> &synchro_active_waiting,
-           const std::vector<bool> &thread_pinning,
-           const std::string &pipeline_pinning_policy/*,
-           const std::vector<bool> &tasks_inplace*/)
-: Pipeline({&first},
-           sep_stages,
-           n_threads,
-           synchro_buffer_sizes,
-           synchro_active_waiting,
-           thread_pinning,
-           pipeline_pinning_policy
-           /*, tasks_inplace*/)
-{
-}
-
 
 template <class TA>
 void Pipeline
@@ -423,7 +458,8 @@ void Pipeline
        const std::vector<size_t> &synchro_buffer_sizes,
        const std::vector<bool> &synchro_active_waiting,
        const std::vector<bool> &thread_pinning,
-       const std::vector<std::vector<size_t>> &puids/*,
+       const std::vector<std::vector<size_t>> &puids,
+       const std::string &pipeline_pinning_policy/*,
        const std::vector<bool> &tasks_inplace*/)
 {
 	if (sep_stages.size() != n_threads.size() && n_threads.size() != 0)
@@ -490,6 +526,12 @@ void Pipeline
 		prev_is_parallel = t > 1;
 	}
 
+	// Creating a vector of pinning policies for each sequence
+	std::vector<std::string> sequences_pinning_policies;
+	if (pipeline_pinning_policy.empty())
+		sequences_pinning_policies = tools::Thread_pinning_utils::pipeline_parser_unpacker(pipeline_pinning_policy,
+		                                                                                   sep_stages.size());
+
 	for (size_t s = 0; s < sep_stages.size(); s++)
 	{
 		const std::vector<TA*> &stage_firsts = std::get<0>(sep_stages[s]);
@@ -498,199 +540,27 @@ void Pipeline
 		const size_t stage_n_threads = n_threads.size() ? n_threads[s] : 1;
 		const bool stage_thread_pinning = thread_pinning.size() ? thread_pinning[s] : false;
 		const std::vector<size_t> stage_puids =  puids.size() ? puids[s] : std::vector<size_t>();
+		const std::string sequence_pinning_policy = sequences_pinning_policies.size() ? sequences_pinning_policies[s] :
+		                                                                                "";
 		const bool stage_tasks_inplace = /*tasks_inplace.size() ? tasks_inplace[s] :*/ true;
-		try{
-			this->stages[s].reset(create_sequence<TA>(stage_firsts,
-													stage_lasts,
-													stage_exclusions,
-													stage_n_threads,
-													stage_thread_pinning,
-													stage_puids,
-													stage_tasks_inplace));
-		}
-		catch(const tools::control_flow_error& e)
+		try
 		{
-			std::stringstream message;
-			message << "Invalid control flow error on stage " << s
-			        << " (perhaps a switcher's tasks were separated between different stages)." << std::endl
-			        << e.what();
-			throw tools::control_flow_error(__FILE__, __LINE__, __func__, message.str());
-		}
-		this->stages[s]->is_part_of_pipeline = true;
-	}
-
-	// verify that the sequential sequence is equivalent to the pipeline sequence
-	auto ref_tasks = this->original_sequence.get_tasks_per_threads()[0];
-	auto cur_tasks = this->get_tasks_per_threads()[0];
-
-	if (ref_tasks.size() != cur_tasks.size())
-	{
-		std::ofstream f1("dbg_ref_sequence.dot");
-		this->original_sequence.export_dot(f1);
-		std::ofstream f2("dbg_cur_pipeline.dot");
-		this->export_dot(f2);
-
-		std::stringstream message;
-		message << "'ref_tasks.size()' has to be equal to 'cur_tasks.size()' ('ref_tasks.size()' = "
-		        << ref_tasks.size() << ", 'cur_tasks.size()' = " << cur_tasks.size() << ").";
-		throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
-	}
-
-	for (size_t ta = 0; ta < cur_tasks.size(); ta++)
-	{
-		if (std::find(ref_tasks.begin(), ref_tasks.end(), cur_tasks[ta]) == ref_tasks.end())
-		{
-			std::ofstream f1("dbg_ref_sequence.dot");
-			this->original_sequence.export_dot(f1);
-			std::ofstream f2("dbg_cur_pipeline.dot");
-			this->export_dot(f2);
-
-			std::stringstream message;
-			message << "'cur_tasks[ta]' is not contained in the 'ref_tasks' vector ('ta' = " << ta
-			        << ", 'cur_tasks[ta]' = " << +cur_tasks[ta]
-			        << ", 'cur_tasks[ta]->get_name()' = " << cur_tasks[ta]->get_name() << ").";
-			throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
-		}
-	}
-
-	this->create_adaptors(synchro_buffer_sizes, synchro_active_waiting);
-	this->bind_adaptors();
-}
-
-// Init and sequence creation for second version pinning
-
-template <class TA>
-runtime::Sequence* create_sequence(const std::vector<TA*> &firsts,
-                                   const std::vector<TA*> &lasts,
-                                   const std::vector<TA*> &exclusions,
-                                   const size_t &n_threads,
-                                   const bool &thread_pinning,
-                                   const std::string &pipeline_pinning_policy,
-                                   const bool &tasks_inplace)
-{
-	throw tools::unimplemented_error(__FILE__, __LINE__, __func__);
-}
-
-template <>
-runtime::Sequence* create_sequence<const runtime::Task>(const std::vector<const runtime::Task*> &firsts,
-                                                        const std::vector<const runtime::Task*> &lasts,
-                                                        const std::vector<const runtime::Task*> &exclusions,
-                                                        const size_t &n_threads,
-                                                        const bool &thread_pinning,
-                                                        const std::string &pipeline_pinning_policy,
-                                                        const bool &tasks_inplace)
-{
-	return new runtime::Sequence(firsts, lasts, exclusions, n_threads, thread_pinning, pipeline_pinning_policy);
-}
-
-template <>
-Sequence* create_sequence<runtime::Task>(const std::vector<runtime::Task*> &firsts,
-                                         const std::vector<runtime::Task*> &lasts,
-                                         const std::vector<runtime::Task*> &exclusions,
-                                         const size_t &n_threads,
-                                         const bool &thread_pinning,
-                                         const std::string &pipeline_pinning_policy,
-                                         const bool &tasks_inplace)
-{
-	return new runtime::Sequence(firsts, lasts, exclusions, n_threads, thread_pinning, pipeline_pinning_policy, tasks_inplace);
-}
-
-template <class TA>
-void Pipeline
-::init(const std::vector<TA*> &firsts,
-       const std::vector<TA*> &lasts,
-       const std::vector<std::tuple<std::vector<TA*>,std::vector<TA*>,std::vector<TA*>>> &sep_stages,
-       const std::vector<size_t> &n_threads,
-       const std::vector<size_t> &synchro_buffer_sizes,
-       const std::vector<bool> &synchro_active_waiting,
-       const std::vector<bool> &thread_pinning,
-       const std::string &pipeline_pinning_policy/*,
-       const std::vector<bool> &tasks_inplace*/)
-{
-	if (sep_stages.size() != n_threads.size() && n_threads.size() != 0)
-	{
-		std::stringstream message;
-		message << "'n_threads.size()' has to be equal to 'sep_stages.size()' or equal to '0' ('n_threads.size()' = "
-		        << n_threads.size() << " , 'sep_stages.size()' = " << sep_stages.size() << ").";
-		throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
-	}
-
-	if (sep_stages.size() != synchro_buffer_sizes.size() +1 && synchro_buffer_sizes.size() != 0)
-	{
-		std::stringstream message;
-		message << "'synchro_buffer_sizes.size()' has to be equal to 'sep_stages.size() -1' or equal to '0' "
-		        << "('synchro_buffer_sizes.size()' = " << synchro_buffer_sizes.size() << " , 'sep_stages.size()' = "
-		        << sep_stages.size() << ").";
-		throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
-	}
-
-	if (sep_stages.size() != synchro_active_waiting.size() +1 && synchro_active_waiting.size() != 0)
-	{
-		std::stringstream message;
-		message << "'synchro_active_waiting.size()' has to be equal to 'sep_stages.size() -1' or equal to '0' "
-		        << "('synchro_active_waiting.size()' = " << synchro_active_waiting.size() << " , 'sep_stages.size()' = "
-		        << sep_stages.size() << ").";
-		throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
-	}
-
-	if (sep_stages.size() != thread_pinning.size() && thread_pinning.size() != 0)
-	{
-		std::stringstream message;
-		message << "'thread_pinning.size()' has to be equal to 'sep_stages.size()' or equal to '0' ("
-		        << "'thread_pinning.size()' = " << thread_pinning.size() << " , 'sep_stages.size()' = "
-		        << sep_stages.size() << ").";
-		throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
-	}
-
-	//if (sep_stages.size() != puids.size() && puids.size() != 0)
-	//{
-	//	std::stringstream message;
-	//	message << "'puids.size()' has to be equal to 'sep_stages.size()' or equal to '0' ('puids.size()' = "
-	//	        << puids.size() << " , 'sep_stages.size()' = " << sep_stages.size() << ").";
-	//	throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
-	//}
-
-	// if (sep_stages.size() != tasks_inplace.size() && tasks_inplace.size() != 0)
-	// {
-	// 	std::stringstream message;
-	// 	message << "'tasks_inplace.size()' has to be equal to 'sep_stages.size()' or equal to '0' ('"
-	// 	        << "tasks_inplace.size()' = " << tasks_inplace.size() << " , 'sep_stages.size()' = "
-	// 	        << sep_stages.size() << ").";
-	// 	throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
-	// }
-
-	bool prev_is_parallel = false;
-	for (auto t : n_threads)
-	{
-		if (t > 1 && prev_is_parallel)
-		{
-			std::stringstream message;
-			message << "Consecutive parallel stages are not supported.";
-			throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
-		}
-		prev_is_parallel = t > 1;
-	}
-	// Creating a vector of pinning policies for each sequence
-	std::vector<std::string> sequences_pinning_policies
-					= tools::Thread_pinning_utils::pipeline_parser_unpacker(pipeline_pinning_policy, sep_stages.size());
-
-	for (size_t s = 0; s < sep_stages.size(); s++)
-	{
-		const std::vector<TA*> &stage_firsts = std::get<0>(sep_stages[s]);
-		const std::vector<TA*> &stage_lasts = std::get<1>(sep_stages[s]);
-		const std::vector<TA*> &stage_exclusions = std::get<2>(sep_stages[s]);
-		const size_t stage_n_threads = n_threads.size() ? n_threads[s] : 1;
-		const bool stage_thread_pinning = thread_pinning.size() ? thread_pinning[s] : false;
-		const std::string sequence_pinning_policy = sequences_pinning_policies.size() ? sequences_pinning_policies[s] : "";
-		const bool stage_tasks_inplace = /*tasks_inplace.size() ? tasks_inplace[s] :*/ true;
-		try{
-			this->stages[s].reset(create_sequence<TA>(stage_firsts,
-													stage_lasts,
-													stage_exclusions,
-													stage_n_threads,
-													stage_thread_pinning,
-													sequence_pinning_policy,
-													stage_tasks_inplace));
+			if (pipeline_pinning_policy.empty())
+				this->stages[s].reset(create_sequence<TA>(stage_firsts,
+				                                          stage_lasts,
+				                                          stage_exclusions,
+				                                          stage_n_threads,
+				                                          stage_thread_pinning,
+				                                          stage_puids,
+				                                          stage_tasks_inplace));
+			else
+				this->stages[s].reset(create_sequence<TA>(stage_firsts,
+				                                          stage_lasts,
+				                                          stage_exclusions,
+				                                          stage_n_threads,
+				                                          stage_thread_pinning,
+				                                          sequence_pinning_policy,
+				                                          stage_tasks_inplace));
 		}
 		catch(const tools::control_flow_error& e)
 		{

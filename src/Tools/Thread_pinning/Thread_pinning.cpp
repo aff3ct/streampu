@@ -169,15 +169,12 @@ void Thread_pinning::pin(const std::string hwloc_objects)
 		// getting the pairs
 		std::vector<std::pair<hwloc_obj_type_t, int>> object_numbers;
 		for (auto obj : hwloc_objects_vector)
-		{
 			object_numbers.push_back(Thread_pinning_utils::str_to_hwloc_object(obj));
-		}
+
 		// getting topology depth of each object
 		std::vector<int> object_depth = {};
 		for (auto obj : object_numbers)
-		{
 			object_depth.push_back(hwloc_get_type_or_below_depth(g_topology, obj.first));
-		}
 
 		// Allocating cpu_set
 		hwloc_bitmap_t all_pus = hwloc_bitmap_alloc();
@@ -200,13 +197,13 @@ void Thread_pinning::pin(const std::string hwloc_objects)
 			char c[128];
 			hwloc_bitmap_snprintf(c, 128, all_pus);
 
-			std::cerr << "Thread pinning info -- ";
+			std::clog << "Thread pinning info -- ";
 			for (size_t i = 0; i < hwloc_objects_vector.size(); ++i)
 			{
-				std::cerr << "Object = " << hwloc_objects_vector[i] << " | number = " << object_numbers[i].second
-						<< std::endl;
+				std::clog << "Object = " << hwloc_objects_vector[i] << " | number = " << object_numbers[i].second
+				          << std::endl;
 			}
-			std::cerr << "bitmap: " << all_pus << std::endl;
+			std::clog << "bitmap: " << all_pus << std::endl;
 		}
 
 		/* And try to bind ourself there. */
@@ -226,16 +223,14 @@ void Thread_pinning::pin(const std::string hwloc_objects)
 	{
 		if (g_enable_logs)
 		{
-			std::clog <<"You can't call the 'pin' method if you have not call the "
-					"'init' method before, nothing will "
-					<<"be done." << std::endl;
+			std::clog << "You can't call the 'pin' method if you have not call the 'init' method before, nothing will "
+			          << "be done." << std::endl;
 		}
 	}
 #else
 	if (g_enable_logs)
 	{
-		std::clog << "'pin' method do nothing as AFF3CT has not been linked with "
-					"the 'hwloc' library." << std::endl;
+		std::clog << "'pin' method do nothing as AFF3CT has not been linked with the 'hwloc' library." << std::endl;
 	}
 #endif
 	g_mtx.unlock();

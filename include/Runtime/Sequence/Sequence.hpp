@@ -91,7 +91,6 @@ protected:
 	// Extra attribute for pinning v2
 	std::vector<std::string> objects_per_thread;
 
-
 public:
 	static bool force_stop_exec; // static variable to stop the current execution used by the signal handler (SIGINT)
 
@@ -148,7 +147,6 @@ public:
 	         const bool thread_pinning = false,
 	         const std::vector<size_t> &puids = {},
 	         const bool tasks_inplace = true);
-
 
 	// Constructors for pinning v2
 	Sequence(const std::vector<const runtime::Task*> &firsts,
