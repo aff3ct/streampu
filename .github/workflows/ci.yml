@@ -131,7 +131,7 @@ jobs:
         run: |
           export CXX="g++"
           export CFLAGS="-Wall -funroll-loops -m64 -mavx2 -mfma"
-          export CMAKE_OPT="-DCMAKE_BUILD_TYPE=RelWithDebInfo -DAFF3CT_CORE_TESTS=ON -DAFF3CT_CORE_COMPILE_STATIC_LIB=ON -DAFF3CT_CORE_COMPILE_SHARED_LIB=ON"
+          export CMAKE_OPT="-DCMAKE_BUILD_TYPE=RelWithDebInfo -DAFF3CT_CORE_TESTS=ON -DAFF3CT_CORE_COMPILE_STATIC_LIB=ON -DAFF3CT_CORE_COMPILE_SHARED_LIB=ON -DAFF3CT_CORE_LINK_HWLOC=ON"
           source ./ci/tools/threads.sh
           ./ci/build-linux-macos.sh
           cd build
