@@ -1,9 +1,9 @@
 #include <functional>
 #include <iostream>
 #include <sstream>
-#include <errno.h>
-#include <stdio.h>
-#include <string.h>
+#include <cerrno>
+#include <cstdio>
+#include <cstring>
 #include <vector>
 #include <mutex>
 #ifdef AFF3CT_CORE_HWLOC
@@ -131,7 +131,7 @@ void Thread_pinning
 			char *str;
 			int error = errno;
 			hwloc_bitmap_asprintf(&str, pu_obj->cpuset);
-			printf("Couldn't bind to cpuset %s: %s\n", str, strerror(error));
+			std::clog << "Couldn't bind to cpuset " << str << ": " << strerror(error) << std::endl;
 			free(str);
 		}
 
@@ -212,7 +212,7 @@ void Thread_pinning::pin(const std::string hwloc_objects)
 			char *str;
 			int   error = errno;
 			hwloc_bitmap_asprintf(&str, all_pus);
-			printf("Couldn't bind to cpuset %s: %s\n", str, strerror(error));
+			std::clog << "Couldn't bind to cpuset " << str << ": " << strerror(error) << std::endl;
 			free(str);
 		}
 
@@ -257,8 +257,10 @@ void Thread_pinning
 		if (hwloc_set_cpubind(g_topology, unpin_set, HWLOC_CPUBIND_THREAD))
 		{
 			char *bitmap_str;
+			int error = errno;
 			hwloc_bitmap_asprintf(&bitmap_str, unpin_set);
-			std::clog << "'unpin' method failed ('bitmap_str' = " << bitmap_str << ")" << std::endl;
+			std::clog << "'unpin' method failed ('bitmap_str' = " << bitmap_str << ", 'error' = " << strerror(error)
+			          << ")" << std::endl;
 			free(bitmap_str);
 		}
 		hwloc_bitmap_free(unpin_set);
