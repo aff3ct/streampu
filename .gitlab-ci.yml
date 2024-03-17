@@ -77,7 +77,7 @@ build-linux-gcc-coverage-regression:
     - export CXX="g++"
     - export CFLAGS="-Wall -funroll-loops -msse4.2 --coverage"
     - export LFLAGS="--coverage"
-    - export CMAKE_OPT="-DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS_DEBUG=-O0 -DAFF3CT_CORE_TESTS=ON -DAFF3CT_CORE_COMPILE_STATIC_LIB=ON -DAFF3CT_CORE_COMPILE_SHARED_LIB=ON"
+    - export CMAKE_OPT="-DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS_DEBUG=-O0 -DAFF3CT_CORE_TESTS=ON -DAFF3CT_CORE_COMPILE_STATIC_LIB=ON -DAFF3CT_CORE_COMPILE_SHARED_LIB=ON -DAFF3CT_CORE_LINK_HWLOC=ON"
     - source ./ci/tools/threads.sh
     - ./ci/build-linux-macos.sh
     - ./ci/test-coverage-regression.sh
@@ -159,7 +159,7 @@ test-memcheck-regression:
   script:
     - export CXX="g++"
     - export CFLAGS="-Wall -funroll-loops -m64 -mavx2 -mfma"
-    - export CMAKE_OPT="-DCMAKE_BUILD_TYPE=RelWithDebInfo -DAFF3CT_CORE_TESTS=ON -DAFF3CT_CORE_COMPILE_STATIC_LIB=ON -DAFF3CT_CORE_COMPILE_SHARED_LIB=ON"
+    - export CMAKE_OPT="-DCMAKE_BUILD_TYPE=RelWithDebInfo -DAFF3CT_CORE_TESTS=ON -DAFF3CT_CORE_COMPILE_STATIC_LIB=ON -DAFF3CT_CORE_COMPILE_SHARED_LIB=ON -DAFF3CT_CORE_LINK_HWLOC=ON"
     - source ./ci/tools/threads.sh
     - ./ci/build-linux-macos.sh
     - cd build
