@@ -1248,10 +1248,10 @@ void Pipeline
 void Pipeline
 ::exec(const std::vector<std::function<bool(const std::vector<const int*>&)>> &stop_conditions)
 {
-	if (stop_conditions.size() != this->stages.size())
+	if (stop_conditions.size() != this->stages.size() && stop_conditions.size() != 1)
 	{
 		std::stringstream message;
-		message << "'stop_conditions.size()' has to be equal to 'stages.size()' ('stop_conditions.size()' = "
+		message << "'stop_conditions.size()' has to be equal to 'stages.size()' or to 1 ('stop_conditions.size()' = "
 		        << stop_conditions.size() << ", 'stages.size()' = " << stages.size() << ").";
 		throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
 	}
@@ -1267,10 +1267,17 @@ void Pipeline
 	std::vector<std::thread> threads;
 	for (size_t s = 0; s < stages.size() -1; s++)
 	{
-		auto &stop_condition = stop_conditions[s];
-		threads.push_back(std::thread([&stages, s, &stop_condition]()
+		const std::function<bool(const std::vector<const int*>&)> *stop_condition = nullptr;
+		if (stop_conditions.size() == this->stages.size())
+			stop_condition = &stop_conditions[s];
+
+		threads.push_back(std::thread([&stages, s, stop_condition]()
 		{
-			stages[s]->exec(stop_condition);
+			if (stop_condition)
+				stages[s]->exec(*stop_condition);
+			else
+				stages[s]->exec();
+
 			// send the signal to stop the next stage
 			const auto &tasks = stages[s + 1]->get_tasks_per_threads();
 			for (size_t th = 0; th < tasks.size(); th++)
@@ -1283,7 +1290,7 @@ void Pipeline
 				}
 		}));
 	}
-	stages[stages.size() -1]->exec(stop_conditions[stages.size() -1]);
+	stages[stages.size() -1]->exec(stop_conditions[stop_conditions.size() -1]);
 	// stop all the stages before
 	for (size_t notify_s = 0; notify_s < stages.size() -1; notify_s++)
 		for (auto &m : stages[notify_s]->get_modules<tools::Interface_waiting>())
@@ -1313,10 +1320,10 @@ void Pipeline
 void Pipeline
 ::exec(const std::vector<std::function<bool()>> &stop_conditions)
 {
-	if (stop_conditions.size() != this->stages.size())
+	if (stop_conditions.size() != this->stages.size() && stop_conditions.size() != 1)
 	{
 		std::stringstream message;
-		message << "'stop_conditions.size()' has to be equal to 'stages.size()' ('stop_conditions.size()' = "
+		message << "'stop_conditions.size()' has to be equal to 'stages.size()' or to 1 ('stop_conditions.size()' = "
 		        << stop_conditions.size() << ", 'stages.size()' = " << stages.size() << ").";
 		throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
 	}
@@ -1332,10 +1339,17 @@ void Pipeline
 	std::vector<std::thread> threads;
 	for (size_t s = 0; s < stages.size() -1; s++)
 	{
-		auto &stop_condition = stop_conditions[s];
-		threads.push_back(std::thread([&stages, s, &stop_condition]()
+		const std::function<bool()> *stop_condition = nullptr;
+		if (stop_conditions.size() == this->stages.size())
+			stop_condition = &stop_conditions[s];
+
+		threads.push_back(std::thread([&stages, s, stop_condition]()
 		{
-			stages[s]->exec(stop_condition);
+			if (stop_condition)
+				stages[s]->exec(*stop_condition);
+			else
+				stages[s]->exec();
+
 			// send the signal to stop the next stage
 			const auto &tasks = stages[s + 1]->get_tasks_per_threads();
 			for (size_t th = 0; th < tasks.size(); th++)
@@ -1348,7 +1362,7 @@ void Pipeline
 				}
 		}));
 	}
-	stages[stages.size() -1]->exec(stop_conditions[stages.size() -1]);
+	stages[stages.size() -1]->exec(stop_conditions[stop_conditions.size() -1]);
 	// stop all the stages before
 	for (size_t notify_s = 0; notify_s < stages.size() -1; notify_s++)
 		for (auto &m : stages[notify_s]->get_modules<tools::Interface_waiting>())
@@ -1378,13 +1392,13 @@ void Pipeline
 void Pipeline
 ::exec(std::function<bool(const std::vector<const int*>&)> stop_condition)
 {
-	this->exec(std::vector<std::function<bool(const std::vector<const int*>&)>>(this->stages.size(), stop_condition));
+	this->exec(std::vector<std::function<bool(const std::vector<const int*>&)>>(1, stop_condition));
 }
 
 void Pipeline
 ::exec(std::function<bool()> stop_condition)
 {
-	this->exec(std::vector<std::function<bool()>>(this->stages.size(), stop_condition));
+	this->exec(std::vector<std::function<bool()>>(1, stop_condition));
 }
 
 void Pipeline
