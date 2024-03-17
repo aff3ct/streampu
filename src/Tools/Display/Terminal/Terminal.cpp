@@ -1,8 +1,3 @@
-#ifdef AFF3CT_MPI
-#include <mpi.h>
-#include <sstream>
-#include "Tools/Exception/exception.hpp"
-#endif
 #include <csignal>
 #include <cstdlib>
 
