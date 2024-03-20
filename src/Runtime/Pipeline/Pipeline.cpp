@@ -528,7 +528,7 @@ void Pipeline
 
 	// Creating a vector of pinning policies for each sequence
 	std::vector<std::string> sequences_pinning_policies;
-	if (pipeline_pinning_policy.empty())
+	if (!pipeline_pinning_policy.empty())
 		sequences_pinning_policies = tools::Thread_pinning_utils::pipeline_parser_unpacker(pipeline_pinning_policy,
 		                                                                                   sep_stages.size());
 
