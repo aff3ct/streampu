@@ -252,8 +252,8 @@ void Thread_pinning
 	}
 	else
 	{
-		hwloc_bitmap_t unpin_set = hwloc_bitmap_alloc();
-		unpin_set = hwloc_get_obj_by_depth(g_topology, 0, 0)->cpuset; // get cpuset of root object
+		// get cpuset of root object
+		hwloc_cpuset_t unpin_set = hwloc_bitmap_dup(hwloc_get_obj_by_depth(g_topology, 0, 0)->cpuset);
 		if (hwloc_set_cpubind(g_topology, unpin_set, HWLOC_CPUBIND_THREAD))
 		{
 			char *bitmap_str;
