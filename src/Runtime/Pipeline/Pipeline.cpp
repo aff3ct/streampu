@@ -1407,18 +1407,6 @@ void Pipeline
 	this->exec([]() { return false; });
 }
 
-const std::vector<std::vector<runtime::Task*>>& Pipeline
-::get_firsts_tasks() const
-{
-	return this->stages[0]->get_firsts_tasks();
-}
-
-const std::vector<std::vector<runtime::Task*>>& Pipeline
-::get_lasts_tasks() const
-{
-	return this->stages.back()->get_lasts_tasks();
-}
-
 std::vector<std::vector<module::Module*>> Pipeline
 ::get_modules_per_threads() const
 {
