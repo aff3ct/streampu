@@ -8,8 +8,9 @@ using namespace aff3ct::module;
 
 template <typename T>
 Finalizer<T>
-::Finalizer(const size_t n_elmts)
-: Module(), final_data(this->get_n_frames(), std::vector<T>(n_elmts, 0))
+::Finalizer(const size_t n_elmts, const size_t history_size)
+: Module(), data(history_size, std::vector<std::vector<T>>(this->get_n_frames(), std::vector<T>(n_elmts, 0))),
+  next_stream_id(0)
 {
 	const std::string name = "Finalizer";
 	this->set_name(name);
@@ -19,6 +20,13 @@ Finalizer<T>
 	{
 		std::stringstream message;
 		message << "'n_elmts' has to be greater than 0.";
+		throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
+	}
+
+	if (history_size == 0)
+	{
+		std::stringstream message;
+		message << "'history_size' has to be greater than 0.";
 		throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
 	}
 
@@ -45,7 +53,22 @@ template <typename T>
 const std::vector<std::vector<T>>& Finalizer<T>
 ::get_final_data() const
 {
-	return this->final_data;
+	auto last_stream_id = this->next_stream_id ? this->next_stream_id - 1 : this->data.size() -1;
+	return this->data[last_stream_id];
+}
+
+template <typename T>
+const std::vector<std::vector<std::vector<T>>>& Finalizer<T>
+::get_histo_data() const
+{
+	return this->data;
+}
+
+template <typename T>
+const size_t Finalizer<T>
+::get_next_stream_id() const
+{
+	return this->next_stream_id;
 }
 
 template <typename T>
@@ -56,9 +79,12 @@ void Finalizer<T>
 	if (old_n_frames != n_frames)
 	{
 		Module::set_n_frames(n_frames);
-		this->final_data.resize(n_frames);
-		for (size_t f = old_n_frames; f < n_frames; f++)
-			this->final_data[f].resize(this->final_data[0].size());
+		for (size_t s = 0; s < this->data.size(); s++)
+		{
+			this->data[s].resize(n_frames);
+			for (size_t f = old_n_frames; f < n_frames; f++)
+				this->data[s][f].resize(this->data[s][0].size());
+		}
 	}
 }
 
@@ -75,8 +101,17 @@ void Finalizer<T>
 ::_finalize(const T *in, const size_t frame_id)
 {
 	std::copy(in,
-	          in + this->final_data[0].size(),
-	          this->final_data[frame_id].begin());
+	          in + this->data[this->next_stream_id][0].size(),
+	          this->data[this->next_stream_id][frame_id].begin());
+
+	this->next_stream_id = (this->next_stream_id + 1) % this->data.size();
+}
+
+template <typename T>
+void Finalizer<T>
+::reset()
+{
+	this->next_stream_id = 0;
 }
 
 // ==================================================================================== explicit template instantiation

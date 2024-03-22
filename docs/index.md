@@ -1,10 +1,11 @@
-# AFF3CT-core Developer Documentation
+# AFF3CT-core Documentation
 
 ## Introduction
 
 `AFF3CT-core` is a DSEL for streaming applications written in C++. This 
-documentation focus on explaining the basic elements of the language from the 
-**developer point of view**.
+documentation maily focuses on explaining the basic elements of the language 
+from the **developer point of view**. The user documention is is currently 
+underway.
 
 Here are the main features of `AFF3CT-core`:
 
@@ -30,21 +31,23 @@ matches **single-rate SDF streaming applications**.
 
 ## Contents of the Documentation
 
-Basic components:
+**For Users**
 
-1. [Task](task.md)
-2. [Module](module.md)
-3. [Socket](socket.md)
-4. [Sequence & Subsequence](sequence.md)
-5. [Pipeline](pipeline.md)  
-6. [Control flow](switcher.md)
+  - Tests:
+    1. [Bootstrap](tests_bootstrap.md)
 
-New features and discussions:
+**For Developpers**
 
-1. [Forward sockets](socket_fwd.md)
-2. [Pipeline & Control Flow](pipeline_ctrl_flow.md)
-3. [Work in Progress](wip.md)
+ - Basic Components:
+    1. [Task](task.md)
+    2. [Module](module.md)
+    3. [Socket](socket.md)
+    4. [Sequence & Subsequence](sequence.md)
+    5. [Pipeline](pipeline.md)  
+    6. [Control flow](switcher.md)
 
-Tests:
+ - New Features and Discussions:
+    1. [Forward sockets](socket_fwd.md)
+    2. [Pipeline & Control Flow](pipeline_ctrl_flow.md)
+    3. [Work in Progress](wip.md)
 
-1. [Bootstrap](tests_bootstrap.md)

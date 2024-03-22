@@ -1,4 +1,4 @@
-site_name: AFF3CT-core Developer Documentation
+site_name: AFF3CT-core Documentation
 site_url: https://aff3ct.github.io/aff3ct-core/
 theme:
   logo: assets/diagram-project-solid.svg
@@ -85,16 +85,18 @@ extra_javascript:
 nav:
   - Home: 
     - index.md
-  - Basic Components:
-      - task.md
-      - module.md
-      - socket.md
-      - sequence.md
-      - pipeline.md
-      - switcher.md
-  - New Features and Discussions:
-      - socket_fwd.md
-      - pipeline_ctrl_flow.md
-      - wip.md
-  - Tests:
+  - For Users:
+    - Tests:
       - tests_bootstrap.md
+  - For Developers:
+      - Basic Components:
+        - task.md
+        - module.md
+        - socket.md
+        - sequence.md
+        - pipeline.md
+        - switcher.md
+      - New Features and Discussions:
+        - socket_fwd.md
+        - pipeline_ctrl_flow.md
+        - wip.md
