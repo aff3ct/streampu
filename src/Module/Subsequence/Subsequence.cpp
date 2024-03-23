@@ -106,7 +106,7 @@ void Subsequence
 		if (s->get_type() == runtime::socket_t::SOUT && s->get_name() != "status")
 		{
 			while (p.sockets[sid]->get_type() != runtime::socket_t::SOUT) sid++;
-			p.sockets[sid++]->bind(*s);
+			p.sockets[sid++]->_bind(*s); // out to out socket binding = black magic
 		}
 	}
 
@@ -121,7 +121,7 @@ void Subsequence
 			if (s->get_type() == runtime::socket_t::SIN)
 			{
 				while (t.sockets[sid]->get_type() != runtime::socket_t::SIN) sid++;
-				s->bind(t.sockets[sid++]->_get_dataptr());
+				(*s) = t.sockets[sid++]->_get_dataptr();
 			}
 		}
 
@@ -171,7 +171,7 @@ void Subsequence
 		if (s->get_type() == runtime::socket_t::SOUT && s->get_name() != "status")
 		{
 			while (p.sockets[sid]->get_type() != runtime::socket_t::SOUT) sid++;
-			p.sockets[sid++]->bind(*s);
+			p.sockets[sid++]->_bind(*s); // out to out socket binding = black magic
 		}
 	}
 }
@@ -207,7 +207,7 @@ void Subsequence
 			if (s->get_type() == runtime::socket_t::SOUT && s->get_name() != "status")
 			{
 				while (p.sockets[sid]->get_type() != runtime::socket_t::SOUT) sid++;
-				p.sockets[sid++]->bind(*s);
+				p.sockets[sid++]->_bind(*s); // out to out socket binding = black magic
 			}
 		}
 	}

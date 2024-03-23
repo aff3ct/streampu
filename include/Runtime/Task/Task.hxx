@@ -23,7 +23,11 @@ bool Task
 bool Task
 ::is_fast() const
 {
+#ifndef AFF3CT_CORE_FAST
 	return this->fast;
+#else
+	return true;
+#endif
 }
 
 bool Task

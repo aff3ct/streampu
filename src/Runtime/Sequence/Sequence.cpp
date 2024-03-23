@@ -1411,9 +1411,11 @@ void Sequence
 			}
 			catch (std::exception &e)
 			{
-				std::cerr << rang::tag::error << "Module clone failed when trying to duplicate the sequence: module "
-				                              << "name is '" << modules_vec[m]->get_name() << "'." << std::endl;
-				throw e;
+				std::stringstream message;
+				message << "Module clone failed when trying to duplicate the sequence (module name is '"
+				        << modules_vec[m]->get_name() << "').";
+
+				throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
 			}
 			this->all_modules[tid + (this->tasks_inplace ? 1 : 0)][m] = this->modules[tid][m].get();
 		}
@@ -1516,7 +1518,7 @@ void Sequence
 
 								auto &s_in  = *this->all_modules[thread_id][m_id    ]->tasks[t_id    ]->sockets[s_id    ];
 								auto &s_out = *this->all_modules[thread_id][m_id_out]->tasks[t_id_out]->sockets[s_id_out];
-								s_in.bind(s_out);
+								s_in = s_out;
 							}
 						}
 					}
@@ -1549,7 +1551,7 @@ void Sequence
 
 								auto &t_in  = *this->all_modules[thread_id][m_id    ]->tasks[t_id    ];
 								auto &s_out = *this->all_modules[thread_id][m_id_out]->tasks[t_id_out]->sockets[s_id_out];
-								t_in.bind(s_out);
+								t_in = s_out;
 							}
 						}
 					}
@@ -2434,11 +2436,11 @@ void Sequence
 {
 	// rebind the sockets
 	for (auto &u : unbind_sockets)
-		u.first->bind(*u.second);
+		(*u.first) = *u.second;
 
 	// rebind the tasks
 	for (auto &u : unbind_tasks)
-		u.first->bind(*u.second);
+		(*u.first) = *u.second;
 }
 
 void Sequence

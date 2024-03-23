@@ -28,6 +28,7 @@ class Module;
 namespace runtime
 {
 class Socket;
+class Pipeline;
 
 enum status_t : int { SUCCESS = 0,
                       FAILURE = 1,
@@ -48,6 +49,7 @@ class Task : public tools::Interface_clone, public tools::Interface_reset
 {
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 	friend Socket;
+	friend Pipeline;
 	friend module::Module;
 #endif
 
@@ -153,15 +155,18 @@ public:
 
 	inline const std::vector<int>& get_status() const;
 
-	void   bind     (Socket &s_out, const int priority = -1);
+	void   bind     (Socket &s_out, const int priority = -1); // deprecated
 	void   operator=(Socket &s_out                         );
 	size_t unbind   (Socket &s_out                         );
 
-	void   bind     (Task &t_out, const int priority = -1);
+	void   bind     (Task &t_out, const int priority = -1); // deprecated
 	void   operator=(Task &t_out                         );
 	size_t unbind   (Task &t_out                         );
 
 protected:
+	void  _bind(Socket &s_out, const int priority = -1);
+	void  _bind(Task &t_out, const int priority = -1);
+
 	void _exec(const int frame_id = -1, const bool managed_memory = true);
 
 	void register_timer(const std::string &key);

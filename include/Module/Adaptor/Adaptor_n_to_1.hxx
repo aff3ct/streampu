@@ -103,7 +103,7 @@ void Adaptor_n_to_1
 			adp.wait_pull();
 			// for debug mode coherence
 			for (size_t s = 0; s < t.sockets.size() -1; s++)
-				t.sockets[s]->bind(adp.get_filled_buffer(s));
+				t.sockets[s]->_bind(adp.get_filled_buffer(s));
 		}
 		else
 		{

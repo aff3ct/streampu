@@ -1135,12 +1135,12 @@ void Pipeline
 				auto sck_in   = std::get<1>(bind);
 				auto priority = std::get<2>(bind);
 				if (sck_in != nullptr) // if socket to socket binding
-					sck_in->bind(*sck_out, priority);
+					sck_in->_bind(*sck_out, priority);
 				else // if socket to task binding
 				{
 					auto tsk_in = std::get<3>(bind);
 					assert(tsk_in != nullptr);
-					tsk_in->bind(*sck_out, priority);
+					tsk_in->_bind(*sck_out, priority);
 				}
 			}
 		}
@@ -1231,12 +1231,12 @@ void Pipeline
 				auto priority = std::get<4>(bind.first);
 				auto sck_in   = std::get<0>(bind.second);
 				if (sck_in != nullptr) // if socket to socket binding
-					sck_in->bind(*sck_out, priority);
+					sck_in->_bind(*sck_out, priority);
 				else // if socket to task binding
 				{
 					auto tsk_in = std::get<4>(bind.second);
 					assert(tsk_in != nullptr);
-					tsk_in->bind(*sck_out, priority);
+					tsk_in->_bind(*sck_out, priority);
 				}
 			}
 		}
@@ -1645,12 +1645,12 @@ void Pipeline
 		auto priority = std::get<4>(bind.first);
 		auto sck_in   = std::get<0>(bind.second);
 		if (sck_in != nullptr)
-			sck_in->bind(*sck_out, priority);
+			sck_in->_bind(*sck_out, priority);
 		else
 		{
 			auto tsk_in = std::get<4>(bind.second);
 			assert(tsk_in != nullptr);
-			tsk_in->bind(*sck_out, priority);
+			tsk_in->_bind(*sck_out, priority);
 		}
 	}
 

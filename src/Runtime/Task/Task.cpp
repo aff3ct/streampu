@@ -968,7 +968,7 @@ Task* Task
 }
 
 void Task
-::bind(Socket &s_out, const int priority)
+::_bind(Socket &s_out, const int priority)
 {
 	// check if the 's_out' socket is already used for an other fake input socket
 	bool already_bound = false;
@@ -1005,26 +1005,62 @@ void Task
 		                                                  s_out.get_databytes(),
 		                                                  socket_t::SIN,
 		                                                  this->is_fast())));
-		this->fake_input_sockets.back()->bind(s_out, priority);
+		this->fake_input_sockets.back()->_bind(s_out, priority);
 		this->last_input_socket = this->fake_input_sockets.back().get();
 		this->n_input_sockets++;
 	}
 }
 
 void Task
+::bind(Socket &s_out, const int priority)
+{
+#ifdef AFF3CT_CORE_SHOW_DEPRECATED
+	std::clog << rang::tag::warning
+	          << "Deprecated: 'Task::bind()' should be replaced by 'Task::operator='." << std::endl;
+#ifdef AFF3CT_CORE_STACKTRACE
+#ifdef AFF3CT_CORE_COLORS
+	bool enable_color = true;
+#else
+	bool enable_color = false;
+#endif
+	cpptrace::generate_trace().print(std::clog, enable_color);
+#endif
+#endif
+	this->_bind(s_out, priority);
+}
+
+void Task
+::_bind(Task &t_out, const int priority)
+{
+	this->_bind(*t_out.sockets.back(), priority);
+}
+
+void Task
 ::bind(Task &t_out, const int priority)
 {
-	this->bind(*t_out.sockets.back(), priority);
+#ifdef AFF3CT_CORE_SHOW_DEPRECATED
+	std::clog << rang::tag::warning
+	          << "Deprecated: 'Task::bind()' should be replaced by 'Task::operator='." << std::endl;
+#ifdef AFF3CT_CORE_STACKTRACE
+#ifdef AFF3CT_CORE_COLORS
+	bool enable_color = true;
+#else
+	bool enable_color = false;
+#endif
+	cpptrace::generate_trace().print(std::clog, enable_color);
+#endif
+#endif
+	this->_bind(t_out, priority);
 }
 
 void Task
 ::operator=(Socket &s_out)
 {
-#ifdef AFF3CT_CORE_FAST
-	this->bind(s_out);
-#else
+#ifndef AFF3CT_CORE_FAST
 	if (s_out.get_type() == socket_t::SOUT || s_out.get_type() == socket_t::SFWD)
-		this->bind(s_out);
+#endif
+		this->_bind(s_out);
+#ifndef AFF3CT_CORE_FAST
 	else
 	{
 		std::stringstream message;
