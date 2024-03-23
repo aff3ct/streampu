@@ -1,9 +1,9 @@
 /*!
  * \file
- * \brief Class module::Subsequence.
+ * \brief Class module::Set.
  */
-#ifndef SUBSEQUENCE_HPP_
-#define SUBSEQUENCE_HPP_
+#ifndef SET_HPP_
+#define SET_HPP_
 
 #include <memory>
 #include <cstddef>
@@ -18,26 +18,26 @@ class Sequence;
 }
 namespace module
 {
-	namespace ssq
+	namespace set
 	{
 		enum class tsk : size_t { exec, SIZE };
 	}
 
-class Subsequence : public Module
+class Set : public Module
 {
 	std::shared_ptr<runtime::Sequence> sequence_cloned;
 	                runtime::Sequence *sequence_extern;
 
 public:
-	inline runtime::Task& operator[](const ssq::tsk t);
+	inline runtime::Task& operator[](const set::tsk t);
 
-	explicit Subsequence(const runtime::Sequence &sequence);
-	explicit Subsequence(      runtime::Sequence &sequence);
-	virtual ~Subsequence() = default;
+	explicit Set(const runtime::Sequence &sequence);
+	explicit Set(      runtime::Sequence &sequence);
+	virtual ~Set() = default;
 
 	virtual void init();
 
-	virtual Subsequence* clone() const;
+	virtual Set* clone() const;
 
 	runtime::Sequence& get_sequence();
 
@@ -45,13 +45,13 @@ public:
 
 protected:
 	using Module::deep_copy;
-	virtual void deep_copy(const Subsequence& m);
+	virtual void deep_copy(const Set& m);
 };
 }
 }
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
-#include "Module/Subsequence/Subsequence.hxx"
+#include "Module/Set/Set.hxx"
 #endif
 
-#endif /* SUBSEQUENCE_HPP_ */
+#endif /* SET_HPP_ */

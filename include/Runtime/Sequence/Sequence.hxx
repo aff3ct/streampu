@@ -1,6 +1,6 @@
 #include <set>
 
-#include "Module/Subsequence/Subsequence.hpp"
+#include "Module/Set/Set.hpp"
 #include "Runtime/Sequence/Sequence.hpp"
 
 namespace aff3ct
@@ -27,18 +27,18 @@ const std::vector<std::vector<runtime::Task*>>& Sequence
 
 template <class C>
 std::vector<C*> Sequence
-::get_modules(const bool subsequence_modules) const
+::get_modules(const bool set_modules) const
 {
 	std::vector<C*> ret;
 	for (auto &mm : this->all_modules)
 		for (auto &m : mm)
 		{
-			if (subsequence_modules)
+			if (set_modules)
 			{
-				auto c = dynamic_cast<module::Subsequence*>(m);
+				auto c = dynamic_cast<module::Set*>(m);
 				if (c != nullptr)
 				{
-					auto subret = c->get_sequence().get_modules<C>(subsequence_modules);
+					auto subret = c->get_sequence().get_modules<C>(set_modules);
 					ret.insert(ret.end(), subret.begin(), subret.end());
 				}
 			}

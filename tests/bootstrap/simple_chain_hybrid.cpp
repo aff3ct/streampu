@@ -1,4 +1,3 @@
-
 #include <iostream>
 #include <cstdlib>
 #include <memory>
@@ -168,9 +167,6 @@ int main(int argc, char** argv)
 		incs_fwd[s]->set_ns(sleep_time_us * 1000);
 		incs_fwd[s]->set_custom_name("Inc_fwd" + std::to_string(s));
 	}
-
-	std::shared_ptr<runtime::Sequence> partial_sequence;
-	std::shared_ptr<module::Subsequence> subsequence;
 
 	// sockets binding
 	(*incs[0])[module::inc::sck::increment::in] = initializer[module::ini::sck::initialize::out];

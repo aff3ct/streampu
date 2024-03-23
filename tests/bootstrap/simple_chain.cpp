@@ -24,7 +24,7 @@ int main(int argc, char** argv)
 		{"print-stats", no_argument, NULL, 'p'},
 		{"step-by-step", no_argument, NULL, 'b'},
 		{"debug", no_argument, NULL, 'g'},
-		{"subseq", no_argument, NULL, 'u'},
+		{"set", no_argument, NULL, 'u'},
 		{"verbose", no_argument, NULL, 'v'},
 		{"help", no_argument, NULL, 'h'},
 		{0}};
@@ -39,7 +39,7 @@ int main(int argc, char** argv)
 	bool print_stats = false;
 	bool step_by_step = false;
 	bool debug = false;
-	bool subseq = false;
+	bool set = false;
 	bool verbose = false;
 
 	while (1)
@@ -80,7 +80,7 @@ int main(int argc, char** argv)
 				debug = true;
 				break;
 			case 'u':
-				subseq = true;
+				set = true;
 				break;
 			case 'v':
 				verbose = true;
@@ -118,9 +118,9 @@ int main(int argc, char** argv)
 				std::cout << "  -g, --debug           "
 				          << "Enable task debug mode (print socket data)                            "
 				          << "[" << (debug ? "true" : "false") << "]" << std::endl;
-				std::cout << "  -u, --subseq          "
-				          << "Enable subsequence in the executed sequence                           "
-				          << "[" << (subseq ? "true" : "false") << "]" << std::endl;
+				std::cout << "  -u, --set          "
+				          << "Enable set in the executed sequence                                   "
+				          << "[" << (set ? "true" : "false") << "]" << std::endl;
 				std::cout << "  -v, --verbose         "
 				          << "Enable verbose mode                                                   "
 				          << "[" << (verbose ? "true" : "false") << "]" << std::endl;
@@ -150,7 +150,7 @@ int main(int argc, char** argv)
 	std::cout << "#   - print_stats    = " << (print_stats ? "true" : "false") << std::endl;
 	std::cout << "#   - step_by_step   = " << (step_by_step ? "true" : "false") << std::endl;
 	std::cout << "#   - debug          = " << (debug ? "true" : "false") << std::endl;
-	std::cout << "#   - subseq         = " << (subseq ? "true" : "false") << std::endl;
+	std::cout << "#   - set            = " << (set ? "true" : "false") << std::endl;
 	std::cout << "#   - verbose        = " << (verbose ? "true" : "false") << std::endl;
 	std::cout << "#" << std::endl;
 
@@ -167,10 +167,10 @@ int main(int argc, char** argv)
 	}
 
 	std::shared_ptr<runtime::Sequence> partial_sequence;
-	std::shared_ptr<module::Subsequence> subsequence;
+	std::shared_ptr<module::Set> aset;
 
 	// sockets binding
-	if (!subseq)
+	if (!set)
 	{
 		(*incs[0])[module::inc::sck::increment::in] = initializer[module::ini::sck::initialize::out];
 		for (size_t s = 0; s < incs.size() -1; s++)
@@ -184,9 +184,9 @@ int main(int argc, char** argv)
 
 		partial_sequence.reset(new runtime::Sequence((*incs[0])[module::inc::tsk::increment],
 		                                             (*incs[incs.size() -1])[module::inc::tsk::increment]));
-		subsequence.reset(new module::Subsequence(*partial_sequence));
-		(*subsequence)[module::ssq::tsk::exec    ][ 0] = initializer   [module::ini::sck::initialize::out];
-		finalizer     [module::fin::sck::finalize::in] = (*subsequence)[module::ssq::tsk::exec      ][  1];
+		aset.reset(new module::Set(*partial_sequence));
+		(*aset)  [module::set::tsk::exec    ][ 0] = initializer[module::ini::sck::initialize::out];
+		finalizer[module::fin::sck::finalize::in] = (*aset)    [module::set::tsk::exec      ][  1];
 	}
 
 	runtime::Sequence sequence_chain(initializer[module::ini::tsk::initialize], n_threads);
@@ -296,7 +296,7 @@ int main(int argc, char** argv)
 
 	// sockets unbinding
 	sequence_chain.set_n_frames(1);
-	if (!subseq)
+	if (!set)
 	{
 		(*incs[0])[module::inc::sck::increment::in].unbind(initializer[module::ini::sck::initialize::out]);
 		for (size_t s = 0; s < incs.size() -1; s++)
@@ -307,8 +307,8 @@ int main(int argc, char** argv)
 	{
 		for (size_t s = 0; s < incs.size() -1; s++)
 			(*incs[s+1])[module::inc::sck::increment::in].unbind((*incs[s])[module::inc::sck::increment::out]);
-		(*subsequence)[module::ssq::tsk::exec    ][ 0].unbind(initializer   [module::ini::sck::initialize::out]);
-		finalizer     [module::fin::sck::finalize::in].unbind((*subsequence)[module::ssq::tsk::exec      ][  1]);
+		(*aset)  [module::set::tsk::exec    ][ 0].unbind(initializer[module::ini::sck::initialize::out]);
+		finalizer[module::fin::sck::finalize::in].unbind((*aset)    [module::set::tsk::exec      ][  1]);
 	}
 
 	return test_results;

@@ -218,7 +218,7 @@ public:
 	inline size_t get_n_threads() const;
 
 	template <class C = module::Module>
-	std::vector<C*> get_modules(const bool subsequence_modules = true) const;
+	std::vector<C*> get_modules(const bool set_modules = true) const;
 	template <class C = module::Module>
 	std::vector<C*> get_cloned_modules(const C &module_ref) const;
 

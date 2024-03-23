@@ -78,6 +78,9 @@
 #ifndef RELAYER_HPP_
 #include <Module/Relayer/Relayer.hpp>
 #endif
+#ifndef SET_HPP_
+#include <Module/Set/Set.hpp>
+#endif
 #ifndef SINK_NO_HPP
 #include <Module/Sink/NO/Sink_NO.hpp>
 #endif
@@ -107,9 +110,6 @@
 #endif
 #ifndef STATELESS_HPP_
 #include <Module/Stateless/Stateless.hpp>
-#endif
-#ifndef SUBSEQUENCE_HPP_
-#include <Module/Subsequence/Subsequence.hpp>
 #endif
 #ifndef SWITCHER_HPP_
 #include <Module/Switcher/Switcher.hpp>

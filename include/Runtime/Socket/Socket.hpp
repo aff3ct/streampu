@@ -20,7 +20,7 @@ namespace module
 {
 class Adaptor_n_to_1;
 class Adaptor_1_to_n;
-class Subsequence;
+class Set;
 }
 namespace runtime
 {
@@ -33,7 +33,7 @@ class Socket : public tools::Interface_reset
 	friend Task;
 	friend module::Adaptor_n_to_1;
 	friend module::Adaptor_1_to_n;
-	friend module::Subsequence;
+	friend module::Set;
 	friend Sequence;
 	friend Pipeline;
 #endif
