@@ -48,8 +48,8 @@ Unaryop<TI,TO,UOP>
 	this->create_codelet(p, [ps_in, ps_out](Module &m, runtime::Task &t, const size_t frame_id) -> int
 	{
 		auto &uop = static_cast<Unaryop&>(m);
-		uop._perform(static_cast<const TI*>(t[ps_in ].get_dataptr()),
-		             static_cast<      TO*>(t[ps_out].get_dataptr()),
+		uop._perform(t[ps_in ].template get_dataptr<const TI>(),
+		             t[ps_out].template get_dataptr<      TO>(),
 		             frame_id);
 		return runtime::status_t::SUCCESS;
 	});

@@ -84,7 +84,7 @@ void Adaptor_n_to_1
 		{
 			std::vector<const int8_t*> sockets_dataptr(p1s_in.size());
 			for (size_t s = 0; s < p1s_in.size(); s++)
-				sockets_dataptr[s] = static_cast<const int8_t*>(t[p1s_in[s]].get_dataptr());
+				sockets_dataptr[s] = t[p1s_in[s]].get_dataptr<const int8_t>();
 			adp.push_n(sockets_dataptr, frame_id);
 		}
 		return runtime::status_t::SUCCESS;
@@ -109,7 +109,7 @@ void Adaptor_n_to_1
 		{
 			std::vector<int8_t*> sockets_dataptr(p2s_out.size());
 			for (size_t s = 0; s < p2s_out.size(); s++)
-				sockets_dataptr[s] = static_cast<int8_t*>(t[p2s_out[s]].get_dataptr());
+				sockets_dataptr[s] = t[p2s_out[s]].get_dataptr<int8_t>();
 			adp.pull_1(sockets_dataptr, frame_id);
 		}
 		return runtime::status_t::SUCCESS;

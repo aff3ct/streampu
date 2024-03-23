@@ -20,6 +20,7 @@ namespace module
 {
 class Adaptor_n_to_1;
 class Adaptor_1_to_n;
+class Subsequence;
 }
 namespace runtime
 {
@@ -31,6 +32,7 @@ class Socket : public tools::Interface_reset
 	friend Task;
 	friend module::Adaptor_n_to_1;
 	friend module::Adaptor_1_to_n;
+	friend module::Subsequence;
 	friend Sequence;
 #endif
 protected:
@@ -141,6 +143,11 @@ public:
 	inline size_t unbind(Socket& s_out);
 
 protected:
+	inline void*  _get_dataptr   (const size_t start_col = 0) const;
+	inline void*  _get_dptr      (const size_t start_col = 0) const;
+	inline void** _get_2d_dataptr(const size_t start_row = 0, const size_t start_col = 0);
+	inline void** _get_2d_dptr   (const size_t start_row = 0, const size_t start_col = 0);
+
 	inline void set_name(const std::string &name);
 
 	inline void set_datatype(const std::type_index datatype);

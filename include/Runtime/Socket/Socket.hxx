@@ -6,6 +6,12 @@
 
 #include "Tools/Exception/exception.hpp"
 #include "Runtime/Socket/Socket.hpp"
+#ifdef AFF3CT_CORE_SHOW_DEPRECATED
+#include "Tools/Display/rang_format/rang_format.h"
+#ifdef AFF3CT_CORE_STACKTRACE
+#include <cpptrace/cpptrace.hpp>
+#endif
+#endif
 
 namespace aff3ct
 {
@@ -111,20 +117,56 @@ size_t Socket
 }
 
 void* Socket
-::get_dataptr(const size_t start_col) const
+::_get_dataptr(const size_t start_col) const
 {
 	uint8_t* ptr = (uint8_t*)dataptr;
 	return (void*)(ptr + start_col);
 }
 
 void* Socket
-::get_dptr(const size_t start_col) const
+::get_dataptr(const size_t start_col) const
+{
+#ifdef AFF3CT_CORE_SHOW_DEPRECATED
+	std::clog << rang::tag::warning
+	          << "Deprecated: 'Socket::get_dataptr' should be replaced by 'Socket::get_dataptr<T>'." << std::endl;
+#ifdef AFF3CT_CORE_STACKTRACE
+#ifdef AFF3CT_CORE_COLORS
+	bool enable_color = true;
+#else
+	bool enable_color = false;
+#endif
+	cpptrace::generate_trace().print(std::clog, enable_color);
+#endif
+#endif
+	return this->_get_dataptr(start_col);
+}
+
+void* Socket
+::_get_dptr(const size_t start_col) const
 {
 	return this->get_dataptr(start_col);
 }
 
+void* Socket
+::get_dptr(const size_t start_col) const
+{
+#ifdef AFF3CT_CORE_SHOW_DEPRECATED
+	std::clog << rang::tag::warning
+	          << "Deprecated: 'Socket::get_dptr' should be replaced by 'Socket::get_dptr<T>'." << std::endl;
+#ifdef AFF3CT_CORE_STACKTRACE
+#ifdef AFF3CT_CORE_COLORS
+	bool enable_color = true;
+#else
+	bool enable_color = false;
+#endif
+	cpptrace::generate_trace().print(std::clog, enable_color);
+#endif
+#endif
+	return this->_get_dptr(start_col);
+}
+
 void** Socket
-::get_2d_dataptr(const size_t start_row, const size_t start_col)
+::_get_2d_dataptr(const size_t start_row, const size_t start_col)
 {
 	assert(start_row < this->get_n_rows());
 	const size_t n_cols = this->get_databytes() / this->get_n_rows();
@@ -145,15 +187,52 @@ void** Socket
 }
 
 void** Socket
-::get_2d_dptr(const size_t start_row, const size_t start_col)
+::get_2d_dataptr(const size_t start_row, const size_t start_col)
+{
+#ifdef AFF3CT_CORE_SHOW_DEPRECATED
+	std::clog << rang::tag::warning
+	          << "Deprecated: 'Socket::get_2d_dataptr' should be replaced by 'Socket::get_2d_dataptr<T>'." << std::endl;
+#ifdef AFF3CT_CORE_STACKTRACE
+#ifdef AFF3CT_CORE_COLORS
+	bool enable_color = true;
+#else
+	bool enable_color = false;
+#endif
+	cpptrace::generate_trace().print(std::clog, enable_color);
+#endif
+#endif
+	return this->_get_2d_dataptr(start_row, start_col);
+}
+
+void** Socket
+::_get_2d_dptr(const size_t start_row, const size_t start_col)
 {
 	return this->get_2d_dataptr(start_row, start_col);
+}
+
+void** Socket
+::get_2d_dptr(const size_t start_row, const size_t start_col)
+{
+#ifdef AFF3CT_CORE_SHOW_DEPRECATED
+	std::clog << rang::tag::warning
+	          << "Deprecated: 'Socket::get_2d_dptr' should be replaced by 'Socket::get_2d_dptr<T>'." << std::endl;
+#ifdef AFF3CT_CORE_STACKTRACE
+#ifdef AFF3CT_CORE_COLORS
+	bool enable_color = true;
+#else
+	bool enable_color = false;
+#endif
+	cpptrace::generate_trace().print(std::clog, enable_color);
+#endif
+#endif
+	return this->_get_2d_dptr(start_row, start_col);
 }
 
 template <typename T>
 T* Socket
 ::get_dataptr(const size_t start_col) const
 {
+#ifndef AFF3CT_CORE_FAST
 	if (this->get_type() == socket_t::SIN && !std::is_const<T>::value)
 	{
 		std::stringstream message;
@@ -166,8 +245,9 @@ T* Socket
 		        << ").";
 		throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
 	}
+#endif
 
-	return static_cast<T*>(this->get_dataptr(start_col * sizeof(T)));
+	return static_cast<T*>(this->_get_dataptr(start_col * sizeof(T)));
 }
 
 template <typename T>
@@ -181,6 +261,7 @@ template <typename T>
 T** Socket
 ::get_2d_dataptr(const size_t start_row, const size_t start_col)
 {
+#ifndef AFF3CT_CORE_FAST
 	if (this->get_type() == socket_t::SIN && !std::is_const<T>::value)
 	{
 		std::stringstream message;
@@ -193,8 +274,9 @@ T** Socket
 		        << ").";
 		throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
 	}
+#endif
 
-	return (T**)(this->get_2d_dataptr(start_row, start_col * sizeof(T)));
+	return (T**)(this->_get_2d_dataptr(start_row, start_col * sizeof(T)));
 }
 
 template <typename T>
@@ -261,6 +343,7 @@ void Socket
 void Socket
 ::bind(Socket &s_out, const int priority)
 {
+#ifndef AFF3CT_CORE_FAST
 	if (!is_fast())
 	{
 		if (s_out.datatype != this->datatype)
@@ -303,10 +386,12 @@ void Socket
 			throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
 		}
 	}
+#endif
 
 	if (this->bound_socket == &s_out)
 		this->unbind(s_out);
 
+#ifndef AFF3CT_CORE_FAST
 	if (this->bound_socket != nullptr && this->get_type() == socket_t::SIN)
 	{
 		std::stringstream message;
@@ -326,9 +411,11 @@ void Socket
 		        << ").";
 		throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
 	}
+#endif
 
 	this->bound_socket = &s_out;
 
+#ifndef AFF3CT_CORE_FAST
 	if (std::find(s_out.bound_sockets.begin(), s_out.bound_sockets.end(), this) != s_out.bound_sockets.end())
 	{
 		std::stringstream message;
@@ -344,6 +431,7 @@ void Socket
 		        << ").";
 		throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
 	}
+#endif
 
 	if ((size_t)priority > s_out.bound_sockets.size() || priority == -1)
 		s_out.bound_sockets.push_back(this);
@@ -362,8 +450,11 @@ template <typename T>
 void Socket
 ::operator=(const void *array)
 {
+#ifndef AFF3CT_CORE_FAST
 	if (this->get_type() == socket_t::SIN || this->get_type() == socket_t::SFWD)
+#endif
 		this->bind(array);
+#ifndef AFF3CT_CORE_FAST
 	else
 	{
 		std::stringstream message;
@@ -377,14 +468,18 @@ void Socket
 		        << ").";
 		throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
 	}
+#endif
 }
 
 template <typename T>
 void Socket
 ::operator=(void *array)
 {
+#ifndef AFF3CT_CORE_FAST
 	if (this->get_type() == socket_t::SIN || this->get_type() == socket_t::SFWD)
+#endif
 		this->bind(array);
+#ifndef AFF3CT_CORE_FAST
 	else
 	{
 		std::stringstream message;
@@ -398,14 +493,18 @@ void Socket
 		        << ").";
 		throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
 	}
+#endif
 }
 
 template <typename T>
 void Socket
 ::operator=(const T *array)
 {
+#ifndef AFF3CT_CORE_FAST
 	if (this->get_type() == socket_t::SIN || this->get_type() == socket_t::SFWD)
+#endif
 		this->bind(array);
+#ifndef AFF3CT_CORE_FAST
 	else
 	{
 		std::stringstream message;
@@ -419,14 +518,18 @@ void Socket
 		        << ").";
 		throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
 	}
+#endif
 }
 
 template <typename T>
 void Socket
 ::operator=(T *array)
 {
+#ifndef AFF3CT_CORE_FAST
 	if (this->get_type() == socket_t::SIN || this->get_type() == socket_t::SFWD)
+#endif
 		this->bind(array);
+#ifndef AFF3CT_CORE_FAST
 	else
 	{
 		std::stringstream message;
@@ -440,14 +543,18 @@ void Socket
 		        << ").";
 		throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
 	}
+#endif
 }
 
 template <typename T, class A>
 void Socket
 ::operator=(const std::vector<T,A> &vector)
 {
+#ifndef AFF3CT_CORE_FAST
 	if (this->get_type() == socket_t::SIN || this->get_type() == socket_t::SFWD)
+#endif
 		this->bind(vector);
+#ifndef AFF3CT_CORE_FAST
 	else
 	{
 		std::stringstream message;
@@ -461,14 +568,18 @@ void Socket
 		        << ").";
 		throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
 	}
+#endif
 }
 
 template <typename T, class A>
 void Socket
 ::operator=(std::vector<T,A> &vector)
 {
+#ifndef AFF3CT_CORE_FAST
 	if (this->get_type() == socket_t::SIN || this->get_type() == socket_t::SFWD)
+#endif
 		this->bind(vector);
+#ifndef AFF3CT_CORE_FAST
 	else
 	{
 		std::stringstream message;
@@ -482,6 +593,7 @@ void Socket
 		        << ").";
 		throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
 	}
+#endif
 }
 
 void Socket
@@ -496,6 +608,7 @@ void Socket
 	// Socket forward bind
 	else if (s.get_type() == socket_t::SFWD && this->get_type() == socket_t::SFWD) 
 		this->bind(s);
+#ifndef AFF3CT_CORE_FAST
 	else
 	{
 		std::stringstream message;
@@ -515,13 +628,17 @@ void Socket
 		        << ").";
 		throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
 	}
+#endif
 }
 
 void Socket
 ::operator=(Task &t)
 {
+#ifndef AFF3CT_CORE_FAST
 	if (this->get_type() == socket_t::SOUT || this->get_type() == socket_t::SFWD)
+#endif
 		t.bind(*this);
+#ifndef AFF3CT_CORE_FAST
 	else
 	{
 		std::stringstream message;
@@ -535,6 +652,7 @@ void Socket
 		        << ").";
 		throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
 	}
+#endif
 }
 
 template <typename T, class A>
@@ -548,22 +666,28 @@ template <typename T, class A>
 void Socket
 ::bind(std::vector<T,A> &vector)
 {
+#ifndef AFF3CT_CORE_FAST
 	if (is_fast())
+#endif
 		this->dataptr = static_cast<void*>(vector.data());
-
-	if (vector.size() != this->get_n_elmts())
+#ifndef AFF3CT_CORE_FAST
+	else
 	{
-		std::stringstream message;
-		message << "'vector.size()' has to be equal to 'get_n_elmts()' ('vector.size()' = " << vector.size()
-		        << ", 'get_n_elmts()' = " << get_n_elmts()
-		        << ", 'name' = " << get_name()
-		        << ", 'task.name' = " << task.get_name()
-//		        << ", 'task.module.name' = " << task.get_module_name()
-		        << ").";
-		throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
-	}
+		if (vector.size() != this->get_n_elmts())
+		{
+			std::stringstream message;
+			message << "'vector.size()' has to be equal to 'get_n_elmts()' ('vector.size()' = " << vector.size()
+			        << ", 'get_n_elmts()' = " << get_n_elmts()
+			        << ", 'name' = " << get_name()
+			        << ", 'task.name' = " << task.get_name()
+//			        << ", 'task.module.name' = " << task.get_module_name()
+			        << ").";
+			throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
+		}
 
-	bind(vector.data());
+		this->bind(vector.data());
+	}
+#endif
 }
 
 template <typename T, class A>
@@ -584,22 +708,28 @@ template <typename T>
 void Socket
 ::bind(T *array)
 {
+#ifndef AFF3CT_CORE_FAST
 	if (is_fast())
+#endif
 		this->dataptr = static_cast<void*>(array);
-
-	if (type_to_string[typeid(T)] != type_to_string[this->datatype])
+#ifndef AFF3CT_CORE_FAST
+	else
 	{
-		std::stringstream message;
-		message << "'T' has to be equal to 'datatype' ('T' = " << type_to_string[typeid(T)]
-		        << ", 'datatype' = " << type_to_string[this->datatype]
-		        << ", 'socket.name' = " << get_name()
-		        << ", 'task.name' = " << task.get_name()
-//		        << ", 'module.name' = " << task.get_module_name()
-		        << ").";
-		throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
-	}
+		if (type_to_string[typeid(T)] != type_to_string[this->datatype])
+		{
+			std::stringstream message;
+			message << "'T' has to be equal to 'datatype' ('T' = " << type_to_string[typeid(T)]
+			        << ", 'datatype' = " << type_to_string[this->datatype]
+			        << ", 'socket.name' = " << get_name()
+			        << ", 'task.name' = " << task.get_name()
+//			        << ", 'module.name' = " << task.get_module_name()
+			        << ").";
+			throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
+		}
 
-	bind(static_cast<void*>(array));
+		bind(static_cast<void*>(array));
+	}
+#endif
 }
 
 template <typename T>
@@ -612,6 +742,7 @@ void Socket
 void Socket
 ::bind(void* dataptr)
 {
+#ifndef AFF3CT_CORE_FAST
 	if (!is_fast())
 	{
 		if (dataptr == nullptr)
@@ -622,6 +753,7 @@ void Socket
 		}
 		this->check_bound_socket();
 	}
+#endif
 	this->dataptr = dataptr;
 }
 
@@ -644,6 +776,7 @@ void Socket
 size_t Socket
 ::unbind(Socket &s_out)
 {
+#ifndef AFF3CT_CORE_FAST
 	if (this->bound_socket == nullptr)
 	{
 		std::stringstream message;
@@ -679,15 +812,20 @@ size_t Socket
 		        << ").";
 		throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
 	}
+#endif
 
 	this->bound_socket = nullptr;
 
 	size_t unbind_pos = 0;
 	auto it = std::find(s_out.bound_sockets.begin(), s_out.bound_sockets.end(), this);
+
+#ifndef AFF3CT_CORE_FAST
 	if (it != s_out.bound_sockets.end())
 	{
+#endif
 		unbind_pos = (size_t)std::distance(s_out.bound_sockets.begin(), it);
 		s_out.bound_sockets.erase(it);
+#ifndef AFF3CT_CORE_FAST
 	}
 	else
 	{
@@ -704,6 +842,7 @@ size_t Socket
 		        << ").";
 		throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
 	}
+#endif
 
 	return unbind_pos;
 }
@@ -741,7 +880,7 @@ void Socket
 void Socket
 ::set_dataptr(void* dataptr)
 {
-	if (dataptr != this->get_dataptr())
+	if (dataptr != this->_get_dataptr())
 	{
 		this->check_bound_socket();
 		this->dataptr = dataptr;
@@ -795,7 +934,7 @@ void Socket
 
 		std::stringstream message;
 		message << "The current socket is already bound ("
-		        << "'dataptr'"   << " = " << get_dataptr()         << ", "
+		        << "'dataptr'"   << " = " << _get_dataptr()        << ", "
 		        << "'databytes'" << " = " << get_databytes()       << ", "
 		        << "'datatype'"  << " = " << get_datatype_string() << ", "
 		        << "'name'"      << " = " << get_name()            << ", "

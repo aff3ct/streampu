@@ -121,7 +121,7 @@ void Subsequence
 			if (s->get_type() == runtime::socket_t::SIN)
 			{
 				while (t.sockets[sid]->get_type() != runtime::socket_t::SIN) sid++;
-				s->bind(t.sockets[sid++]->get_dataptr());
+				s->bind(t.sockets[sid++]->_get_dataptr());
 			}
 		}
 

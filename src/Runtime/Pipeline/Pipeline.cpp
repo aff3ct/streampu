@@ -923,7 +923,7 @@ void Pipeline
 					{
 						// avoid the creation of new adaptor sockets for forward sockets pointing to the same memory
 						// space
-						auto sck_out_dptr = sck_out->get_dataptr();
+						auto sck_out_dptr = (void*)sck_out->get_dataptr<int8_t>();
 						assert(sck_out_dptr != nullptr);
 						if (fwd_source.find(sck_out_dptr) == fwd_source.end())
 						{
@@ -969,7 +969,7 @@ void Pipeline
 					if (tsk_out_sta <= sta)
 					{
 						auto sck_out_ptr = std::get<0>(bind.first);
-						auto sck_out_dptr = sck_out_ptr->get_dataptr();
+						auto sck_out_dptr = (void*)sck_out_ptr->get_dataptr<int8_t>();
 						assert(sck_out_dptr != nullptr);
 
 						if (std::find(passed_scks_out.begin(),
@@ -1065,7 +1065,7 @@ void Pipeline
 					ss->processes.insert(ss->processes.begin(), [task_pull]() -> const int*
 					{
 						task_pull->exec();
-						const int* status = (int*)task_pull->sockets.back()->get_dataptr();
+						const int* status = task_pull->sockets.back()->get_dataptr<const int>();
 						return status;
 					});
 					this->stages[sta]->update_tasks_id(t);
@@ -1097,7 +1097,7 @@ void Pipeline
 					ss->processes.push_back([task_push]() -> const int*
 					{
 						task_push->exec();
-						const int* status = (int*)task_push->sockets.back()->get_dataptr();
+						const int* status = task_push->sockets.back()->get_dataptr<const int>();
 						return status;
 					});
 					last_task_id = ss->tasks_id[ss->tasks_id.size() -1] +1;

@@ -49,8 +49,8 @@ Reducer<TI,TO,BOP>
 	this->create_codelet(p, [ps_in, ps_out](Module &m, runtime::Task &t, const size_t frame_id) -> int
 	{
 		auto &red = static_cast<Reducer&>(m);
-		red._reduce(static_cast<const TI*>(t[ps_in ].get_dataptr()),
-		            static_cast<      TO*>(t[ps_out].get_dataptr()),
+		red._reduce(t[ps_in ].template get_dataptr<const TI>(),
+		            t[ps_out].template get_dataptr<      TO>(),
 		            frame_id);
 		return runtime::status_t::SUCCESS;
 	});

@@ -85,14 +85,14 @@ Switcher
 	{
 		auto &swi = static_cast<Switcher&>(m);
 
-		const auto ctrl_socket_in  = static_cast<const int8_t*>(t[p1s_in_ctrl].get_dataptr());
+		const auto ctrl_socket_in  = t[p1s_in_ctrl].get_dataptr<const int8_t>();
 		swi.set_path((size_t)ctrl_socket_in[0]);
 		const size_t path = swi.get_path();
 
 		if (!swi.is_no_copy_commute())
 		{
-			const auto data_socket_in  = static_cast<const int8_t*>(t[p1s_in_data       ].get_dataptr());
-			      auto data_socket_out = static_cast<      int8_t*>(t[p1s_out_data[path]].get_dataptr());
+			const auto data_socket_in  = t[p1s_in_data       ].get_dataptr<const int8_t>();
+			      auto data_socket_out = t[p1s_out_data[path]].get_dataptr<      int8_t>();
 
 			std::copy(data_socket_in,
 			          data_socket_in + swi.get_n_frames() * swi.get_n_bytes_commute(),
@@ -116,8 +116,8 @@ Switcher
 		{
 			const size_t path = swi.get_path();
 
-			const auto data_socket_in  = static_cast<const int8_t*>(t[p2s_in_data[path]].get_dataptr());
-			      auto data_socket_out = static_cast<      int8_t*>(t[p2s_out_data     ].get_dataptr());
+			const auto data_socket_in  = t[p2s_in_data[path]].get_dataptr<const int8_t>();
+			      auto data_socket_out = t[p2s_out_data     ].get_dataptr<      int8_t>();
 
 			std::copy(data_socket_in,
 			          data_socket_in + swi.get_n_frames() * swi.get_n_bytes_select(),

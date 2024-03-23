@@ -60,7 +60,7 @@ Probe<T>
 	this->create_codelet(p1, [p1s_in](Module &m, runtime::Task &t, const size_t frame_id) -> int
 	{
 		auto &prb = static_cast<Probe<T>&>(m);
-		const T* in = (p1s_in != -1) ? static_cast<const T*>(t[p1s_in].get_dataptr()) : nullptr;
+		const T* in = (p1s_in != -1) ? t[p1s_in].template get_dataptr<const T>() : nullptr;
 		prb._probe(in, frame_id);
 		return runtime::status_t::SUCCESS;
 	});

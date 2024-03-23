@@ -59,8 +59,7 @@ Sink<B>
 	{
 		auto &snk = static_cast<Sink<B>&>(m);
 
-		snk._send(static_cast<const B*>(t[p1s_in_data].get_dataptr()),
-		          frame_id);
+		snk._send(t[p1s_in_data].template get_dataptr<const B>(), frame_id);
 
 		return runtime::status_t::SUCCESS;
 	});
@@ -72,8 +71,8 @@ Sink<B>
 	{
 		auto &snk = static_cast<Sink<B>&>(m);
 
-		snk._send_count(static_cast<const B*>(t[p2s_in_data].get_dataptr()),
-			            static_cast<const uint32_t*>(t[p2s_in_count].get_dataptr()),
+		snk._send_count(t[p2s_in_data].template get_dataptr<const B>(),
+			            t[p2s_in_count].template get_dataptr<const uint32_t>(),
 		                frame_id);
 
 		return runtime::status_t::SUCCESS;

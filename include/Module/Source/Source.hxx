@@ -53,8 +53,8 @@ Source<B>
 	{
 		auto &src = static_cast<Source<B>&>(m);
 
-		src._generate(static_cast<B*>(t[ps_out_data].get_dataptr()),
-			          static_cast<uint32_t*>(t[ps_out_count].get_dataptr()),
+		src._generate(t[ps_out_data].template get_dataptr<B>(),
+			          t[ps_out_count].template get_dataptr<uint32_t>(),
 		              frame_id);
 
 		return runtime::status_t::SUCCESS;

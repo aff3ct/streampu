@@ -35,7 +35,7 @@ Finalizer<T>
 	this->create_codelet(p, [ps_in](Module &m, runtime::Task &t, const size_t frame_id) -> int
 	{
 		auto &fin = static_cast<Finalizer&>(m);
-		fin._finalize(static_cast<const T*>(t[ps_in].get_dataptr()), frame_id);
+		fin._finalize(t[ps_in].template get_dataptr<const T>(), frame_id);
 		return runtime::status_t::SUCCESS;
 	});
 }

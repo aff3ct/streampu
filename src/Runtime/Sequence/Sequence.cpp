@@ -1683,7 +1683,7 @@ void Sequence
 			{
 				case socket_t::SIN:
 					stype = "in[" + std::to_string(sid) + "]";
-					static_input = s->get_dataptr() != nullptr && s->bound_socket == nullptr;
+					static_input = s->_get_dataptr() != nullptr && s->bound_socket == nullptr;
 					break;
 				case socket_t::SOUT: stype = "out[" + std::to_string(sid) + "]"; break;
 				case socket_t::SFWD: stype = "fwd[" + std::to_string(sid) + "]"; break;
@@ -1901,7 +1901,7 @@ void Sequence
 										explore_thread_rec(socket, bound_sockets);
 								}
 								for (auto sck : bound_sockets)
-									dataptrs.push_back(sck->get_dataptr());
+									dataptrs.push_back(sck->_get_dataptr());
 
 								contents->rebind_sockets[rebind_id].push_back(bound_sockets);
 								contents->rebind_dataptrs[rebind_id].push_back(dataptrs);
@@ -1911,10 +1911,10 @@ void Sequence
 						modified_tasks[select_task] = [contents, select_task, switcher, rebind_id]() -> const int*
 						{
 							select_task->exec();
-							const int* status = (int*)select_task->sockets.back()->get_dataptr();
+							const int* status = select_task->sockets.back()->get_dataptr<int>();
 
 							const auto path = switcher->get_path();
-							const auto in_dataptr = select_task->sockets[path]->get_dataptr();
+							const auto in_dataptr = select_task->sockets[path]->_get_dataptr();
 
 							// rebind input sockets on the fly
 							// there should be only one output socket at this time (sout_id == 0)
@@ -1951,7 +1951,7 @@ void Sequence
 										explore_thread_rec(socket, bound_sockets);
 								}
 								for (auto sck : bound_sockets)
-									dataptrs.push_back(sck->get_dataptr());
+									dataptrs.push_back(sck->_get_dataptr());
 
 								contents->rebind_sockets[rebind_id].push_back(bound_sockets);
 								contents->rebind_dataptrs[rebind_id].push_back(dataptrs);
@@ -1961,8 +1961,8 @@ void Sequence
 						modified_tasks[commute_task] = [contents, commute_task, switcher, rebind_id]() -> const int*
 						{
 							commute_task->exec();
-							const int* status = (int*)commute_task->sockets.back()->get_dataptr();
-							const auto in_dataptr = commute_task->sockets[0]->get_dataptr();
+							const int* status = commute_task->sockets.back()->get_dataptr<int>();
+							const auto in_dataptr = commute_task->sockets[0]->_get_dataptr();
 							const auto path = switcher->get_path();
 
 							// rebind input sockets on the fly
@@ -1998,7 +1998,7 @@ void Sequence
 										explore_thread_rec(socket, bound_sockets);
 								}
 								for (auto sck : bound_sockets)
-									dataptrs.push_back(sck->get_dataptr());
+									dataptrs.push_back(sck->_get_dataptr());
 
 								contents->rebind_sockets[rebind_id].push_back(bound_sockets);
 								contents->rebind_dataptrs[rebind_id].push_back(dataptrs);
@@ -2009,7 +2009,7 @@ void Sequence
 						{
 							// active or passive waiting here
 							pull_task->exec();
-							const int* status = (int*)pull_task->sockets.back()->get_dataptr();
+							const int* status = pull_task->sockets.back()->get_dataptr<int>();
 
 							// rebind input sockets on the fly
 							for (size_t sin_id = 0; sin_id < contents->rebind_sockets[rebind_id].size(); sin_id++)
@@ -2018,7 +2018,7 @@ void Sequence
 								{
 									// we start to 1 because the rebinding of the 'pull_task' is made in the
 									// 'pull_task->exec()' call (this way the debug mode is still working)
-									auto swap_buff = contents->rebind_sockets[rebind_id][sin_id][1]->get_dataptr();
+									auto swap_buff = contents->rebind_sockets[rebind_id][sin_id][1]->_get_dataptr();
 									auto buff = adp_pull->get_filled_buffer(sin_id, swap_buff);
 									contents->rebind_sockets[rebind_id][sin_id][1]->dataptr = buff;
 									// for the next tasks the same buffer 'buff' is required, an easy mistake is to re-swap
@@ -2060,7 +2060,7 @@ void Sequence
 									explore_thread_rec_reverse(bound_socket, bound_sockets);
 
 								for (auto sck : bound_sockets)
-									dataptrs.push_back(sck->get_dataptr());
+									dataptrs.push_back(sck->_get_dataptr());
 
 								contents->rebind_sockets[rebind_id].push_back(bound_sockets);
 								contents->rebind_dataptrs[rebind_id].push_back(dataptrs);
@@ -2070,13 +2070,13 @@ void Sequence
 						{
 							// active or passive waiting here
 							push_task->exec();
-							const int* status = (int*)push_task->sockets.back()->get_dataptr();
+							const int* status = push_task->sockets.back()->get_dataptr<int>();
 							// rebind output sockets on the fly
 							for (size_t sout_id = 0; sout_id < contents->rebind_sockets[rebind_id].size(); sout_id++)
 							{
 								// we start to 1 because the rebinding of the 'push_task' is made in the
 								// 'push_task->exec()' call (this way the debug mode is still working)
-								auto swap_buff = contents->rebind_sockets[rebind_id][sout_id][1]->get_dataptr();
+								auto swap_buff = contents->rebind_sockets[rebind_id][sout_id][1]->_get_dataptr();
 								auto buff = adp_push->get_empty_buffer(sout_id, swap_buff);
 								contents->rebind_sockets[rebind_id][sout_id][1]->dataptr = buff;
 								// the output socket linked to the push adp can have more than one socket bound and so
@@ -2097,7 +2097,7 @@ void Sequence
 						contents->processes.push_back([task]() -> const int*
 						{
 							task->exec();
-							const int* status = (int*)task->sockets.back()->get_dataptr();
+							const int* status = task->sockets.back()->get_dataptr<int>();
 							return status;
 						});
 

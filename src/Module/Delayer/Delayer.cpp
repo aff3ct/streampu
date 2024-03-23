@@ -25,7 +25,7 @@ Delayer<D>
 	auto p1s_in = this->template create_socket_in <D>(p1, "in", this->size);
 	this->create_codelet(p1, [p1s_in](aff3ct::module::Module &m, aff3ct::runtime::Task &t, const size_t frame_id) -> int
 	{
-		static_cast<Delayer<D>&>(m)._memorize(static_cast<D*>(t[p1s_in].get_dataptr()), frame_id);
+		static_cast<Delayer<D>&>(m)._memorize(t[p1s_in].template get_dataptr<const D>(), frame_id);
 		return aff3ct::runtime::status_t::SUCCESS;
 	});
 
@@ -33,7 +33,7 @@ Delayer<D>
 	auto p2s_out = this->template create_socket_out<D>(p2, "out", this->size);
 	this->create_codelet(p2, [p2s_out](aff3ct::module::Module &m, aff3ct::runtime::Task &t, const size_t frame_id) -> int
 	{
-		static_cast<Delayer<D>&>(m)._produce(static_cast<D*>(t[p2s_out].get_dataptr()), frame_id);
+		static_cast<Delayer<D>&>(m)._produce(t[p2s_out].template get_dataptr<D>(), frame_id);
 		return aff3ct::runtime::status_t::SUCCESS;
 	});
 }
