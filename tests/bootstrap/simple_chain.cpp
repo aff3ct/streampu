@@ -172,24 +172,22 @@ int main(int argc, char** argv)
 	// sockets binding
 	if (!set)
 	{
-		(*incs[0])[module::inc::sck::increment::in] = initializer[module::ini::sck::initialize::out];
+		(*incs[0])      ["increment::in"] = initializer           ["initialize::out"];
 		for (size_t s = 0; s < incs.size() -1; s++)
-			(*incs[s+1])[module::inc::sck::increment::in] = (*incs[s])[module::inc::sck::increment::out];
-		finalizer[module::fin::sck::finalize::in] = (*incs[incs.size()-1])[module::inc::sck::increment::out];
+			(*incs[s+1])["increment::in"] = (*incs[s])            [ "increment::out"];
+		finalizer       [ "finalize::in"] = (*incs[incs.size()-1])[ "increment::out"];
 	}
 	else
 	{
 		for (size_t s = 0; s < incs.size() -1; s++)
-			(*incs[s+1])[module::inc::sck::increment::in] = (*incs[s])[module::inc::sck::increment::out];
-
-		partial_sequence.reset(new runtime::Sequence((*incs[0])[module::inc::tsk::increment],
-		                                             (*incs[incs.size() -1])[module::inc::tsk::increment]));
+			(*incs[s+1])["increment::in"] = (*incs[s])["increment::out"];
+		partial_sequence.reset(new runtime::Sequence((*incs[0])("increment"), (*incs[incs.size() -1])("increment")));
 		aset.reset(new module::Set(*partial_sequence));
-		(*aset)  [module::set::tsk::exec    ][ 0] = initializer[module::ini::sck::initialize::out];
-		finalizer[module::fin::sck::finalize::in] = (*aset)    [module::set::tsk::exec      ][  1];
+		(*aset)  (    "exec")[0 ] = initializer["initialize::out"];
+		finalizer["finalize::in"] = (*aset)    (      "exec")[ 1 ];
 	}
 
-	runtime::Sequence sequence_chain(initializer[module::ini::tsk::initialize], n_threads);
+	runtime::Sequence sequence_chain(initializer("initialize"), n_threads);
 	sequence_chain.set_n_frames(n_inter_frames);
 	sequence_chain.set_no_copy_mode(no_copy_mode);
 

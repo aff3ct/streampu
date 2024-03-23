@@ -162,12 +162,12 @@ int main(int argc, char** argv)
 	std::shared_ptr<runtime::Sequence> partial_sequence;
 
 	// sockets binding
-	(*incs[0])[module::inc::sck::incrementf::fwd] = initializer[module::ini::sck::initialize::out];
+	(*incs[0])      ["incrementf::fwd"] = initializer           ["initialize::out"];
 	for (size_t s = 0; s < incs.size() - 1; s++)
-		(*incs[s+1])[module::inc::sck::incrementf::fwd] = (*incs[s])[module::inc::sck::incrementf::fwd];
-	finalizer[module::fin::sck::finalize::in] = (*incs[incs.size()-1])[module::inc::sck::incrementf::fwd];
+		(*incs[s+1])["incrementf::fwd"] = (*incs[s])            ["incrementf::fwd"];
+	finalizer       [  "finalize::in" ] = (*incs[incs.size()-1])["incrementf::fwd"];
 
-	runtime::Sequence sequence_chain(initializer[module::ini::tsk::initialize], n_threads);
+	runtime::Sequence sequence_chain(initializer("initialize"), n_threads);
 	sequence_chain.set_n_frames(n_inter_frames);
 	sequence_chain.set_no_copy_mode(no_copy_mode);
 

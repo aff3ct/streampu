@@ -175,22 +175,23 @@ int main(int argc, char** argv)
 	module::Iterator iterator2(n_loop_out);
 	iterator2.set_custom_name("IteratorOut");
 
-	switcher2 [module::swi::tsk::select ][1]    = initializer[module::ini::sck::initialize::out];
-	iterator2 [module::ite::tsk::iterate]       = switcher2  [module::swi::tsk::select][3];
-	switcher2 [module::swi::tsk::commute][0]    = switcher2  [module::swi::tsk::select][2];
-	switcher2 [module::swi::tsk::commute][1]    = iterator2  [module::ite::sck::iterate::out];
-	switcher  [module::swi::tsk::select ][1]    = switcher2  [module::swi::tsk::commute][2];
-	iterator  [module::ite::tsk::iterate]       = switcher   [module::swi::tsk::select ][3];
-	switcher  [module::swi::tsk::commute][0]    = switcher   [module::swi::tsk::select ][2];
-	switcher  [module::swi::tsk::commute][1]    = iterator   [module::ite::sck::iterate::out];
-	(*incs[0])[module::inc::sck::increment::in] = switcher   [module::swi::tsk::commute][2];
+	// sockets binding
+	switcher2       [   "select::in_data1"] = initializer           ["initialize::out"      ];
+	iterator2       (  "iterate"          ) = switcher2             (    "select"           );
+	switcher2       [  "commute::in_data" ] = switcher2             [    "select::out_data" ];
+	switcher2       [  "commute::in_ctrl" ] = iterator2             [   "iterate::out"      ];
+	switcher        [   "select::in_data1"] = switcher2             [   "commute::out_data0"];
+	iterator        (  "iterate"          ) = switcher              (    "select"           );
+	switcher        [  "commute::in_data" ] = switcher              [    "select::out_data" ];
+	switcher        [  "commute::in_ctrl" ] = iterator              [   "iterate::out"      ];
+	(*incs[0])      ["increment::in"      ] = switcher              [   "commute::out_data0"];
 	for (size_t s = 0; s < incs.size() -1; s++)
-		(*incs[s+1])[module::inc::sck::increment::in] = (*incs[s])[module::inc::sck::increment::out];
-	switcher  [module::swi::tsk::select][0]     = (*incs[incs.size()-1])[module::inc::sck::increment::out];
-	switcher2 [module::swi::tsk::select][0]     = switcher   [module::swi::tsk::commute][3];
-	finalizer [module::fin::sck::finalize::in]  = switcher2  [module::swi::tsk::commute][3];
+		(*incs[s+1])["increment::in"      ] = (*incs[s])            [ "increment::out"      ];
+	switcher        [   "select::in_data0"] = (*incs[incs.size()-1])[ "increment::out"      ];
+	switcher2       [   "select::in_data0"] = switcher              [   "commute::out_data1"];
+	finalizer       [ "finalize::in"      ] = switcher2             [   "commute::out_data1"];
 
-	runtime::Sequence sequence_nested_loops(initializer[module::ini::tsk::initialize], n_threads);
+	runtime::Sequence sequence_nested_loops(initializer("initialize"), n_threads);
 	sequence_nested_loops.set_n_frames(n_inter_frames);
 	sequence_nested_loops.set_no_copy_mode(no_copy_mode);
 

@@ -219,17 +219,17 @@ int main(int argc, char** argv)
 	}
 
 	// sockets binding
-	(*rlys[0])[module::rly::sck::relay::in] = source[module::src::sck::generate::out_data];
+	(*rlys[0])      [     "relay::in"      ] = source                ["generate::out_data" ];
 	for (size_t s = 0; s < rlys.size() -1; s++)
-		(*rlys[s+1])[module::rly::sck::relay::in] = (*rlys[s])[module::rly::sck::relay::out];
-	sink[module::snk::sck::send_count::in_data] = (*rlys[rlys.size()-1])[module::rly::sck::relay::out];
-	sink[module::snk::sck::send_count::in_count] = source[module::src::sck::generate::out_count];
+		(*rlys[s+1])[     "relay::in"      ] = (*rlys[s])            [   "relay::out"      ];
+	sink            ["send_count::in_data" ] = (*rlys[rlys.size()-1])[   "relay::out"      ];
+	sink            ["send_count::in_count"] = source                ["generate::out_count"];
 
 	std::unique_ptr<runtime::Sequence> sequence_chain;
 	std::unique_ptr<runtime::Pipeline> pipeline_chain;
 	if (force_sequence)
 	{
-		sequence_chain.reset(new runtime::Sequence(source[module::src::tsk::generate], n_threads));
+		sequence_chain.reset(new runtime::Sequence(source("generate"), n_threads));
 		sequence_chain->set_n_frames(n_inter_frames);
 		sequence_chain->set_no_copy_mode(no_copy_mode);
 
@@ -273,16 +273,13 @@ int main(int argc, char** argv)
 	else
 	{
 		pipeline_chain.reset(new runtime::Pipeline(
-		                     source[module::src::tsk::generate], // first task of the sequence
-		                     { // pipeline stage 0
-		                       { { &source[module::src::tsk::generate] },   // first tasks of stage 0
-		                         { &source[module::src::tsk::generate] } }, // last  tasks of stage 0
-		                       // pipeline stage 1
-		                       { { &(*rlys[             0])[module::rly::tsk::relay] },   // first tasks of stage 1
-		                         { &(*rlys[rlys.size() -1])[module::rly::tsk::relay] } }, // last  tasks of stage 1
-		                       // pipeline stage 2
-		                       { { &sink[module::snk::tsk::send_count] },   // first tasks of stage 2
-		                         {                                     } }, // last  tasks of stage 2
+		                     source("generate"), // first task of the sequence
+		                     { // pipeline stage 0: first & last tasks
+		                       { { &source("generate") }, { &source("generate") } },
+		                       // pipeline stage 1: first & last tasks
+		                       { { &(*rlys[0])("relay") }, { &(*rlys[rlys.size()-1])("relay") } },
+		                       // pipeline stage 2: first task (no need to specify the last taks)
+		                       { { &sink("send_count") }, {} },
 		                     },
 		                     {
 		                       1,                         // number of threads in the stage 0
