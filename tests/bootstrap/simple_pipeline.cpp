@@ -37,7 +37,7 @@ bool compare_files(const std::string& filename1, const std::string& filename2)
 
 int main(int argc, char** argv)
 {
-	tools::setup_signal_handler();
+	tools::Signal_handler::init();
 
 	option longopts[] = {
 		{"n-threads", required_argument, NULL, 't'},

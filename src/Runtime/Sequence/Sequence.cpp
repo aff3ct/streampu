@@ -12,6 +12,7 @@
 #include "Tools/Thread_pinning/Thread_pinning_utils.hpp"
 #include "Tools/Thread_pinning/Thread_pinning.hpp"
 #include "Tools/Exception/exception.hpp"
+#include "Tools/Signal_handler/Signal_handler.hpp"
 #include "Module/Module.hpp"
 #include "Module/Probe/Probe.hpp"
 #include "Module/Switcher/Switcher.hpp"
@@ -22,8 +23,6 @@
 
 using namespace aff3ct;
 using namespace aff3ct::runtime;
-
-bool aff3ct::runtime::Sequence::force_stop_exec = false;
 
 Sequence
 ::Sequence(const std::vector<const runtime::Task*> &firsts,
@@ -672,7 +671,7 @@ void Sequence
         std::function<bool(const std::vector<const int*>&)> &stop_condition,
         tools::Digraph_node<Sub_sequence>* sequence)
 {
-	Sequence::force_stop_exec = false;
+	tools::Signal_handler::reset_sigint();
 
 	if (this->is_thread_pinning())
 	{
@@ -724,7 +723,7 @@ void Sequence
 				// do nothing, this is normal
 			}
 		}
-		while (!*force_exit_loop && !stop_condition(statuses) && !Sequence::force_stop_exec);
+		while (!*force_exit_loop && !stop_condition(statuses) && !tools::Signal_handler::is_sigint());
 	}
 	catch (tools::waiting_canceled const&)
 	{
@@ -762,7 +761,7 @@ void Sequence
                          std::function<bool()> &stop_condition,
                          tools::Digraph_node<Sub_sequence>* sequence)
 {
-	Sequence::force_stop_exec = false;
+	tools::Signal_handler::reset_sigint();
 
 	if (this->is_thread_pinning())
 	{
@@ -810,7 +809,7 @@ void Sequence
 				// do nothing, this is normal
 			}
 		}
-		while (!*force_exit_loop && !stop_condition() && !Sequence::force_stop_exec);
+		while (!*force_exit_loop && !stop_condition() && !tools::Signal_handler::is_sigint());
 	}
 	catch (tools::waiting_canceled const&)
 	{

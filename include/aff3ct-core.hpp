@@ -234,8 +234,8 @@
 #ifndef REPORTER_HPP__
 #include <Tools/Reporter/Reporter.hpp>
 #endif
-#ifndef SIGNAL_HANDLER_H_
-#include <Tools/signal_handler.h>
+#ifndef SIGNAL_HANDLER_HPP_
+#include <Tools/Signal_handler/Signal_handler.hpp>
 #endif
 #ifndef SYSTEM_MEMORY_HPP__
 #include <Tools/System/memory.hpp>

@@ -11,8 +11,14 @@
 #include <cstdio>
 
 #include "Runtime/Sequence/Sequence.hpp"
-#include "Tools/signal_handler.h"
+#include "Tools/Signal_handler/Signal_handler.hpp"
 #include "Tools/Display/rang_format/rang_format.h"
+
+using namespace aff3ct;
+using namespace aff3ct::tools;
+
+bool g_sigsegv = false;
+bool g_sigint = false;
 
 #ifdef AFF3CT_CORE_STACKTRACE_SEGFAULT
 
@@ -42,6 +48,8 @@ void signal_sigsegv_handler(int signo)
 void signal_sigsegv_handler(int signo, siginfo_t* info, void* context)
 #endif
 {
+	g_sigsegv = true;
+
 	// print basic message
 	std::cerr << rang::tag::error << "Signal \"Segmentation Violation\" caught by AFF3CT-core signal handler!"
 	          << std::endl;
@@ -90,6 +98,7 @@ void signal_sigsegv_handler(int signo)
 void signal_sigsegv_handler(int signo, siginfo_t* info, void* context)
 #endif
 {
+	g_sigsegv = true;
 
 	// print basic message
 	std::cerr << rang::tag::error << "Signal \"Segmentation Violation\" caught by AFF3CT-core signal handler!"
@@ -131,7 +140,8 @@ void signal_sigint_handler(int signo, siginfo_t* info, void* context)
 	if (g_is_interrupt)
 	{
 		// print basic message
-		std::cerr << rang::tag::error << "Signal \"Interruption\" caught twice by AFF3CT-core signal handler!"
+		std::cerr << std::endl
+		          << rang::tag::error << "Signal \"Interruption\" caught twice by AFF3CT-core signal handler!"
 		          << std::endl;
 		std::cerr << rang::tag::error << "Killing the application RIGHT NOW sir!" << std::endl;
 		exit(1);
@@ -142,15 +152,18 @@ void signal_sigint_handler(int signo, siginfo_t* info, void* context)
 		std::this_thread::sleep_for(std::chrono::milliseconds(250)); // 250 ms of passive waiting
 
 		// print basic message
-		std::clog << rang::tag::info << "Signal \"Interruption\" caught by AFF3CT-core signal handler!" << std::endl;
+		std::clog << std::endl
+		          << rang::tag::info << "Signal \"Interruption\" caught by AFF3CT-core signal handler!" << std::endl;
 		std::clog << rang::tag::info << "Stopping Sequence::exec() and/or Pipeline::exec()..." << std::endl;
 
-		aff3ct::runtime::Sequence::force_stop_exec = true;
+		g_sigint = true;
+
 		g_is_interrupt = false;
 	}
 }
 
-int aff3ct::tools::setup_signal_handler()
+int Signal_handler
+::init()
 {
 // SIGSEGV handler
 #ifdef AFF3CT_CORE_STACKTRACE_SEGFAULT
@@ -181,4 +194,28 @@ int aff3ct::tools::setup_signal_handler()
 #endif /* defined(_WIN64) || defined(_WIN32) */
 
 	return 0;
+}
+
+bool Signal_handler
+::is_sigint()
+{
+	return g_sigint;
+}
+
+void Signal_handler
+::reset_sigint()
+{
+	g_sigint = false;
+}
+
+bool Signal_handler
+::is_sigsegv()
+{
+	return g_sigsegv;
+}
+
+void Signal_handler
+::reset_sigsegv()
+{
+	g_sigsegv = false;
 }
