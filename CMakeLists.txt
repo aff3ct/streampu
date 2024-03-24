@@ -212,7 +212,7 @@ if(AFF3CT_CORE_TESTS)
     list(APPEND aff3ct_core_targets_list aff3ct-core-test-generic-pipeline)
 
     add_executable(aff3ct-core-test-exclusive-paths-pipeline $<TARGET_OBJECTS:aff3ct-core-obj>
-                   ${CMAKE_CURRENT_SOURCE_DIR}/tests/ctrl_flw/exclusive_paths_pipeline.cpp)
+                   ${CMAKE_CURRENT_SOURCE_DIR}/tests/ctrl_flow/exclusive_paths_pipeline.cpp)
     set_target_properties(aff3ct-core-test-exclusive-paths-pipeline PROPERTIES
                                                            OUTPUT_NAME test-exclusive-paths-pipeline
                                                            POSITION_INDEPENDENT_CODE ON) # set -fpie
@@ -220,7 +220,7 @@ if(AFF3CT_CORE_TESTS)
     list(APPEND aff3ct_core_targets_list aff3ct-core-test-exclusive-paths-pipeline)
 
     add_executable(aff3ct-core-test-nest-loops-pipeline $<TARGET_OBJECTS:aff3ct-core-obj>
-                   ${CMAKE_CURRENT_SOURCE_DIR}/tests/ctrl_flw/nested_loops_pipeline.cpp)
+                   ${CMAKE_CURRENT_SOURCE_DIR}/tests/ctrl_flow/nested_loops_pipeline.cpp)
     set_target_properties(aff3ct-core-test-nest-loops-pipeline PROPERTIES
                                                            OUTPUT_NAME test-nested-loops-pipeline
                                                            POSITION_INDEPENDENT_CODE ON) # set -fpie

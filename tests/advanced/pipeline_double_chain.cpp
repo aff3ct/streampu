@@ -189,14 +189,14 @@ int main(int argc, char** argv)
 	}
 
 	// sockets binding
-	(*incs_fwd[0])[module::inc::sck::incrementf::fwd] = initializer[module::ini::sck::initialize::out];
-	(*incs[0])[module::inc::sck::increment::in] = initializer[module::ini::sck::initialize::out];
+	(*incs_fwd[0])      ["incrementf::fwd"] = initializer            ["initialize::out"];
+	(*incs[0])          [ "increment::in" ] = initializer            ["initialize::out"];
 	for (size_t s = 0; s < incs_fwd.size() -1; s++)
 	{
-		(*incs_fwd[s+1])[module::inc::sck::incrementf::fwd] = (*incs_fwd[s])[module::inc::sck::incrementf::fwd];
-		(*incs[s+1])[module::inc::sck::increment::in] = (*incs[s])[module::inc::sck::increment::out];
+		(*incs_fwd[s+1])["incrementf::fwd"] = (*incs_fwd[s])         ["incrementf::fwd"];
+		(*incs[s+1])    [ "increment::in" ] = (*incs[s])             [ "increment::out"];
 	}
-	finalizer[module::fin::sck::finalize::in] = (*incs[incs.size() -1])[module::inc::sck::increment::out];
+	finalizer           [  "finalize::in" ] = (*incs[incs.size() -1])[ "increment::out"];
 
 	std::unique_ptr<runtime::Sequence> sequence_chain;
 	std::unique_ptr<runtime::Pipeline> pipeline_chain;
@@ -206,7 +206,7 @@ int main(int argc, char** argv)
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	if (force_sequence)
 	{
-		sequence_chain.reset(new runtime::Sequence(initializer[module::ini::tsk::initialize], n_threads));
+		sequence_chain.reset(new runtime::Sequence(initializer("initialize"), n_threads));
 		sequence_chain->set_n_frames(n_inter_frames);
 
 		// initialize input data
@@ -260,16 +260,13 @@ int main(int argc, char** argv)
 	{
 		pipeline_chain.reset(new runtime::Pipeline(
 			initializer[module::ini::tsk::initialize], // first task of the sequence
-			{  // pipeline stage 0
-			   { { &initializer[module::ini::tsk::initialize] },               // first tasks of stage 0
-			     { &initializer[module::ini::tsk::initialize] } },             // last  tasks of stage 0
-			   // pipeline stage 1
-			   { { &(*incs_fwd[0])[module::inc::tsk::incrementf],              // first tasks of stage 1
-			       &(*incs[0])[module::inc::tsk::increment] },
-			     { &(*incs[incs.size() -1])[module::inc::tsk::increment], } }, // last  tasks of stage 1
-			   // pipeline stage 2
-			   { {& finalizer[module::fin::tsk::finalize] },                   // first tasks of stage 2
-			     {                                      } },                   // last  tasks of stage 2
+			{  // pipeline stage 0, first & last tasks
+			   { { &initializer("initialize") }, { &initializer("initialize") } },
+			   // pipeline stage 1, first & last tasks
+			   { { &(*incs_fwd[0])("incrementf"), &(*incs[0])("increment") },
+			     { &(*incs[incs.size() -1])("increment"), } },
+			   // pipeline stage 2, first task
+			   { {& finalizer("finalize") }, { } },
 			},
 			{
 			   1,                         // number of threads in the stage 0

@@ -497,7 +497,7 @@ void Sequence
 	}
 
 	this->n_tasks = taid;
-	this->check_ctrl_flw(root);
+	this->check_ctrl_flow(root);
 	this->_init<SS>(root);
 	this->update_firsts_and_lasts_tasks();
 	this->gen_processes();
@@ -2459,7 +2459,7 @@ void Sequence
 
 template<class SS>
 void Sequence
-::check_ctrl_flw(tools::Digraph_node<SS>* root)
+::check_ctrl_flow(tools::Digraph_node<SS>* root)
 {
 	std::function<void(tools::Digraph_node<SS>*,
 	              std::vector<tools::Digraph_node<SS>*>&)> check_control_flow_parity =

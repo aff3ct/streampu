@@ -143,11 +143,11 @@ This sub-sequence is invalid because the last `SS Branch 3` has no path to the
 
 ```python
 # Note that path_taken here is copied between recursive calls and NOT shared
-void Check_ctrl_flw(Node n, List path_taken):
+void Check_ctrl_flow(Node n, List path_taken):
     if n is not in path_taken and n is not childless
         path_taken.append(n)
         for every child c of n:
-            Check_ctrl_flw(c, path_taken)
+            Check_ctrl_flow(c, path_taken)
     else
         for i = 0, i < path_taken.size, i++:
             if path_taken[i] does not contain a switcher task:
