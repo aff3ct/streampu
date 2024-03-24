@@ -186,6 +186,7 @@ int main(int argc, char** argv)
 	module::Relayer<uint8_t> relayer2(data_length);
 	relayer2.set_custom_name("RelayerEnd");
 
+	// sockets binding
 	relayer1        [    "relay::in"      ] = initializer           ["initialize::out"      ];
 	switcher2       [   "select::in_data1"] = relayer1              [     "relay::out"      ];
 	iterator2       (  "iterate"          ) = switcher2             (    "select"           );
