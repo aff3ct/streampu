@@ -12,6 +12,7 @@
 #include "Tools/Thread_pinning/Thread_pinning_utils.hpp"
 #include "Tools/Thread_pinning/Thread_pinning.hpp"
 #include "Tools/Exception/exception.hpp"
+#include "Tools/Signal_handler/Signal_handler.hpp"
 #include "Module/Module.hpp"
 #include "Module/Probe/Probe.hpp"
 #include "Module/Switcher/Switcher.hpp"
@@ -22,8 +23,6 @@
 
 using namespace aff3ct;
 using namespace aff3ct::runtime;
-
-bool aff3ct::runtime::Sequence::force_stop_exec = false;
 
 Sequence
 ::Sequence(const std::vector<const runtime::Task*> &firsts,
@@ -498,7 +497,7 @@ void Sequence
 	}
 
 	this->n_tasks = taid;
-	this->check_ctrl_flw(root);
+	this->check_ctrl_flow(root);
 	this->_init<SS>(root);
 	this->update_firsts_and_lasts_tasks();
 	this->gen_processes();
@@ -672,7 +671,7 @@ void Sequence
         std::function<bool(const std::vector<const int*>&)> &stop_condition,
         tools::Digraph_node<Sub_sequence>* sequence)
 {
-	Sequence::force_stop_exec = false;
+	tools::Signal_handler::reset_sigint();
 
 	if (this->is_thread_pinning())
 	{
@@ -724,7 +723,7 @@ void Sequence
 				// do nothing, this is normal
 			}
 		}
-		while (!*force_exit_loop && !stop_condition(statuses) && !Sequence::force_stop_exec);
+		while (!*force_exit_loop && !stop_condition(statuses) && !tools::Signal_handler::is_sigint());
 	}
 	catch (tools::waiting_canceled const&)
 	{
@@ -762,7 +761,7 @@ void Sequence
                          std::function<bool()> &stop_condition,
                          tools::Digraph_node<Sub_sequence>* sequence)
 {
-	Sequence::force_stop_exec = false;
+	tools::Signal_handler::reset_sigint();
 
 	if (this->is_thread_pinning())
 	{
@@ -810,7 +809,7 @@ void Sequence
 				// do nothing, this is normal
 			}
 		}
-		while (!*force_exit_loop && !stop_condition() && !Sequence::force_stop_exec);
+		while (!*force_exit_loop && !stop_condition() && !tools::Signal_handler::is_sigint());
 	}
 	catch (tools::waiting_canceled const&)
 	{
@@ -1412,9 +1411,11 @@ void Sequence
 			}
 			catch (std::exception &e)
 			{
-				std::cerr << rang::tag::error << "Module clone failed when trying to duplicate the sequence: module "
-				                              << "name is '" << modules_vec[m]->get_name() << "'." << std::endl;
-				throw e;
+				std::stringstream message;
+				message << "Module clone failed when trying to duplicate the sequence (module name is '"
+				        << modules_vec[m]->get_name() << "').";
+
+				throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
 			}
 			this->all_modules[tid + (this->tasks_inplace ? 1 : 0)][m] = this->modules[tid][m].get();
 		}
@@ -1517,7 +1518,7 @@ void Sequence
 
 								auto &s_in  = *this->all_modules[thread_id][m_id    ]->tasks[t_id    ]->sockets[s_id    ];
 								auto &s_out = *this->all_modules[thread_id][m_id_out]->tasks[t_id_out]->sockets[s_id_out];
-								s_in.bind(s_out);
+								s_in = s_out;
 							}
 						}
 					}
@@ -1550,7 +1551,7 @@ void Sequence
 
 								auto &t_in  = *this->all_modules[thread_id][m_id    ]->tasks[t_id    ];
 								auto &s_out = *this->all_modules[thread_id][m_id_out]->tasks[t_id_out]->sockets[s_id_out];
-								t_in.bind(s_out);
+								t_in = s_out;
 							}
 						}
 					}
@@ -1684,7 +1685,7 @@ void Sequence
 			{
 				case socket_t::SIN:
 					stype = "in[" + std::to_string(sid) + "]";
-					static_input = s->get_dataptr() != nullptr && s->bound_socket == nullptr;
+					static_input = s->_get_dataptr() != nullptr && s->bound_socket == nullptr;
 					break;
 				case socket_t::SOUT: stype = "out[" + std::to_string(sid) + "]"; break;
 				case socket_t::SFWD: stype = "fwd[" + std::to_string(sid) + "]"; break;
@@ -1902,7 +1903,7 @@ void Sequence
 										explore_thread_rec(socket, bound_sockets);
 								}
 								for (auto sck : bound_sockets)
-									dataptrs.push_back(sck->get_dataptr());
+									dataptrs.push_back(sck->_get_dataptr());
 
 								contents->rebind_sockets[rebind_id].push_back(bound_sockets);
 								contents->rebind_dataptrs[rebind_id].push_back(dataptrs);
@@ -1912,10 +1913,10 @@ void Sequence
 						modified_tasks[select_task] = [contents, select_task, switcher, rebind_id]() -> const int*
 						{
 							select_task->exec();
-							const int* status = (int*)select_task->sockets.back()->get_dataptr();
+							const int* status = select_task->sockets.back()->get_dataptr<int>();
 
 							const auto path = switcher->get_path();
-							const auto in_dataptr = select_task->sockets[path]->get_dataptr();
+							const auto in_dataptr = select_task->sockets[path]->_get_dataptr();
 
 							// rebind input sockets on the fly
 							// there should be only one output socket at this time (sout_id == 0)
@@ -1952,7 +1953,7 @@ void Sequence
 										explore_thread_rec(socket, bound_sockets);
 								}
 								for (auto sck : bound_sockets)
-									dataptrs.push_back(sck->get_dataptr());
+									dataptrs.push_back(sck->_get_dataptr());
 
 								contents->rebind_sockets[rebind_id].push_back(bound_sockets);
 								contents->rebind_dataptrs[rebind_id].push_back(dataptrs);
@@ -1962,8 +1963,8 @@ void Sequence
 						modified_tasks[commute_task] = [contents, commute_task, switcher, rebind_id]() -> const int*
 						{
 							commute_task->exec();
-							const int* status = (int*)commute_task->sockets.back()->get_dataptr();
-							const auto in_dataptr = commute_task->sockets[0]->get_dataptr();
+							const int* status = commute_task->sockets.back()->get_dataptr<int>();
+							const auto in_dataptr = commute_task->sockets[0]->_get_dataptr();
 							const auto path = switcher->get_path();
 
 							// rebind input sockets on the fly
@@ -1999,7 +2000,7 @@ void Sequence
 										explore_thread_rec(socket, bound_sockets);
 								}
 								for (auto sck : bound_sockets)
-									dataptrs.push_back(sck->get_dataptr());
+									dataptrs.push_back(sck->_get_dataptr());
 
 								contents->rebind_sockets[rebind_id].push_back(bound_sockets);
 								contents->rebind_dataptrs[rebind_id].push_back(dataptrs);
@@ -2010,7 +2011,7 @@ void Sequence
 						{
 							// active or passive waiting here
 							pull_task->exec();
-							const int* status = (int*)pull_task->sockets.back()->get_dataptr();
+							const int* status = pull_task->sockets.back()->get_dataptr<int>();
 
 							// rebind input sockets on the fly
 							for (size_t sin_id = 0; sin_id < contents->rebind_sockets[rebind_id].size(); sin_id++)
@@ -2019,7 +2020,7 @@ void Sequence
 								{
 									// we start to 1 because the rebinding of the 'pull_task' is made in the
 									// 'pull_task->exec()' call (this way the debug mode is still working)
-									auto swap_buff = contents->rebind_sockets[rebind_id][sin_id][1]->get_dataptr();
+									auto swap_buff = contents->rebind_sockets[rebind_id][sin_id][1]->_get_dataptr();
 									auto buff = adp_pull->get_filled_buffer(sin_id, swap_buff);
 									contents->rebind_sockets[rebind_id][sin_id][1]->dataptr = buff;
 									// for the next tasks the same buffer 'buff' is required, an easy mistake is to re-swap
@@ -2061,7 +2062,7 @@ void Sequence
 									explore_thread_rec_reverse(bound_socket, bound_sockets);
 
 								for (auto sck : bound_sockets)
-									dataptrs.push_back(sck->get_dataptr());
+									dataptrs.push_back(sck->_get_dataptr());
 
 								contents->rebind_sockets[rebind_id].push_back(bound_sockets);
 								contents->rebind_dataptrs[rebind_id].push_back(dataptrs);
@@ -2071,13 +2072,13 @@ void Sequence
 						{
 							// active or passive waiting here
 							push_task->exec();
-							const int* status = (int*)push_task->sockets.back()->get_dataptr();
+							const int* status = push_task->sockets.back()->get_dataptr<int>();
 							// rebind output sockets on the fly
 							for (size_t sout_id = 0; sout_id < contents->rebind_sockets[rebind_id].size(); sout_id++)
 							{
 								// we start to 1 because the rebinding of the 'push_task' is made in the
 								// 'push_task->exec()' call (this way the debug mode is still working)
-								auto swap_buff = contents->rebind_sockets[rebind_id][sout_id][1]->get_dataptr();
+								auto swap_buff = contents->rebind_sockets[rebind_id][sout_id][1]->_get_dataptr();
 								auto buff = adp_push->get_empty_buffer(sout_id, swap_buff);
 								contents->rebind_sockets[rebind_id][sout_id][1]->dataptr = buff;
 								// the output socket linked to the push adp can have more than one socket bound and so
@@ -2098,7 +2099,7 @@ void Sequence
 						contents->processes.push_back([task]() -> const int*
 						{
 							task->exec();
-							const int* status = (int*)task->sockets.back()->get_dataptr();
+							const int* status = task->sockets.back()->get_dataptr<int>();
 							return status;
 						});
 
@@ -2435,11 +2436,11 @@ void Sequence
 {
 	// rebind the sockets
 	for (auto &u : unbind_sockets)
-		u.first->bind(*u.second);
+		(*u.first) = *u.second;
 
 	// rebind the tasks
 	for (auto &u : unbind_tasks)
-		u.first->bind(*u.second);
+		(*u.first) = *u.second;
 }
 
 void Sequence
@@ -2458,7 +2459,7 @@ void Sequence
 
 template<class SS>
 void Sequence
-::check_ctrl_flw(tools::Digraph_node<SS>* root)
+::check_ctrl_flow(tools::Digraph_node<SS>* root)
 {
 	std::function<void(tools::Digraph_node<SS>*,
 	              std::vector<tools::Digraph_node<SS>*>&)> check_control_flow_parity =

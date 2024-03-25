@@ -7,12 +7,12 @@ namespace runtime
 
 template <class C>
 std::vector<C*> Pipeline
-::get_modules(const bool subsequence_modules) const
+::get_modules(const bool set_modules) const
 {
 	std::vector<C*> ret;
 	for (auto &stage : this->stages)
 	{
-		auto modules = stage->get_modules<C>(subsequence_modules);
+		auto modules = stage->get_modules<C>(set_modules);
 		ret.insert(ret.end(), modules.begin(), modules.end());
 	}
 	return ret;

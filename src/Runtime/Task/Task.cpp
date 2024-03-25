@@ -246,7 +246,7 @@ void Task
 
 	// do not use 'this->status' because the dataptr can have been changed by the 'tools::Sequence' when using the no
 	// copy mode
-	int* status = (int*)this->sockets.back()->get_dataptr();
+	int* status = this->sockets.back()->get_dataptr<int>();
 	for (size_t w = 0; w < n_waves; w++)
 		status[w] = (int)status_t::UNKNOWN;
 
@@ -264,7 +264,7 @@ void Task
 	{
 		// save the initial dataptr of the sockets
 		for (size_t sid = 0; sid < this->sockets.size() -1; sid++)
-			sockets_dataptr_init[sid] = (int8_t*)this->sockets[sid]->get_dataptr();
+			sockets_dataptr_init[sid] = (int8_t*)this->sockets[sid]->_get_dataptr();
 
 		if (frame_id > 0 && managed_memory == true && n_frames_per_wave > 1)
 		{
@@ -346,11 +346,14 @@ void Task
 const std::vector<int>& Task
 ::exec(const int frame_id, const bool managed_memory)
 {
+#ifndef AFF3CT_CORE_FAST
 	if (this->is_fast() && !this->is_debug() && !this->is_stats())
 	{
+#endif
 		this->_exec(frame_id, managed_memory);
 		this->n_calls++;
 		return this->get_status();
+#ifndef AFF3CT_CORE_FAST
 	}
 
 	if (frame_id != -1 && (size_t)frame_id >= this->get_module().get_n_frames())
@@ -405,16 +408,16 @@ const std::vector<int>& Task
 					auto p = debug_precision;
 					auto h = debug_hex;
 					std::cout << "# {IN}  " << s->get_name() << spaces << " = [";
-					     if (s->get_datatype() == typeid(int8_t  )) display_data((int8_t  *)s->get_dataptr(), fra_size, n_fra, n_fra_per_w, limit, max_frame, p, (uint8_t)max_n_chars +12, h);
-					else if (s->get_datatype() == typeid(uint8_t )) display_data((uint8_t *)s->get_dataptr(), fra_size, n_fra, n_fra_per_w, limit, max_frame, p, (uint8_t)max_n_chars +12, h);
-					else if (s->get_datatype() == typeid(int16_t )) display_data((int16_t *)s->get_dataptr(), fra_size, n_fra, n_fra_per_w, limit, max_frame, p, (uint8_t)max_n_chars +12, h);
-					else if (s->get_datatype() == typeid(uint16_t)) display_data((uint16_t*)s->get_dataptr(), fra_size, n_fra, n_fra_per_w, limit, max_frame, p, (uint8_t)max_n_chars +12, h);
-					else if (s->get_datatype() == typeid(int32_t )) display_data((int32_t *)s->get_dataptr(), fra_size, n_fra, n_fra_per_w, limit, max_frame, p, (uint8_t)max_n_chars +12, h);
-					else if (s->get_datatype() == typeid(uint32_t)) display_data((uint32_t*)s->get_dataptr(), fra_size, n_fra, n_fra_per_w, limit, max_frame, p, (uint8_t)max_n_chars +12, h);
-					else if (s->get_datatype() == typeid(int64_t )) display_data((int64_t *)s->get_dataptr(), fra_size, n_fra, n_fra_per_w, limit, max_frame, p, (uint8_t)max_n_chars +12, h);
-					else if (s->get_datatype() == typeid(uint64_t)) display_data((uint64_t*)s->get_dataptr(), fra_size, n_fra, n_fra_per_w, limit, max_frame, p, (uint8_t)max_n_chars +12, h);
-					else if (s->get_datatype() == typeid(float   )) display_data((float   *)s->get_dataptr(), fra_size, n_fra, n_fra_per_w, limit, max_frame, p, (uint8_t)max_n_chars +12, h);
-					else if (s->get_datatype() == typeid(double  )) display_data((double  *)s->get_dataptr(), fra_size, n_fra, n_fra_per_w, limit, max_frame, p, (uint8_t)max_n_chars +12, h);
+					     if (s->get_datatype() == typeid(int8_t  )) display_data(s->get_dataptr<const int8_t  >(), fra_size, n_fra, n_fra_per_w, limit, max_frame, p, (uint8_t)max_n_chars +12, h);
+					else if (s->get_datatype() == typeid(uint8_t )) display_data(s->get_dataptr<const uint8_t >(), fra_size, n_fra, n_fra_per_w, limit, max_frame, p, (uint8_t)max_n_chars +12, h);
+					else if (s->get_datatype() == typeid(int16_t )) display_data(s->get_dataptr<const int16_t >(), fra_size, n_fra, n_fra_per_w, limit, max_frame, p, (uint8_t)max_n_chars +12, h);
+					else if (s->get_datatype() == typeid(uint16_t)) display_data(s->get_dataptr<const uint16_t>(), fra_size, n_fra, n_fra_per_w, limit, max_frame, p, (uint8_t)max_n_chars +12, h);
+					else if (s->get_datatype() == typeid(int32_t )) display_data(s->get_dataptr<const int32_t >(), fra_size, n_fra, n_fra_per_w, limit, max_frame, p, (uint8_t)max_n_chars +12, h);
+					else if (s->get_datatype() == typeid(uint32_t)) display_data(s->get_dataptr<const uint32_t>(), fra_size, n_fra, n_fra_per_w, limit, max_frame, p, (uint8_t)max_n_chars +12, h);
+					else if (s->get_datatype() == typeid(int64_t )) display_data(s->get_dataptr<const int64_t >(), fra_size, n_fra, n_fra_per_w, limit, max_frame, p, (uint8_t)max_n_chars +12, h);
+					else if (s->get_datatype() == typeid(uint64_t)) display_data(s->get_dataptr<const uint64_t>(), fra_size, n_fra, n_fra_per_w, limit, max_frame, p, (uint8_t)max_n_chars +12, h);
+					else if (s->get_datatype() == typeid(float   )) display_data(s->get_dataptr<const float   >(), fra_size, n_fra, n_fra_per_w, limit, max_frame, p, (uint8_t)max_n_chars +12, h);
+					else if (s->get_datatype() == typeid(double  )) display_data(s->get_dataptr<const double  >(), fra_size, n_fra, n_fra_per_w, limit, max_frame, p, (uint8_t)max_n_chars +12, h);
 					std::cout << "]" << std::endl;
 				}
 			}
@@ -462,23 +465,23 @@ const std::vector<int>& Task
 					auto p = debug_precision;
 					auto h = debug_hex;
 					std::cout << "# {OUT} " << s->get_name() << spaces << " = [";
-					     if (s->get_datatype() == typeid(int8_t  )) display_data((int8_t  *)s->get_dataptr(), fra_size, n_fra, n_fra_per_w, limit, max_frame, p, (uint8_t)max_n_chars +12, h);
-					else if (s->get_datatype() == typeid(uint8_t )) display_data((uint8_t *)s->get_dataptr(), fra_size, n_fra, n_fra_per_w, limit, max_frame, p, (uint8_t)max_n_chars +12, h);
-					else if (s->get_datatype() == typeid(int16_t )) display_data((int16_t *)s->get_dataptr(), fra_size, n_fra, n_fra_per_w, limit, max_frame, p, (uint8_t)max_n_chars +12, h);
-					else if (s->get_datatype() == typeid(uint16_t)) display_data((uint16_t*)s->get_dataptr(), fra_size, n_fra, n_fra_per_w, limit, max_frame, p, (uint8_t)max_n_chars +12, h);
-					else if (s->get_datatype() == typeid(int32_t )) display_data((int32_t *)s->get_dataptr(), fra_size, n_fra, n_fra_per_w, limit, max_frame, p, (uint8_t)max_n_chars +12, h);
-					else if (s->get_datatype() == typeid(uint32_t)) display_data((uint32_t*)s->get_dataptr(), fra_size, n_fra, n_fra_per_w, limit, max_frame, p, (uint8_t)max_n_chars +12, h);
-					else if (s->get_datatype() == typeid(int64_t )) display_data((int64_t *)s->get_dataptr(), fra_size, n_fra, n_fra_per_w, limit, max_frame, p, (uint8_t)max_n_chars +12, h);
-					else if (s->get_datatype() == typeid(uint64_t)) display_data((uint64_t*)s->get_dataptr(), fra_size, n_fra, n_fra_per_w, limit, max_frame, p, (uint8_t)max_n_chars +12, h);
-					else if (s->get_datatype() == typeid(float   )) display_data((float   *)s->get_dataptr(), fra_size, n_fra, n_fra_per_w, limit, max_frame, p, (uint8_t)max_n_chars +12, h);
-					else if (s->get_datatype() == typeid(double  )) display_data((double  *)s->get_dataptr(), fra_size, n_fra, n_fra_per_w, limit, max_frame, p, (uint8_t)max_n_chars +12, h);
+					     if (s->get_datatype() == typeid(int8_t  )) display_data(s->get_dataptr<const int8_t  >(), fra_size, n_fra, n_fra_per_w, limit, max_frame, p, (uint8_t)max_n_chars +12, h);
+					else if (s->get_datatype() == typeid(uint8_t )) display_data(s->get_dataptr<const uint8_t >(), fra_size, n_fra, n_fra_per_w, limit, max_frame, p, (uint8_t)max_n_chars +12, h);
+					else if (s->get_datatype() == typeid(int16_t )) display_data(s->get_dataptr<const int16_t >(), fra_size, n_fra, n_fra_per_w, limit, max_frame, p, (uint8_t)max_n_chars +12, h);
+					else if (s->get_datatype() == typeid(uint16_t)) display_data(s->get_dataptr<const uint16_t>(), fra_size, n_fra, n_fra_per_w, limit, max_frame, p, (uint8_t)max_n_chars +12, h);
+					else if (s->get_datatype() == typeid(int32_t )) display_data(s->get_dataptr<const int32_t >(), fra_size, n_fra, n_fra_per_w, limit, max_frame, p, (uint8_t)max_n_chars +12, h);
+					else if (s->get_datatype() == typeid(uint32_t)) display_data(s->get_dataptr<const uint32_t>(), fra_size, n_fra, n_fra_per_w, limit, max_frame, p, (uint8_t)max_n_chars +12, h);
+					else if (s->get_datatype() == typeid(int64_t )) display_data(s->get_dataptr<const int64_t >(), fra_size, n_fra, n_fra_per_w, limit, max_frame, p, (uint8_t)max_n_chars +12, h);
+					else if (s->get_datatype() == typeid(uint64_t)) display_data(s->get_dataptr<const uint64_t>(), fra_size, n_fra, n_fra_per_w, limit, max_frame, p, (uint8_t)max_n_chars +12, h);
+					else if (s->get_datatype() == typeid(float   )) display_data(s->get_dataptr<const float   >(), fra_size, n_fra, n_fra_per_w, limit, max_frame, p, (uint8_t)max_n_chars +12, h);
+					else if (s->get_datatype() == typeid(double  )) display_data(s->get_dataptr<const double  >(), fra_size, n_fra, n_fra_per_w, limit, max_frame, p, (uint8_t)max_n_chars +12, h);
 					std::cout << "]" << std::endl;
 				}
 			}
 			std::cout << "# Returned status: [";
 			// do not use 'this->status' because the dataptr can have been changed by the 'tools::Sequence' when using
 			// the no copy mode
-			int* status = (int*)this->sockets.back()->get_dataptr();
+			int* status = this->sockets.back()->get_dataptr<int>();
 			for (size_t w = 0; w < this->get_module().get_n_waves(); w++)
 			{
 				if (status_t_to_string.count(status[w]))
@@ -515,6 +518,7 @@ const std::vector<int>& Task
 		        << this->get_name() << ", 'module.name' = " << module->get_name() << ", " << socs.str() << ").";
 		throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
 	}
+#endif /* !AFF3CT_CORE_FAST */
 }
 
 template <typename T>
@@ -944,7 +948,7 @@ Task* Task
 				dataptr = (void*)t->out_buffers[out_buffers_counter++].data();
 		}
 		else if (s->get_type() == socket_t::SIN || s->get_type() == socket_t::SFWD)
-			dataptr = s->get_dataptr();
+			dataptr = s->_get_dataptr();
 
 		const std::pair<size_t,size_t> databytes_per_dim = { s->get_n_rows(), s->get_databytes() / s->get_n_rows() };
 		auto s_new = std::shared_ptr<Socket>(new Socket(*t,
@@ -964,7 +968,7 @@ Task* Task
 }
 
 void Task
-::bind(Socket &s_out, const int priority)
+::_bind(Socket &s_out, const int priority)
 {
 	// check if the 's_out' socket is already used for an other fake input socket
 	bool already_bound = false;
@@ -1001,23 +1005,62 @@ void Task
 		                                                  s_out.get_databytes(),
 		                                                  socket_t::SIN,
 		                                                  this->is_fast())));
-		this->fake_input_sockets.back()->bind(s_out, priority);
+		this->fake_input_sockets.back()->_bind(s_out, priority);
 		this->last_input_socket = this->fake_input_sockets.back().get();
 		this->n_input_sockets++;
 	}
 }
 
 void Task
+::bind(Socket &s_out, const int priority)
+{
+#ifdef AFF3CT_CORE_SHOW_DEPRECATED
+	std::clog << rang::tag::warning
+	          << "Deprecated: 'Task::bind()' should be replaced by 'Task::operator='." << std::endl;
+#ifdef AFF3CT_CORE_STACKTRACE
+#ifdef AFF3CT_CORE_COLORS
+	bool enable_color = true;
+#else
+	bool enable_color = false;
+#endif
+	cpptrace::generate_trace().print(std::clog, enable_color);
+#endif
+#endif
+	this->_bind(s_out, priority);
+}
+
+void Task
+::_bind(Task &t_out, const int priority)
+{
+	this->_bind(*t_out.sockets.back(), priority);
+}
+
+void Task
 ::bind(Task &t_out, const int priority)
 {
-	this->bind(*t_out.sockets.back(), priority);
+#ifdef AFF3CT_CORE_SHOW_DEPRECATED
+	std::clog << rang::tag::warning
+	          << "Deprecated: 'Task::bind()' should be replaced by 'Task::operator='." << std::endl;
+#ifdef AFF3CT_CORE_STACKTRACE
+#ifdef AFF3CT_CORE_COLORS
+	bool enable_color = true;
+#else
+	bool enable_color = false;
+#endif
+	cpptrace::generate_trace().print(std::clog, enable_color);
+#endif
+#endif
+	this->_bind(t_out, priority);
 }
 
 void Task
 ::operator=(Socket &s_out)
 {
+#ifndef AFF3CT_CORE_FAST
 	if (s_out.get_type() == socket_t::SOUT || s_out.get_type() == socket_t::SFWD)
-		this->bind(s_out);
+#endif
+		this->_bind(s_out);
+#ifndef AFF3CT_CORE_FAST
 	else
 	{
 		std::stringstream message;
@@ -1030,6 +1073,7 @@ void Task
 		        << ").";
 		throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
 	}
+#endif
 }
 
 void Task
@@ -1096,7 +1140,7 @@ size_t Task
 	size_t n = 0;
 	for (auto &s : this->sockets)
 		if (s->get_type() == socket_t::SIN &&
-		    s->get_dataptr() != nullptr &&
+		    s->_get_dataptr() != nullptr &&
 		    s->bound_socket == nullptr)
 			n++;
 	return n;

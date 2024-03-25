@@ -174,7 +174,7 @@ public:
 	Sequence& operator[](const size_t stage_id);
 
 	template <class C = module::Module>
-	std::vector<C*> get_modules(const bool subsequence_modules = true) const;
+	std::vector<C*> get_modules(const bool set_modules = true) const;
 	std::vector<std::vector<module::Module*>> get_modules_per_threads() const;
 	std::vector<std::vector<module::Module*>> get_modules_per_types  () const;
 

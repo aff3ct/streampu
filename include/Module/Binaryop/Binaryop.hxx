@@ -73,9 +73,9 @@ Binaryop<TI,TO,BOP>
 	this->create_codelet(p, [ps_in0, ps_in1, ps_out](Module &m, runtime::Task &t, const size_t frame_id) -> int
 	{
 		auto &bop = static_cast<Binaryop&>(m);
-		bop._perform(*static_cast<const TI*>(t[ps_in0].get_dataptr()),
-		              static_cast<const TI*>(t[ps_in1].get_dataptr()),
-		              static_cast<      TO*>(t[ps_out].get_dataptr()),
+		bop._perform(*t[ps_in0].template get_dataptr<const TI>(),
+		              t[ps_in1].template get_dataptr<const TI>(),
+		              t[ps_out].template get_dataptr<      TO>(),
 		             frame_id);
 		return runtime::status_t::SUCCESS;
 	});
@@ -85,9 +85,9 @@ Binaryop<TI,TO,BOP>
 	this->create_codelet(p, [ps_in0, ps_in1, ps_out](Module &m, runtime::Task &t, const size_t frame_id) -> int
 	{
 		auto &bop = static_cast<Binaryop&>(m);
-		bop._perform( static_cast<const TI*>(t[ps_in0].get_dataptr()),
-		             *static_cast<const TI*>(t[ps_in1].get_dataptr()),
-		              static_cast<      TO*>(t[ps_out].get_dataptr()),
+		bop._perform( t[ps_in0].template get_dataptr<const TI>(),
+		             *t[ps_in1].template get_dataptr<const TI>(),
+		              t[ps_out].template get_dataptr<      TO>(),
 		              frame_id);
 		return runtime::status_t::SUCCESS;
 	});
@@ -97,9 +97,9 @@ Binaryop<TI,TO,BOP>
 	this->create_codelet(p, [ps_in0, ps_in1, ps_out](Module &m, runtime::Task &t, const size_t frame_id) -> int
 	{
 		auto &bop = static_cast<Binaryop&>(m);
-		bop._perform(static_cast<const TI*>(t[ps_in0].get_dataptr()),
-		             static_cast<const TI*>(t[ps_in1].get_dataptr()),
-		             static_cast<      TO*>(t[ps_out].get_dataptr()),
+		bop._perform(t[ps_in0].template get_dataptr<const TI>(),
+		             t[ps_in1].template get_dataptr<const TI>(),
+		             t[ps_out].template get_dataptr<      TO>(),
 		             frame_id);
 		return runtime::status_t::SUCCESS;
 	});
@@ -114,8 +114,8 @@ Binaryop<TI,TO,BOP>
 	this->create_codelet(p2, [p2_in, p2_fwd](Module &m, runtime::Task &t, const size_t frame_id) -> int
 	{
 		auto &bop = static_cast<Binaryop&>(m);
-		bop._perform(*static_cast<const TI*>(t[p2_in ].get_dataptr()),
-		              static_cast<      TI*>(t[p2_fwd].get_dataptr()),
+		bop._perform(*t[p2_in ].template get_dataptr<const TI>(),
+		              t[p2_fwd].template get_dataptr<      TI>(),
 		             frame_id);
 		return runtime::status_t::SUCCESS;
 	});
@@ -125,8 +125,8 @@ Binaryop<TI,TO,BOP>
 	this->create_codelet(p2, [p2_in, p2_fwd](Module &m, runtime::Task &t, const size_t frame_id) -> int
 	{
 		auto &bop = static_cast<Binaryop&>(m);
-		bop._perform(static_cast<const TI*>(t[p2_in ].get_dataptr()),
-		             static_cast<      TI*>(t[p2_fwd].get_dataptr()),
+		bop._perform(t[p2_in ].template get_dataptr<const TI>(),
+		             t[p2_fwd].template get_dataptr<      TI>(),
 		             frame_id);
 		return runtime::status_t::SUCCESS;
 	});

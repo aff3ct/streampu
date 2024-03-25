@@ -14,7 +14,7 @@ using namespace aff3ct::runtime;
 
 int main(int argc, char** argv)
 {
-	tools::setup_signal_handler();
+	tools::Signal_handler::init();
 
 	option longopts[] = {
 		{"n-threads", required_argument, NULL, 't'},
@@ -185,11 +185,11 @@ int main(int argc, char** argv)
 	module::Stateless comp;
 	comp.set_name("comparator");
 	auto& task_comp = comp.create_task("compare");
-	auto sock_0 = comp.create_socket_fwd<uint8_t>(task_comp, "fwd_0", data_length);
-	auto sock_1 = comp.create_socket_fwd<uint8_t>(task_comp, "fwd_1", data_length);
+	auto sock_0 = comp.create_socket_fwd<uint8_t>(task_comp, "fwd0", data_length);
+	auto sock_1 = comp.create_socket_fwd<uint8_t>(task_comp, "fwd1", data_length);
 
 	comp.create_codelet(task_comp,
-		[sock_0, sock_1,data_length,incs](module::Module &m, runtime::Task &t, const size_t frame_id) -> int
+		[sock_0, sock_1, data_length,incs] (module::Module &m, runtime::Task &t, const size_t frame_id) -> int
 	{
 		auto tab_0 = t[sock_0].get_dataptr<const uint8_t>();
 		auto tab_1 = t[sock_1].get_dataptr<const uint8_t>();
@@ -205,13 +205,13 @@ int main(int argc, char** argv)
 	});
 
 	// sockets binding
-	(*rlys[0])[module::rly::sck::relayf::fwd] = initializer[module::ini::sck::initialize::out];
-	(*incs[0])[module::inc::sck::incrementf::fwd] = (*rlys[0])[module::rly::sck::relayf::fwd];
-	(*incs[1])[module::inc::sck::incrementf::fwd] = (*rlys[0])[module::rly::sck::relayf::fwd];
-	(*rlys[1])[module::rly::sck::relayf::fwd] = (*incs[0])[module::inc::sck::incrementf::fwd];
-	comp["compare::fwd_0"] = (*rlys[1])[module::rly::sck::relayf::fwd];
-	comp["compare::fwd_1"] = (*incs[1])[module::inc::sck::incrementf::fwd];
-	finalizer[module::fin::sck::finalize::in] = comp["compare::fwd_1"];
+	(*rlys[0])[    "relayf::fwd" ] = initializer["initialize::out" ];
+	(*incs[0])["incrementf::fwd" ] = (*rlys[0]) [    "relayf::fwd" ];
+	(*incs[1])["incrementf::fwd" ] = (*rlys[0]) [    "relayf::fwd" ];
+	(*rlys[1])[    "relayf::fwd" ] = (*incs[0]) ["incrementf::fwd" ];
+	comp      [   "compare::fwd0"] = (*rlys[1]) [    "relayf::fwd" ];
+	comp      [   "compare::fwd1"] = (*incs[1]) ["incrementf::fwd" ];
+	finalizer [  "finalize::in"  ] = comp       [   "compare::fwd1"];
 
 	std::unique_ptr<runtime::Sequence> sequence_chain;
 	std::unique_ptr<runtime::Pipeline> pipeline_chain;
@@ -221,7 +221,7 @@ int main(int argc, char** argv)
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	if (force_sequence)
 	{
-		sequence_chain.reset(new runtime::Sequence(initializer[module::ini::tsk::initialize], n_threads));
+		sequence_chain.reset(new runtime::Sequence(initializer("initialize"), n_threads));
 		sequence_chain->set_n_frames(n_inter_frames);
 
 		// initialize the input data
@@ -277,22 +277,17 @@ int main(int argc, char** argv)
 	else
 	{
 		pipeline_chain.reset(new runtime::Pipeline(
-			initializer[module::ini::tsk::initialize], // first task of the sequence
-			{  // pipeline stage 0
-			   { { &initializer[module::ini::tsk::initialize] },  // first tasks of stage 0
-			     { &(*rlys[0])[module::rly::tsk::relayf] } },     // last  tasks of stage 0
-			   // pipeline stage 1
-			   { { &(*incs[0])[module::inc::tsk::incrementf] },   // first tasks of stage 1
-			     { &(*incs[0])[module::inc::tsk::incrementf] } }, // last  tasks of stage 1
-			   // pipeline stage 2
-			   { { &(*rlys[1])[module::rly::tsk::relayf] },       // first tasks of stage 2
-			     { &(*rlys[1])[module::rly::tsk::relayf]} },      // last  tasks of stage 2
-			   // pipeline stage 3
-			   { { &(*incs[1])[module::inc::tsk::incrementf] },   // first tasks of stage 3
-			     { &(*incs[1])[module::inc::tsk::incrementf] } }, // last  tasks of stage 3
-			   // pipeline stage 4
-			   { { &task_comp },                                  // first tasks of stage 4
-			     { &finalizer[module::fin::tsk::finalize] } },    // last  tasks of stage 4
+			initializer("initialize"), // first task of the sequence
+			{  // pipeline stage 0, last & first tasks
+			   { { &initializer("initialize") }, { &(*rlys[0])("relayf") } },
+			   // pipeline stage 1, last & first tasks
+			   { { &(*incs[0])("incrementf") }, { &(*incs[0])("incrementf") } },
+			   // pipeline stage 2, last & first tasks
+			   { { &(*rlys[1])("relayf") },  { &(*rlys[1])("relayf")} },
+			   // pipeline stage 3, last & first tasks
+			   { { &(*incs[1])("incrementf") }, { &(*incs[1])("incrementf") } },
+			   // pipeline stage 4, last & first tasks
+			   { { &comp("compare") }, { &finalizer("finalize") } },
 			},
 			{
 			   1,                         // number of threads in the stage 0
@@ -401,9 +396,9 @@ int main(int argc, char** argv)
 	(*incs[0])[module::inc::sck::incrementf::fwd].unbind((*rlys[0])[module::rly::sck::relayf::fwd]);
 	(*incs[1])[module::inc::sck::incrementf::fwd].unbind((*rlys[0])[module::rly::sck::relayf::fwd]);
 	(*rlys[1])[module::rly::sck::relayf::fwd].unbind((*incs[0])[module::inc::sck::incrementf::fwd]);
-	comp["compare::fwd_1"].unbind((*incs[1])[module::inc::sck::incrementf::fwd]);
-	comp["compare::fwd_0"].unbind((*rlys[1])[module::rly::sck::relayf::fwd]);
-	finalizer[module::fin::sck::finalize::in].unbind(comp["compare::fwd_1"]);
+	comp["compare::fwd1"].unbind((*incs[1])[module::inc::sck::incrementf::fwd]);
+	comp["compare::fwd0"].unbind((*rlys[1])[module::rly::sck::relayf::fwd]);
+	finalizer[module::fin::sck::finalize::in].unbind(comp["compare::fwd1"]);
 
 	return test_results;
 }

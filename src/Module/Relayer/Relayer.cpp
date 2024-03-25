@@ -28,8 +28,8 @@ Relayer<T>
 	this->create_codelet(p1, [p1s_in, p1s_out](Module &m, runtime::Task &t, const size_t frame_id) -> int
 	{
 		auto &rly = static_cast<Relayer&>(m);
-		rly._relay(static_cast<const T*>(t[p1s_in ].get_dataptr()),
-		           static_cast<      T*>(t[p1s_out].get_dataptr()),
+		rly._relay(t[p1s_in ].template get_dataptr<const T>(),
+		           t[p1s_out].template get_dataptr<      T>(),
 		           frame_id);
 		return runtime::status_t::SUCCESS;
 	});

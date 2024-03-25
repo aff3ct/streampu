@@ -45,7 +45,7 @@ bool compare_files(const std::string& filename1, const std::string& filename2)
 
 int main(int argc, char** argv)
 {
-	tools::setup_signal_handler();
+	tools::Signal_handler::init();
 
 	option longopts[] = {
 		{"n-threads", required_argument, NULL, 't'},
@@ -285,24 +285,25 @@ int main(int argc, char** argv)
 	});
 
 	// sockets binding
-	relayer_com[module::rly::sck::relay::in] = source[module::src::sck::generate::out_data];
-	alternator("alternate")[s_in_alt] = source[module::src::sck::generate::out_data];
+	relayer_com[      "relay::in"     ] = source     [ "generate::out_data" ];
+	alternator [  "alternate::in"     ] = source     [ "generate::out_data" ];
 
-	switcher[module::swi::tsk::commute][0] = relayer_com[module::rly::sck::relay::out];
-	switcher[module::swi::tsk::commute][1] = alternator("alternate")[s_path];
-	uppercaser("upcase")[s_in_up] = switcher[module::swi::tsk::commute][2];
-	lowercaser("lowcase")[s_in_low] = switcher[module::swi::tsk::commute][3];
-	switcher[module::swi::tsk::select][0] = uppercaser("upcase")[s_out_up];
-	switcher[module::swi::tsk::select][1] = lowercaser("lowcase")[s_out_low];
+	switcher   [   "commute::in_data" ] = relayer_com[    "relay::out"      ];
+	switcher   [   "commute::in_ctrl" ] = alternator ["alternate::path"     ];
+	uppercaser [    "upcase::in"      ] = switcher   [  "commute::out_data0"];
+	lowercaser [   "lowcase::in"      ] = switcher   [  "commute::out_data1"];
+	switcher   [    "select::in_data0"] = uppercaser [   "upcase::out"      ];
+	switcher   [    "select::in_data1"] = lowercaser [  "lowcase::out"      ];
 
-	relayer_sel[module::rly::sck::relay::in] = switcher[module::swi::tsk::select][2];
-	sink[module::snk::sck::send_count::in_data] = relayer_sel[module::rly::sck::relay::out];
-	sink[module::snk::sck::send_count::in_count] = source[module::src::sck::generate::out_count];
+	relayer_sel[     "relay::in"      ] = switcher   [   "select::out_data" ];
+	sink       ["send_count::in_data" ] = relayer_sel[    "relay::out"      ];
+	sink       ["send_count::in_count"] = source     [ "generate::out_count"];
+
 	std::unique_ptr<runtime::Sequence> sequence_chain;
 	std::unique_ptr<runtime::Pipeline> pipeline_chain;
 	if (force_sequence)
 	{
-		sequence_chain.reset(new runtime::Sequence(source[module::src::tsk::generate], n_threads));
+		sequence_chain.reset(new runtime::Sequence(source("generate"), n_threads));
 		sequence_chain->set_n_frames(n_inter_frames);
 		sequence_chain->set_no_copy_mode(no_copy_mode);
 
@@ -347,16 +348,13 @@ int main(int argc, char** argv)
 	{
 		pipeline_chain.reset(
 			new runtime::Pipeline(
-			source[module::src::tsk::generate], // first task of the sequence
-			{ // pipeline stage 0
-			  { { &source[module::src::tsk::generate] },   // first tasks of stage 0
-			    { &relayer_com[module::rly::tsk::relay], &alternator("alternate") } }, // last  tasks of stage 0
-			  // pipeline stage 1
-			  { { &switcher[module::swi::tsk::commute] },   // first tasks of stage 1
-			    { &relayer_sel[module::rly::tsk::relay] } }, // last  tasks of stage 1
-			  // pipeline stage 2
-			  { { &sink[module::snk::tsk::send_count] },   // first tasks of stage 2
-			    {                                     } }, // last  tasks of stage 2
+			source("generate"), // first task of the sequence
+			{ // pipeline stage 0, first & last tasks
+			  { { &source("generate") }, { &relayer_com("relay"), &alternator("alternate") } },
+			  // pipeline stage 1 first & last tasks
+			  { { &switcher("commute") }, { &relayer_sel("relay") } },
+			  // pipeline stage 2 first task
+			  { { &sink("send_count") }, { } },
 			},
 			{
 			  1,                         // number of threads in the stage 0

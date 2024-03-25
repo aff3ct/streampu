@@ -22,6 +22,8 @@ option(AFF3CT_CORE_COLORS              "Enable the colors in the terminal"      
 option(AFF3CT_CORE_TESTS               "Enable the compilation of the tests"                    ON )
 option(AFF3CT_CORE_STACKTRACE          "Print the stack trace when an exception is raised"      ON )
 option(AFF3CT_CORE_STACKTRACE_SEGFAULT "Try to print the stack trace when a segfault occurs"    OFF)
+option(AFF3CT_CORE_SHOW_DEPRECATED     "Print message each time a deprecated func. is called"   OFF)
+option(AFF3CT_CORE_FAST                "Remove checks to speedup the code"                      OFF)
 
 if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/.git" AND NOT AFF3CT_CORE_OVERRIDE_VERSION)
     message(FATAL_ERROR "The '.git' folder can't be found, AFF3CT_CORE can't be compiled if it is not cloned "
@@ -210,7 +212,7 @@ if(AFF3CT_CORE_TESTS)
     list(APPEND aff3ct_core_targets_list aff3ct-core-test-generic-pipeline)
 
     add_executable(aff3ct-core-test-exclusive-paths-pipeline $<TARGET_OBJECTS:aff3ct-core-obj>
-                   ${CMAKE_CURRENT_SOURCE_DIR}/tests/ctrl_flw/exclusive_paths_pipeline.cpp)
+                   ${CMAKE_CURRENT_SOURCE_DIR}/tests/ctrl_flow/exclusive_paths_pipeline.cpp)
     set_target_properties(aff3ct-core-test-exclusive-paths-pipeline PROPERTIES
                                                            OUTPUT_NAME test-exclusive-paths-pipeline
                                                            POSITION_INDEPENDENT_CODE ON) # set -fpie
@@ -218,7 +220,7 @@ if(AFF3CT_CORE_TESTS)
     list(APPEND aff3ct_core_targets_list aff3ct-core-test-exclusive-paths-pipeline)
 
     add_executable(aff3ct-core-test-nest-loops-pipeline $<TARGET_OBJECTS:aff3ct-core-obj>
-                   ${CMAKE_CURRENT_SOURCE_DIR}/tests/ctrl_flw/nested_loops_pipeline.cpp)
+                   ${CMAKE_CURRENT_SOURCE_DIR}/tests/ctrl_flow/nested_loops_pipeline.cpp)
     set_target_properties(aff3ct-core-test-nest-loops-pipeline PROPERTIES
                                                            OUTPUT_NAME test-nested-loops-pipeline
                                                            POSITION_INDEPENDENT_CODE ON) # set -fpie
@@ -304,6 +306,20 @@ if (AFF3CT_CORE_STACKTRACE_SEGFAULT)
     endif(CPPTRACE_UNWIND_WITH_LIBUNWIND)
 else()
     message(STATUS "AFF3CT-core - Stacktrace segfault: off")
+endif()
+
+if(AFF3CT_CORE_SHOW_DEPRECATED)
+    aff3ct_core_target_compile_definitions("${aff3ct_core_targets_list}" PUBLIC AFF3CT_CORE_SHOW_DEPRECATED)
+    message(STATUS "AFF3CT-core - Show deprecated: on")
+else()
+    message(STATUS "AFF3CT-core - Show deprecated: off")
+endif()
+
+if(AFF3CT_CORE_FAST)
+    aff3ct_core_target_compile_definitions("${aff3ct_core_targets_list}" PUBLIC AFF3CT_CORE_FAST)
+    message(STATUS "AFF3CT-core - Fast: on")
+else()
+    message(STATUS "AFF3CT-core - Fast: off")
 endif()
 
 # ---------------------------------------------------------------------------------------------------------------------

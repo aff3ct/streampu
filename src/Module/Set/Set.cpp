@@ -3,31 +3,31 @@
 
 #include "Tools/Exception/exception.hpp"
 #include "Runtime/Sequence/Sequence.hpp"
-#include "Module/Subsequence/Subsequence.hpp"
+#include "Module/Set/Set.hpp"
 
 using namespace aff3ct;
 using namespace aff3ct::module;
 
-Subsequence
-::Subsequence(runtime::Sequence &sequence)
+Set
+::Set(runtime::Sequence &sequence)
 : Module(),
   sequence_extern(&sequence)
 {
 	this->init();
 }
 
-Subsequence
-::Subsequence(const runtime::Sequence &sequence)
+Set
+::Set(const runtime::Sequence &sequence)
 : Module(),
   sequence_cloned(sequence.clone()), sequence_extern(nullptr)
 {
 	this->init();
 }
 
-void Subsequence
+void Set
 ::init()
 {
-	const std::string name = "Subsequence";
+	const std::string name = "Set";
 	this->set_name(name);
 	this->set_short_name(name);
 	this->set_single_wave(true);
@@ -37,8 +37,8 @@ void Subsequence
 	if (sequence.get_n_threads() != 1)
 	{
 		std::stringstream message;
-		message << "'sequence.get_n_threads()' has to be equal to 1 ('sequence.get_n_threads()' = " << sequence.get_n_threads()
-		        << ").";
+		message << "'sequence.get_n_threads()' has to be equal to 1 ('sequence.get_n_threads()' = "
+		        << sequence.get_n_threads() << ").";
 		throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
 	}
 
@@ -50,8 +50,8 @@ void Subsequence
 	{
 		if (s->get_type() == runtime::socket_t::SIN)
 		{
-			if (s->get_datatype() == typeid(int8_t ))
-				this->template create_socket_in<int8_t >(p, s->get_name(), s->get_n_elmts() / this->get_n_frames());
+			if (s->get_datatype() == typeid(int8_t))
+				this->template create_socket_in<int8_t>(p, s->get_name(), s->get_n_elmts() / this->get_n_frames());
 			else if (s->get_datatype() == typeid(uint8_t))
 				this->template create_socket_in<uint8_t>(p, s->get_name(), s->get_n_elmts() / this->get_n_frames());
 			else if (s->get_datatype() == typeid(int16_t))
@@ -66,10 +66,16 @@ void Subsequence
 				this->template create_socket_in<int64_t>(p, s->get_name(), s->get_n_elmts() / this->get_n_frames());
 			else if (s->get_datatype() == typeid(uint64_t))
 				this->template create_socket_in<uint64_t>(p, s->get_name(), s->get_n_elmts() / this->get_n_frames());
-			else if (s->get_datatype() == typeid(float  ))
-				this->template create_socket_in<float  >(p, s->get_name(), s->get_n_elmts() / this->get_n_frames());
+			else if (s->get_datatype() == typeid(float))
+				this->template create_socket_in<float>(p, s->get_name(), s->get_n_elmts() / this->get_n_frames());
 			else if (s->get_datatype() == typeid(double ))
-				this->template create_socket_in<double >(p, s->get_name(), s->get_n_elmts() / this->get_n_frames());
+				this->template create_socket_in<double>(p, s->get_name(), s->get_n_elmts() / this->get_n_frames());
+		}
+		else if (s->get_type() == runtime::socket_t::SFWD)
+		{
+			std::stringstream message;
+			message << "Forward socket is not supported yet :-(.";
+			throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
 		}
 	}
 	auto &lasts  = sequence.get_lasts_tasks()[0];
@@ -77,8 +83,8 @@ void Subsequence
 	{
 		if (s->get_type() == runtime::socket_t::SOUT && s->get_name() != "status")
 		{
-			if (s->get_datatype() == typeid(int8_t ))
-				this->template create_socket_out<int8_t >(p, s->get_name(), s->get_n_elmts() / this->get_n_frames());
+			if (s->get_datatype() == typeid(int8_t))
+				this->template create_socket_out<int8_t>(p, s->get_name(), s->get_n_elmts() / this->get_n_frames());
 			else if (s->get_datatype() == typeid(uint8_t))
 				this->template create_socket_out<uint8_t>(p, s->get_name(), s->get_n_elmts() / this->get_n_frames());
 			else if (s->get_datatype() == typeid(int16_t))
@@ -93,10 +99,16 @@ void Subsequence
 				this->template create_socket_out<int64_t>(p, s->get_name(), s->get_n_elmts() / this->get_n_frames());
 			else if (s->get_datatype() == typeid(uint64_t))
 				this->template create_socket_out<uint64_t>(p, s->get_name(), s->get_n_elmts() / this->get_n_frames());
-			else if (s->get_datatype() == typeid(float  ))
-				this->template create_socket_out<float  >(p, s->get_name(), s->get_n_elmts() / this->get_n_frames());
-			else if (s->get_datatype() == typeid(double ))
-				this->template create_socket_out<double >(p, s->get_name(), s->get_n_elmts() / this->get_n_frames());
+			else if (s->get_datatype() == typeid(float))
+				this->template create_socket_out<float>(p, s->get_name(), s->get_n_elmts() / this->get_n_frames());
+			else if (s->get_datatype() == typeid(double))
+				this->template create_socket_out<double>(p, s->get_name(), s->get_n_elmts() / this->get_n_frames());
+		}
+		else if (s->get_type() == runtime::socket_t::SFWD)
+		{
+			std::stringstream message;
+			message << "Forward socket is not supported yet :-(.";
+			throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
 		}
 	}
 
@@ -106,13 +118,13 @@ void Subsequence
 		if (s->get_type() == runtime::socket_t::SOUT && s->get_name() != "status")
 		{
 			while (p.sockets[sid]->get_type() != runtime::socket_t::SOUT) sid++;
-			p.sockets[sid++]->bind(*s);
+			p.sockets[sid++]->_bind(*s); // out to out socket binding = black magic
 		}
 	}
 
 	this->create_codelet(p, [](Module &m, runtime::Task &t, const size_t frame_id) -> int
 	{
-		auto &ss = static_cast<Subsequence&>(m);
+		auto &ss = static_cast<Set&>(m);
 
 		auto &firsts = ss.get_sequence().get_firsts_tasks()[0];
 		size_t sid = 0;
@@ -121,7 +133,7 @@ void Subsequence
 			if (s->get_type() == runtime::socket_t::SIN)
 			{
 				while (t.sockets[sid]->get_type() != runtime::socket_t::SIN) sid++;
-				s->bind(t.sockets[sid++]->get_dataptr());
+				(*s) = t.sockets[sid++]->_get_dataptr();
 			}
 		}
 
@@ -132,7 +144,7 @@ void Subsequence
 	});
 }
 
-runtime::Sequence& Subsequence
+runtime::Sequence& Set
 ::get_sequence()
 {
 	if (this->sequence_extern)
@@ -141,16 +153,16 @@ runtime::Sequence& Subsequence
 		return *this->sequence_cloned;
 }
 
-Subsequence* Subsequence
+Set* Set
 ::clone() const
 {
-	auto m = new Subsequence(*this);
+	auto m = new Set(*this);
 	m->deep_copy(*this);
 	return m;
 }
 
-void Subsequence
-::deep_copy(const Subsequence& m)
+void Set
+::deep_copy(const Set& m)
 {
 	Module::deep_copy(m);
 	if (m.sequence_cloned != nullptr)
@@ -163,7 +175,7 @@ void Subsequence
 
 	auto &lasts = this->get_sequence().get_lasts_tasks()[0];
 
-	auto &p = (*this)[ssq::tsk::exec];
+	auto &p = (*this)[set::tsk::exec];
 
 	size_t sid = 0;
 	for (auto &last : lasts) for (auto &s : last->sockets)
@@ -171,12 +183,12 @@ void Subsequence
 		if (s->get_type() == runtime::socket_t::SOUT && s->get_name() != "status")
 		{
 			while (p.sockets[sid]->get_type() != runtime::socket_t::SOUT) sid++;
-			p.sockets[sid++]->bind(*s);
+			p.sockets[sid++]->_bind(*s); // out to out socket binding = black magic
 		}
 	}
 }
 
-void Subsequence
+void Set
 ::set_n_frames(const size_t n_frames)
 {
 	const auto old_n_frames = this->get_n_frames();
@@ -207,7 +219,7 @@ void Subsequence
 			if (s->get_type() == runtime::socket_t::SOUT && s->get_name() != "status")
 			{
 				while (p.sockets[sid]->get_type() != runtime::socket_t::SOUT) sid++;
-				p.sockets[sid++]->bind(*s);
+				p.sockets[sid++]->_bind(*s); // out to out socket binding = black magic
 			}
 		}
 	}

@@ -11,7 +11,7 @@ using namespace aff3ct;
 
 int main(int argc, char** argv)
 {
-	tools::setup_signal_handler();
+	tools::Signal_handler::init();
 
 	option longopts[] = {
 		{"n-threads", required_argument, NULL, 't'},
@@ -160,17 +160,18 @@ int main(int argc, char** argv)
 		incs[s]->set_custom_name("Inc" + std::to_string(s));
 	}
 
-	switcher  [module::swi::tsk::select ][1]    = initializer[module::ini::sck::initialize::out];
-	iterator  [module::ite::tsk::iterate]       = switcher   [module::swi::tsk::select][3];
-	switcher  [module::swi::tsk::commute][0]    = switcher   [module::swi::tsk::select][2];
-	switcher  [module::swi::tsk::commute][1]    = iterator   [module::ite::sck::iterate::out];
-	(*incs[0])[module::inc::sck::increment::in] = switcher   [module::swi::tsk::commute][2];
+	// sockets binding
+	switcher        [   "select::in_data1"] = initializer           ["initialize::out"      ];
+	iterator        (  "iterate"          ) = switcher              (    "select"           );
+	switcher        [  "commute::in_data" ] = switcher              [    "select::out_data" ];
+	switcher        [  "commute::in_ctrl" ] = iterator              [   "iterate::out"      ];
+	(*incs[0])      ["increment::in"      ] = switcher              [   "commute::out_data0"];
 	for (size_t s = 0; s < incs.size() -1; s++)
-		(*incs[s+1])[module::inc::sck::increment::in] = (*incs[s])[module::inc::sck::increment::out];
-	switcher  [module::swi::tsk::select][0]     = (*incs[incs.size()-1])[module::inc::sck::increment::out];
-	finalizer [module::fin::sck::finalize::in]  = switcher   [module::swi::tsk::commute][3];
+		(*incs[s+1])["increment::in"      ] = (*incs[s])            [ "increment::out"      ];
+	switcher        [   "select::in_data0"] = (*incs[incs.size()-1])[ "increment::out"      ];
+	finalizer       [ "finalize::in"      ] = switcher              [   "commute::out_data1"];
 
-	runtime::Sequence sequence_for_loop(initializer[module::ini::tsk::initialize], n_threads);
+	runtime::Sequence sequence_for_loop(initializer("initialize"), n_threads);
 	sequence_for_loop.set_n_frames(n_inter_frames);
 	sequence_for_loop.set_no_copy_mode(no_copy_mode);
 

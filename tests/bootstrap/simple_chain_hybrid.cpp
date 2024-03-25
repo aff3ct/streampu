@@ -1,4 +1,3 @@
-
 #include <iostream>
 #include <cstdlib>
 #include <memory>
@@ -14,7 +13,7 @@ using namespace aff3ct::runtime;
 
 int main(int argc, char** argv)
 {
-	tools::setup_signal_handler();
+	tools::Signal_handler::init();
 
 	option longopts[] = {
 		{"n-threads", required_argument, NULL, 't'},
@@ -169,30 +168,21 @@ int main(int argc, char** argv)
 		incs_fwd[s]->set_custom_name("Inc_fwd" + std::to_string(s));
 	}
 
-	std::shared_ptr<runtime::Sequence> partial_sequence;
-	std::shared_ptr<module::Subsequence> subsequence;
-
+	size_t s = 0, s_fwd = 0;
 	// sockets binding
-	(*incs[0])[module::inc::sck::increment::in] = initializer[module::ini::sck::initialize::out];
-
-	size_t s = 0;
+	(*incs[0])              [ "increment::in" ] = initializer           ["initialize::out"];
 	for (; s < incs.size()/2 - 1; ++s)
-		(*incs[s+1])[module::inc::sck::increment::in] = (*incs[s])[module::inc::sck::increment::out];
+		(*incs[s+1])        [ "increment::in" ] = (*incs[s])            [ "increment::out"];
 	// Hybrid binding
-	(*incs_fwd[0])[module::inc::sck::incrementf::fwd] = (*incs[s])[module::inc::sck::increment::out];
-
-	size_t s_fwd = 0;
+	(*incs_fwd[0])          ["incrementf::fwd"] = (*incs[s])            [ "increment::out"];
 	for (; s_fwd < incs_fwd.size() -1; ++s_fwd)
-		(*incs_fwd[s_fwd+1])[module::inc::sck::incrementf::fwd] =
-			(*incs_fwd[s_fwd])[module::inc::sck::incrementf::fwd];
-
-	s++;
-	(*incs[s])[module::inc::sck::increment::in] = (*incs_fwd[s_fwd])[module::inc::sck::incrementf::fwd];
+		(*incs_fwd[s_fwd+1])["incrementf::fwd"] = (*incs_fwd[s_fwd])    ["incrementf::fwd"];
+	(*incs[++s])            [ "increment::in" ] = (*incs_fwd[s_fwd])    ["incrementf::fwd"];
 	for (; s < incs.size() - 1; ++s)
-		(*incs[s+1])[module::inc::sck::increment::in] = (*incs[s])[module::inc::sck::increment::out];
-	finalizer[module::fin::sck::finalize::in] = (*incs[incs.size()-1])[module::inc::sck::increment::out];
+		(*incs[s+1])        [ "increment::in" ] = (*incs[s])            [ "increment::out"];
+	finalizer               [  "finalize::in" ] = (*incs[incs.size()-1])[ "increment::out"];
 
-	runtime::Sequence sequence_chain(initializer[module::ini::tsk::initialize], n_threads);
+	runtime::Sequence sequence_chain(initializer("initialize"), n_threads);
 	sequence_chain.set_n_frames(n_inter_frames);
 	sequence_chain.set_no_copy_mode(no_copy_mode);
 

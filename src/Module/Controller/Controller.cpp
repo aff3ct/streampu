@@ -18,7 +18,7 @@ Controller
 	this->create_codelet(p1, [p1s_out](Module &m, runtime::Task &t, const size_t frame_id) -> int
 	{
 		auto &ctr = static_cast<Controller&>(m);
-		ctr._control(static_cast<int8_t*>(t[p1s_out].get_dataptr()), frame_id);
+		ctr._control(t[p1s_out].get_dataptr<int8_t>(), frame_id);
 		return runtime::status_t::SUCCESS;
 	});
 

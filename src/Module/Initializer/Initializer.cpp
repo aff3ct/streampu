@@ -30,7 +30,7 @@ Initializer<T>
 	this->create_codelet(p, [ps_out](Module &m, runtime::Task &t, const size_t frame_id) -> int
 	{
 		auto &ini = static_cast<Initializer&>(m);
-		ini._initialize(static_cast<T*>(t[ps_out].get_dataptr()), frame_id);
+		ini._initialize(t[ps_out].template get_dataptr<T>(), frame_id);
 		return runtime::status_t::SUCCESS;
 	});
 }

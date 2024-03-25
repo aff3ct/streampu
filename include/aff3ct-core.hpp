@@ -78,6 +78,9 @@
 #ifndef RELAYER_HPP_
 #include <Module/Relayer/Relayer.hpp>
 #endif
+#ifndef SET_HPP_
+#include <Module/Set/Set.hpp>
+#endif
 #ifndef SINK_NO_HPP
 #include <Module/Sink/NO/Sink_NO.hpp>
 #endif
@@ -107,9 +110,6 @@
 #endif
 #ifndef STATELESS_HPP_
 #include <Module/Stateless/Stateless.hpp>
-#endif
-#ifndef SUBSEQUENCE_HPP_
-#include <Module/Subsequence/Subsequence.hpp>
 #endif
 #ifndef SWITCHER_HPP_
 #include <Module/Switcher/Switcher.hpp>
@@ -234,8 +234,8 @@
 #ifndef REPORTER_HPP__
 #include <Tools/Reporter/Reporter.hpp>
 #endif
-#ifndef SIGNAL_HANDLER_H_
-#include <Tools/signal_handler.h>
+#ifndef SIGNAL_HANDLER_HPP_
+#include <Tools/Signal_handler/Signal_handler.hpp>
 #endif
 #ifndef SYSTEM_MEMORY_HPP__
 #include <Tools/System/memory.hpp>

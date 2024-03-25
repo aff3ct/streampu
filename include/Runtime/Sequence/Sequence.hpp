@@ -91,8 +91,6 @@ protected:
 	std::vector<std::string> pin_objects_per_thread;
 
 public:
-	static bool force_stop_exec; // static variable to stop the current execution used by the signal handler (SIGINT)
-
 	Sequence(const std::vector<const runtime::Task*> &firsts,
 	         const size_t n_threads = 1,
 	         const bool thread_pinning = false,
@@ -220,7 +218,7 @@ public:
 	inline size_t get_n_threads() const;
 
 	template <class C = module::Module>
-	std::vector<C*> get_modules(const bool subsequence_modules = true) const;
+	std::vector<C*> get_modules(const bool set_modules = true) const;
 	template <class C = module::Module>
 	std::vector<C*> get_cloned_modules(const C &module_ref) const;
 
@@ -296,7 +294,7 @@ protected:
 	void reset_no_copy_mode();
 
 	template<class SS>
-	void check_ctrl_flw(tools::Digraph_node<SS>* root);
+	void check_ctrl_flow(tools::Digraph_node<SS>* root);
 	Sub_sequence* get_last_subsequence(const size_t tid);
 	void update_tasks_id(const size_t tid);
 
