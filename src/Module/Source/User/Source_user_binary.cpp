@@ -91,10 +91,20 @@ void Source_user_binary<B>
 		{
 			*out_count = this->n_left + n_bytes_read * CHAR_BIT;
 
-			if (!this->auto_reset && source_file.eof()) {
+			if (!this->auto_reset && source_file.eof())
+			{
 				this->done = true;
 				if (this->n_left + n_bytes_read * CHAR_BIT == 0)
-					throw tools::processing_aborted(__FILE__, __LINE__, __func__);
+				{
+					if (frame_id == 0)
+						throw tools::processing_aborted(__FILE__, __LINE__, __func__);
+					else
+					{
+						std::fill(out_data, out_data + this->max_data_size, (B)0);
+						*out_count = 0;
+						return;
+					}
+				}
 			}
 
 			tools::Bit_packer::unpack(this->memblk.data(), out_data + this->n_left, n_bytes_read * CHAR_BIT);
