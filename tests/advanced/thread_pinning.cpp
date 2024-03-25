@@ -51,7 +51,6 @@ class Finalizer_histo : public module::Finalizer<uint32_t>
 
 int main(int argc, char** argv)
 {
-	tools::setup_signal_handler();
 
 	option longopts[] = {
 		{"n-exec", required_argument, NULL, 'e'},
