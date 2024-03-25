@@ -217,7 +217,7 @@ int main(int argc, char** argv)
 	// create reporters and probes for the real-time probes file
 	tools::Reporter_probe rep_fra_stats("Counters");
 	module::Probe<>& prb_fra_id(rep_fra_stats.create_probe_occurrence("FRAME_ID"));
-	module::Probe<>& prb_stream_id(rep_fra_stats.create_probe_occurrence("STREAM_ID"));
+	module::Probe<>& prb_stream_id(rep_fra_stats.create_probe_stream("STREA_ID"));
 
 	tools::Reporter_probe rep_thr_stats("Throughput, latency", "and time");
 	module::Probe<>& prb_thr_thr (rep_thr_stats.create_probe_throughput("FPS"));  // only valid for sequence, invalid for pipeline
@@ -336,6 +336,10 @@ int main(int argc, char** argv)
 			tsk->set_fast       (true       ); // enable the fast mode (= disable the useless verifs in the tasks)
 		}
 
+		// reset the probes (to initialize the timers)
+		for (auto& prb : sequence_chain->get_modules<module::AProbe>(false))
+			prb->reset();
+
 		auto t_start = std::chrono::steady_clock::now();
 		if (!step_by_step)
 			sequence_chain->exec(stop_condition);
@@ -406,6 +410,10 @@ int main(int argc, char** argv)
 			tsk->set_stats      (print_stats); // enable the statistics
 			tsk->set_fast       (true       ); // enable the fast mode (= disable the useless verifs in the tasks)
 		}
+
+		// reset the probes (to initialize the timers)
+		for (auto& prb : pipeline_chain->get_modules<module::AProbe>(false))
+			prb->reset();
 
 		auto t_start = std::chrono::steady_clock::now();
 		pipeline_chain->exec(stop_condition);

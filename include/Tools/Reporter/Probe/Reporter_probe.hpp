@@ -27,6 +27,7 @@ namespace module
 	class Probe_time;
 	class Probe_timestamp;
 	class Probe_occurrence;
+	class Probe_stream;
 }
 namespace tools
 {
@@ -106,6 +107,12 @@ public:
 	                                                  const size_t buffer_size = 100,
 	                                                  const std::ios_base::fmtflags ff = std::ios_base::scientific,
 	                                                  const size_t precision = 3);
+
+	module::Probe_stream& create_probe_stream(const std::string &name,
+	                                          const std::string &unit = "",
+	                                          const size_t buffer_size = 100,
+	                                          const std::ios_base::fmtflags ff = std::ios_base::scientific,
+	                                          const size_t precision = 3);
 
 	virtual void probe(const std::string &name, const void *data, const size_t frame_id);
 

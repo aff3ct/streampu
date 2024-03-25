@@ -8,6 +8,7 @@
 #include "Module/Probe/Time/Probe_time.hpp"
 #include "Module/Probe/Timestamp/Probe_timestamp.hpp"
 #include "Module/Probe/Occurrence/Probe_occurrence.hpp"
+#include "Module/Probe/Stream/Probe_stream.hpp"
 #include "Tools/Reporter/Probe/Reporter_probe.hpp"
 
 using namespace aff3ct;
@@ -364,6 +365,32 @@ module::Probe_occurrence& Reporter_probe
 {
 	this->create_probe_checks(name);
 	auto probe = new module::Probe_occurrence(name, *this);
+	probe->set_n_frames(this->get_n_frames());
+	this->probes               .push_back(std::unique_ptr<module::AProbe>(probe));
+	this->head                 .push_back(0);
+	this->tail                 .push_back(0);
+	this->buffer               .push_back(std::vector<std::vector<int8_t>>(this->get_n_frames() * buffer_size,
+	                                      std::vector<int8_t>(1 * B_from_datatype(probe->get_datatype()))));
+	this->datatypes            .push_back(probe->get_datatype());
+	this->stream_flags         .push_back(ff);
+	this->precisions           .push_back(precision);
+	this->datasizes            .push_back(1);
+	this->cols_groups[0].second.push_back(std::make_pair(name, unit));
+	this->name_to_col[name] = this->buffer.size() -1;
+	this->col_to_name[this->buffer.size() -1] = name;
+
+	return *probe;
+}
+
+module::Probe_stream& Reporter_probe
+::create_probe_stream(const std::string &name,
+                      const std::string &unit,
+                      const size_t buffer_size,
+                      const std::ios_base::fmtflags ff,
+                      const size_t precision)
+{
+	this->create_probe_checks(name);
+	auto probe = new module::Probe_stream(name, *this);
 	probe->set_n_frames(this->get_n_frames());
 	this->probes               .push_back(std::unique_ptr<module::AProbe>(probe));
 	this->head                 .push_back(0);
