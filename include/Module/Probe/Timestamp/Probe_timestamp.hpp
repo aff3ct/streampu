@@ -17,14 +17,14 @@ namespace module
 {
 class Probe_timestamp : public Probe<uint8_t>
 {
+	friend tools::Reporter_probe;
+
 protected:
 	const uint64_t mod;
+	Probe_timestamp(const std::string &col_name, const uint64_t mod, tools::Reporter_probe& reporter);
+	Probe_timestamp(const std::string &col_name, tools::Reporter_probe& reporter);
 
 public:
-	Probe_timestamp(const std::string &col_name, const uint64_t mod, tools::Reporter_probe& reporter,
-	                const int n_frames = 1);
-	Probe_timestamp(const std::string &col_name, tools::Reporter_probe& reporter, const int n_frames = 1);
-
 	virtual ~Probe_timestamp() = default;
 
 	virtual std::type_index get_datatype() const;

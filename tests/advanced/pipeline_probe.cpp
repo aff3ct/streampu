@@ -215,24 +215,24 @@ int main(int argc, char** argv)
 		std::clog << rang::tag::warning << "Sequence mode only supports a single thread (User-Source/Sinks are not clonable)" << std::endl;
 
 	// create reporters and probes for the real-time probes file
-	tools::Reporter_probe rep_fra_stats("Counters", n_inter_frames);
-	std::unique_ptr<module::Probe<>> prb_fra_id(rep_fra_stats.create_probe_occurrence("FRAME_ID"));
-	std::unique_ptr<module::Probe<>> prb_stream_id(rep_fra_stats.create_probe_occurrence("STREAM_ID"));
+	tools::Reporter_probe rep_fra_stats("Counters");
+	module::Probe<>& prb_fra_id(rep_fra_stats.create_probe_occurrence("FRAME_ID"));
+	module::Probe<>& prb_stream_id(rep_fra_stats.create_probe_occurrence("STREAM_ID"));
 
-	tools::Reporter_probe rep_thr_stats("Throughput, latency", "and time", n_inter_frames);
-	std::unique_ptr<module::Probe<>> prb_thr_thr (rep_thr_stats.create_probe_throughput("FPS"));  // only valid for sequence, invalid for pipeline
-	std::unique_ptr<module::Probe<>> prb_thr_lat (rep_thr_stats.create_probe_latency   ("LAT"));  // only valid for sequence, invalid for pipeline
-	std::unique_ptr<module::Probe<>> prb_thr_time(rep_thr_stats.create_probe_time      ("TIME")); // only valid for sequence, invalid for pipeline
+	tools::Reporter_probe rep_thr_stats("Throughput, latency", "and time");
+	module::Probe<>& prb_thr_thr (rep_thr_stats.create_probe_throughput("FPS"));  // only valid for sequence, invalid for pipeline
+	module::Probe<>& prb_thr_lat (rep_thr_stats.create_probe_latency   ("LAT"));  // only valid for sequence, invalid for pipeline
+	module::Probe<>& prb_thr_time(rep_thr_stats.create_probe_time      ("TIME")); // only valid for sequence, invalid for pipeline
 
-	tools::Reporter_probe rep_timestamp_stats("Timestamps", "(in microseconds) [SX = stage X, B = begin, E = end]", n_inter_frames);
+	tools::Reporter_probe rep_timestamp_stats("Timestamps", "(in microseconds) [SX = stage X, B = begin, E = end]");
 	const uint64_t mod = 1000000ul * 60ul * 10; // limit to 10 minutes timestamp
 	const size_t probe_buff = 200; // size of the buffer used by the probes to record values
-	std::unique_ptr<module::Probe<>>         prb_ts_s1b(rep_timestamp_stats.create_probe_timestamp_mod  ("S1_B", mod,    probe_buff   )); // timestamp stage 1 begin
-	std::unique_ptr<module::Probe<>>         prb_ts_s1e(rep_timestamp_stats.create_probe_timestamp_mod  ("S1_E", mod,    probe_buff   )); // timestamp stage 1 end
-	std::unique_ptr<module::Probe<uint64_t>> prb_ts_s2b(rep_timestamp_stats.create_probe_value<uint64_t>("S2_B", "(us)", probe_buff, 1)); // timestamp stage 2 begin
-	std::unique_ptr<module::Probe<uint64_t>> prb_ts_s2e(rep_timestamp_stats.create_probe_value<uint64_t>("S2_E", "(us)", probe_buff, 1)); // timestamp stage 2 end
-	std::unique_ptr<module::Probe<>>         prb_ts_s3b(rep_timestamp_stats.create_probe_timestamp_mod  ("S3_B", mod,    probe_buff   )); // timestamp stage 3 begin
-	std::unique_ptr<module::Probe<>>         prb_ts_s3e(rep_timestamp_stats.create_probe_timestamp_mod  ("S3_E", mod,    probe_buff   )); // timestamp stage 3 end
+	module::Probe<>&         prb_ts_s1b(rep_timestamp_stats.create_probe_timestamp_mod  ("S1_B", mod,    probe_buff   )); // timestamp stage 1 begin
+	module::Probe<>&         prb_ts_s1e(rep_timestamp_stats.create_probe_timestamp_mod  ("S1_E", mod,    probe_buff   )); // timestamp stage 1 end
+	module::Probe<uint64_t>& prb_ts_s2b(rep_timestamp_stats.create_probe_value<uint64_t>("S2_B", "(us)", probe_buff, 1)); // timestamp stage 2 begin
+	module::Probe<uint64_t>& prb_ts_s2e(rep_timestamp_stats.create_probe_value<uint64_t>("S2_E", "(us)", probe_buff, 1)); // timestamp stage 2 end
+	module::Probe<>&         prb_ts_s3b(rep_timestamp_stats.create_probe_timestamp_mod  ("S3_B", mod,    probe_buff   )); // timestamp stage 3 begin
+	module::Probe<>&         prb_ts_s3e(rep_timestamp_stats.create_probe_timestamp_mod  ("S3_E", mod,    probe_buff   )); // timestamp stage 3 end
 
 	const std::vector<tools::Reporter*>& reporters = { &rep_fra_stats, &rep_thr_stats, &rep_timestamp_stats };
 	tools::Terminal_dump terminal_probes(reporters);
@@ -279,30 +279,30 @@ int main(int argc, char** argv)
 
 	// sockets binding
 	// stage 1 -------------------------------------------------------------------------------
-	source          (  "generate"          ) = (*prb_ts_s1b)         (     "probe"           );
-	(*prb_ts_s1e)   (     "probe"          ) = source                (  "generate"           );
+	source          (  "generate"          ) = prb_ts_s1b            (     "probe"           );
+	prb_ts_s1e      (     "probe"          ) = source                (  "generate"           );
 	// stage 2 -------------------------------------------------------------------------------
-	(*ts_s2b)       (      "exec"          ) = (*prb_ts_s1e)         (     "probe"           );
+	(*ts_s2b)       (      "exec"          ) = prb_ts_s1e            (     "probe"           );
 	(*rlys[0])      (     "relay"          ) = (*ts_s2b)             (      "exec"           );
 	(*rlys[0])      [     "relay::in"      ] = source                [  "generate::out_data" ];
 	for (size_t s = 0; s < rlys.size() -1; s++)
 		(*rlys[s+1])[     "relay::in"      ] = (*rlys[s])            [     "relay::out"      ];
 	(*ts_s2e)       (      "exec"          ) = (*rlys[rlys.size()-1])(     "relay"           );
 	// stage 3 -------------------------------------------------------------------------------
-	(*prb_ts_s3b)   (     "probe"          ) = (*ts_s2e)             (      "exec"           );
-	sink            ("send_count"          ) = (*prb_ts_s3b)         (     "probe"           );
+	prb_ts_s3b      (     "probe"          ) = (*ts_s2e)             (      "exec"           );
+	sink            ("send_count"          ) = prb_ts_s3b            (     "probe"           );
 	sink            ["send_count::in_data" ] = (*rlys[rlys.size()-1])[     "relay::out"      ];
 	sink            ["send_count::in_count"] = source                [  "generate::out_count"];
-	(*prb_fra_id)   (     "probe"          ) = sink                  ("send_count"           );
-	(*prb_stream_id)(     "probe"          ) = (*prb_fra_id)         (     "probe"           );
-	(*prb_thr_thr)  (     "probe"          ) = (*prb_stream_id)      (     "probe"           );
-	(*prb_thr_lat)  (     "probe"          ) = (*prb_thr_thr)        (     "probe"           );
-	(*prb_thr_time) (     "probe"          ) = (*prb_thr_lat)        (     "probe"           );
-	(*prb_ts_s2b)   (     "probe"          ) = (*prb_thr_time)       (     "probe"           );
-	(*prb_ts_s2b)   [     "probe::in"      ] = (*ts_s2b)             [      "exec::out"      ];
-	(*prb_ts_s2e)   (     "probe"          ) = (*prb_ts_s2b)         (     "probe"           );
-	(*prb_ts_s2e)   [     "probe::in"      ] = (*ts_s2e)             [      "exec::out"      ];
-	(*prb_ts_s3e)   (     "probe"          ) = (*prb_ts_s2e)         (     "probe"           );
+	prb_fra_id      (     "probe"          ) = sink                  ("send_count"           );
+	prb_stream_id   (     "probe"          ) = prb_fra_id            (     "probe"           );
+	prb_thr_thr     (     "probe"          ) = prb_stream_id         (     "probe"           );
+	prb_thr_lat     (     "probe"          ) = prb_thr_thr           (     "probe"           );
+	prb_thr_time    (     "probe"          ) = prb_thr_lat           (     "probe"           );
+	prb_ts_s2b      (     "probe"          ) = prb_thr_time          (     "probe"           );
+	prb_ts_s2b      [     "probe::in"      ] = (*ts_s2b)             [      "exec::out"      ];
+	prb_ts_s2e      (     "probe"          ) = prb_ts_s2b            (     "probe"           );
+	prb_ts_s2e      [     "probe::in"      ] = (*ts_s2e)             [      "exec::out"      ];
+	prb_ts_s3e      (     "probe"          ) = prb_ts_s2e            (     "probe"           );
 
 	// stop condition that write the probes data into a file
 	std::function<bool()> stop_condition = [&terminal_probes, &probes_file] ()
@@ -316,7 +316,7 @@ int main(int argc, char** argv)
 	std::unique_ptr<runtime::Pipeline> pipeline_chain;
 	if (force_sequence)
 	{
-		sequence_chain.reset(new runtime::Sequence((*prb_ts_s1b)("probe"), n_threads));
+		sequence_chain.reset(new runtime::Sequence(prb_ts_s1b("probe"), n_threads));
 		sequence_chain->set_n_frames(n_inter_frames);
 		sequence_chain->set_no_copy_mode(no_copy_mode);
 
@@ -360,19 +360,19 @@ int main(int argc, char** argv)
 	else
 	{
 		pipeline_chain.reset(new runtime::Pipeline(
-		                     { &(*prb_ts_s1b)("probe") }, // first task of the sequence
+		                     { &prb_ts_s1b("probe") }, // first task of the sequence
 		                     { // pipeline stage 0: first & last tasks
-		                       { { &(*prb_ts_s1b)("probe"), &(*prb_ts_s1e)("probe") },
-		                         { &source("generate"), &(*prb_ts_s1e)("probe") },
+		                       { { &prb_ts_s1b("probe"), &prb_ts_s1e("probe") },
+		                         { &source("generate"), &prb_ts_s1e("probe") },
 		                         { }, },
 		                       // pipeline stage 1: first & last tasks
 		                       { { &(*ts_s2b)("exec"), &(*rlys[0])("relay"), },
 		                         { &(*ts_s2e)("exec") } ,
-		                         { &(*prb_ts_s3b)("probe"), &sink("send_count"), &(*prb_ts_s2b)("probe"),
-		                           &(*prb_ts_s2e)("probe") }, },
+		                         { &prb_ts_s3b("probe"), &sink("send_count"), &prb_ts_s2b("probe"),
+		                           &prb_ts_s2e("probe") }, },
 		                       // pipeline stage 2: first task (no need to specify the last taks)
-		                       { { &(*prb_ts_s3b)("probe"), &sink("send_count"), &(*prb_ts_s2b)("probe"),
-		                           &(*prb_ts_s2e)("probe") },
+		                       { { &prb_ts_s3b("probe"), &sink("send_count"), &prb_ts_s2b("probe"),
+		                           &prb_ts_s2e("probe") },
 		                         { },
 		                         { }, },
 		                     },
@@ -452,7 +452,8 @@ int main(int argc, char** argv)
 	// sockets unbinding
 	if (force_sequence)
 		sequence_chain->set_n_frames(1);
-	else {
+	else
+	{
 		pipeline_chain->set_n_frames(1);
 		pipeline_chain->unbind_adaptors();
 	}
@@ -464,30 +465,30 @@ int main(int argc, char** argv)
 	// sink[module::snk::sck::send_count::in_count].unbind(source[module::src::sck::generate::out_count]);
 
 	// stage 1 -------------------------------------------------------------------------------------
-	source          (  "generate"          ).unbind((*prb_ts_s1b)         (     "probe"           ));
-	(*prb_ts_s1e)   (     "probe"          ).unbind(source                (  "generate"           ));
+	source          (  "generate"          ).unbind(prb_ts_s1b            (     "probe"           ));
+	prb_ts_s1e      (     "probe"          ).unbind(source                (  "generate"           ));
 	// stage 2 -------------------------------------------------------------------------------------
-	(*ts_s2b)       (      "exec"          ).unbind((*prb_ts_s1e)         (     "probe"           ));
+	(*ts_s2b)       (      "exec"          ).unbind(prb_ts_s1e            (     "probe"           ));
 	(*rlys[0])      (     "relay"          ).unbind((*ts_s2b)             (      "exec"           ));
 	(*rlys[0])      [     "relay::in"      ].unbind(source                [  "generate::out_data" ]);
 	for (size_t s = 0; s < rlys.size() -1; s++)
 		(*rlys[s+1])[     "relay::in"      ].unbind((*rlys[s])            [     "relay::out"      ]);
 	(*ts_s2e)       (      "exec"          ).unbind((*rlys[rlys.size()-1])(     "relay"           ));
 	// stage 3 -------------------------------------------------------------------------------------
-	(*prb_ts_s3b)   (     "probe"          ).unbind((*ts_s2e)             (      "exec"           ));
-	sink            ("send_count"          ).unbind((*prb_ts_s3b)         (     "probe"           ));
+	prb_ts_s3b      (     "probe"          ).unbind((*ts_s2e)             (      "exec"           ));
+	sink            ("send_count"          ).unbind(prb_ts_s3b            (     "probe"           ));
 	sink            ["send_count::in_data" ].unbind((*rlys[rlys.size()-1])[     "relay::out"      ]);
 	sink            ["send_count::in_count"].unbind(source                [  "generate::out_count"]);
-	(*prb_fra_id)   (     "probe"          ).unbind(sink                  ("send_count"           ));
-	(*prb_stream_id)(     "probe"          ).unbind((*prb_fra_id)         (     "probe"           ));
-	(*prb_thr_thr)  (     "probe"          ).unbind((*prb_stream_id)      (     "probe"           ));
-	(*prb_thr_lat)  (     "probe"          ).unbind((*prb_thr_thr)        (     "probe"           ));
-	(*prb_thr_time) (     "probe"          ).unbind((*prb_thr_lat)        (     "probe"           ));
-	(*prb_ts_s2b)   (     "probe"          ).unbind((*prb_thr_time)       (     "probe"           ));
-	(*prb_ts_s2b)   [     "probe::in"      ].unbind((*ts_s2b)             [      "exec::out"      ]);
-	(*prb_ts_s2e)   (     "probe"          ).unbind((*prb_ts_s2b)         (     "probe"           ));
-	(*prb_ts_s2e)   [     "probe::in"      ].unbind((*ts_s2e)             [      "exec::out"      ]);
-	(*prb_ts_s3e)   (     "probe"          ).unbind((*prb_ts_s2e)         (     "probe"           ));
+	prb_fra_id      (     "probe"          ).unbind(sink                  ("send_count"           ));
+	prb_stream_id   (     "probe"          ).unbind(prb_fra_id            (     "probe"           ));
+	prb_thr_thr     (     "probe"          ).unbind(prb_stream_id         (     "probe"           ));
+	prb_thr_lat     (     "probe"          ).unbind(prb_thr_thr           (     "probe"           ));
+	prb_thr_time    (     "probe"          ).unbind(prb_thr_lat           (     "probe"           ));
+	prb_ts_s2b      (     "probe"          ).unbind(prb_thr_time          (     "probe"           ));
+	prb_ts_s2b      [     "probe::in"      ].unbind((*ts_s2b)             [      "exec::out"      ]);
+	prb_ts_s2e      (     "probe"          ).unbind(prb_ts_s2b            (     "probe"           ));
+	prb_ts_s2e      [     "probe::in"      ].unbind((*ts_s2e)             [      "exec::out"      ]);
+	prb_ts_s3e      (     "probe"          ).unbind(prb_ts_s2e            (     "probe"           ));
 
 
 	return test_results;

@@ -18,9 +18,12 @@ namespace module
 template <typename T>
 class Probe_value : public Probe<T>
 {
-public:
-	Probe_value(const int size, const std::string &col_name, tools::Reporter_probe& reporter, const int n_frames = 1);
+	friend tools::Reporter_probe;
 
+protected:
+	Probe_value(const int size, const std::string &col_name, tools::Reporter_probe& reporter);
+
+public:
 	virtual ~Probe_value() = default;
 
 	virtual std::type_index get_datatype() const;

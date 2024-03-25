@@ -18,12 +18,13 @@ namespace module
 {
 class Probe_latency : public Probe<uint8_t>
 {
+	friend tools::Reporter_probe;
+
 protected:
 	std::chrono::time_point<std::chrono::steady_clock> t_start;
+	Probe_latency(const std::string &col_name, tools::Reporter_probe& reporter);
 
 public:
-	Probe_latency(const std::string &col_name, tools::Reporter_probe& reporter, const int n_frames = 1);
-
 	virtual ~Probe_latency() = default;
 
 	virtual std::type_index get_datatype() const;

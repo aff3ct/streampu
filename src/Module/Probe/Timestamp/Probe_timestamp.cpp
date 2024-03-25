@@ -7,8 +7,8 @@ using namespace aff3ct;
 using namespace aff3ct::module;
 
 Probe_timestamp
-::Probe_timestamp(const std::string &col_name, const uint64_t mod, tools::Reporter_probe& reporter, const int n_frames)
-: Probe<uint8_t>(0, col_name, reporter, n_frames), mod(mod)
+::Probe_timestamp(const std::string &col_name, const uint64_t mod, tools::Reporter_probe& reporter)
+: Probe<uint8_t>(0, col_name, reporter), mod(mod)
 {
 	const std::string name = "Probe_timestamp<" + col_name + ">";
 	this->set_name(name);
@@ -16,8 +16,8 @@ Probe_timestamp
 }
 
 Probe_timestamp
-::Probe_timestamp(const std::string &col_name, tools::Reporter_probe& reporter, const int n_frames)
-: Probe_timestamp(col_name, 0, reporter, n_frames)
+::Probe_timestamp(const std::string &col_name, tools::Reporter_probe& reporter)
+: Probe_timestamp(col_name, 0, reporter)
 {
 }
 

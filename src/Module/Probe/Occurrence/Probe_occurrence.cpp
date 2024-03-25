@@ -4,8 +4,8 @@ using namespace aff3ct;
 using namespace aff3ct::module;
 
 Probe_occurrence
-::Probe_occurrence(const std::string &col_name, tools::Reporter_probe& reporter, const int n_frames)
-: Probe<uint8_t>(0, col_name, reporter, n_frames),
+::Probe_occurrence(const std::string &col_name, tools::Reporter_probe& reporter)
+: Probe<uint8_t>(0, col_name, reporter),
   occurrences(0)
 {
 	const std::string name = "Probe_occurrence<" + col_name + ">";

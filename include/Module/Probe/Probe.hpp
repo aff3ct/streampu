@@ -33,16 +33,20 @@ namespace module
 		}
 	}
 
-class AProbe : public Module
+class AProbe : public Module, public tools::Interface_reset
 {
-protected:
+public:
 	AProbe();
 	virtual ~AProbe() = default;
+	virtual void reset() = 0;
+	virtual std::type_index get_datatype() const = 0;
 };
 
 template <typename T = uint8_t>
-class Probe : public AProbe, public tools::Interface_reset
+class Probe : public AProbe
 {
+	friend tools::Reporter_probe;
+
 public:
 	inline runtime::Task&   operator[](const prb::tsk             t);
 	inline runtime::Socket& operator[](const prb::sck::probe      s);
@@ -53,10 +57,9 @@ protected:
 	const int size;
 	const std::string col_name;
 	tools::Reporter_probe& reporter;
+	Probe(const int size, const std::string &col_name, tools::Reporter_probe& reporter);
 
 public:
-	Probe(const int size, const std::string &col_name, tools::Reporter_probe& reporter, const int n_frames);
-
 	virtual ~Probe() = default;
 
 	template <class AT = std::allocator<T>>
@@ -66,11 +69,9 @@ public:
 
 	void probe(const int frame_id = -1, const bool managed_memory = true);
 
-	virtual std::type_index get_datatype() const = 0;
-
 	virtual void reset();
 
-	void set_n_frames(const size_t n_frames);
+	virtual void set_n_frames(const size_t n_frames);
 
 protected:
 	virtual void _probe(const T *in, const size_t frame_id);

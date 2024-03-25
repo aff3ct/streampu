@@ -4,8 +4,8 @@ using namespace aff3ct;
 using namespace aff3ct::module;
 
 Probe_time
-::Probe_time(const std::string &col_name, tools::Reporter_probe& reporter, const int n_frames)
-: Probe<uint8_t>(0, col_name, reporter, n_frames),
+::Probe_time(const std::string &col_name, tools::Reporter_probe& reporter)
+: Probe<uint8_t>(0, col_name, reporter),
   t_start(std::chrono::steady_clock::now())
 {
 	const std::string name = "Probe_time<" + col_name + ">";

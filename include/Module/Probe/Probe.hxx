@@ -40,13 +40,12 @@ runtime::Socket& Probe<T>
 
 template <typename T>
 Probe<T>
-::Probe(const int size, const std::string &col_name, tools::Reporter_probe& reporter, const int n_frames)
+::Probe(const int size, const std::string &col_name, tools::Reporter_probe& reporter)
 : AProbe(), size(size), col_name(col_name), reporter(reporter)
 {
 	const std::string name = "Probe<" + col_name + ">";
 	this->set_name(name);
 	this->set_short_name(name);
-	AProbe::set_n_frames(n_frames);
 
 	if (size < 0)
 	{
@@ -73,9 +72,8 @@ void Probe<T>
 	const size_t old_n_frames = this->get_n_frames();
 	if (old_n_frames != n_frames)
 	{
-		std::stringstream message;
-		message << "This method is disabled in the 'Probe' class.";
-		throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
+		Module::set_n_frames(n_frames);
+		reporter.set_n_frames(n_frames);
 	}
 }
 
