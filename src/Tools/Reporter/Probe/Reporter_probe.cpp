@@ -100,7 +100,7 @@ Reporter::report_t Reporter_probe
 	auto& probe_report = the_report[0];
 
 	// bool can_pull = false;
-	for (auto f = 0; f < this->get_n_frames(); f++)
+	for (size_t f = 0; f < this->get_n_frames(); f++)
 	{
 		for (size_t col = 0; col < this->buffer.size(); col++)
 		{

@@ -257,7 +257,7 @@ int main(int argc, char** argv)
 	{
 		std::chrono::microseconds us = std::chrono::duration_cast<std::chrono::microseconds>(
 			std::chrono::steady_clock::now().time_since_epoch());
-		t[ts_out_val].get_dataptr<uint64_t>()[frame_id] = mod ? (uint64_t)us.count() % mod : (uint64_t)us.count();
+		(*t[ts_out_val].get_dataptr<uint64_t>()) = mod ? (uint64_t)us.count() % mod : (uint64_t)us.count();
 		return aff3ct::runtime::status_t::SUCCESS;
 	});
 	std::unique_ptr<aff3ct::module::Stateless> ts_s2e(ts_s2b->clone());
