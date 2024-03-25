@@ -225,6 +225,15 @@ if(AFF3CT_CORE_TESTS)
     # list(APPEND aff3ct_core_tests_list aff3ct-core-test-nest-loops-pipeline)
     list(APPEND aff3ct_core_targets_list aff3ct-core-test-nest-loops-pipeline)
 
+	#Pin test addition
+	add_executable(aff3ct-core-test-is-pin $<TARGET_OBJECTS:aff3ct-core-obj>
+                   ${CMAKE_CURRENT_SOURCE_DIR}/tests/is_pin.cpp)
+    set_target_properties(aff3ct-core-test-is-pin PROPERTIES
+                                                           OUTPUT_NAME test-is-pin
+                                                           POSITION_INDEPENDENT_CODE ON) # set -fpie
+    #list(APPEND aff3ct_core_tests_list aff3ct-core-test-nest-loops-pipeline)
+    list(APPEND aff3ct_core_targets_list aff3ct-core-test-is-pin)
+
 endif()
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -680,4 +689,8 @@ if(AFF3CT_CORE_TESTS)
     set_tests_properties(pipeline2::aff3ct-core-test-nest-loops-pipeline PROPERTIES LABELS nest-loops-pipeline)
     add_test(NAME pipeline3::aff3ct-core-test-nest-loops-pipeline COMMAND aff3ct-core-test-nest-loops-pipeline -e 200 -f 13)
     set_tests_properties(pipeline3::aff3ct-core-test-nest-loops-pipeline PROPERTIES LABELS nest-loops-pipeline)
+
+	# Static test to verify pinning (for CPUs with at least 4 hardware threads)
+	add_test(NAME pipeline0::aff3ct-core-test-is-pin COMMAND aff3ct-core-test-is-pin -e 30)
+    set_tests_properties(pipeline0::aff3ct-core-test-is-pin PROPERTIES LABELS is-pin)
 endif()
