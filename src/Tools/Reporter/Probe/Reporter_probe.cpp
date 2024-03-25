@@ -387,6 +387,7 @@ void Reporter_probe
 	const size_t old_n_frames = this->get_n_frames();
 	if (n_frames != old_n_frames)
 	{
+		this->n_frames = n_frames;
 		for (size_t p = 0; p < this->probes.size(); p++)
 		{
 			this->probes[p]->set_n_frames(n_frames);
@@ -394,7 +395,6 @@ void Reporter_probe
 			this->buffer[p].resize(n_frames * buffer_size,
 			                       std::vector<int8_t>(1 * B_from_datatype(this->probes[p]->get_datatype())));
 		}
-		this->n_frames = n_frames;
 	}
 }
 
