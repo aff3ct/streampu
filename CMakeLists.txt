@@ -176,6 +176,13 @@ if(AFF3CT_CORE_TESTS)
                                                            POSITION_INDEPENDENT_CODE ON) # set -fpie
     list(APPEND aff3ct_core_targets_list aff3ct-core-test-simple-pipeline)
 
+    add_executable(aff3ct-core-test-pipeline-probe $<TARGET_OBJECTS:aff3ct-core-obj>
+                   ${CMAKE_CURRENT_SOURCE_DIR}/tests/advanced/pipeline_probe.cpp)
+    set_target_properties(aff3ct-core-test-pipeline-probe PROPERTIES
+                                                          OUTPUT_NAME test-pipeline-probe
+                                                          POSITION_INDEPENDENT_CODE ON) # set -fpie
+    list(APPEND aff3ct_core_targets_list aff3ct-core-test-pipeline-probe)
+
     add_executable(aff3ct-core-test-complex-pipeline-inter-stage $<TARGET_OBJECTS:aff3ct-core-obj>
                    ${CMAKE_CURRENT_SOURCE_DIR}/tests/advanced/complex_pipeline_inter_stage.cpp)
     set_target_properties(aff3ct-core-test-complex-pipeline-inter-stage PROPERTIES
