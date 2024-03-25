@@ -56,7 +56,10 @@ void Source_user_binary<B>
 ::_generate(B *out_data, uint32_t* out_count, const size_t frame_id)
 {
 	if (this->is_done())
+	{
 		std::fill(out_data, out_data + this->max_data_size, (B)0);
+		*out_count = 0;
+	}
 	else
 	{
 		size_t n_bytes_read = 0;
