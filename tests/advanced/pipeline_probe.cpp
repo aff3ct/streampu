@@ -238,7 +238,8 @@ int main(int argc, char** argv)
 	tools::Terminal_dump terminal_probes(reporters);
 
 	std::ofstream probes_file;
-	if (!probes_filepath.empty()) {
+	if (!probes_filepath.empty())
+	{
 		probes_file.open(probes_filepath);
 		probes_file << "####################" << std::endl;
 		probes_file << "# Real-time probes #" << std::endl;
@@ -466,38 +467,31 @@ int main(int argc, char** argv)
 		pipeline_chain->unbind_adaptors();
 	}
 
-	// (*rlys[0])[module::rly::sck::relay::in].unbind(source[module::src::sck::generate::out_data]);
-	// for (size_t s = 0; s < rlys.size() -1; s++)
-	// 	(*rlys[s+1])[module::rly::sck::relay::in].unbind((*rlys[s])[module::rly::sck::relay::out]);
-	// sink[module::snk::sck::send_count::in_data].unbind((*rlys[rlys.size()-1])[module::rly::sck::relay::out]);
-	// sink[module::snk::sck::send_count::in_count].unbind(source[module::src::sck::generate::out_count]);
-
-	// stage 1 -------------------------------------------------------------------------------------
-	source          (  "generate"          ).unbind(prb_ts_s1b            (     "probe"           ));
-	prb_ts_s1e      (     "probe"          ).unbind(source                (  "generate"           ));
-	// stage 2 -------------------------------------------------------------------------------------
-	(*ts_s2b)       (      "exec"          ).unbind(prb_ts_s1e            (     "probe"           ));
-	(*rlys[0])      (     "relay"          ).unbind((*ts_s2b)             (      "exec"           ));
-	(*rlys[0])      [     "relay::in"      ].unbind(source                [  "generate::out_data" ]);
+	// stage 1 ---------------------------------------------------------------------------------------------------------------------
+	source          [module::src::tsk::generate            ].unbind(prb_ts_s1b            [module::prb::tsk::probe                ]);
+	prb_ts_s1e      [module::prb::tsk::probe               ].unbind(source                [module::src::tsk::generate             ]);
+	// stage 2 ---------------------------------------------------------------------------------------------------------------------
+	(*ts_s2b)       (                 "exec"               ).unbind(prb_ts_s1e            [module::prb::tsk::probe                ]);
+	(*rlys[0])      [module::rly::tsk::relay               ].unbind((*ts_s2b)             (                 "exec"                ));
+	(*rlys[0])      [module::rly::sck::relay     ::in      ].unbind(source                [module::src::sck::generate  ::out_data ]);
 	for (size_t s = 0; s < rlys.size() -1; s++)
-		(*rlys[s+1])[     "relay::in"      ].unbind((*rlys[s])            [     "relay::out"      ]);
-	(*ts_s2e)       (      "exec"          ).unbind((*rlys[rlys.size()-1])(     "relay"           ));
-	// stage 3 -------------------------------------------------------------------------------------
-	prb_ts_s3b      (     "probe"          ).unbind((*ts_s2e)             (      "exec"           ));
-	sink            ("send_count"          ).unbind(prb_ts_s3b            (     "probe"           ));
-	sink            ["send_count::in_data" ].unbind((*rlys[rlys.size()-1])[     "relay::out"      ]);
-	sink            ["send_count::in_count"].unbind(source                [  "generate::out_count"]);
-	prb_fra_id      (     "probe"          ).unbind(sink                  ("send_count"           ));
-	prb_stream_id   (     "probe"          ).unbind(prb_fra_id            (     "probe"           ));
-	prb_thr_thr     (     "probe"          ).unbind(prb_stream_id         (     "probe"           ));
-	prb_thr_lat     (     "probe"          ).unbind(prb_thr_thr           (     "probe"           ));
-	prb_thr_time    (     "probe"          ).unbind(prb_thr_lat           (     "probe"           ));
-	prb_ts_s2b      (     "probe"          ).unbind(prb_thr_time          (     "probe"           ));
-	prb_ts_s2b      [     "probe::in"      ].unbind((*ts_s2b)             [      "exec::out"      ]);
-	prb_ts_s2e      (     "probe"          ).unbind(prb_ts_s2b            (     "probe"           ));
-	prb_ts_s2e      [     "probe::in"      ].unbind((*ts_s2e)             [      "exec::out"      ]);
-	prb_ts_s3e      (     "probe"          ).unbind(prb_ts_s2e            (     "probe"           ));
-
+		(*rlys[s+1])[module::rly::sck::relay     ::in      ].unbind((*rlys[s])            [module::rly::sck::relay     ::out      ]);
+	(*ts_s2e)       (                 "exec"               ).unbind((*rlys[rlys.size()-1])[module::rly::tsk::relay                ]);
+	// stage 3 ---------------------------------------------------------------------------------------------------------------------
+	prb_ts_s3b      [module::prb::tsk::probe               ].unbind((*ts_s2e)             (                 "exec"                ));
+	sink            [module::snk::tsk::send_count          ].unbind(prb_ts_s3b            [module::prb::tsk::probe                ]);
+	sink            [module::snk::sck::send_count::in_data ].unbind((*rlys[rlys.size()-1])[module::rly::sck::relay     ::out      ]);
+	sink            [module::snk::sck::send_count::in_count].unbind(source                [module::src::sck::generate  ::out_count]);
+	prb_fra_id      [module::prb::tsk::probe               ].unbind(sink                  [module::snk::tsk::send_count           ]);
+	prb_stream_id   [module::prb::tsk::probe               ].unbind(prb_fra_id            [module::prb::tsk::probe                ]);
+	prb_thr_thr     [module::prb::tsk::probe               ].unbind(prb_stream_id         [module::prb::tsk::probe                ]);
+	prb_thr_lat     [module::prb::tsk::probe               ].unbind(prb_thr_thr           [module::prb::tsk::probe                ]);
+	prb_thr_time    [module::prb::tsk::probe               ].unbind(prb_thr_lat           [module::prb::tsk::probe                ]);
+	prb_ts_s2b      [module::prb::tsk::probe               ].unbind(prb_thr_time          [module::prb::tsk::probe                ]);
+	prb_ts_s2b      [module::prb::sck::probe     ::in      ].unbind((*ts_s2b)             [                 "exec      ::out"     ]);
+	prb_ts_s2e      [module::prb::tsk::probe               ].unbind(prb_ts_s2b            [module::prb::tsk::probe                ]);
+	prb_ts_s2e      [module::prb::sck::probe     ::in      ].unbind((*ts_s2e)             [                 "exec      ::out"     ]);
+	prb_ts_s3e      [module::prb::tsk::probe               ].unbind(prb_ts_s2e            [module::prb::tsk::probe                ]);
 
 	return test_results;
 }
