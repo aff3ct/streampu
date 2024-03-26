@@ -21,7 +21,7 @@ class Probe_timestamp : public Probe<uint8_t>
 
 protected:
 	const uint64_t mod;
-	Probe_timestamp(const std::string &col_name, const uint64_t mod, tools::Reporter_probe& reporter);
+	Probe_timestamp(const uint64_t mod, const std::string &col_name, tools::Reporter_probe& reporter);
 	Probe_timestamp(const std::string &col_name, tools::Reporter_probe& reporter);
 
 public:

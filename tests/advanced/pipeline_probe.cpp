@@ -217,22 +217,30 @@ int main(int argc, char** argv)
 	// create reporters and probes for the real-time probes file
 	tools::Reporter_probe rep_fra_stats("Counters");
 	module::Probe<>& prb_fra_id(rep_fra_stats.create_probe_occurrence("FRAME_ID"));
-	module::Probe<>& prb_stream_id(rep_fra_stats.create_probe_stream("STREA_ID"));
+	module::Probe<>& prb_stream_id(rep_fra_stats.create_probe_stream("STREAM_ID"));
+	prb_stream_id.set_col_size(11);
+	rep_fra_stats.set_buff_size(200);
 
 	tools::Reporter_probe rep_thr_stats("Throughput, latency", "and time");
 	module::Probe<>& prb_thr_thr (rep_thr_stats.create_probe_throughput("FPS"));  // only valid for sequence, invalid for pipeline
 	module::Probe<>& prb_thr_lat (rep_thr_stats.create_probe_latency   ("LAT"));  // only valid for sequence, invalid for pipeline
 	module::Probe<>& prb_thr_time(rep_thr_stats.create_probe_time      ("TIME")); // only valid for sequence, invalid for pipeline
+	prb_thr_thr.set_col_size(12);
+	prb_thr_time.set_prec(6);
+	prb_thr_time.set_col_size(12);
+	rep_thr_stats.set_buff_size(200);
 
 	tools::Reporter_probe rep_timestamp_stats("Timestamps", "(in microseconds) [SX = stage X, B = begin, E = end]");
-	const uint64_t mod = 1000000ul * 60ul * 10; // limit to 10 minutes timestamp
-	const size_t probe_buff = 200; // size of the buffer used by the probes to record values
-	module::Probe<>&         prb_ts_s1b(rep_timestamp_stats.create_probe_timestamp_mod  ("S1_B", mod,    probe_buff   )); // timestamp stage 1 begin
-	module::Probe<>&         prb_ts_s1e(rep_timestamp_stats.create_probe_timestamp_mod  ("S1_E", mod,    probe_buff   )); // timestamp stage 1 end
-	module::Probe<uint64_t>& prb_ts_s2b(rep_timestamp_stats.create_probe_value<uint64_t>("S2_B", "(us)", probe_buff, 1)); // timestamp stage 2 begin
-	module::Probe<uint64_t>& prb_ts_s2e(rep_timestamp_stats.create_probe_value<uint64_t>("S2_E", "(us)", probe_buff, 1)); // timestamp stage 2 end
-	module::Probe<>&         prb_ts_s3b(rep_timestamp_stats.create_probe_timestamp_mod  ("S3_B", mod,    probe_buff   )); // timestamp stage 3 begin
-	module::Probe<>&         prb_ts_s3e(rep_timestamp_stats.create_probe_timestamp_mod  ("S3_E", mod,    probe_buff   )); // timestamp stage 3 end
+	const uint64_t mod = 6000000ul * 60ul * 10; // limit to 60 minutes timestamp
+	module::Probe<>&         prb_ts_s1b(rep_timestamp_stats.create_probe_timestamp      (mod, "S1_B")); // timestamp stage 1 begin
+	module::Probe<>&         prb_ts_s1e(rep_timestamp_stats.create_probe_timestamp      (mod, "S1_E")); // timestamp stage 1 end
+	module::Probe<uint64_t>& prb_ts_s2b(rep_timestamp_stats.create_probe_value<uint64_t>(1,   "S2_B")); // timestamp stage 2 begin
+	module::Probe<uint64_t>& prb_ts_s2e(rep_timestamp_stats.create_probe_value<uint64_t>(1,   "S2_E")); // timestamp stage 2 end
+	module::Probe<>&         prb_ts_s3b(rep_timestamp_stats.create_probe_timestamp      (mod, "S3_B")); // timestamp stage 3 begin
+	module::Probe<>&         prb_ts_s3e(rep_timestamp_stats.create_probe_timestamp      (mod, "S3_E")); // timestamp stage 3 end
+	rep_timestamp_stats.set_buff_size(200); // size of the buffer used by the probes to record values
+	rep_timestamp_stats.set_unit("(us)");
+	rep_timestamp_stats.set_col_size(12);
 
 	const std::vector<tools::Reporter*>& reporters = { &rep_fra_stats, &rep_thr_stats, &rep_timestamp_stats };
 	tools::Terminal_dump terminal_probes(reporters);

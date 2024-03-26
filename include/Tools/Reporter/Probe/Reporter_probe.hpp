@@ -41,8 +41,9 @@ protected:
 	std::vector<size_t> tail;
 	std::vector<std::vector<std::vector<int8_t>>> buffer;
 	std::vector<std::type_index> datatypes;
-	std::vector<std::ios_base::fmtflags> stream_flags;
+	std::vector<std::ios_base::fmtflags> format_flags;
 	std::vector<size_t> precisions;
+	std::vector<size_t> column_sizes;
 	std::vector<size_t> datasizes;
 	std::map<std::string, int> name_to_col;
 	std::map<int, std::string> col_to_name;
@@ -59,23 +60,35 @@ public:
 	virtual report_t report(bool final = false);
 
 	template <typename T>
-	module::Probe_value<T>& create_probe_value(const std::string &name,
+	module::Probe_value<T>& create_probe_value(const size_t socket_size,
+		                                       const std::string &name,
 	                                           const std::string &unit = "",
 	                                           const size_t buffer_size = 100,
-	                                           const size_t socket_size = 1,
 	                                           const std::ios_base::fmtflags ff = std::ios_base::scientific,
 	                                           const size_t precision = 3);
 
-	module::Probe_throughput& create_probe_throughput_mbps(const std::string &name,
-	                                                       const size_t data_size = 1,
+	module::Probe_throughput& create_probe_throughput_mbps(const size_t data_size,
+	                                                       const std::string &name,
 	                                                       const size_t buffer_size = 100,
 	                                                       const std::ios_base::fmtflags ff = std::ios_base::dec | std::ios_base::fixed,
 	                                                       const size_t precision = 3);
 
-	module::Probe_throughput& create_probe_throughput(const std::string &name,
-	                                                  const std::string &unit = "",
-	                                                  const size_t data_size = 1,
+	module::Probe_throughput& create_probe_throughput_mbps(const std::string &name,
+	                                                       const size_t buffer_size = 100,
+	                                                       const std::ios_base::fmtflags ff = std::ios_base::dec | std::ios_base::fixed,
+	                                                       const size_t precision = 3);
+
+	module::Probe_throughput& create_probe_throughput(const size_t data_size,
+	                                                  const std::string &name,
 	                                                  const double factor = 1.,
+	                                                  const std::string &unit = "",
+	                                                  const size_t buffer_size = 100,
+	                                                  const std::ios_base::fmtflags ff = std::ios_base::dec | std::ios_base::fixed,
+	                                                  const size_t precision = 3);
+
+	module::Probe_throughput& create_probe_throughput(const std::string &name,
+	                                                  const double factor = 1.,
+	                                                  const std::string &unit = "",
 	                                                  const size_t buffer_size = 100,
 	                                                  const std::ios_base::fmtflags ff = std::ios_base::dec | std::ios_base::fixed,
 	                                                  const size_t precision = 3);
@@ -90,16 +103,16 @@ public:
 	                                      const std::ios_base::fmtflags ff = std::ios_base::dec | std::ios_base::fixed,
 	                                      const size_t precision = 2);
 
-	module::Probe_timestamp& create_probe_timestamp(const std::string &name,
+	module::Probe_timestamp& create_probe_timestamp(const uint64_t mod,
+	                                                const std::string &name,
 	                                                const size_t buffer_size = 100,
 	                                                const std::ios_base::fmtflags ff = std::ios_base::scientific,
 	                                                const size_t precision = 2);
 
-	module::Probe_timestamp& create_probe_timestamp_mod(const std::string &name,
-	                                                    const uint64_t mod,
-	                                                    const size_t buffer_size = 100,
-	                                                    const std::ios_base::fmtflags ff = std::ios_base::scientific,
-	                                                    const size_t precision = 2);
+	module::Probe_timestamp& create_probe_timestamp(const std::string &name,
+	                                                const size_t buffer_size = 100,
+	                                                const std::ios_base::fmtflags ff = std::ios_base::scientific,
+	                                                const size_t precision = 2);
 
 	module::Probe_occurrence& create_probe_occurrence(const std::string &name,
 	                                                  const std::string &unit = "",
@@ -121,6 +134,18 @@ public:
 
 	size_t get_n_frames() const;
 
+	void set_cname    (const std::string &name, const module::AProbe &prb);
+	void set_unit     (const std::string &unit, const module::AProbe &prb);
+	void set_unit     (const std::string &unit);
+	void set_buff_size(const size_t buffer_size, const module::AProbe &prb);
+	void set_buff_size(const size_t buffer_size);
+	void set_fmtflags (const std::ios_base::fmtflags ff, const module::AProbe &prb);
+	void set_fmtflags (const std::ios_base::fmtflags ff);
+	void set_prec     (const size_t precision, const module::AProbe &prb);
+	void set_prec     (const size_t precision);
+	void set_col_size (const size_t col_size, const module::AProbe &prb);
+	void set_col_size (const size_t col_size);
+
 protected:
 	void create_probe_checks(const std::string &name);
 
@@ -132,6 +157,8 @@ protected:
 
 	template <typename T>
 	bool pull(const int col, T *data);
+
+	size_t get_probe_index(const module::AProbe &prb);
 
 private:
 	template <typename T>

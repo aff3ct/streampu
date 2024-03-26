@@ -57,10 +57,12 @@ void Terminal_dump
 					{
 						auto text = report[g].size() ? report[g][c] : "-";
 
-						if (text.size() < (size_t)column_width)
+						size_t column_with = std::get<2>(groups[g].second[c]) ? std::get<2>(groups[g].second[c]) :
+					                         def_column_width;
+						if (text.size() < (size_t)column_with)
 						{
 							text += " ";
-							text.insert(0, column_width - text.size(), ' ');
+							text.insert(0, column_with - text.size(), ' ');
 						}
 
 						stream << text;

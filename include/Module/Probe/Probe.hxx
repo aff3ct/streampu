@@ -138,5 +138,47 @@ void Probe<T>
 {
 }
 
+template <typename T>
+void Probe<T>
+::set_cname(const std::string &name)
+{
+	this->reporter.set_cname(name, *this);
+}
+
+template <typename T>
+void Probe<T>
+::set_unit(const std::string &unit)
+{
+	this->reporter.set_unit(unit, *this);
+}
+
+template <typename T>
+void Probe<T>
+::set_buff_size(const size_t buffer_size)
+{
+	this->reporter.set_buff_size(buffer_size, *this);
+}
+
+template <typename T>
+void Probe<T>
+::set_fmtflags(const std::ios_base::fmtflags ff)
+{
+	this->reporter.set_fmtflags(ff, *this);
+}
+
+template <typename T>
+void Probe<T>
+::set_prec(const size_t precision)
+{
+	this->reporter.set_prec(precision, *this);
+}
+
+template <typename T>
+void Probe<T>
+::set_col_size(const size_t col_size)
+{
+	this->reporter.set_col_size(col_size, *this);
+}
+
 }
 }

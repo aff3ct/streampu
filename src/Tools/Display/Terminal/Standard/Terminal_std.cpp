@@ -21,9 +21,9 @@ const rang::style aff3ct::tools::Terminal_std::legend_style          = rang::sty
 const rang::style aff3ct::tools::Terminal_std::report_style          = rang::style::bold;
 
 #ifdef _WIN32
-const int aff3ct::tools::Terminal_std::column_width = 11;
+const size_t aff3ct::tools::Terminal_std::def_column_width = 11;
 #else
-const int aff3ct::tools::Terminal_std::column_width = 10;
+const size_t aff3ct::tools::Terminal_std::def_column_width = 10;
 #endif
 
 Terminal_std
@@ -108,12 +108,12 @@ void Terminal_std
 		stream << rang::tag::comment;
 		for (unsigned i = 0; i < cols_groups.size(); i++)
 		{
-			const auto& text = l == 0 ? cols_groups[i]->first.first : cols_groups[i]->first.second;
+			const auto& text = l == 0 ? std::get<0>(cols_groups[i]->first) : std::get<1>(cols_groups[i]->first);
 
 			const unsigned group_width = get_group_width(*cols_groups[i]);
 			int n_spaces = (int)group_width - (int)text.size();
 
-			if (text.size() != std::max(cols_groups[i]->first.first.size(), cols_groups[i]->first.second.size()))
+			if (text.size() != std::max(std::get<0>(cols_groups[i]->first).size(), std::get<1>(cols_groups[i]->first).size()))
 				n_spaces += extra_spaces(cols_groups[i]->first, group_width);
 
 
@@ -153,7 +153,8 @@ void Terminal_std
 
 		for (unsigned j = 0; j < cols_groups[i]->second.size(); j++)
 		{
-			auto n_separators = column_width;
+			auto n_separators = (std::get<2>(cols_groups[i]->second[j])) ? std::get<2>(cols_groups[i]->second[j]) :
+			                    def_column_width;
 			if (j == 0)
 				n_separators += n_extra;
 
@@ -178,8 +179,10 @@ void Terminal_std
 
 			for (unsigned j = 0; j < cols_groups[i]->second.size(); j++)
 			{
-				const auto& text = l == 0 ? cols_groups[i]->second[j].first : cols_groups[i]->second[j].second;
-				int n_spaces = (int)column_width - (int)text.size() -1;
+				const auto& text = l == 0 ? std::get<0>(cols_groups[i]->second[j]) :
+				                            std::get<1>(cols_groups[i]->second[j]);
+				int n_spaces = (int)((std::get<2>(cols_groups[i]->second[j])) ?
+				                      std::get<2>(cols_groups[i]->second[j]) : def_column_width) - (int)text.size() -1;
 
 				if (j == 0)
 					n_spaces += n_extra;
@@ -208,7 +211,8 @@ void Terminal_std
 
 		for (unsigned j = 0; j < cols_groups[i]->second.size(); j++)
 		{
-			auto n_separators = column_width;
+			auto n_separators = (std::get<2>(cols_groups[i]->second[j])) ? std::get<2>(cols_groups[i]->second[j]) :
+			                    def_column_width;
 			if (j == 0)
 				n_separators += n_extra;
 
@@ -250,10 +254,12 @@ void Terminal_std
 				{
 					auto& text = report[g][c];
 
-					if (text.size() < (size_t)column_width)
+					size_t column_with = std::get<2>(groups[g].second[c]) ? std::get<2>(groups[g].second[c]) :
+					                     def_column_width;
+					if (text.size() < (size_t)column_with)
 					{
 						text += " ";
-						text.insert(0, column_width - text.size(), ' ');
+						text.insert(0, column_with - text.size(), ' ');
 					}
 
 					stream << text;
@@ -292,7 +298,7 @@ void Terminal_std
 unsigned Terminal_std
 ::extra_spaces(const Reporter::title_t& text, const unsigned group_width)
 {
-	const unsigned longest_text = (unsigned)std::max(text.first.size(), text.second.size());
+	const unsigned longest_text = (unsigned)std::max(std::get<0>(text).size(), std::get<1>(text).size());
 	return (longest_text > group_width) ? longest_text - group_width : 0;
 }
 
@@ -305,5 +311,9 @@ unsigned Terminal_std
 unsigned Terminal_std
 ::get_group_width(const Reporter::group_t& group)
 {
-	return (unsigned)(group.second.size() * (column_width + 1) -1); // add a col separator between each except for the last
+	size_t group_width = 0;
+	for (size_t j = 0; j < group.second.size(); j++)
+		group_width += (std::get<2>(group.second[j]) ? std::get<2>(group.second[j]) : def_column_width) +1;
+	return --group_width;
 }
+
