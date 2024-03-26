@@ -88,6 +88,8 @@ nav:
   - For Users:
     - Tests:
       - tests_bootstrap.md
+    - Thread Pinning:
+      - thread_pinning.md
   - For Developers:
       - Basic Components:
         - task.md
