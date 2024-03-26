@@ -36,7 +36,7 @@ Another level of syntax abstraction is possible for all the pipeline, all the th
   -  Enable pinning : `{false, true, true}`  
   -  The pinning policy : ```"| L2D_0 | PU_2, PU3"```   
   
-###Unpin
+### Unpin
 
   An **unpin** function exists, it can be called by each thread individually, so that the calling thread will be free to be scheduled all over the process units.
 
