@@ -383,7 +383,6 @@ int main(int argc, char** argv)
 			rly_lsck = (sck_type_tsk[i][j +1] == "SFWD") ? "relayf::fwd" : "relay::in";
 			rly_rsck = (sck_type_tsk[i][j   ] == "SFWD") ? "relayf::fwd" : "relay::out";
 			(*rlys[tas +1].get())[rly_lsck] = (*rlys[tas].get())[rly_rsck];
-
 			tas++;
 		}
 		// We have to bind the last task of stage i to the first one of task i+1

@@ -5,8 +5,8 @@ using namespace aff3ct::module;
 
 template <typename T>
 Probe_value<T>
-::Probe_value(const int size, const std::string &col_name, tools::Reporter_probe& reporter, const int n_frames)
-: Probe<T>(size, col_name, reporter, n_frames)
+::Probe_value(const int size, const std::string &col_name, tools::Reporter_probe& reporter)
+: Probe<T>(size, col_name, reporter)
 {
 	const std::string name = "Probe_value<" + col_name + ">";
 	this->set_name(name);

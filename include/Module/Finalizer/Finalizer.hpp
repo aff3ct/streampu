@@ -45,7 +45,7 @@ public:
 
 	const std::vector<std::vector<T>>& get_final_data() const;
 	const std::vector<std::vector<std::vector<T>>>& get_histo_data() const;
-	const size_t get_next_stream_id() const;
+	size_t get_next_stream_id() const;
 
 	void set_n_frames(const size_t n_frames);
 

@@ -7,6 +7,7 @@
 
 #include <vector>
 #include <utility>
+#include <tuple>
 #include <string>
 
 #include "Tools/Interface/Interface_reset.hpp"
@@ -18,10 +19,10 @@ namespace tools
 class Reporter : public Interface_reset
 {
 public:
-	using title_t        = std::pair<std::string, std::string>;
-	using group_title_t  = title_t;
-	using column_title_t = std::vector<title_t>;
-	using group_t        = std::pair<group_title_t, column_title_t>;
+	using title_t         = std::tuple<std::string, std::string, size_t>;
+	using group_title_t   = title_t;
+	using column_titles_t = std::vector<title_t>;
+	using group_t         = std::pair<group_title_t, column_titles_t>;
 
 	using report_t = std::vector<std::vector<std::string>>;
 

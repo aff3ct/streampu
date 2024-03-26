@@ -5,8 +5,8 @@ using namespace aff3ct::module;
 
 Probe_throughput
 ::Probe_throughput(const size_t data_size, const std::string &col_name, const double factor,
-                   tools::Reporter_probe& reporter, const int n_frames)
-: Probe<uint8_t>(0, col_name, reporter, n_frames),
+                   tools::Reporter_probe& reporter)
+: Probe<uint8_t>(0, col_name, reporter),
   t_start(std::chrono::steady_clock::now()),
   data_size(data_size),
   thr(0.),
@@ -18,9 +18,8 @@ Probe_throughput
 }
 
 Probe_throughput
-::Probe_throughput(const size_t data_size, const std::string &col_name, tools::Reporter_probe& reporter,
-                   const int n_frames)
-: Probe_throughput(data_size, col_name, 1024. * 1024., reporter, n_frames)
+::Probe_throughput(const size_t data_size, const std::string &col_name, tools::Reporter_probe& reporter)
+: Probe_throughput(data_size, col_name, 1024. * 1024., reporter)
 {
 }
 
@@ -29,7 +28,7 @@ void Probe_throughput
 {
 	auto t_stop = std::chrono::steady_clock::now();
 	auto time_duration = (double)std::chrono::duration_cast<std::chrono::microseconds>(t_stop - this->t_start).count();
-	this->thr = ((double)(this->data_size * this->n_frames) / (this->factor)) / (time_duration * 1e-6);
+	this->thr = ((double)(this->data_size * this->get_n_frames()) / (this->factor)) / (time_duration * 1e-6);
 	this->t_start = t_stop;
 
 	for (size_t f = 0; f < this->get_n_frames(); f++)

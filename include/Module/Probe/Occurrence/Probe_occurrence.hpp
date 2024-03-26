@@ -18,12 +18,13 @@ namespace module
 {
 class Probe_occurrence : public Probe<uint8_t>
 {
+	friend tools::Reporter_probe;
+
 protected:
 	int64_t occurrences;
+	Probe_occurrence(const std::string &col_name, tools::Reporter_probe& reporter);
 
 public:
-	Probe_occurrence(const std::string &col_name, tools::Reporter_probe& reporter, const int n_frames = 1);
-
 	virtual ~Probe_occurrence() = default;
 
 	virtual std::type_index get_datatype() const;
