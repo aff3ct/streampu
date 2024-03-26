@@ -244,7 +244,16 @@ int main(int argc, char** argv)
 	rep_timestamp_stats.set_cols_unit("(us)");
 	rep_timestamp_stats.set_cols_size(12);
 
-	const std::vector<tools::Reporter*>& reporters = { &rep_fra_stats, &rep_thr_stats, &rep_timestamp_stats };
+	tools::Reporter_probe rep_bitvals("Read bits", "(Unpacked)");
+	module::AProbe& prb_bitvals_cnt(rep_bitvals.create_probe_value<uint32_t>(1, "Count"));
+	module::AProbe& prb_bitvals_data(rep_bitvals.create_probe_value<uint8_t>(data_length, "Bits"));
+	rep_bitvals.set_cols_buff_size(200);
+	prb_bitvals_cnt.set_col_size(7);
+	prb_bitvals_data.set_col_size(data_length * 4 + 2);
+	prb_bitvals_data.set_col_unit("(low-order bit on the left)");
+
+	const std::vector<tools::Reporter*>& reporters = { &rep_fra_stats, &rep_thr_stats, &rep_timestamp_stats,
+	                                                   &rep_bitvals };
 	tools::Terminal_dump terminal_probes(reporters);
 
 	std::ofstream probes_file;
@@ -303,6 +312,10 @@ int main(int argc, char** argv)
 	sink            ("send_count"          ) = prb_ts_s3b            (     "probe"           );
 	sink            ["send_count::in_data" ] = (*rlys[rlys.size()-1])[     "relay::out"      ];
 	sink            ["send_count::in_count"] = source                [  "generate::out_count"];
+	prb_bitvals_cnt (     "probe"          ) = sink                  ("send_count"           );
+	prb_bitvals_data(     "probe"          ) = sink                  ("send_count"           );
+	prb_bitvals_cnt [     "probe::in"      ] = source                [  "generate::out_count"];
+	prb_bitvals_data[     "probe::in"      ] = (*rlys[rlys.size()-1])[     "relay::out"      ];
 	prb_thr_thr     (     "probe"          ) = sink                  ("send_count"           );
 	prb_thr_lat     (     "probe"          ) = prb_thr_thr           (     "probe"           );
 	prb_thr_time    (     "probe"          ) = prb_thr_lat           (     "probe"           );
@@ -383,8 +396,8 @@ int main(int argc, char** argv)
 		                         { &prb_ts_s3b("probe"), &sink("send_count"), &prb_ts_s2b("probe"),
 		                           &prb_ts_s2e("probe") }, },
 		                       // pipeline stage 2: first task (no need to specify the last taks)
-		                       { { &prb_ts_s3b("probe"), &sink("send_count"), &prb_ts_s2b("probe"),
-		                           &prb_ts_s2e("probe") },
+		                       { { &prb_ts_s3b("probe"), &sink("send_count"), &prb_bitvals_cnt("probe"),
+		                           &prb_bitvals_data("probe"), &prb_ts_s2b("probe"), &prb_ts_s2e("probe") },
 		                         { },
 		                         { }, },
 		                     },
@@ -491,6 +504,10 @@ int main(int argc, char** argv)
 	sink            [module::snk::tsk::send_count          ].unbind(prb_ts_s3b            [module::prb::tsk::probe                ]);
 	sink            [module::snk::sck::send_count::in_data ].unbind((*rlys[rlys.size()-1])[module::rly::sck::relay     ::out      ]);
 	sink            [module::snk::sck::send_count::in_count].unbind(source                [module::src::sck::generate  ::out_count]);
+	prb_bitvals_cnt [module::prb::tsk::probe               ].unbind(sink                  [module::snk::tsk::send_count           ]);
+	prb_bitvals_data[module::prb::tsk::probe               ].unbind(sink                  [module::snk::tsk::send_count           ]);
+	prb_bitvals_cnt [module::prb::sck::probe     ::in      ].unbind(source                [module::src::sck::generate  ::out_count]);
+	prb_bitvals_data[module::prb::sck::probe     ::in      ].unbind((*rlys[rlys.size()-1])[module::rly::sck::relay     ::out      ]);
 	prb_thr_thr     [module::prb::tsk::probe               ].unbind(sink                  [module::snk::tsk::send_count           ]);
 	prb_thr_lat     [module::prb::tsk::probe               ].unbind(prb_thr_thr           [module::prb::tsk::probe                ]);
 	prb_thr_time    [module::prb::tsk::probe               ].unbind(prb_thr_lat           [module::prb::tsk::probe                ]);
