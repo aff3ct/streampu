@@ -1439,6 +1439,12 @@ std::vector<std::vector<module::Module*>> Pipeline
 	return modules_per_types;
 }
 
+std::vector<std::vector<module::Module*>> Pipeline
+::get_original_modules() const
+{
+	return this->original_sequence.get_modules_per_types();
+}
+
 std::vector<std::vector<runtime::Task*>> Pipeline
 ::get_tasks_per_threads() const
 {

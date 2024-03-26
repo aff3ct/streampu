@@ -177,9 +177,11 @@ public:
 	std::vector<C*> get_modules(const bool set_modules = true) const;
 	std::vector<std::vector<module::Module*>> get_modules_per_threads() const;
 	std::vector<std::vector<module::Module*>> get_modules_per_types  () const;
+	std::vector<std::vector<module::Module*>> get_original_modules   () const;
 
 	std::vector<std::vector<runtime::Task*>> get_tasks_per_threads() const;
 	std::vector<std::vector<runtime::Task*>> get_tasks_per_types  () const;
+
 
 	inline const std::vector<std::vector<runtime::Task*>>& get_firsts_tasks() const;
 	inline const std::vector<std::vector<runtime::Task*>>& get_lasts_tasks() const;
