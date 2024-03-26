@@ -41,12 +41,17 @@ public:
 	virtual void reset() = 0;
 	virtual std::type_index get_datatype() const = 0;
 
-	virtual void set_cname    (const std::string &name) = 0;
-	virtual void set_unit     (const std::string &unit) = 0;
-	virtual void set_buff_size(const size_t buffer_size) = 0;
-	virtual void set_fmtflags (const std::ios_base::fmtflags ff) = 0;
-	virtual void set_prec     (const size_t precision) = 0;
-	virtual void set_col_size (const size_t col_size) = 0;
+	virtual void set_col_name     (const std::string &name) = 0;
+	virtual void set_col_unit     (const std::string &unit) = 0;
+	virtual void set_col_buff_size(const size_t buffer_size) = 0;
+	virtual void set_col_fmtflags (const std::ios_base::fmtflags ff) = 0;
+	virtual void set_col_prec     (const size_t precision) = 0;
+	virtual void set_col_size     (const size_t col_size) = 0;
+
+	inline runtime::Task&   operator[](const prb::tsk             t);
+	inline runtime::Socket& operator[](const prb::sck::probe      s);
+	inline runtime::Socket& operator[](const prb::sck::probe_noin s);
+	inline runtime::Socket& operator[](const std::string &tsk_sck  );
 };
 
 template <typename T = uint8_t>
@@ -80,12 +85,12 @@ public:
 
 	virtual void set_n_frames(const size_t n_frames);
 
-	virtual void set_cname    (const std::string &name);
-	virtual void set_unit     (const std::string &unit);
-	virtual void set_buff_size(const size_t buffer_size);
-	virtual void set_fmtflags (const std::ios_base::fmtflags ff);
-	virtual void set_prec     (const size_t precision);
-	virtual void set_col_size (const size_t col_size);
+	virtual void set_col_name     (const std::string &name);
+	virtual void set_col_unit     (const std::string &unit);
+	virtual void set_col_buff_size(const size_t buffer_size);
+	virtual void set_col_fmtflags (const std::ios_base::fmtflags ff);
+	virtual void set_col_prec     (const size_t precision);
+	virtual void set_col_size     (const size_t col_size);
 
 protected:
 	virtual void _probe(const T *in, const size_t frame_id);

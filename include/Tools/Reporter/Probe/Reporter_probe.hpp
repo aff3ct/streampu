@@ -44,7 +44,7 @@ protected:
 	std::vector<std::ios_base::fmtflags> format_flags;
 	std::vector<size_t> precisions;
 	std::vector<size_t> column_sizes;
-	std::vector<size_t> datasizes;
+	std::vector<size_t> socket_sizes;
 	std::map<std::string, int> name_to_col;
 	std::map<int, std::string> col_to_name;
 	size_t n_frames;
@@ -134,20 +134,29 @@ public:
 
 	size_t get_n_frames() const;
 
-	void set_cname    (const std::string &name, const module::AProbe &prb);
-	void set_unit     (const std::string &unit, const module::AProbe &prb);
-	void set_unit     (const std::string &unit);
-	void set_buff_size(const size_t buffer_size, const module::AProbe &prb);
-	void set_buff_size(const size_t buffer_size);
-	void set_fmtflags (const std::ios_base::fmtflags ff, const module::AProbe &prb);
-	void set_fmtflags (const std::ios_base::fmtflags ff);
-	void set_prec     (const size_t precision, const module::AProbe &prb);
-	void set_prec     (const size_t precision);
-	void set_col_size (const size_t col_size, const module::AProbe &prb);
-	void set_col_size (const size_t col_size);
+	void set_col_name(const std::string &name, const module::AProbe &prb);
+	void set_col_unit(const std::string &unit, const module::AProbe &prb);
+	void set_col_buff_size(const size_t buffer_size, const module::AProbe &prb);
+	void set_col_fmtflags(const std::ios_base::fmtflags ff, const module::AProbe &prb);
+	void set_col_prec(const size_t precision, const module::AProbe &prb);
+	void set_col_size(const size_t col_size, const module::AProbe &prb);
+
+	void set_cols_unit(const std::string &unit);
+	void set_cols_buff_size(const size_t buffer_size);
+	void set_cols_fmtflags(const std::ios_base::fmtflags ff);
+	void set_cols_prec(const size_t precision);
+	void set_cols_size(const size_t col_size);
 
 protected:
 	void create_probe_checks(const std::string &name);
+
+	void register_probe(module::AProbe* probe,
+                        const size_t socket_size,
+                        const std::string &name,
+                        const std::string &unit,
+                        const size_t buffer_size,
+                        const std::ios_base::fmtflags ff,
+                        const size_t precision);
 
 	template <typename T>
 	size_t col_size(const int col);

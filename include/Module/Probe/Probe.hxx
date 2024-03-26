@@ -8,6 +8,32 @@ namespace aff3ct
 namespace module
 {
 
+runtime::Task& AProbe
+::operator[](const prb::tsk t)
+{
+	return Module::operator[]((int)t);
+}
+
+runtime::Socket& AProbe
+::operator[](const prb::sck::probe s)
+{
+	assert((*this)[prb::tsk::probe].get_n_input_sockets() == 1);
+	return Module::operator[]((int)prb::tsk::probe)[(int)s];
+}
+
+runtime::Socket& AProbe
+::operator[](const prb::sck::probe_noin s)
+{
+	assert((*this)[prb::tsk::probe].get_n_input_sockets() == 0);
+	return Module::operator[]((int)prb::tsk::probe)[(int)s];
+}
+
+runtime::Socket& AProbe
+::operator[](const std::string &tsk_sck)
+{
+	return Module::operator[](tsk_sck);
+}
+
 template <typename T>
 runtime::Task& Probe<T>
 ::operator[](const prb::tsk t)
@@ -140,37 +166,37 @@ void Probe<T>
 
 template <typename T>
 void Probe<T>
-::set_cname(const std::string &name)
+::set_col_name(const std::string &name)
 {
-	this->reporter.set_cname(name, *this);
+	this->reporter.set_col_name(name, *this);
 }
 
 template <typename T>
 void Probe<T>
-::set_unit(const std::string &unit)
+::set_col_unit(const std::string &unit)
 {
-	this->reporter.set_unit(unit, *this);
+	this->reporter.set_col_unit(unit, *this);
 }
 
 template <typename T>
 void Probe<T>
-::set_buff_size(const size_t buffer_size)
+::set_col_buff_size(const size_t buffer_size)
 {
-	this->reporter.set_buff_size(buffer_size, *this);
+	this->reporter.set_col_buff_size(buffer_size, *this);
 }
 
 template <typename T>
 void Probe<T>
-::set_fmtflags(const std::ios_base::fmtflags ff)
+::set_col_fmtflags(const std::ios_base::fmtflags ff)
 {
-	this->reporter.set_fmtflags(ff, *this);
+	this->reporter.set_col_fmtflags(ff, *this);
 }
 
 template <typename T>
 void Probe<T>
-::set_prec(const size_t precision)
+::set_col_prec(const size_t precision)
 {
-	this->reporter.set_prec(precision, *this);
+	this->reporter.set_col_prec(precision, *this);
 }
 
 template <typename T>

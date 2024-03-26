@@ -216,31 +216,33 @@ int main(int argc, char** argv)
 
 	// create reporters and probes for the real-time probes file
 	tools::Reporter_probe rep_fra_stats("Counters");
-	module::Probe<>& prb_fra_id(rep_fra_stats.create_probe_occurrence("FRAME_ID"));
-	module::Probe<>& prb_stream_id(rep_fra_stats.create_probe_stream("STREAM_ID"));
-	prb_stream_id.set_col_size(11);
-	rep_fra_stats.set_buff_size(200);
+	module::AProbe& prb_fra_fid(rep_fra_stats.create_probe_occurrence("FRAME_ID"));
+	module::AProbe& prb_fra_sid(rep_fra_stats.create_probe_stream("STREAM_ID"));
+	prb_fra_sid.set_col_size(11);
+	prb_fra_fid.set_custom_name("Probe<FID>");
+	prb_fra_sid.set_custom_name("Probe<SID>");
+	rep_fra_stats.set_cols_buff_size(200);
 
 	tools::Reporter_probe rep_thr_stats("Throughput, latency", "and time");
-	module::Probe<>& prb_thr_thr (rep_thr_stats.create_probe_throughput("FPS"));  // only valid for sequence, invalid for pipeline
-	module::Probe<>& prb_thr_lat (rep_thr_stats.create_probe_latency   ("LAT"));  // only valid for sequence, invalid for pipeline
-	module::Probe<>& prb_thr_time(rep_thr_stats.create_probe_time      ("TIME")); // only valid for sequence, invalid for pipeline
+	module::AProbe& prb_thr_thr (rep_thr_stats.create_probe_throughput("FPS"));  // only valid for sequence, invalid for pipeline
+	module::AProbe& prb_thr_lat (rep_thr_stats.create_probe_latency   ("LAT"));  // only valid for sequence, invalid for pipeline
+	module::AProbe& prb_thr_time(rep_thr_stats.create_probe_time      ("TIME")); // only valid for sequence, invalid for pipeline
 	prb_thr_thr.set_col_size(12);
-	prb_thr_time.set_prec(6);
+	prb_thr_time.set_col_prec(6);
 	prb_thr_time.set_col_size(12);
-	rep_thr_stats.set_buff_size(200);
+	rep_thr_stats.set_cols_buff_size(200);
 
 	tools::Reporter_probe rep_timestamp_stats("Timestamps", "(in microseconds) [SX = stage X, B = begin, E = end]");
 	const uint64_t mod = 6000000ul * 60ul * 10; // limit to 60 minutes timestamp
-	module::Probe<>&         prb_ts_s1b(rep_timestamp_stats.create_probe_timestamp      (mod, "S1_B")); // timestamp stage 1 begin
-	module::Probe<>&         prb_ts_s1e(rep_timestamp_stats.create_probe_timestamp      (mod, "S1_E")); // timestamp stage 1 end
-	module::Probe<uint64_t>& prb_ts_s2b(rep_timestamp_stats.create_probe_value<uint64_t>(1,   "S2_B")); // timestamp stage 2 begin
-	module::Probe<uint64_t>& prb_ts_s2e(rep_timestamp_stats.create_probe_value<uint64_t>(1,   "S2_E")); // timestamp stage 2 end
-	module::Probe<>&         prb_ts_s3b(rep_timestamp_stats.create_probe_timestamp      (mod, "S3_B")); // timestamp stage 3 begin
-	module::Probe<>&         prb_ts_s3e(rep_timestamp_stats.create_probe_timestamp      (mod, "S3_E")); // timestamp stage 3 end
-	rep_timestamp_stats.set_buff_size(200); // size of the buffer used by the probes to record values
-	rep_timestamp_stats.set_unit("(us)");
-	rep_timestamp_stats.set_col_size(12);
+	module::AProbe& prb_ts_s1b(rep_timestamp_stats.create_probe_timestamp      (mod, "S1_B")); // timestamp stage 1 begin
+	module::AProbe& prb_ts_s1e(rep_timestamp_stats.create_probe_timestamp      (mod, "S1_E")); // timestamp stage 1 end
+	module::AProbe& prb_ts_s2b(rep_timestamp_stats.create_probe_value<uint64_t>(1,   "S2_B")); // timestamp stage 2 begin
+	module::AProbe& prb_ts_s2e(rep_timestamp_stats.create_probe_value<uint64_t>(1,   "S2_E")); // timestamp stage 2 end
+	module::AProbe& prb_ts_s3b(rep_timestamp_stats.create_probe_timestamp      (mod, "S3_B")); // timestamp stage 3 begin
+	module::AProbe& prb_ts_s3e(rep_timestamp_stats.create_probe_timestamp      (mod, "S3_E")); // timestamp stage 3 end
+	rep_timestamp_stats.set_cols_buff_size(200); // size of the buffer used by the probes to record values
+	rep_timestamp_stats.set_cols_unit("(us)");
+	rep_timestamp_stats.set_cols_size(12);
 
 	const std::vector<tools::Reporter*>& reporters = { &rep_fra_stats, &rep_thr_stats, &rep_timestamp_stats };
 	tools::Terminal_dump terminal_probes(reporters);
@@ -285,9 +287,9 @@ int main(int argc, char** argv)
 
 	// sockets binding
 	// stage 1 -------------------------------------------------------------------------------
-	prb_fra_id      (     "probe"          ) = prb_ts_s1b            (     "probe"           );
-	prb_stream_id   (     "probe"          ) = prb_fra_id            (     "probe"           );
-	source          (  "generate"          ) = prb_stream_id         (     "probe"           );
+	prb_fra_fid     (     "probe"          ) = prb_ts_s1b            (     "probe"           );
+	prb_fra_sid     (     "probe"          ) = prb_fra_fid           (     "probe"           );
+	source          (  "generate"          ) = prb_fra_sid           (     "probe"           );
 	prb_ts_s1e      (     "probe"          ) = source                (  "generate"           );
 	// stage 2 -------------------------------------------------------------------------------
 	(*ts_s2b)       (      "exec"          ) = prb_ts_s1e            (     "probe"           );
@@ -473,9 +475,9 @@ int main(int argc, char** argv)
 	}
 
 	// stage 1 ---------------------------------------------------------------------------------------------------------------------
-	prb_fra_id      [module::prb::tsk::probe               ].unbind(prb_ts_s1b            [module::prb::tsk::probe                ]);
-	prb_stream_id   [module::prb::tsk::probe               ].unbind(prb_fra_id            [module::prb::tsk::probe                ]);
-	source          [module::src::tsk::generate            ].unbind(prb_stream_id         [module::prb::tsk::probe                ]);
+	prb_fra_fid     [module::prb::tsk::probe               ].unbind(prb_ts_s1b            [module::prb::tsk::probe                ]);
+	prb_fra_sid     [module::prb::tsk::probe               ].unbind(prb_fra_fid           [module::prb::tsk::probe                ]);
+	source          [module::src::tsk::generate            ].unbind(prb_fra_sid           [module::prb::tsk::probe                ]);
 	prb_ts_s1e      [module::prb::tsk::probe               ].unbind(source                [module::src::tsk::generate             ]);
 	// stage 2 ---------------------------------------------------------------------------------------------------------------------
 	(*ts_s2b)       (                 "exec"               ).unbind(prb_ts_s1e            [module::prb::tsk::probe                ]);
