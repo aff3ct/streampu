@@ -47,7 +47,6 @@ protected:
 	std::map<std::string, int> name_to_col;
 	std::map<int, std::string> col_to_name;
 	size_t n_frames;
-	Reporter::report_t final_report;
 	std::vector<std::mutex> mtx;
 
 public:

@@ -94,46 +94,82 @@ Reporter::report_t Reporter_probe
 		throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
 	}
 
-	if (final)
-		return this->final_report;
-
 	Reporter::report_t the_report(this->cols_groups.size());
 	auto& probe_report = the_report[0];
-
-	// bool can_pull = false;
-	for (size_t f = 0; f < this->get_n_frames(); f++)
+	if (final)
 	{
-		for (size_t col = 0; col < this->buffer.size(); col++)
+		bool can_pull;
+		do
 		{
-			std::stringstream stream, temp_stream;
-			temp_stream.flags(this->stream_flags[col]);
-			     if (this->datatypes[col] == typeid(double  )) /* can_pull = */ format_values<double  >(col, temp_stream);
-			else if (this->datatypes[col] == typeid(float   )) /* can_pull = */ format_values<float   >(col, temp_stream);
-			else if (this->datatypes[col] == typeid( int64_t)) /* can_pull = */ format_values< int64_t>(col, temp_stream);
-			else if (this->datatypes[col] == typeid(uint64_t)) /* can_pull = */ format_values<uint64_t>(col, temp_stream);
-			else if (this->datatypes[col] == typeid( int32_t)) /* can_pull = */ format_values< int32_t>(col, temp_stream);
-			else if (this->datatypes[col] == typeid(uint32_t)) /* can_pull = */ format_values<uint32_t>(col, temp_stream);
-			else if (this->datatypes[col] == typeid( int16_t)) /* can_pull = */ format_values< int16_t>(col, temp_stream);
-			else if (this->datatypes[col] == typeid(uint16_t)) /* can_pull = */ format_values<uint16_t>(col, temp_stream);
-			else if (this->datatypes[col] == typeid( int8_t )) /* can_pull = */ format_values< int8_t >(col, temp_stream);
-			else if (this->datatypes[col] == typeid(uint8_t )) /* can_pull = */ format_values<uint8_t >(col, temp_stream);
-			else
+			can_pull = false;
+			std::vector<std::stringstream> streams(this->buffer.size());
+			for (size_t col = 0; col < this->buffer.size(); col++)
 			{
-				std::stringstream message;
-				message << "Unsupported type.";
-				throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
+				std::stringstream temp_stream;
+				temp_stream.flags(this->stream_flags[col]);
+				bool c_pull = false;
+				     if (this->datatypes[col] == typeid(double  )) c_pull = format_values<double  >(col, temp_stream);
+				else if (this->datatypes[col] == typeid(float   )) c_pull = format_values<float   >(col, temp_stream);
+				else if (this->datatypes[col] == typeid( int64_t)) c_pull = format_values< int64_t>(col, temp_stream);
+				else if (this->datatypes[col] == typeid(uint64_t)) c_pull = format_values<uint64_t>(col, temp_stream);
+				else if (this->datatypes[col] == typeid( int32_t)) c_pull = format_values< int32_t>(col, temp_stream);
+				else if (this->datatypes[col] == typeid(uint32_t)) c_pull = format_values<uint32_t>(col, temp_stream);
+				else if (this->datatypes[col] == typeid( int16_t)) c_pull = format_values< int16_t>(col, temp_stream);
+				else if (this->datatypes[col] == typeid(uint16_t)) c_pull = format_values<uint16_t>(col, temp_stream);
+				else if (this->datatypes[col] == typeid( int8_t )) c_pull = format_values< int8_t >(col, temp_stream);
+				else if (this->datatypes[col] == typeid(uint8_t )) c_pull = format_values<uint8_t >(col, temp_stream);
+				else
+				{
+					std::stringstream message;
+					message << "Unsupported type.";
+					throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
+				}
+
+				streams[col] << std::setprecision(this->precisions[col] +1) << temp_stream.str();
+
+				can_pull = can_pull || c_pull;
 			}
 
-			// if (!can_pull)
-			// 	temp_stream << std::setprecision(this->precisions[col]) << std::scientific << " -";
-
-			stream << std::setprecision(this->precisions[col] +1) << temp_stream.str();
-			probe_report.push_back(stream.str());
+			if (can_pull)
+				for (auto &s : streams)
+					probe_report.push_back(s.str());
 		}
-	}
+		while (can_pull);
 
-	this->final_report = the_report;
-	return the_report;
+		return the_report;
+	}
+	else
+	{
+		for (size_t f = 0; f < this->get_n_frames(); f++)
+		{
+			for (size_t col = 0; col < this->buffer.size(); col++)
+			{
+				std::stringstream stream, temp_stream;
+				temp_stream.flags(this->stream_flags[col]);
+				     if (this->datatypes[col] == typeid(double  )) format_values<double  >(col, temp_stream);
+				else if (this->datatypes[col] == typeid(float   )) format_values<float   >(col, temp_stream);
+				else if (this->datatypes[col] == typeid( int64_t)) format_values< int64_t>(col, temp_stream);
+				else if (this->datatypes[col] == typeid(uint64_t)) format_values<uint64_t>(col, temp_stream);
+				else if (this->datatypes[col] == typeid( int32_t)) format_values< int32_t>(col, temp_stream);
+				else if (this->datatypes[col] == typeid(uint32_t)) format_values<uint32_t>(col, temp_stream);
+				else if (this->datatypes[col] == typeid( int16_t)) format_values< int16_t>(col, temp_stream);
+				else if (this->datatypes[col] == typeid(uint16_t)) format_values<uint16_t>(col, temp_stream);
+				else if (this->datatypes[col] == typeid( int8_t )) format_values< int8_t >(col, temp_stream);
+				else if (this->datatypes[col] == typeid(uint8_t )) format_values<uint8_t >(col, temp_stream);
+				else
+				{
+					std::stringstream message;
+					message << "Unsupported type.";
+					throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
+				}
+
+				stream << std::setprecision(this->precisions[col] +1) << temp_stream.str();
+				probe_report.push_back(stream.str());
+			}
+		}
+
+		return the_report;
+	}
 }
 
 size_t B_from_datatype(const std::type_index &type)
