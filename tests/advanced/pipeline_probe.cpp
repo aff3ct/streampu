@@ -241,9 +241,6 @@ int main(int argc, char** argv)
 	if (!probes_filepath.empty())
 	{
 		probes_file.open(probes_filepath);
-		probes_file << "####################" << std::endl;
-		probes_file << "# Real-time probes #" << std::endl;
-		probes_file << "####################" << std::endl;
 		terminal_probes.legend(probes_file);
 	}
 
@@ -280,7 +277,9 @@ int main(int argc, char** argv)
 
 	// sockets binding
 	// stage 1 -------------------------------------------------------------------------------
-	source          (  "generate"          ) = prb_ts_s1b            (     "probe"           );
+	prb_fra_id      (     "probe"          ) = prb_ts_s1b            (     "probe"           );
+	prb_stream_id   (     "probe"          ) = prb_fra_id            (     "probe"           );
+	source          (  "generate"          ) = prb_stream_id         (     "probe"           );
 	prb_ts_s1e      (     "probe"          ) = source                (  "generate"           );
 	// stage 2 -------------------------------------------------------------------------------
 	(*ts_s2b)       (      "exec"          ) = prb_ts_s1e            (     "probe"           );
@@ -294,9 +293,7 @@ int main(int argc, char** argv)
 	sink            ("send_count"          ) = prb_ts_s3b            (     "probe"           );
 	sink            ["send_count::in_data" ] = (*rlys[rlys.size()-1])[     "relay::out"      ];
 	sink            ["send_count::in_count"] = source                [  "generate::out_count"];
-	prb_fra_id      (     "probe"          ) = sink                  ("send_count"           );
-	prb_stream_id   (     "probe"          ) = prb_fra_id            (     "probe"           );
-	prb_thr_thr     (     "probe"          ) = prb_stream_id         (     "probe"           );
+	prb_thr_thr     (     "probe"          ) = sink                  ("send_count"           );
 	prb_thr_lat     (     "probe"          ) = prb_thr_thr           (     "probe"           );
 	prb_thr_time    (     "probe"          ) = prb_thr_lat           (     "probe"           );
 	prb_ts_s2b      (     "probe"          ) = prb_thr_time          (     "probe"           );
@@ -468,7 +465,9 @@ int main(int argc, char** argv)
 	}
 
 	// stage 1 ---------------------------------------------------------------------------------------------------------------------
-	source          [module::src::tsk::generate            ].unbind(prb_ts_s1b            [module::prb::tsk::probe                ]);
+	prb_fra_id      [module::prb::tsk::probe               ].unbind(prb_ts_s1b            [module::prb::tsk::probe                ]);
+	prb_stream_id   [module::prb::tsk::probe               ].unbind(prb_fra_id            [module::prb::tsk::probe                ]);
+	source          [module::src::tsk::generate            ].unbind(prb_stream_id         [module::prb::tsk::probe                ]);
 	prb_ts_s1e      [module::prb::tsk::probe               ].unbind(source                [module::src::tsk::generate             ]);
 	// stage 2 ---------------------------------------------------------------------------------------------------------------------
 	(*ts_s2b)       (                 "exec"               ).unbind(prb_ts_s1e            [module::prb::tsk::probe                ]);
@@ -482,9 +481,7 @@ int main(int argc, char** argv)
 	sink            [module::snk::tsk::send_count          ].unbind(prb_ts_s3b            [module::prb::tsk::probe                ]);
 	sink            [module::snk::sck::send_count::in_data ].unbind((*rlys[rlys.size()-1])[module::rly::sck::relay     ::out      ]);
 	sink            [module::snk::sck::send_count::in_count].unbind(source                [module::src::sck::generate  ::out_count]);
-	prb_fra_id      [module::prb::tsk::probe               ].unbind(sink                  [module::snk::tsk::send_count           ]);
-	prb_stream_id   [module::prb::tsk::probe               ].unbind(prb_fra_id            [module::prb::tsk::probe                ]);
-	prb_thr_thr     [module::prb::tsk::probe               ].unbind(prb_stream_id         [module::prb::tsk::probe                ]);
+	prb_thr_thr     [module::prb::tsk::probe               ].unbind(sink                  [module::snk::tsk::send_count           ]);
 	prb_thr_lat     [module::prb::tsk::probe               ].unbind(prb_thr_thr           [module::prb::tsk::probe                ]);
 	prb_thr_time    [module::prb::tsk::probe               ].unbind(prb_thr_lat           [module::prb::tsk::probe                ]);
 	prb_ts_s2b      [module::prb::tsk::probe               ].unbind(prb_thr_time          [module::prb::tsk::probe                ]);
