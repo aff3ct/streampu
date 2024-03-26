@@ -65,7 +65,7 @@ const std::vector<std::vector<std::vector<T>>>& Finalizer<T>
 }
 
 template <typename T>
-const size_t Finalizer<T>
+size_t Finalizer<T>
 ::get_next_stream_id() const
 {
 	return this->next_stream_id;
