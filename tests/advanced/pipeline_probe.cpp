@@ -295,19 +295,19 @@ int main(int argc, char** argv)
 	}
 
 	// sockets binding
-	// stage 1 -------------------------------------------------------------------------------
+	// stage 0 -------------------------------------------------------------------------------
 	prb_fra_fid     (     "probe"          ) = prb_ts_s1b            (     "probe"           );
 	prb_fra_sid     (     "probe"          ) = prb_fra_fid           (     "probe"           );
 	source          (  "generate"          ) = prb_fra_sid           (     "probe"           );
 	prb_ts_s1e      (     "probe"          ) = source                (  "generate"           );
-	// stage 2 -------------------------------------------------------------------------------
+	// stage 1 -------------------------------------------------------------------------------
 	(*ts_s2b)       (      "exec"          ) = prb_ts_s1e            (     "probe"           );
 	(*rlys[0])      (     "relay"          ) = (*ts_s2b)             (      "exec"           );
 	(*rlys[0])      [     "relay::in"      ] = source                [  "generate::out_data" ];
 	for (size_t s = 0; s < rlys.size() -1; s++)
 		(*rlys[s+1])[     "relay::in"      ] = (*rlys[s])            [     "relay::out"      ];
 	(*ts_s2e)       (      "exec"          ) = (*rlys[rlys.size()-1])(     "relay"           );
-	// stage 3 -------------------------------------------------------------------------------
+	// stage 2 -------------------------------------------------------------------------------
 	prb_ts_s3b      (     "probe"          ) = (*ts_s2e)             (      "exec"           );
 	sink            ("send_count"          ) = prb_ts_s3b            (     "probe"           );
 	sink            ["send_count::in_data" ] = (*rlys[rlys.size()-1])[     "relay::out"      ];
@@ -487,19 +487,19 @@ int main(int argc, char** argv)
 		pipeline_chain->unbind_adaptors();
 	}
 
-	// stage 1 ---------------------------------------------------------------------------------------------------------------------
+	// stage 0 ---------------------------------------------------------------------------------------------------------------------
 	prb_fra_fid     [module::prb::tsk::probe               ].unbind(prb_ts_s1b            [module::prb::tsk::probe                ]);
 	prb_fra_sid     [module::prb::tsk::probe               ].unbind(prb_fra_fid           [module::prb::tsk::probe                ]);
 	source          [module::src::tsk::generate            ].unbind(prb_fra_sid           [module::prb::tsk::probe                ]);
 	prb_ts_s1e      [module::prb::tsk::probe               ].unbind(source                [module::src::tsk::generate             ]);
-	// stage 2 ---------------------------------------------------------------------------------------------------------------------
+	// stage 1 ---------------------------------------------------------------------------------------------------------------------
 	(*ts_s2b)       (                 "exec"               ).unbind(prb_ts_s1e            [module::prb::tsk::probe                ]);
 	(*rlys[0])      [module::rly::tsk::relay               ].unbind((*ts_s2b)             (                 "exec"                ));
 	(*rlys[0])      [module::rly::sck::relay     ::in      ].unbind(source                [module::src::sck::generate  ::out_data ]);
 	for (size_t s = 0; s < rlys.size() -1; s++)
 		(*rlys[s+1])[module::rly::sck::relay     ::in      ].unbind((*rlys[s])            [module::rly::sck::relay     ::out      ]);
 	(*ts_s2e)       (                 "exec"               ).unbind((*rlys[rlys.size()-1])[module::rly::tsk::relay                ]);
-	// stage 3 ---------------------------------------------------------------------------------------------------------------------
+	// stage 2 ---------------------------------------------------------------------------------------------------------------------
 	prb_ts_s3b      [module::prb::tsk::probe               ].unbind((*ts_s2e)             (                 "exec"                ));
 	sink            [module::snk::tsk::send_count          ].unbind(prb_ts_s3b            [module::prb::tsk::probe                ]);
 	sink            [module::snk::sck::send_count::in_data ].unbind((*rlys[rlys.size()-1])[module::rly::sck::relay     ::out      ]);
