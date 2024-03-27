@@ -14,46 +14,12 @@
 using namespace aff3ct;
 using namespace aff3ct::runtime;
 
-// Definning custom finalizer class
-class Finalizer_histo : public module::Finalizer<uint32_t>
-{
-private:
-	std::vector<uint32_t> historique;
-public:
-	Finalizer_histo(size_t data_length): module::Finalizer<uint32_t>(data_length)
-	{
-		const std::string name = "Finalizer_histo";
-		this->set_name(name);
-		this->set_short_name(name);
-
-		if (data_length == 0)
-		{
-			std::stringstream message;
-			message << "'data_length' has to be greater than 0.";
-			throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
-		}
-
-		auto &p = this->create_task("finalize_store");
-		auto ps_in = this->template create_socket_in<uint32_t>(p, "in", data_length);
-		this->create_codelet(p, [this,ps_in](Module &m, runtime::Task &t, const size_t frame_id) -> int
-		{
-			auto data_in = t[ps_in].get_dataptr<const uint32_t>();
-			this->historique.push_back(*data_in);
-			return runtime::status_t::SUCCESS;
-		});
-	}
-
-	std::vector<uint32_t> get_histo()
-	{
-		return historique;
-	}
-};
-
 int main(int argc, char** argv)
 {
 	tools::Signal_handler::init();
 
 	option longopts[] = {
+		{"n-inter-frames", required_argument, NULL, 'f'},
 		{"n-exec", required_argument, NULL, 'e'},
 		{"dot-filepath", required_argument, NULL, 'o'},
 		{"print-stats", no_argument, NULL, 'p'},
@@ -73,11 +39,14 @@ int main(int argc, char** argv)
 
 	while (1)
 	{
-		const int opt = getopt_long(argc, argv, "e:o:pgwh", longopts, 0);
+		const int opt = getopt_long(argc, argv, "f:e:o:pgwh", longopts, 0);
 		if (opt == -1)
 			break;
 		switch (opt)
 		{
+			case 'f':
+				n_inter_frames = atoi(optarg);
+				break;
 			case 'e':
 				n_exec = atoi(optarg);
 				break;
@@ -96,6 +65,9 @@ int main(int argc, char** argv)
 			case 'h':
 				std::cout << "usage: " << argv[0] << " [options]" << std::endl;
 				std::cout << std::endl;
+				std::cout << "  -f, --n-inter-frames  "
+				          << "Number of frames to process in one task                               "
+				          << "[" << n_inter_frames << "]" << std::endl;
 				std::cout << "  -e, --n-exec          "
 				          << "Number of sequence executions                                         "
 				          << "[" << n_exec << "]" << std::endl;
@@ -139,9 +111,9 @@ int main(int argc, char** argv)
 
 	tools::Thread_pinning::init();
 
-	std::vector<std::shared_ptr<Finalizer_histo>> finalizers_histo(3);
-	for (size_t s = 0; s < finalizers_histo.size(); s++)
-		finalizers_histo[s].reset(new Finalizer_histo(data_length));
+	std::vector<std::shared_ptr<module::Finalizer<uint32_t>>> finalizers(3);
+	for (size_t s = 0; s < finalizers.size(); s++)
+		finalizers[s].reset(new module::Finalizer<uint32_t>(data_length, n_exec));
 
 	// Getting hwloc topology
 	hwloc_topology_t g_topology;
@@ -152,17 +124,15 @@ int main(int argc, char** argv)
 	module::Stateless pin_mod;
 	pin_mod.set_name("Pinner");
 	auto& pin_task = pin_mod.create_task("pin");
-	auto sock_out = pin_mod.create_socket_out<uint32_t>(pin_task, "val", data_length);
+	auto sck_val = pin_mod.create_socket_out<uint32_t>(pin_task, "val", data_length);
 
-	pin_mod.create_codelet(pin_task,[sock_out, data_length, g_topology]
+	pin_mod.create_codelet(pin_task,[sck_val, g_topology]
 		(module::Module &m, runtime::Task &t, const size_t frame_id) -> int
 	{
-		auto tab = t[sock_out].get_dataptr<uint32_t>();
-		hwloc_bitmap_t set = hwloc_bitmap_alloc();
-		hwloc_get_thread_cpubind(g_topology,pthread_self(),set, 0);
 		auto core = sched_getcpu();
 		auto pu_obj = hwloc_get_pu_obj_by_os_index(g_topology, core);
-		 *tab = pu_obj->logical_index;
+		*t[sck_val].get_dataptr<uint32_t>() = pu_obj->logical_index;
+
 		return runtime::status_t::SUCCESS;
 	});
 
@@ -171,14 +141,13 @@ int main(int argc, char** argv)
 	module::Stateless *pin_mod3 = pin_mod.clone();
 
 	// sockets binding
-	(*pin_mod2)("pin") = (*pin_mod1)["pin::val"];
-	(*pin_mod3)("pin") = (*pin_mod2)["pin::val"];
-	(*finalizers_histo[0])["finalize_store::in"] = (*pin_mod1)["pin::val"];
-	(*finalizers_histo[1])["finalize_store::in"] = (*pin_mod2)["pin::val"];
-	(*finalizers_histo[2])["finalize_store::in"] = (*pin_mod3)["pin::val"];
+	(*pin_mod2)     (     "pin"    ) = (*pin_mod1)["pin::val"];
+	(*pin_mod3)     (     "pin"    ) = (*pin_mod2)["pin::val"];
+	(*finalizers[0])["finalize::in"] = (*pin_mod1)["pin::val"];
+	(*finalizers[1])["finalize::in"] = (*pin_mod2)["pin::val"];
+	(*finalizers[2])["finalize::in"] = (*pin_mod3)["pin::val"];
 
 	std::unique_ptr<runtime::Pipeline> pipeline_chain;
-	std::vector<std::vector<Finalizer_histo*>> finalizer_histo_list;
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////////////////////////////////////// PIPELINE EXEC //
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -189,36 +158,27 @@ int main(int argc, char** argv)
 		  // pipeline stage 1
 		  { { &(*pin_mod2)("pin") }, { &(*pin_mod2)("pin") } },
 		  // pipeline stage 2
-		  { { &(*pin_mod3)("pin") }, { &(*pin_mod3)("pin") } },
-		  // pipeline stage 3
-		  { { &((*finalizers_histo[0])("finalize_store")), &((*finalizers_histo[1])("finalize_store")),
-		      &((*finalizers_histo[2])("finalize_store")) },
-		    { &((*finalizers_histo[0])("finalize_store")), &((*finalizers_histo[1])("finalize_store")),
-		      &((*finalizers_histo[2])("finalize_store")) } },
+		  { { &(*pin_mod3)("pin"), &((*finalizers[0])("finalize")), &((*finalizers[1])("finalize")) }, { } },
 		},
 		{
 		  1, // number of threads in the stage 0
 		  3, // number of threads in the stage 1
 		  1, // number of threads in the stage 2
-		  1, // number of threads in the stage 3
 		},
 		{
 		  buffer_size, // synchronization buffer size between stages 0 and 1
 		  buffer_size, // synchronization buffer size between stages 1 and 2
-		  buffer_size, // synchronization buffer size between stages 2 and 3
 		},
 		{
 		  active_waiting, // type of waiting between stages 0 and 1 (true = active, false = passive)
 		  active_waiting, // type of waiting between stages 1 and 2 (true = active, false = passive)
-		  active_waiting, // type of waiting between stages 2 and 3 (true = active, false = passive)
 		},
 		{
 		  true, // Pinning activation for stage 0
 		  true, // Pinning activation for stage 1
 		  true, // Pinning activation for stage 2
-		  false // Pinning activation for stage 3
 		},
-		" PU_0 | PU_0; PU_1; PU_2 | PU_3 |") // explicit thread pinning
+		" PU_0 | PU_0; PU_1; PU_2 | PU_3") // explicit thread pinning
 	);
 	pipeline_chain->set_n_frames(n_inter_frames);
 
@@ -245,47 +205,56 @@ int main(int argc, char** argv)
 	auto elapsed_time = duration.count() / 1000.f / 1000.f;
 	std::cout << "Sequence elapsed time: " << elapsed_time << " ms" << std::endl;
 
-	for (size_t i = 0; i < finalizers_histo.size(); ++i)
-	{
-		finalizer_histo_list.push_back(pipeline_chain.get()->get_stages()[pipeline_chain.get()->get_stages().size()-1]
-		->get_cloned_modules<Finalizer_histo>(*finalizers_histo[i].get()));
-	}
-
 	// verification of the pipeline thread binding
 	bool tests_passed = true;
-	for (size_t i = 0; i < n_exec; ++i)
+	for (size_t i = 0; i < n_exec; i++)
 	{
-		if (finalizer_histo_list[0][0]->get_histo()[i] != 0)
+		for (size_t f = 0; f < n_inter_frames; f++)
 		{
-			tests_passed = false;
-			std::cout << "# Thread is not pin to exepcted value for the execution number " << i << std::endl
-			          << "Stage : " << 0 << ", Thread number : " << 0 << std::endl
-			          << "Exepected  : 0, " << "Real : " << finalizer_histo_list[0][0]->get_histo()[i] << std::endl
-			          << "Did you compile with  -DAFF3CT_CORE_LINK_HWLOC=ON ?" << std::endl;
-			break;
-		}
+			if (finalizers[0]->get_histo_data()[i][f][0] != 0)
+			{
+				tests_passed = false;
+				std::cout << "# Thread is not pin to expected value for the stream n°" << i << " and fra n°" << f
+				          << std::endl
+				          << "Stage: " << 0 << ", Thread number: " << 0 << std::endl
+				          << "Expected: 0, Real: " << finalizers[0]->get_histo_data()[i][f][0] << std::endl;
+#ifndef AFF3CT_CORE_HWLOC
+				std::cout << "You need to compile with the '-DAFF3CT_CORE_LINK_HWLOC=ON' CMake option!" << std::endl;
+#endif
+				break;
+			}
 
-		if (finalizer_histo_list[2][0]->get_histo()[i] != 3)
-		{
-			tests_passed = false;
-			std::cout << "# Thread is not pin to exepcted value for the execution number " << i << std::endl
-			          << "Stage : " << 2 << ", Thread number : " << 0 << std::endl
-			          << "Exepected  : 3, " << "Real : " << finalizer_histo_list[2][0]->get_histo()[i] << std::endl
-			          << "Did you compile with  -DAFF3CT_CORE_LINK_HWLOC=ON ?" << std::endl;
-			break;
-		}
+			if (finalizers[1]->get_histo_data()[i][f][0] != (i % 3))
+			{
+				tests_passed = false;
+				std::cout << "# Thread is not pin to expected value for the stream n°" << i << " and fra n°" << f
+				          << std::endl
+				          << "Stage: " << 1 << ", Thread number: " << (i % 3) << std::endl
+				          << "Expected: " << (i % 3) << ", Real: " << finalizers[1]->get_histo_data()[i][f][0]
+				          << std::endl;
+#ifndef AFF3CT_CORE_HWLOC
+				std::cout << "You need to compile with the '-DAFF3CT_CORE_LINK_HWLOC=ON' CMake option!" << std::endl;
+#endif
+				break;
+			}
 
-		uint32_t exepcted = i % 3 == 0 ? (0) : (i % 3 == 1 ? (1) : 2);
-		if (finalizer_histo_list[1][0]->get_histo()[i] != exepcted)
-		{
-			tests_passed = false;
-			std::cout << "# Thread is not pin to exepcted value for the execution number " << i << std::endl
-			          << "Stage : " << 1 << ", Thread number : " << i%3 << std::endl
-			          << "Exepected  : " << exepcted << ", Real : " << finalizer_histo_list[1][0]->get_histo()[i]
-			          << std::endl << "Did you compile with  -DAFF3CT_CORE_LINK_HWLOC=ON ?" << std::endl;
-			break;
+			if (finalizers[2]->get_histo_data()[i][f][0] != 3)
+			{
+				tests_passed = false;
+				std::cout << "# Thread is not pin to expected value for the stream n°" << i << " and fra n°" << f
+				          << std::endl
+				          << "Stage: " << 2 << ", Thread number: " << 0 << std::endl
+				          << "Expected: 3, Real: " << finalizers[2]->get_histo_data()[i][f][0] << std::endl;
+#ifndef AFF3CT_CORE_HWLOC
+				std::cout << "You need to compile with the '-DAFF3CT_CORE_LINK_HWLOC=ON' CMake option!" << std::endl;
+#endif
+				break;
+			}
 		}
+		if (!tests_passed)
+			break;
 	}
+
 	if (tests_passed)
 		std::cout << "# " << rang::style::bold << rang::fg::green << "Tests passed!" << rang::style::reset
 		          << std::endl;
@@ -295,14 +264,26 @@ int main(int argc, char** argv)
 
 	unsigned int test_results = !tests_passed;
 
+	// display the statistics of the tasks (if enabled)
+	if (print_stats)
+	{
+		auto stages = pipeline_chain->get_stages();
+		for (size_t s = 0; s < stages.size(); s++)
+		{
+			const int n_threads = stages[s]->get_n_threads();
+			std::cout << "#" << std::endl << "# Pipeline stage " << s << " (" << n_threads << " thread(s)): " << std::endl;
+			tools::Stats::show(stages[s]->get_tasks_per_types(), true, false);
+		}
+	}
+
 	pipeline_chain->set_n_frames(1);
 	pipeline_chain->unbind_adaptors();
 
-	(*pin_mod2)("pin").unbind((*pin_mod1)["pin::val"]);
-	(*pin_mod3)("pin").unbind((*pin_mod2)["pin::val"]);
-	(*finalizers_histo[0])["finalize_store::in"].unbind((*pin_mod1)["pin::val"]);
-	(*finalizers_histo[1])["finalize_store::in"].unbind((*pin_mod2)["pin::val"]);
-	(*finalizers_histo[2])["finalize_store::in"].unbind((*pin_mod3)["pin::val"]);
+	(*pin_mod2)     (     "pin"    ).unbind((*pin_mod1)["pin::val"]);
+	(*pin_mod3)     (     "pin"    ).unbind((*pin_mod2)["pin::val"]);
+	(*finalizers[0])["finalize::in"].unbind((*pin_mod1)["pin::val"]);
+	(*finalizers[1])["finalize::in"].unbind((*pin_mod2)["pin::val"]);
+	(*finalizers[2])["finalize::in"].unbind((*pin_mod3)["pin::val"]);
 
 	return test_results;
 }
