@@ -104,7 +104,8 @@ void Finalizer<T>
 	          in + this->data[this->next_stream_id][0].size(),
 	          this->data[this->next_stream_id][frame_id].begin());
 
-	this->next_stream_id = (this->next_stream_id + 1) % this->data.size();
+	if (frame_id == this->get_n_frames() -1)
+		this->next_stream_id = (this->next_stream_id + 1) % this->data.size();
 }
 
 template <typename T>
