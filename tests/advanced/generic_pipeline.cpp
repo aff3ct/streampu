@@ -122,6 +122,7 @@ int main(int argc, char** argv)
 		{"tsk-per-sta", no_argument, NULL, 'n'},
 		{"sck-type-tsk", no_argument, NULL, 'r'},
 		{"sck-type-sta", no_argument, NULL, 'R'},
+		{"pinning-policy", no_argument, NULL, 'P'},
 		{0}};
 
 	std::string n_threads_param; std::vector<size_t> n_threads;
@@ -142,10 +143,11 @@ int main(int argc, char** argv)
 	std::string tsk_per_sta_param; std::vector<size_t> tsk_per_sta;
 	std::string sck_type_tsk_param; std::vector<std::vector<std::string>> sck_type_tsk;
 	std::string sck_type_sta_param; std::vector<std::string> sck_type_sta;
+	std::string pinning_policy;
 
 	while (1)
 	{
-		const int opt = getopt_long(argc, argv, "t:f:s:d:u:o:i:j:n:r:R:cpbgqwh", longopts, 0);
+		const int opt = getopt_long(argc, argv, "t:f:s:d:u:o:i:j:n:r:R:P:cpbgqwh", longopts, 0);
 		if (opt == -1)
 			break;
 		switch (opt)
@@ -207,6 +209,9 @@ int main(int argc, char** argv)
 				sck_type_sta_param = std::string(optarg);
 				parse_sck_type_sta(sck_type_sta_param, sck_type_sta);
 				break;
+			case 'P':
+				pinning_policy = std::string(optarg);
+				break;
 			case 'h':
 				std::cout << "usage: " << argv[0] << " [options]" << std::endl;
 				std::cout << std::endl;
@@ -264,6 +269,10 @@ int main(int argc, char** argv)
 				          << "The socket type of tasks on each stage (SFWD or SIO)                  "
 				          << "[" << (sck_type_sta_param.empty() ? "empty" : "\"" + sck_type_sta_param + "\"")
 				          << "]" << std::endl;
+				std::cout << "  -P, --pinning-policy       "
+				          << "Pinning policy for pipeline execution                                 "
+				          << "[" << (pinning_policy.empty() ? "empty" : "\"" + pinning_policy + "\"")
+				          << "]" << std::endl;
 				std::cout << "  -h, --help               "
 				          << "This help                                                             "
 				          << "[false]" << std::endl;
@@ -319,6 +328,7 @@ int main(int argc, char** argv)
 	std::cout << "#   - tsk_per_sta    = " << (tsk_per_sta_param.empty() ? "[empty]" : tsk_per_sta_param.c_str()) << std::endl;
 	std::cout << "#   - sck_type_tsk   = " << (sck_type_tsk_param.empty() ? "[empty]" : sck_type_tsk_param.c_str()) << std::endl;
 	std::cout << "#   - sck_type_sta   = " << (sck_type_sta_param.empty() ? "[empty]" : sck_type_sta_param.c_str()) << std::endl;
+	std::cout << "#   - pinning_policy = " << (pinning_policy.empty() ? "[empty]" : pinning_policy.c_str()) << std::endl;
 	std::cout << "#   - n_inter_frames = " << n_inter_frames << std::endl;
 	std::cout << "#   - sleep_time_us  = " << sleep_time_us << std::endl;
 	std::cout << "#   - data_length    = " << data_length << std::endl;
@@ -383,6 +393,7 @@ int main(int argc, char** argv)
 			rly_lsck = (sck_type_tsk[i][j +1] == "SFWD") ? "relayf::fwd" : "relay::in";
 			rly_rsck = (sck_type_tsk[i][j   ] == "SFWD") ? "relayf::fwd" : "relay::out";
 			(*rlys[tas +1].get())[rly_lsck] = (*rlys[tas].get())[rly_rsck];
+
 			tas++;
 		}
 		// We have to bind the last task of stage i to the first one of task i+1
@@ -480,8 +491,23 @@ int main(int argc, char** argv)
 		for (size_t i = 0; i < stages_number + 1; ++i)
 			wait_vect.push_back(active_waiting);
 
+		// Stages to pin
+#ifdef AFF3CT_CORE_HWLOC
+		if ( ! pinning_policy.empty())
+		{
+			tools::Thread_pinning::init();
+			std::vector<bool> enable_pin = {false};
+			for (size_t i = 0; i < stages_number; ++i)
+				enable_pin.push_back(true);
+			enable_pin.push_back(false);
+			pipeline_chain.reset(new runtime::Pipeline(source("generate"), stage_creat, n_threads, pool_buff, wait_vect, enable_pin, pinning_policy));
+		}else
+		{
+			pipeline_chain.reset(new runtime::Pipeline(source("generate"), stage_creat, n_threads, pool_buff, wait_vect));
+		}
+#else
 		pipeline_chain.reset(new runtime::Pipeline(source("generate"), stage_creat, n_threads, pool_buff, wait_vect));
-
+#endif
 		pipeline_chain->set_n_frames(n_inter_frames);
 
 		if (!dot_filepath.empty())
