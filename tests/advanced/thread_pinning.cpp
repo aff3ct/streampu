@@ -17,40 +17,41 @@ using namespace aff3ct::runtime;
 // Definning custom finalizer class
 class Finalizer_histo : public module::Finalizer<uint32_t>
 {
-	private:
-		std::vector<uint32_t> historique;
-	public:
-		Finalizer_histo(size_t data_length): module::Finalizer<uint32_t>(data_length)
+private:
+	std::vector<uint32_t> historique;
+public:
+	Finalizer_histo(size_t data_length): module::Finalizer<uint32_t>(data_length)
+	{
+		const std::string name = "Finalizer_histo";
+		this->set_name(name);
+		this->set_short_name(name);
+
+		if (data_length == 0)
 		{
-			const std::string name = "Finalizer_histo";
-			this->set_name(name);
-			this->set_short_name(name);
-
-			if (data_length == 0)
-			{
-				std::stringstream message;
-				message << "'data_length' has to be greater than 0.";
-				throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
-			}
-
-			auto &p = this->create_task("finalize_store");
-			auto ps_in = this->template create_socket_in<uint32_t>(p, "in", data_length);
-			this->create_codelet(p, [this,ps_in](Module &m, runtime::Task &t, const size_t frame_id) -> int
-			{
-				auto data_in = t[ps_in].get_dataptr<const uint32_t>();
-				this->historique.push_back(*data_in);
-				return runtime::status_t::SUCCESS;
-			});
+			std::stringstream message;
+			message << "'data_length' has to be greater than 0.";
+			throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
 		}
 
-		std::vector<uint32_t> get_histo()
+		auto &p = this->create_task("finalize_store");
+		auto ps_in = this->template create_socket_in<uint32_t>(p, "in", data_length);
+		this->create_codelet(p, [this,ps_in](Module &m, runtime::Task &t, const size_t frame_id) -> int
 		{
-			return historique;
-		}
+			auto data_in = t[ps_in].get_dataptr<const uint32_t>();
+			this->historique.push_back(*data_in);
+			return runtime::status_t::SUCCESS;
+		});
+	}
+
+	std::vector<uint32_t> get_histo()
+	{
+		return historique;
+	}
 };
 
 int main(int argc, char** argv)
 {
+	tools::Signal_handler::init();
 
 	option longopts[] = {
 		{"n-exec", required_argument, NULL, 'e'},
@@ -120,9 +121,9 @@ int main(int argc, char** argv)
 		}
 	}
 
-	std::cout << "############################################################" << std::endl;
-	std::cout << "# Micro-benchmark: Complexe pipeline increment and compare #" << std::endl;
-	std::cout << "############################################################" << std::endl;
+	std::cout << "###################################" << std::endl;
+	std::cout << "# Micro-benchmark: Thread Pinning #" << std::endl;
+	std::cout << "###################################" << std::endl;
 	std::cout << "#" << std::endl;
 
 	std::cout << "# Command line arguments:" << std::endl;
@@ -137,20 +138,17 @@ int main(int argc, char** argv)
 	std::cout << "#" << std::endl;
 
 	tools::Thread_pinning::init();
-	module::Finalizer  <uint32_t> finalizer  (data_length);
+
 	std::vector<std::shared_ptr<Finalizer_histo>> finalizers_histo(3);
 	for (size_t s = 0; s < finalizers_histo.size(); s++)
-	{
 		finalizers_histo[s].reset(new Finalizer_histo(data_length));
-	}
+
 	// Getting hwloc topology
 	hwloc_topology_t g_topology;
 	hwloc_topology_init(&g_topology);
 	hwloc_topology_load(g_topology);
 
-	/*
-	Stateless module, with a task which forwards the current hardware core of the running thread
-	*/
+	// Stateless module, with a task which forwards the current hardware core of the running thread
 	module::Stateless pin_mod;
 	pin_mod.set_name("Pinner");
 	auto& pin_task = pin_mod.create_task("pin");
@@ -186,47 +184,42 @@ int main(int argc, char** argv)
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	pipeline_chain.reset(new runtime::Pipeline(
 		(*pin_mod1)("pin"), // first task of the sequence
-		{  // pipeline stage 0
-			{ { &(*pin_mod1)("pin") },  		// first tasks of stage 0
-			  { &(*pin_mod1)("pin") } },		// last tasks of stage 0
-			// pipeline stage 1
-			{ { &(*pin_mod2)("pin") },  		// first tasks of stage 1
-			  { &(*pin_mod2)("pin") } },		// last tasks of stage 1
-			// pipeline stage 2
-			{ { &(*pin_mod3)("pin") },  		// first tasks of stage 2
-			  { &(*pin_mod3)("pin") } },		// last tasks of stage 0
-			// pipeline stage 3
-			{ { &((*finalizers_histo[0])("finalize_store")),	// first tasks of stage 3
-				&((*finalizers_histo[1])("finalize_store")),
-				&((*finalizers_histo[2])("finalize_store")) },
-
-			  { &((*finalizers_histo[0])("finalize_store")),	// last tasks of stage 3
-				&((*finalizers_histo[1])("finalize_store")),
-				&((*finalizers_histo[2])("finalize_store")) } },
+		{ // pipeline stage 0
+		  { { &(*pin_mod1)("pin") }, { &(*pin_mod1)("pin") } },
+		  // pipeline stage 1
+		  { { &(*pin_mod2)("pin") }, { &(*pin_mod2)("pin") } },
+		  // pipeline stage 2
+		  { { &(*pin_mod3)("pin") }, { &(*pin_mod3)("pin") } },
+		  // pipeline stage 3
+		  { { &((*finalizers_histo[0])("finalize_store")), &((*finalizers_histo[1])("finalize_store")),
+		      &((*finalizers_histo[2])("finalize_store")) },
+		    { &((*finalizers_histo[0])("finalize_store")), &((*finalizers_histo[1])("finalize_store")),
+		      &((*finalizers_histo[2])("finalize_store")) } },
 		},
 		{
-			1, // number of threads in the stage 0
-			3, // number of threads in the stage 1
-			1, // number of threads in the stage 2
-			1, // number of threads in the stage 3
+		  1, // number of threads in the stage 0
+		  3, // number of threads in the stage 1
+		  1, // number of threads in the stage 2
+		  1, // number of threads in the stage 3
 		},
 		{
-		   	buffer_size, // synchronization buffer size between stages 0 and 1
-		   	buffer_size, // synchronization buffer size between stages 1 and 2
-			buffer_size, // synchronization buffer size between stages 2 and 3
+		  buffer_size, // synchronization buffer size between stages 0 and 1
+		  buffer_size, // synchronization buffer size between stages 1 and 2
+		  buffer_size, // synchronization buffer size between stages 2 and 3
 		},
 		{
-		   	active_waiting, // type of waiting between stages 0 and 1 (true = active, false = passive)
-		   	active_waiting, // type of waiting between stages 1 and 2 (true = active, false = passive)
-			active_waiting, // type of waiting between stages 2 and 3 (true = active, false = passive)
+		  active_waiting, // type of waiting between stages 0 and 1 (true = active, false = passive)
+		  active_waiting, // type of waiting between stages 1 and 2 (true = active, false = passive)
+		  active_waiting, // type of waiting between stages 2 and 3 (true = active, false = passive)
 		},
 		{
-			true,	// Pinning activation for stage 0
-			true,	// Pinning activation for stage 1
-			true,	// Pinning activation for stage 2
-			false	// Pinning activation for stage 3
+		  true, // Pinning activation for stage 0
+		  true, // Pinning activation for stage 1
+		  true, // Pinning activation for stage 2
+		  false // Pinning activation for stage 3
 		},
-		" PU_0 | PU_0; PU_1; PU_2 | PU_3 |"));
+		" PU_0 | PU_0; PU_1; PU_2 | PU_3 |") // explicit thread pinning
+	);
 	pipeline_chain->set_n_frames(n_inter_frames);
 
 	if (!dot_filepath.empty())
@@ -265,31 +258,31 @@ int main(int argc, char** argv)
 		if (finalizer_histo_list[0][0]->get_histo()[i] != 0)
 		{
 			tests_passed = false;
-			std::cout << "# Thread is not pin to exepcted value for the execution number " << i << std::endl <<
-					"Stage : " << 0 << ", Thread number : " << 0 << std::endl <<
-					"Exepected  : 0, " << "Real : " << finalizer_histo_list[0][0]->get_histo()[i] << std::endl <<
-					"Did you compile with  -DAFF3CT_CORE_LINK_HWLOC=ON ?" << std::endl;
+			std::cout << "# Thread is not pin to exepcted value for the execution number " << i << std::endl
+			          << "Stage : " << 0 << ", Thread number : " << 0 << std::endl
+			          << "Exepected  : 0, " << "Real : " << finalizer_histo_list[0][0]->get_histo()[i] << std::endl
+			          << "Did you compile with  -DAFF3CT_CORE_LINK_HWLOC=ON ?" << std::endl;
 			break;
 		}
 
 		if (finalizer_histo_list[2][0]->get_histo()[i] != 3)
 		{
 			tests_passed = false;
-			std::cout << "# Thread is not pin to exepcted value for the execution number " << i << std::endl <<
-					"Stage : " << 2 << ", Thread number : " << 0 << std::endl<<
-					"Exepected  : 3, " << "Real : " << finalizer_histo_list[2][0]->get_histo()[i] << std::endl <<
-					"Did you compile with  -DAFF3CT_CORE_LINK_HWLOC=ON ?" << std::endl;
+			std::cout << "# Thread is not pin to exepcted value for the execution number " << i << std::endl
+			          << "Stage : " << 2 << ", Thread number : " << 0 << std::endl
+			          << "Exepected  : 3, " << "Real : " << finalizer_histo_list[2][0]->get_histo()[i] << std::endl
+			          << "Did you compile with  -DAFF3CT_CORE_LINK_HWLOC=ON ?" << std::endl;
 			break;
 		}
 
-		uint32_t exepcted = i%3 == 0 ? (0) : (i%3 == 1 ? (1) : 2);
+		uint32_t exepcted = i % 3 == 0 ? (0) : (i % 3 == 1 ? (1) : 2);
 		if (finalizer_histo_list[1][0]->get_histo()[i] != exepcted)
 		{
 			tests_passed = false;
-			std::cout << "# Thread is not pin to exepcted value for the execution number " << i << std::endl <<
-					"Stage : " << 1 << ", Thread number : " << i%3 << std::endl <<
-					"Exepected  : " << exepcted << ", Real : " << finalizer_histo_list[1][0]->get_histo()[i]
-					<< std::endl << "Did you compile with  -DAFF3CT_CORE_LINK_HWLOC=ON ?" << std::endl;
+			std::cout << "# Thread is not pin to exepcted value for the execution number " << i << std::endl
+			          << "Stage : " << 1 << ", Thread number : " << i%3 << std::endl
+			          << "Exepected  : " << exepcted << ", Real : " << finalizer_histo_list[1][0]->get_histo()[i]
+			          << std::endl << "Did you compile with  -DAFF3CT_CORE_LINK_HWLOC=ON ?" << std::endl;
 			break;
 		}
 	}
