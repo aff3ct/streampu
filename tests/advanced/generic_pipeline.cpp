@@ -328,6 +328,7 @@ int main(int argc, char** argv)
 	std::cout << "#   - tsk_per_sta    = " << (tsk_per_sta_param.empty() ? "[empty]" : tsk_per_sta_param.c_str()) << std::endl;
 	std::cout << "#   - sck_type_tsk   = " << (sck_type_tsk_param.empty() ? "[empty]" : sck_type_tsk_param.c_str()) << std::endl;
 	std::cout << "#   - sck_type_sta   = " << (sck_type_sta_param.empty() ? "[empty]" : sck_type_sta_param.c_str()) << std::endl;
+	std::cout << "#   - pinning_policy = " << (pinning_policy.empty() ? "[empty]" : pinning_policy.c_str()) << std::endl;
 	std::cout << "#   - n_inter_frames = " << n_inter_frames << std::endl;
 	std::cout << "#   - sleep_time_us  = " << sleep_time_us << std::endl;
 	std::cout << "#   - data_length    = " << data_length << std::endl;
@@ -392,6 +393,7 @@ int main(int argc, char** argv)
 			rly_lsck = (sck_type_tsk[i][j +1] == "SFWD") ? "relayf::fwd" : "relay::in";
 			rly_rsck = (sck_type_tsk[i][j   ] == "SFWD") ? "relayf::fwd" : "relay::out";
 			(*rlys[tas +1].get())[rly_lsck] = (*rlys[tas].get())[rly_rsck];
+
 			tas++;
 		}
 		// We have to bind the last task of stage i to the first one of task i+1
