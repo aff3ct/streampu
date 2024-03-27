@@ -752,10 +752,13 @@ if(AFF3CT_CORE_TESTS)
     set_tests_properties(pipeline2::aff3ct-core-test-nest-loops-pipeline PROPERTIES LABELS nest-loops-pipeline)
     add_test(NAME pipeline3::aff3ct-core-test-nest-loops-pipeline COMMAND aff3ct-core-test-nest-loops-pipeline -e 200 -f 13)
     set_tests_properties(pipeline3::aff3ct-core-test-nest-loops-pipeline PROPERTIES LABELS nest-loops-pipeline)
+
 if (AFF3CT_CORE_LINK_HWLOC)
 	# Static test to verify pinning (for CPUs with at least 4 hardware threads)
 	add_test(NAME pipeline0::aff3ct-core-test-thread-pinning COMMAND aff3ct-core-test-thread-pinning -e 30)
     set_tests_properties(pipeline0::aff3ct-core-test-thread-pinning PROPERTIES LABELS thread-pinning)
+    add_test(NAME pipeline1::aff3ct-core-test-thread-pinning COMMAND aff3ct-core-test-thread-pinning -e 300 -f 5)
+    set_tests_properties(pipeline1::aff3ct-core-test-thread-pinning PROPERTIES LABELS thread-pinning)
 endif (AFF3CT_CORE_LINK_HWLOC)
 
 endif()
