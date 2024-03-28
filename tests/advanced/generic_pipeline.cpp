@@ -257,11 +257,11 @@ int main(int argc, char** argv)
 				std::cout << "  -w, --active-waiting     "
 				          << "Enable active waiting in the pipeline synchronizations                "
 				          << "[" << (active_waiting ? "true" : "false") << "]" << std::endl;
-				std::cout << "  -n, --tsk-per-sta "
+				std::cout << "  -n, --tsk-per-sta        "
 				          << "The number of tasks on each stage of the pipeline                     "
 				          << "[" << (tsk_per_sta_param.empty() ? "empty" : "\"" + tsk_per_sta_param + "\"") << "]"
 				          << std::endl;
-				std::cout << "  -r, --sck-type-tsk  "
+				std::cout << "  -r, --sck-type-tsk       "
 				          << "The socket type of each task (SFWD or SIO)                            "
 				          << "[" << (sck_type_tsk_param.empty() ? "empty" : "\"" + sck_type_tsk_param + "\"")
 				          << "]" << std::endl;
@@ -269,7 +269,7 @@ int main(int argc, char** argv)
 				          << "The socket type of tasks on each stage (SFWD or SIO)                  "
 				          << "[" << (sck_type_sta_param.empty() ? "empty" : "\"" + sck_type_sta_param + "\"")
 				          << "]" << std::endl;
-				std::cout << "  -P, --pinning-policy       "
+				std::cout << "  -P, --pinning-policy     "
 				          << "Pinning policy for pipeline execution                                 "
 				          << "[" << (pinning_policy.empty() ? "empty" : "\"" + pinning_policy + "\"")
 				          << "]" << std::endl;
@@ -465,9 +465,9 @@ int main(int argc, char** argv)
 		std::vector<std::pair<std::vector<runtime::Task*>, std::vector<runtime::Task*>>> stage_creat;
 		tas = 0;
 
-		// First Stage contains only the generate task
+		// First stage contains only the generate task
 		stage_creat.push_back({ { &source("generate") }, { &source("generate") } });
-
+		// Middle stages
 		for (size_t i = 0; i < sck_type_tsk.size(); ++i)
 		{
 			std::string rly_ltsk = sck_type_tsk[i][                        0] == "SFWD" ? "relayf" : "relay";
@@ -477,7 +477,6 @@ int main(int argc, char** argv)
 			});
 			tas += sck_type_tsk[i].size();
 		}
-
 		// Last stage creation 	with the sink
 		stage_creat.push_back({ { &sink("send_count") }, { } });
 
@@ -491,23 +490,24 @@ int main(int argc, char** argv)
 		for (size_t i = 0; i < stages_number + 1; ++i)
 			wait_vect.push_back(active_waiting);
 
-		// Stages to pin
 #ifdef AFF3CT_CORE_HWLOC
-		if ( ! pinning_policy.empty())
+		// Stages to pin
+		if (!pinning_policy.empty())
 		{
 			tools::Thread_pinning::init();
-			std::vector<bool> enable_pin = {false};
+			std::vector<bool> enable_pin = { false };
 			for (size_t i = 0; i < stages_number; ++i)
 				enable_pin.push_back(true);
 			enable_pin.push_back(false);
-			pipeline_chain.reset(new runtime::Pipeline(source("generate"), stage_creat, n_threads, pool_buff, wait_vect, enable_pin, pinning_policy));
-		}else
-		{
-			pipeline_chain.reset(new runtime::Pipeline(source("generate"), stage_creat, n_threads, pool_buff, wait_vect));
+			pipeline_chain.reset(new runtime::Pipeline(source("generate"), stage_creat, n_threads, pool_buff, wait_vect,
+			                                           enable_pin, pinning_policy));
 		}
-#else
-		pipeline_chain.reset(new runtime::Pipeline(source("generate"), stage_creat, n_threads, pool_buff, wait_vect));
+		else
 #endif
+		{
+			pipeline_chain.reset(new runtime::Pipeline(source("generate"), stage_creat, n_threads, pool_buff,
+			                                           wait_vect));
+		}
 		pipeline_chain->set_n_frames(n_inter_frames);
 
 		if (!dot_filepath.empty())
