@@ -51,9 +51,12 @@
 *[PRNGs]: Pseudo Random Number Generators
 *[PPA]: Personal Package Archive
 *[RISC]: Reduced Instruction Set Computer
+*[SBC]: Single Board Computer
+*[SBCs]: Single Board Computers
 *[SDF]: Synchronous Data Flow
 *[SDR]: Software-Defined Radio
 *[SIMD]: Single Instruction Multiple Data
+*[SMT]: Simultaneous MultiThreading (or Hyper-Threading in the Intel nomenclature)
 *[SNRs]: Signal Noise Ratios
 *[SNR]: Signal Noise Ratio
 *[SSE]: Streaming SIMD Extensions
