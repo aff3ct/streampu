@@ -50,6 +50,8 @@
 *[PRNG]: Pseudo Random Number Generator
 *[PRNGs]: Pseudo Random Number Generators
 *[PPA]: Personal Package Archive
+*[PU]: Process Unit
+*[PUs]: Process Units
 *[RISC]: Reduced Instruction Set Computer
 *[SBC]: Single Board Computer
 *[SBCs]: Single Board Computers
