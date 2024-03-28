@@ -29,7 +29,8 @@ architectures** (see the illustration below).
   ![Orange Pi 5](./assets/hwloc_orangepi5.svg){ width=1000 }
   <figcaption>
   	Result of the hwloc-ls command on the Orange Pi 5 Plus board (Rockchip 
-  	RK3588 SoC).
+  	RK3588 SoC, cores 0-3 are energy efficient ARM Cortex-A55 and cores 4-7 are 
+  	powerful ARM Cortex-A76).
   </figcaption>
 </figure>
 
