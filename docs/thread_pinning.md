@@ -122,8 +122,8 @@ SYNC1(Sync)-->S2T3;
 SYNC1(Sync)-->S2T4;
 S2T1(Stage 2, thread 1 - pin: PU_4 or PU_5)-->SYNC2;
 S2T2(Stage 2, thread 2 - pin: PU_4 or PU_5)-->SYNC2;
-S2T3(Stage 2, thread 3 - pin: PU_5 or PU_6)-->SYNC2;
-S2T4(Stage 2, thread 4 - pin: PU_4 or PU_6)-->SYNC2;
+S2T3(Stage 2, thread 3 - pin: PU_6 or PU_7)-->SYNC2;
+S2T4(Stage 2, thread 4 - pin: PU_6 or PU_7)-->SYNC2;
 SYNC2(Sync)-->S3T1(Stage 3, thread 1 - pin: PU_0, PU_1, PU_2 or PU_3);
 ```
 
