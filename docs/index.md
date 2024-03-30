@@ -33,6 +33,8 @@ matches **single-rate SDF streaming applications**.
 
 **For Users**
 
+  - Runtime:
+    1. [Thread Pinning](thread_pinning.md)
   - Tests:
     1. [Bootstrap](tests_bootstrap.md)
 

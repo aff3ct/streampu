@@ -65,7 +65,7 @@ const std::vector<std::vector<std::vector<T>>>& Finalizer<T>
 }
 
 template <typename T>
-const size_t Finalizer<T>
+size_t Finalizer<T>
 ::get_next_stream_id() const
 {
 	return this->next_stream_id;
@@ -104,7 +104,8 @@ void Finalizer<T>
 	          in + this->data[this->next_stream_id][0].size(),
 	          this->data[this->next_stream_id][frame_id].begin());
 
-	this->next_stream_id = (this->next_stream_id + 1) % this->data.size();
+	if (frame_id == this->get_n_frames() -1)
+		this->next_stream_id = (this->next_stream_id + 1) % this->data.size();
 }
 
 template <typename T>

@@ -34,7 +34,7 @@ public:
 	static const std::string data_tag;
 	static const rang::style legend_style;
 	static const rang::style report_style;
-	static const int         column_width;
+	static const size_t      def_column_width;
 
 protected:
 	std::vector<tools::Reporter*> reporters;

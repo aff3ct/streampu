@@ -36,6 +36,7 @@
 *[ISA]: Instruction Set Architecture
 *[ISAs]: Instruction Set Architectures
 *[JSON]: JavaScript Object Notation
+*[LLC]: Last Level Cache
 *[LUT]: Look Up Table
 *[LUTs]: Look Up Tables
 *[MKL]: Intel Math Kernel Library
@@ -45,15 +46,21 @@
 *[MSVC]: Microsoft Visual C++
 *[MT 19937]: Mersenne Twister 19937
 *[NEON]: ARM SIMD instructions
+*[NUMA]: Non Uniform Memory Access
 *[OS]: Operating System
 *[OSs]: Operating Systems
 *[PRNG]: Pseudo Random Number Generator
 *[PRNGs]: Pseudo Random Number Generators
 *[PPA]: Personal Package Archive
+*[PU]: Process Unit
+*[PUs]: Process Units
 *[RISC]: Reduced Instruction Set Computer
+*[SBC]: Single Board Computer
+*[SBCs]: Single Board Computers
 *[SDF]: Synchronous Data Flow
 *[SDR]: Software-Defined Radio
 *[SIMD]: Single Instruction Multiple Data
+*[SMT]: Simultaneous MultiThreading (or Hyper-Threading in the Intel nomenclature)
 *[SNRs]: Signal Noise Ratios
 *[SNR]: Signal Noise Ratio
 *[SSE]: Streaming SIMD Extensions
@@ -63,3 +70,4 @@
 *[SSE4.1]: Streaming SIMD Extensions 4.1
 *[SSE4.2]: Streaming SIMD Extensions 4.2
 *[STD]: Standard
+*[UMA]: Uniform Memory Access

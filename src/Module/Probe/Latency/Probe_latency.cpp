@@ -4,8 +4,8 @@ using namespace aff3ct;
 using namespace aff3ct::module;
 
 Probe_latency
-::Probe_latency(const std::string &col_name, tools::Reporter_probe& reporter, const int n_frames)
-: Probe<uint8_t>(0, col_name, reporter, n_frames),
+::Probe_latency(const std::string &col_name, tools::Reporter_probe& reporter)
+: Probe<uint8_t>(0, col_name, reporter),
   t_start(std::chrono::steady_clock::now())
 {
 	const std::string name = "Probe_latency<" + col_name + ">";

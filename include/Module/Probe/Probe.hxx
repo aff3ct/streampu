@@ -8,6 +8,32 @@ namespace aff3ct
 namespace module
 {
 
+runtime::Task& AProbe
+::operator[](const prb::tsk t)
+{
+	return Module::operator[]((int)t);
+}
+
+runtime::Socket& AProbe
+::operator[](const prb::sck::probe s)
+{
+	assert((*this)[prb::tsk::probe].get_n_input_sockets() == 1);
+	return Module::operator[]((int)prb::tsk::probe)[(int)s];
+}
+
+runtime::Socket& AProbe
+::operator[](const prb::sck::probe_noin s)
+{
+	assert((*this)[prb::tsk::probe].get_n_input_sockets() == 0);
+	return Module::operator[]((int)prb::tsk::probe)[(int)s];
+}
+
+runtime::Socket& AProbe
+::operator[](const std::string &tsk_sck)
+{
+	return Module::operator[](tsk_sck);
+}
+
 template <typename T>
 runtime::Task& Probe<T>
 ::operator[](const prb::tsk t)
@@ -40,13 +66,12 @@ runtime::Socket& Probe<T>
 
 template <typename T>
 Probe<T>
-::Probe(const int size, const std::string &col_name, tools::Reporter_probe& reporter, const int n_frames)
+::Probe(const int size, const std::string &col_name, tools::Reporter_probe& reporter)
 : AProbe(), size(size), col_name(col_name), reporter(reporter)
 {
 	const std::string name = "Probe<" + col_name + ">";
 	this->set_name(name);
 	this->set_short_name(name);
-	AProbe::set_n_frames(n_frames);
 
 	if (size < 0)
 	{
@@ -73,9 +98,8 @@ void Probe<T>
 	const size_t old_n_frames = this->get_n_frames();
 	if (old_n_frames != n_frames)
 	{
-		std::stringstream message;
-		message << "This method is disabled in the 'Probe' class.";
-		throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
+		Module::set_n_frames(n_frames);
+		reporter.set_n_frames(n_frames);
 	}
 }
 
@@ -138,6 +162,48 @@ template <typename T>
 void Probe<T>
 ::reset()
 {
+}
+
+template <typename T>
+void Probe<T>
+::set_col_name(const std::string &name)
+{
+	this->reporter.set_col_name(name, *this);
+}
+
+template <typename T>
+void Probe<T>
+::set_col_unit(const std::string &unit)
+{
+	this->reporter.set_col_unit(unit, *this);
+}
+
+template <typename T>
+void Probe<T>
+::set_col_buff_size(const size_t buffer_size)
+{
+	this->reporter.set_col_buff_size(buffer_size, *this);
+}
+
+template <typename T>
+void Probe<T>
+::set_col_fmtflags(const std::ios_base::fmtflags ff)
+{
+	this->reporter.set_col_fmtflags(ff, *this);
+}
+
+template <typename T>
+void Probe<T>
+::set_col_prec(const size_t precision)
+{
+	this->reporter.set_col_prec(precision, *this);
+}
+
+template <typename T>
+void Probe<T>
+::set_col_size(const size_t col_size)
+{
+	this->reporter.set_col_size(col_size, *this);
 }
 
 }

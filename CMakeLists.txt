@@ -185,6 +185,13 @@ if(AFF3CT_CORE_TESTS)
                                                            POSITION_INDEPENDENT_CODE ON) # set -fpie
     list(APPEND aff3ct_core_targets_list aff3ct-core-test-simple-pipeline)
 
+    add_executable(aff3ct-core-test-pipeline-probe $<TARGET_OBJECTS:aff3ct-core-obj>
+                   ${CMAKE_CURRENT_SOURCE_DIR}/tests/advanced/pipeline_probe.cpp)
+    set_target_properties(aff3ct-core-test-pipeline-probe PROPERTIES
+                                                          OUTPUT_NAME test-pipeline-probe
+                                                          POSITION_INDEPENDENT_CODE ON) # set -fpie
+    list(APPEND aff3ct_core_targets_list aff3ct-core-test-pipeline-probe)
+
     add_executable(aff3ct-core-test-complex-pipeline-inter-stage $<TARGET_OBJECTS:aff3ct-core-obj>
                    ${CMAKE_CURRENT_SOURCE_DIR}/tests/advanced/complex_pipeline_inter_stage.cpp)
     set_target_properties(aff3ct-core-test-complex-pipeline-inter-stage PROPERTIES
@@ -235,6 +242,17 @@ if(AFF3CT_CORE_TESTS)
                                                            POSITION_INDEPENDENT_CODE ON) # set -fpie
     # list(APPEND aff3ct_core_tests_list aff3ct-core-test-nest-loops-pipeline)
     list(APPEND aff3ct_core_targets_list aff3ct-core-test-nest-loops-pipeline)
+
+if (AFF3CT_CORE_LINK_HWLOC)
+	#Pin test addition
+	add_executable(aff3ct-core-test-thread-pinning $<TARGET_OBJECTS:aff3ct-core-obj>
+                   ${CMAKE_CURRENT_SOURCE_DIR}/tests/advanced/thread_pinning.cpp)
+	set_target_properties(aff3ct-core-test-thread-pinning PROPERTIES
+                                                           OUTPUT_NAME test-thread-pinning
+                                                           POSITION_INDEPENDENT_CODE ON) # set -fpie
+    #list(APPEND aff3ct_core_tests_list aff3ct-core-test-nest-loops-pipeline)
+    list(APPEND aff3ct_core_targets_list aff3ct-core-test-thread-pinning)
+endif (AFF3CT_CORE_LINK_HWLOC)
 
 endif()
 
@@ -562,6 +580,10 @@ if(AFF3CT_CORE_TESTS)
     set_tests_properties(sequence2::aff3ct-core-test-simple-pipeline PROPERTIES LABELS simple-pipeline)
     add_test(NAME sequence3::aff3ct-core-test-simple-pipeline COMMAND aff3ct-core-test-simple-pipeline -q -t 1 -i ${INPUT_FILE} -o graph.dot)
     set_tests_properties(sequence3::aff3ct-core-test-simple-pipeline PROPERTIES LABELS simple-pipeline)
+    add_test(NAME sequence4::aff3ct-core-test-simple-pipeline COMMAND aff3ct-core-test-simple-pipeline -q -t 1 -i ${INPUT_FILE} -f 2)
+    set_tests_properties(sequence4::aff3ct-core-test-simple-pipeline PROPERTIES LABELS simple-pipeline)
+    add_test(NAME sequence5::aff3ct-core-test-simple-pipeline COMMAND aff3ct-core-test-simple-pipeline -q -t 1 -i ${INPUT_FILE} -f 13)
+    set_tests_properties(sequence5::aff3ct-core-test-simple-pipeline PROPERTIES LABELS simple-pipeline)
     add_test(NAME pipeline0::aff3ct-core-test-simple-pipeline COMMAND aff3ct-core-test-simple-pipeline -i ${INPUT_FILE})
     set_tests_properties(pipeline0::aff3ct-core-test-simple-pipeline PROPERTIES LABELS simple-pipeline)
     add_test(NAME pipeline1::aff3ct-core-test-simple-pipeline COMMAND aff3ct-core-test-simple-pipeline -i ${INPUT_FILE} -p)
@@ -574,6 +596,40 @@ if(AFF3CT_CORE_TESTS)
     set_tests_properties(pipeline4::aff3ct-core-test-simple-pipeline PROPERTIES LABELS simple-pipeline)
     add_test(NAME pipeline5::aff3ct-core-test-simple-pipeline COMMAND aff3ct-core-test-simple-pipeline -i ${INPUT_FILE} -u 128 -o graph.dot)
     set_tests_properties(pipeline5::aff3ct-core-test-simple-pipeline PROPERTIES LABELS simple-pipeline)
+    add_test(NAME pipeline6::aff3ct-core-test-simple-pipeline COMMAND aff3ct-core-test-simple-pipeline -i ${INPUT_FILE} -u 8 -f 2)
+    set_tests_properties(pipeline6::aff3ct-core-test-simple-pipeline PROPERTIES LABELS simple-pipeline)
+    add_test(NAME pipeline7::aff3ct-core-test-simple-pipeline COMMAND aff3ct-core-test-simple-pipeline -i ${INPUT_FILE} -u 17 -f 5)
+    set_tests_properties(pipeline7::aff3ct-core-test-simple-pipeline PROPERTIES LABELS simple-pipeline)
+
+    # probes
+    add_test(NAME sequence0::aff3ct-core-test-pipeline-probe COMMAND aff3ct-core-test-pipeline-probe -q -t 1 -i ${INPUT_FILE})
+    set_tests_properties(sequence0::aff3ct-core-test-pipeline-probe PROPERTIES LABELS pipeline-probe)
+    add_test(NAME sequence1::aff3ct-core-test-pipeline-probe COMMAND aff3ct-core-test-pipeline-probe -q -t 1 -i ${INPUT_FILE} -p -g)
+    set_tests_properties(sequence1::aff3ct-core-test-pipeline-probe PROPERTIES LABELS pipeline-probe)
+    add_test(NAME sequence2::aff3ct-core-test-pipeline-probe COMMAND aff3ct-core-test-pipeline-probe -q -t 1 -i ${INPUT_FILE} -b)
+    set_tests_properties(sequence2::aff3ct-core-test-pipeline-probe PROPERTIES LABELS pipeline-probe)
+    add_test(NAME sequence3::aff3ct-core-test-pipeline-probe COMMAND aff3ct-core-test-pipeline-probe -q -t 1 -i ${INPUT_FILE} -o graph.dot)
+    set_tests_properties(sequence3::aff3ct-core-test-pipeline-probe PROPERTIES LABELS pipeline-probe)
+    add_test(NAME sequence4::aff3ct-core-test-pipeline-probe COMMAND aff3ct-core-test-pipeline-probe -q -t 1 -i ${INPUT_FILE} -f 2)
+    set_tests_properties(sequence4::aff3ct-core-test-pipeline-probe PROPERTIES LABELS pipeline-probe)
+    add_test(NAME sequence5::aff3ct-core-test-pipeline-probe COMMAND aff3ct-core-test-pipeline-probe -q -t 1 -i ${INPUT_FILE} -f 13)
+    set_tests_properties(sequence5::aff3ct-core-test-pipeline-probe PROPERTIES LABELS pipeline-probe)
+    add_test(NAME pipeline0::aff3ct-core-test-pipeline-probe COMMAND aff3ct-core-test-pipeline-probe -i ${INPUT_FILE})
+    set_tests_properties(pipeline0::aff3ct-core-test-pipeline-probe PROPERTIES LABELS pipeline-probe)
+    add_test(NAME pipeline1::aff3ct-core-test-pipeline-probe COMMAND aff3ct-core-test-pipeline-probe -i ${INPUT_FILE} -p)
+    set_tests_properties(pipeline1::aff3ct-core-test-pipeline-probe PROPERTIES LABELS pipeline-probe)
+    add_test(NAME pipeline2::aff3ct-core-test-pipeline-probe COMMAND aff3ct-core-test-pipeline-probe -i ${INPUT_FILE} -w)
+    set_tests_properties(pipeline2::aff3ct-core-test-pipeline-probe PROPERTIES LABELS "pipeline-probe;skip-memcheck") # to exclude this previous test from memchecks, active waiting is too long in Valgrind :-(
+    add_test(NAME pipeline3::aff3ct-core-test-pipeline-probe COMMAND aff3ct-core-test-pipeline-probe -i ${INPUT_FILE} -u 1)
+    set_tests_properties(pipeline3::aff3ct-core-test-pipeline-probe PROPERTIES LABELS pipeline-probe)
+    add_test(NAME pipeline4::aff3ct-core-test-pipeline-probe COMMAND aff3ct-core-test-pipeline-probe -i ${INPUT_FILE} -u 1024)
+    set_tests_properties(pipeline4::aff3ct-core-test-pipeline-probe PROPERTIES LABELS pipeline-probe)
+    add_test(NAME pipeline5::aff3ct-core-test-pipeline-probe COMMAND aff3ct-core-test-pipeline-probe -i ${INPUT_FILE} -u 128 -o graph.dot)
+    set_tests_properties(pipeline5::aff3ct-core-test-pipeline-probe PROPERTIES LABELS pipeline-probe)
+    add_test(NAME pipeline6::aff3ct-core-test-pipeline-probe COMMAND aff3ct-core-test-pipeline-probe -i ${INPUT_FILE} -u 8 -f 2)
+    set_tests_properties(pipeline6::aff3ct-core-test-pipeline-probe PROPERTIES LABELS pipeline-probe)
+    add_test(NAME pipeline7::aff3ct-core-test-pipeline-probe COMMAND aff3ct-core-test-pipeline-probe -i ${INPUT_FILE} -u 17 -f 5)
+    set_tests_properties(pipeline7::aff3ct-core-test-pipeline-probe PROPERTIES LABELS pipeline-probe)
 
     # complex pipeline interstage
     add_test(NAME pipeline0::aff3ct-core-test-complex-pipeline-inter-stage COMMAND aff3ct-core-test-complex-pipeline-inter-stage -i ${INPUT_FILE})
@@ -705,4 +761,13 @@ if(AFF3CT_CORE_TESTS)
     set_tests_properties(pipeline2::aff3ct-core-test-nest-loops-pipeline PROPERTIES LABELS nest-loops-pipeline)
     add_test(NAME pipeline3::aff3ct-core-test-nest-loops-pipeline COMMAND aff3ct-core-test-nest-loops-pipeline -e 200 -f 13)
     set_tests_properties(pipeline3::aff3ct-core-test-nest-loops-pipeline PROPERTIES LABELS nest-loops-pipeline)
+
+if (AFF3CT_CORE_LINK_HWLOC)
+	# Static test to verify pinning (for CPUs with at least 4 hardware threads)
+	add_test(NAME pipeline0::aff3ct-core-test-thread-pinning COMMAND aff3ct-core-test-thread-pinning -e 30)
+    set_tests_properties(pipeline0::aff3ct-core-test-thread-pinning PROPERTIES LABELS thread-pinning)
+    add_test(NAME pipeline1::aff3ct-core-test-thread-pinning COMMAND aff3ct-core-test-thread-pinning -e 300 -f 5)
+    set_tests_properties(pipeline1::aff3ct-core-test-thread-pinning PROPERTIES LABELS thread-pinning)
+endif (AFF3CT_CORE_LINK_HWLOC)
+
 endif()

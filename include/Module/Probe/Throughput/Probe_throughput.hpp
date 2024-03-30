@@ -18,18 +18,18 @@ namespace module
 {
 class Probe_throughput : public Probe<uint8_t>
 {
+	friend tools::Reporter_probe;
+
 protected:
 	std::chrono::time_point<std::chrono::steady_clock> t_start;
 	size_t data_size;
 	double thr;
 	double factor;
+	Probe_throughput(const size_t data_size, const std::string &col_name, tools::Reporter_probe& reporter);
+	Probe_throughput(const size_t data_size, const std::string &col_name, const double factor,
+	                 tools::Reporter_probe& reporter);
 
 public:
-	Probe_throughput(const size_t data_size, const std::string &col_name, tools::Reporter_probe& reporter,
-	                 const int n_frames = 1);
-	Probe_throughput(const size_t data_size, const std::string &col_name, const double factor,
-	                 tools::Reporter_probe& reporter, const int n_frames = 1);
-
 	virtual ~Probe_throughput() = default;
 
 	virtual std::type_index get_datatype() const;

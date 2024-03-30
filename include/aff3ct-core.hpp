@@ -60,6 +60,9 @@
 #ifndef PROBE_HPP_
 #include <Module/Probe/Probe.hpp>
 #endif
+#ifndef PROBE_STREAM_HPP_
+#include <Module/Probe/Stream/Probe_stream.hpp>
+#endif
 #ifndef PROBE_THROUGHPUT_HPP_
 #include <Module/Probe/Throughput/Probe_throughput.hpp>
 #endif
