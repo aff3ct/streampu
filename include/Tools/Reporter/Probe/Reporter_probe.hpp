@@ -28,6 +28,8 @@ namespace tools
 
 class Reporter_probe : public Reporter
 {
+	friend module::AProbe;
+
 protected:
 	std::vector<module::AProbe*> probes;
 
@@ -71,15 +73,15 @@ public:
 	void set_cols_prec(const size_t precision);
 	void set_cols_size(const size_t col_size);
 
-	void register_probe(module::AProbe* probe, const size_t data_size, const std::type_index data_type,
-	                    const std::string &unit, const size_t buffer_size, const std::ios_base::fmtflags ff,
-	                    const size_t precision);
-
-	virtual void probe(const std::string &name, const void *data, const size_t frame_id);
-
 	void register_probes(const std::initializer_list<module::AProbe*> &probes);
 
 protected:
+	void register_probe(module::AProbe& probe, const size_t data_size, const std::type_index data_type,
+	                    const std::string &unit, const size_t buffer_size, const std::ios_base::fmtflags ff,
+	                    const size_t precision);
+
+	virtual void probe(const module::AProbe& probe, const void *data, const size_t frame_id);
+
 	void create_probe_checks(const std::string &name);
 
 	template <typename T>

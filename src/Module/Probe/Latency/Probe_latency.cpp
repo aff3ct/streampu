@@ -31,20 +31,18 @@ void Probe_latency
 		throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
 	}
 	this->reporter = reporter;
-	this->reporter->register_probe(this, 1, typeid(int64_t), "(us)", 100, std::ios_base::scientific, 3);
+	this->proxy_register_probe(1, typeid(int64_t), "(us)", 100, std::ios_base::scientific, 3);
 }
 
 void Probe_latency
 ::_probe(const uint8_t *in, const size_t frame_id)
 {
-	this->check_reporter();
-
 	auto t_stop = std::chrono::steady_clock::now();
 	auto time_duration = (int64_t)std::chrono::duration_cast<std::chrono::microseconds>(t_stop - this->t_start).count();
 	this->t_start = t_stop;
 
 	for (size_t f = 0; f < this->get_n_frames(); f++)
-		this->reporter->probe(this->col_name, (void*)&time_duration, frame_id);
+		this->proxy_probe((void*)&time_duration, frame_id);
 }
 
 void Probe_latency

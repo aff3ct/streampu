@@ -38,14 +38,12 @@ void Probe_timestamp
 		throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
 	}
 	this->reporter = reporter;
-	this->reporter->register_probe(this, 1, typeid(uint64_t), "(us)", 100, std::ios_base::scientific, 2);
+	this->proxy_register_probe(1, typeid(uint64_t), "(us)", 100, std::ios_base::scientific, 2);
 }
 
 void Probe_timestamp
 ::_probe(const uint8_t *in, const size_t frame_id)
 {
-	this->check_reporter();
-
 	std::chrono::microseconds us = std::chrono::duration_cast<std::chrono::microseconds>(
 	    // std::chrono::system_clock::now().time_since_epoch()
 	    std::chrono::steady_clock::now().time_since_epoch()
@@ -54,6 +52,6 @@ void Probe_timestamp
 	uint64_t unix_timestamp_count = mod ? (uint64_t)us.count() % mod : (uint64_t)us.count();
 
 	for (size_t f = 0; f < this->get_n_frames(); f++)
-		this->reporter->probe(this->col_name, (void*)&unix_timestamp_count, frame_id);
+		this->proxy_probe((void*)&unix_timestamp_count, frame_id);
 }
 

@@ -35,6 +35,9 @@ namespace module
 
 class AProbe : public Module, public tools::Interface_reset
 {
+protected:
+	tools::Reporter_probe* reporter;
+
 public:
 	AProbe();
 	virtual ~AProbe() = default;
@@ -53,7 +56,13 @@ public:
 	inline runtime::Task&   operator[](const prb::tsk             t);
 	inline runtime::Socket& operator[](const prb::sck::probe      s);
 	inline runtime::Socket& operator[](const prb::sck::probe_noin s);
-	inline runtime::Socket& operator[](const std::string &tsk_sck  );
+	inline runtime::Socket& operator[](const std::string   &tsk_sck);
+
+protected:
+	void check_reporter();
+	void proxy_register_probe(const size_t data_size, const std::type_index data_type, const std::string &unit,
+	                          const size_t buffer_size, const std::ios_base::fmtflags ff, const size_t precision);
+	void proxy_probe(const void *data, const size_t frame_id);
 };
 
 template <typename T = uint8_t>
@@ -63,12 +72,11 @@ public:
 	inline runtime::Task&   operator[](const prb::tsk             t);
 	inline runtime::Socket& operator[](const prb::sck::probe      s);
 	inline runtime::Socket& operator[](const prb::sck::probe_noin s);
-	inline runtime::Socket& operator[](const std::string &tsk_sck  );
+	inline runtime::Socket& operator[](const std::string   &tsk_sck);
 
 protected:
 	const size_t socket_size;
 	const std::string col_name;
-	tools::Reporter_probe* reporter;
 	Probe(const size_t socket_size, const std::string &col_name);
 
 public:
@@ -96,7 +104,6 @@ public:
 
 protected:
 	virtual void _probe(const T *in, const size_t frame_id);
-	void check_reporter();
 };
 }
 }

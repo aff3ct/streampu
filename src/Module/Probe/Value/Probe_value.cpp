@@ -38,16 +38,14 @@ void Probe_value<T>
 		throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
 	}
 	this->reporter = reporter;
-	this->reporter->register_probe(this, this->get_socket_size(), typeid(T), "", 100, std::ios_base::scientific, 3);
+	this->proxy_register_probe(this->get_socket_size(), typeid(T), "", 100, std::ios_base::scientific, 3);
 }
 
 template <typename T>
 void Probe_value<T>
 ::_probe(const T *in, const size_t frame_id)
 {
-	this->check_reporter();
-
-	this->reporter->probe(this->col_name, (void*)in, frame_id);
+	this->proxy_probe((void*)in, frame_id);
 }
 
 // ==================================================================================== explicit template instantiation

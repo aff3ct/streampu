@@ -31,9 +31,10 @@ Reporter_probe
 }
 
 void Reporter_probe
-::probe(const std::string &name, const void *data, const size_t frame_id)
+::probe(const module::AProbe& probe, const void *data, const size_t frame_id)
 {
-	const int col = this->name_to_col[name];
+	std::string col_name = probe.get_col_name();
+	const int col = this->name_to_col[col_name];
 	// bool can_push = false;
 	     if (this->datatypes[col] == typeid(double  )) /* can_push = */ this->push<double  >(col, ( double* )data);
 	else if (this->datatypes[col] == typeid(float   )) /* can_push = */ this->push<float   >(col, ( float*  )data);
@@ -205,22 +206,11 @@ void Reporter_probe
 }
 
 void Reporter_probe
-::register_probe(module::AProbe* probe,
-                 const size_t data_size,
-                 const std::type_index data_type,
-                 const std::string &unit,
-                 const size_t buffer_size,
-                 const std::ios_base::fmtflags ff,
+::register_probe(module::AProbe& probe, const size_t data_size, const std::type_index data_type,
+                 const std::string &unit, const size_t buffer_size, const std::ios_base::fmtflags ff,
                  const size_t precision)
 {
-	if (probe == nullptr)
-	{
-		std::stringstream message;
-		message << "'probe' cannot be nullptr.";
-		throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
-	}
-
-	if (probe->get_col_name().empty())
+	if (probe.get_col_name().empty())
 	{
 		std::stringstream message;
 		message << "'probe->get_col_name()' cannot be empty.";
@@ -235,16 +225,16 @@ void Reporter_probe
 	}
 
 	for (auto p : this->probes)
-		if (p == probe)
+		if (p == &probe)
 		{
 			std::stringstream message;
-			message << "'probe' has already been registered to this reporter ('probe->get_col_name()' = "
-			        << probe->get_col_name() << ").";
+			message << "'probe' has already been registered to this reporter ('probe.get_col_name()' = "
+			        << probe.get_col_name() << ").";
 			throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
 		}
 
-	probe->set_n_frames(this->get_n_frames());
-	this->probes               .push_back(probe);
+	probe.set_n_frames(this->get_n_frames());
+	this->probes               .push_back(&probe);
 	this->head                 .push_back(0);
 	this->tail                 .push_back(0);
 	this->buffer               .push_back(std::vector<std::vector<int8_t>>(this->get_n_frames() * buffer_size,
@@ -253,9 +243,9 @@ void Reporter_probe
 	this->format_flags         .push_back(ff);
 	this->precisions           .push_back(precision);
 	this->data_sizes           .push_back(data_size);
-	this->cols_groups[0].second.push_back(std::make_tuple(probe->get_col_name(), unit, 0));
-	this->name_to_col[probe->get_col_name()] = this->buffer.size() -1;
-	this->col_to_name[this->buffer.size() -1] = probe->get_col_name();
+	this->cols_groups[0].second.push_back(std::make_tuple(probe.get_col_name(), unit, 0));
+	this->name_to_col[probe.get_col_name()] = this->buffer.size() -1;
+	this->col_to_name[this->buffer.size() -1] = probe.get_col_name();
 }
 
 void Reporter_probe

@@ -31,18 +31,14 @@ void Probe_stream
 		throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
 	}
 	this->reporter = reporter;
-	this->reporter->register_probe(this, 1, typeid(int64_t), "", 100, std::ios_base::scientific, 3);
+	this->proxy_register_probe(1, typeid(int64_t), "", 100, std::ios_base::scientific, 3);
 }
 
 void Probe_stream
 ::_probe(const uint8_t *in, const size_t frame_id)
 {
-	this->check_reporter();
-
 	for (size_t f = 0; f < this->get_n_frames(); f++)
-	{
-		this->reporter->probe(this->col_name, (void*)&occurrences, frame_id);
-	}
+		this->proxy_probe((void*)&occurrences, frame_id);
 	this->occurrences++;
 }
 

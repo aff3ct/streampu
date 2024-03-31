@@ -67,7 +67,7 @@ runtime::Socket& Probe<T>
 template <typename T>
 Probe<T>
 ::Probe(const size_t socket_size, const std::string &col_name)
-: AProbe(), socket_size(socket_size), col_name(col_name), reporter(nullptr)
+: AProbe(), socket_size(socket_size), col_name(col_name)
 {
 	const std::string name = "Probe<" + col_name + ">";
 	this->set_name(name);
@@ -196,18 +196,6 @@ void Probe<T>
 {
 	this->check_reporter();
 	this->reporter->set_col_size(col_size, *this);
-}
-
-template <typename T>
-void Probe<T>
-::check_reporter()
-{
-	if (reporter == nullptr)
-	{
-		std::stringstream message;
-		message << "'reporter' can't be null, it is required to call 'AProbe::register_reporter()' first.";
-		throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
-	}
 }
 
 template <typename T>
