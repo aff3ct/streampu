@@ -39,14 +39,16 @@ public:
 	AProbe();
 	virtual ~AProbe() = default;
 	virtual void reset() = 0;
-	virtual std::type_index get_datatype() const = 0;
 
-	virtual void set_col_name     (const std::string &name) = 0;
 	virtual void set_col_unit     (const std::string &unit) = 0;
 	virtual void set_col_buff_size(const size_t buffer_size) = 0;
 	virtual void set_col_fmtflags (const std::ios_base::fmtflags ff) = 0;
 	virtual void set_col_prec     (const size_t precision) = 0;
 	virtual void set_col_size     (const size_t col_size) = 0;
+
+	virtual void register_reporter(tools::Reporter_probe* reporter) = 0;
+
+	virtual const std::string& get_col_name() const = 0;
 
 	inline runtime::Task&   operator[](const prb::tsk             t);
 	inline runtime::Socket& operator[](const prb::sck::probe      s);
@@ -57,8 +59,6 @@ public:
 template <typename T = uint8_t>
 class Probe : public AProbe
 {
-	friend tools::Reporter_probe;
-
 public:
 	inline runtime::Task&   operator[](const prb::tsk             t);
 	inline runtime::Socket& operator[](const prb::sck::probe      s);
@@ -66,10 +66,10 @@ public:
 	inline runtime::Socket& operator[](const std::string &tsk_sck  );
 
 protected:
-	const int size;
+	const size_t socket_size;
 	const std::string col_name;
-	tools::Reporter_probe& reporter;
-	Probe(const int size, const std::string &col_name, tools::Reporter_probe& reporter);
+	tools::Reporter_probe* reporter;
+	Probe(const size_t socket_size, const std::string &col_name);
 
 public:
 	virtual ~Probe() = default;
@@ -85,15 +85,18 @@ public:
 
 	virtual void set_n_frames(const size_t n_frames);
 
-	virtual void set_col_name     (const std::string &name);
 	virtual void set_col_unit     (const std::string &unit);
 	virtual void set_col_buff_size(const size_t buffer_size);
 	virtual void set_col_fmtflags (const std::ios_base::fmtflags ff);
 	virtual void set_col_prec     (const size_t precision);
 	virtual void set_col_size     (const size_t col_size);
 
+	const std::string& get_col_name() const;
+	const size_t get_socket_size() const;
+
 protected:
 	virtual void _probe(const T *in, const size_t frame_id);
+	void check_reporter();
 };
 }
 }

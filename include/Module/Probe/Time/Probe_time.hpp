@@ -18,18 +18,17 @@ namespace module
 {
 class Probe_time : public Probe<uint8_t>
 {
-	friend tools::Reporter_probe;
-
 protected:
 	std::chrono::time_point<std::chrono::steady_clock> t_start;
-	Probe_time(const std::string &col_name, tools::Reporter_probe& reporter);
 
 public:
+	Probe_time(const std::string &col_name, tools::Reporter_probe* reporter = nullptr);
+
 	virtual ~Probe_time() = default;
 
-	virtual std::type_index get_datatype() const;
-
 	virtual void reset();
+
+	virtual void register_reporter(tools::Reporter_probe* reporter);
 
 protected:
 	virtual void _probe(const uint8_t *in, const size_t frame_id);

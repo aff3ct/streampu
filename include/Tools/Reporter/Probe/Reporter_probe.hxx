@@ -20,7 +20,7 @@ bool Reporter_probe
 	if (this->col_size<T>(col) == this->buffer[col].size() -1)
 		return false;
 	auto buff = reinterpret_cast<T*>(this->buffer[col][this->head[col]].data());
-	std::copy(elts, elts + this->socket_sizes[col], buff);
+	std::copy(elts, elts + this->data_sizes[col], buff);
 	this->head[col] = (this->head[col] +1) % this->buffer[col].size();
 	return true;
 }
@@ -33,7 +33,7 @@ bool Reporter_probe
 	if (this->col_size<T>(col) == 0)
 		return false;
 	auto buff = reinterpret_cast<const T*>(this->buffer[col][this->tail[col]].data());
-	std::copy(buff, buff + this->socket_sizes[col], elts);
+	std::copy(buff, buff + this->data_sizes[col], elts);
 	this->tail[col] = (this->tail[col] +1) % this->buffer[col].size();
 	return true;
 }

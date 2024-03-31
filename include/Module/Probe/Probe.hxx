@@ -66,22 +66,15 @@ runtime::Socket& Probe<T>
 
 template <typename T>
 Probe<T>
-::Probe(const int size, const std::string &col_name, tools::Reporter_probe& reporter)
-: AProbe(), size(size), col_name(col_name), reporter(reporter)
+::Probe(const size_t socket_size, const std::string &col_name)
+: AProbe(), socket_size(socket_size), col_name(col_name), reporter(nullptr)
 {
 	const std::string name = "Probe<" + col_name + ">";
 	this->set_name(name);
 	this->set_short_name(name);
 
-	if (size < 0)
-	{
-		std::stringstream message;
-		message << "'size' has to be greater or equal to 0 ('size' = " << size << ").";
-		throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
-	}
-
 	auto &p1 = this->create_task("probe");
-	auto p1s_in = (size > 0) ? (int)this->template create_socket_in<T>(p1, "in", this->size) : (int)-1;
+	auto p1s_in = (socket_size > 0) ? (int)this->template create_socket_in<T>(p1, "in", this->socket_size) : (int)-1;
 	this->create_codelet(p1, [p1s_in](Module &m, runtime::Task &t, const size_t frame_id) -> int
 	{
 		auto &prb = static_cast<Probe<T>&>(m);
@@ -99,7 +92,8 @@ void Probe<T>
 	if (old_n_frames != n_frames)
 	{
 		Module::set_n_frames(n_frames);
-		reporter.set_n_frames(n_frames);
+		if (reporter != nullptr)
+			reporter->set_n_frames(n_frames);
 	}
 }
 
@@ -166,44 +160,68 @@ void Probe<T>
 
 template <typename T>
 void Probe<T>
-::set_col_name(const std::string &name)
-{
-	this->reporter.set_col_name(name, *this);
-}
-
-template <typename T>
-void Probe<T>
 ::set_col_unit(const std::string &unit)
 {
-	this->reporter.set_col_unit(unit, *this);
+	this->check_reporter();
+	this->reporter->set_col_unit(unit, *this);
 }
 
 template <typename T>
 void Probe<T>
 ::set_col_buff_size(const size_t buffer_size)
 {
-	this->reporter.set_col_buff_size(buffer_size, *this);
+	this->check_reporter();
+	this->reporter->set_col_buff_size(buffer_size, *this);
 }
 
 template <typename T>
 void Probe<T>
 ::set_col_fmtflags(const std::ios_base::fmtflags ff)
 {
-	this->reporter.set_col_fmtflags(ff, *this);
+	this->check_reporter();
+	this->reporter->set_col_fmtflags(ff, *this);
 }
 
 template <typename T>
 void Probe<T>
 ::set_col_prec(const size_t precision)
 {
-	this->reporter.set_col_prec(precision, *this);
+	this->check_reporter();
+	this->reporter->set_col_prec(precision, *this);
 }
 
 template <typename T>
 void Probe<T>
 ::set_col_size(const size_t col_size)
 {
-	this->reporter.set_col_size(col_size, *this);
+	this->check_reporter();
+	this->reporter->set_col_size(col_size, *this);
+}
+
+template <typename T>
+void Probe<T>
+::check_reporter()
+{
+	if (reporter == nullptr)
+	{
+		std::stringstream message;
+		message << "'reporter' can't be null, it is required to call 'AProbe::register_reporter()' first.";
+		throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
+	}
+}
+
+template <typename T>
+const std::string& Probe<T>
+::get_col_name() const
+{
+	return this->col_name;
+}
+
+template <typename T>
+const size_t Probe<T>
+::get_socket_size() const
+{
+	return this->socket_size;
 }
 
 }

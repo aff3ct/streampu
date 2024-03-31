@@ -2,13 +2,8 @@
 #include <iomanip>
 #include <sstream>
 
-#include "Module/Probe/Value/Probe_value.hpp"
-#include "Module/Probe/Throughput/Probe_throughput.hpp"
-#include "Module/Probe/Latency/Probe_latency.hpp"
-#include "Module/Probe/Time/Probe_time.hpp"
-#include "Module/Probe/Timestamp/Probe_timestamp.hpp"
-#include "Module/Probe/Occurrence/Probe_occurrence.hpp"
-#include "Module/Probe/Stream/Probe_stream.hpp"
+#include "Module/Probe/Probe.hpp"
+
 #include "Tools/Reporter/Probe/Reporter_probe.hpp"
 
 using namespace aff3ct;
@@ -71,15 +66,15 @@ template <typename T>
 bool Reporter_probe
 ::format_values(const int col, std::stringstream &temp_stream)
 {
-	std::vector<T> buff(this->socket_sizes[col]);
+	std::vector<T> buff(this->data_sizes[col]);
 	const auto can_pull = this->pull<T>(col, buff.data());
-	if (this->socket_sizes[col] > 1 && can_pull) temp_stream << "[";
-	for (size_t v = 0; v < this->socket_sizes[col] && can_pull; v++)
+	if (this->data_sizes[col] > 1 && can_pull) temp_stream << "[";
+	for (size_t v = 0; v < this->data_sizes[col] && can_pull; v++)
 	{
 		const std::string s = std::string((v != 0) ? ", " : "") + std::string((buff[v] >= 0) ? " " : "");
 		temp_stream << std::setprecision(this->precisions[col]) << s << +buff[v];
 	}
-	if (this->socket_sizes[col]> 1 && can_pull) temp_stream << "]";
+	if (this->data_sizes[col]> 1 && can_pull) temp_stream << "]";
 	return can_pull;
 }
 
@@ -211,24 +206,24 @@ void Reporter_probe
 
 void Reporter_probe
 ::register_probe(module::AProbe* probe,
-                 const size_t socket_size,
-                 const std::string &name,
+                 const size_t data_size,
+                 const std::type_index data_type,
                  const std::string &unit,
                  const size_t buffer_size,
                  const std::ios_base::fmtflags ff,
                  const size_t precision)
 {
-	if (name.empty())
+	if (probe == nullptr)
 	{
 		std::stringstream message;
-		message << "'name' cannot be empty.";
+		message << "'probe' cannot be nullptr.";
 		throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
 	}
 
-	if (socket_size == 0)
+	if (probe->get_col_name().empty())
 	{
 		std::stringstream message;
-		message << "'socket_size' has to be higher than 0.";
+		message << "'probe->get_col_name()' cannot be empty.";
 		throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
 	}
 
@@ -239,154 +234,28 @@ void Reporter_probe
 		throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
 	}
 
+	for (auto p : this->probes)
+		if (p == probe)
+		{
+			std::stringstream message;
+			message << "'probe' has already been registered to this reporter ('probe->get_col_name()' = "
+			        << probe->get_col_name() << ").";
+			throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
+		}
+
 	probe->set_n_frames(this->get_n_frames());
-	this->probes               .push_back(std::unique_ptr<module::AProbe>(probe));
+	this->probes               .push_back(probe);
 	this->head                 .push_back(0);
 	this->tail                 .push_back(0);
 	this->buffer               .push_back(std::vector<std::vector<int8_t>>(this->get_n_frames() * buffer_size,
-	                                      std::vector<int8_t>(socket_size * B_from_datatype(probe->get_datatype()))));
-	this->datatypes            .push_back(probe->get_datatype());
+	                                      std::vector<int8_t>(data_size * B_from_datatype(data_type))));
+	this->datatypes            .push_back(data_type);
 	this->format_flags         .push_back(ff);
 	this->precisions           .push_back(precision);
-	this->socket_sizes         .push_back(socket_size);
-	this->cols_groups[0].second.push_back(std::make_tuple(name, unit, 0));
-	this->name_to_col[name] = this->buffer.size() -1;
-	this->col_to_name[this->buffer.size() -1] = name;
-}
-
-template <typename T>
-module::Probe_value<T>& Reporter_probe
-::create_probe_value(const size_t socket_size,
-                     const std::string &name,
-                     const std::string &unit,
-                     const size_t buffer_size,
-                     const std::ios_base::fmtflags ff,
-                     const size_t precision)
-{
-	this->create_probe_checks(name);
-	auto probe = new module::Probe_value<T>(socket_size, name, *this);
-	this->register_probe(probe, socket_size, name, unit, buffer_size, ff, precision);
-	return *probe;
-}
-
-module::Probe_throughput& Reporter_probe
-::create_probe_throughput_mbps(const size_t data_size,
-                               const std::string &name,
-                               const size_t buffer_size,
-                               const std::ios_base::fmtflags ff,
-                               const size_t precision)
-{
-	this->create_probe_checks(name);
-	auto probe = new module::Probe_throughput(data_size, name, *this);
-	this->register_probe(probe, 1, name, "(Mbps)", buffer_size, ff, precision);
-	return *probe;
-}
-
-module::Probe_throughput& Reporter_probe
-::create_probe_throughput_mbps(const std::string &name,
-                               const size_t buffer_size,
-                               const std::ios_base::fmtflags ff,
-                               const size_t precision)
-{
-	return this->create_probe_throughput_mbps(1, name, buffer_size, ff, precision);
-}
-
-module::Probe_throughput& Reporter_probe
-::create_probe_throughput(const size_t data_size,
-                          const std::string &name,
-                          const double factor,
-                          const std::string &unit,
-                          const size_t buffer_size,
-                          const std::ios_base::fmtflags ff,
-                          const size_t precision)
-{
-	this->create_probe_checks(name);
-	auto probe = new module::Probe_throughput(data_size, name, factor, *this);
-	this->register_probe(probe, 1, name, unit, buffer_size, ff, precision);
-	return *probe;
-}
-
-module::Probe_throughput& Reporter_probe
-::create_probe_throughput(const std::string &name,
-                          const double factor,
-                          const std::string &unit,
-                          const size_t buffer_size,
-                          const std::ios_base::fmtflags ff,
-                          const size_t precision)
-{
-	return this->create_probe_throughput(1, name, factor, unit, buffer_size, ff, precision);
-}
-
-module::Probe_latency& Reporter_probe
-::create_probe_latency(const std::string &name,
-                       const size_t buffer_size,
-                       const std::ios_base::fmtflags ff,
-                       const size_t precision)
-{
-	this->create_probe_checks(name);
-	auto probe = new module::Probe_latency(name, *this);
-	this->register_probe(probe, 1, name, "(us)", buffer_size, ff, precision);
-	return *probe;
-}
-
-module::Probe_time& Reporter_probe
-::create_probe_time(const std::string &name,
-                    const size_t buffer_size,
-                    const std::ios_base::fmtflags ff,
-                    const size_t precision)
-{
-	this->create_probe_checks(name);
-	auto probe = new module::Probe_time(name, *this);
-	this->register_probe(probe, 1, name, "(sec)", buffer_size, ff, precision);
-	return *probe;
-}
-
-module::Probe_timestamp& Reporter_probe
-::create_probe_timestamp(const uint64_t mod,
-                         const std::string &name,
-                         const size_t buffer_size,
-                         const std::ios_base::fmtflags ff,
-                         const size_t precision)
-{
-	this->create_probe_checks(name);
-	auto probe = new module::Probe_timestamp(mod, name, *this);
-	this->register_probe(probe, 1, name, "(us)", buffer_size, ff, precision);
-	return *probe;
-}
-
-module::Probe_timestamp& Reporter_probe
-::create_probe_timestamp(const std::string &name,
-                         const size_t buffer_size,
-                         const std::ios_base::fmtflags ff,
-                         const size_t precision)
-{
-	return this->create_probe_timestamp(0, name, buffer_size, ff, precision);
-}
-
-module::Probe_occurrence& Reporter_probe
-::create_probe_occurrence(const std::string &name,
-                          const std::string &unit,
-                          const size_t buffer_size,
-                          const std::ios_base::fmtflags ff,
-                          const size_t precision)
-{
-	this->create_probe_checks(name);
-	auto probe = new module::Probe_occurrence(name, *this);
-	this->register_probe(probe, 1, name, unit, buffer_size, ff, precision);
-	return *probe;
-}
-
-module::Probe_stream& Reporter_probe
-::create_probe_stream(const std::string &name,
-                      const std::string &unit,
-                      const size_t buffer_size,
-                      const std::ios_base::fmtflags ff,
-                      const size_t precision)
-{
-	this->create_probe_checks(name);
-	auto probe = new module::Probe_stream(name, *this);
-	this->register_probe(probe, 1, name, unit, buffer_size, ff, precision);
-	return *probe;
+	this->data_sizes           .push_back(data_size);
+	this->cols_groups[0].second.push_back(std::make_tuple(probe->get_col_name(), unit, 0));
+	this->name_to_col[probe->get_col_name()] = this->buffer.size() -1;
+	this->col_to_name[this->buffer.size() -1] = probe->get_col_name();
 }
 
 void Reporter_probe
@@ -401,7 +270,7 @@ void Reporter_probe
 			this->probes[p]->set_n_frames(n_frames);
 			auto buffer_size = this->buffer[p].size() / old_n_frames;
 			this->buffer[p].resize(n_frames * buffer_size,
-			                       std::vector<int8_t>(this->socket_sizes[p] * B_from_datatype(this->datatypes[p])));
+			                       std::vector<int8_t>(this->data_sizes[p] * B_from_datatype(this->datatypes[p])));
 		}
 	}
 }
@@ -416,22 +285,13 @@ size_t Reporter_probe
 ::get_probe_index(const module::AProbe &prb)
 {
 	for (size_t p = 0; p < probes.size(); p++)
-		if (probes[p].get() == &prb)
+		if (probes[p] == &prb)
 			return p;
 
 	std::stringstream message;
 	message << "Current probe is not contained in the reporter ('prb.get_name()' = " << prb.get_name()
 	        << ", 'Reporter_probe.name' = " << std::get<0>(this->cols_groups[0].first) << ").";
 	throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
-}
-
-void Reporter_probe
-::set_col_name(const std::string &name, const module::AProbe &prb)
-{
-	size_t p = this->get_probe_index(prb);
-	std::string unit = std::get<1>(this->cols_groups[0].second[p]);
-	size_t col_size = std::get<2>(this->cols_groups[0].second[p]);
-	this->cols_groups[0].second[p] = std::make_tuple(name, unit, col_size);
 }
 
 void Reporter_probe
@@ -447,7 +307,7 @@ void Reporter_probe
 ::set_cols_unit(const std::string &unit)
 {
 	for (auto &p : this->probes)
-		this->set_col_unit(unit, *p.get());
+		this->set_col_unit(unit, *p);
 }
 
 void Reporter_probe
@@ -455,14 +315,14 @@ void Reporter_probe
 {
 	size_t p = this->get_probe_index(prb);
 	this->buffer[p].resize(this->get_n_frames() * buffer_size,
-		                   std::vector<int8_t>(this->socket_sizes[p] * B_from_datatype(prb.get_datatype())));
+		                   std::vector<int8_t>(this->data_sizes[p] * B_from_datatype(this->datatypes[p])));
 }
 
 void Reporter_probe
 ::set_cols_buff_size(const size_t buffer_size)
 {
 	for (auto &p : this->probes)
-		this->set_col_buff_size(buffer_size, *p.get());
+		this->set_col_buff_size(buffer_size, *p);
 }
 
 void Reporter_probe
@@ -476,7 +336,7 @@ void Reporter_probe
 ::set_cols_fmtflags(const std::ios_base::fmtflags ff)
 {
 	for (auto &p : this->probes)
-		this->set_col_fmtflags(ff, *p.get());
+		this->set_col_fmtflags(ff, *p);
 }
 
 void Reporter_probe
@@ -490,7 +350,7 @@ void Reporter_probe
 ::set_cols_prec(const size_t precision)
 {
 	for (auto &p : this->probes)
-		this->set_col_prec(precision, *p.get());
+		this->set_col_prec(precision, *p);
 }
 
 void Reporter_probe
@@ -506,21 +366,20 @@ void Reporter_probe
 ::set_cols_size(const size_t col_size)
 {
 	for (auto &p : this->probes)
-		this->set_col_size(col_size, *p.get());
+		this->set_col_size(col_size, *p);
 }
 
-// ==================================================================================== explicit template instantiation
-
-template aff3ct::module::Probe_value<int8_t  >& aff3ct::tools::Reporter_probe::create_probe_value<int8_t  >(const size_t, const std::string&, const std::string&, const size_t, const std::ios_base::fmtflags, const size_t);
-template aff3ct::module::Probe_value<uint8_t >& aff3ct::tools::Reporter_probe::create_probe_value<uint8_t >(const size_t, const std::string&, const std::string&, const size_t, const std::ios_base::fmtflags, const size_t);
-template aff3ct::module::Probe_value<int16_t >& aff3ct::tools::Reporter_probe::create_probe_value<int16_t >(const size_t, const std::string&, const std::string&, const size_t, const std::ios_base::fmtflags, const size_t);
-template aff3ct::module::Probe_value<uint16_t>& aff3ct::tools::Reporter_probe::create_probe_value<uint16_t>(const size_t, const std::string&, const std::string&, const size_t, const std::ios_base::fmtflags, const size_t);
-template aff3ct::module::Probe_value<int32_t >& aff3ct::tools::Reporter_probe::create_probe_value<int32_t >(const size_t, const std::string&, const std::string&, const size_t, const std::ios_base::fmtflags, const size_t);
-template aff3ct::module::Probe_value<uint32_t>& aff3ct::tools::Reporter_probe::create_probe_value<uint32_t>(const size_t, const std::string&, const std::string&, const size_t, const std::ios_base::fmtflags, const size_t);
-template aff3ct::module::Probe_value<int64_t >& aff3ct::tools::Reporter_probe::create_probe_value<int64_t >(const size_t, const std::string&, const std::string&, const size_t, const std::ios_base::fmtflags, const size_t);
-template aff3ct::module::Probe_value<uint64_t>& aff3ct::tools::Reporter_probe::create_probe_value<uint64_t>(const size_t, const std::string&, const std::string&, const size_t, const std::ios_base::fmtflags, const size_t);
-template aff3ct::module::Probe_value<float   >& aff3ct::tools::Reporter_probe::create_probe_value<float   >(const size_t, const std::string&, const std::string&, const size_t, const std::ios_base::fmtflags, const size_t);
-template aff3ct::module::Probe_value<double  >& aff3ct::tools::Reporter_probe::create_probe_value<double  >(const size_t, const std::string&, const std::string&, const size_t, const std::ios_base::fmtflags, const size_t);
-
-// ==================================================================================== explicit template instantiation
-
+void Reporter_probe
+::register_probes(const std::initializer_list<module::AProbe*> &probes)
+{
+	for (auto p : probes)
+	{
+		if (p == nullptr)
+		{
+			std::stringstream message;
+			message << "'p' cannot be nullptr.";
+			throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
+		}
+		p->register_reporter(this);
+	}
+}

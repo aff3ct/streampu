@@ -1,33 +1,50 @@
+#include <ios>
+#include <sstream>
+
+#include "Tools/Exception/exception.hpp"
 #include "Module/Probe/Latency/Probe_latency.hpp"
 
 using namespace aff3ct;
 using namespace aff3ct::module;
 
 Probe_latency
-::Probe_latency(const std::string &col_name, tools::Reporter_probe& reporter)
-: Probe<uint8_t>(0, col_name, reporter),
+::Probe_latency(const std::string &col_name, tools::Reporter_probe* reporter)
+: Probe<uint8_t>(0, col_name),
   t_start(std::chrono::steady_clock::now())
 {
 	const std::string name = "Probe_latency<" + col_name + ">";
 	this->set_name(name);
 	this->set_single_wave(true);
+
+	if (reporter != nullptr)
+		this->register_reporter(reporter);
+}
+
+void Probe_latency
+::register_reporter(tools::Reporter_probe* reporter)
+{
+	if (this->reporter != nullptr)
+	{
+		std::stringstream message;
+		message << "It is not possible to register this probe to a new 'tools::Reporter_probe' because it is already "
+		        << "registered to an other 'tools::Reporter_probe'.";
+		throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
+	}
+	this->reporter = reporter;
+	this->reporter->register_probe(this, 1, typeid(int64_t), "(us)", 100, std::ios_base::scientific, 3);
 }
 
 void Probe_latency
 ::_probe(const uint8_t *in, const size_t frame_id)
 {
+	this->check_reporter();
+
 	auto t_stop = std::chrono::steady_clock::now();
 	auto time_duration = (int64_t)std::chrono::duration_cast<std::chrono::microseconds>(t_stop - this->t_start).count();
 	this->t_start = t_stop;
 
 	for (size_t f = 0; f < this->get_n_frames(); f++)
-		this->reporter.probe(this->col_name, (void*)&time_duration, frame_id);
-}
-
-std::type_index Probe_latency
-::get_datatype() const
-{
-	return typeid(int64_t);
+		this->reporter->probe(this->col_name, (void*)&time_duration, frame_id);
 }
 
 void Probe_latency

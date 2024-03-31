@@ -208,25 +208,29 @@ int main(int argc, char** argv)
 	std::cout << "#" << std::endl;
 
 	if (!force_sequence && !no_copy_mode)
-		std::clog << rang::tag::warning << "'no_copy_mode' has no effect with pipeline (it is always enable)" << std::endl;
+		std::clog << rang::tag::warning << "'no_copy_mode' has no effect with pipeline (it is always enable)"
+		                                << std::endl;
 	if (!force_sequence && step_by_step)
 		std::clog << rang::tag::warning << "'step_by_step' is not available with pipeline" << std::endl;
 	if (force_sequence && n_threads > 1)
-		std::clog << rang::tag::warning << "Sequence mode only supports a single thread (User-Source/Sinks are not clonable)" << std::endl;
+		std::clog << rang::tag::warning << "Sequence mode only supports a single thread (User-Source/Sinks are not "
+		                                << "clonable)" << std::endl;
 
 	// create reporters and probes for the real-time probes file
 	tools::Reporter_probe rep_fra_stats("Counters");
-	module::AProbe& prb_fra_fid(rep_fra_stats.create_probe_occurrence("FRAME_ID"));
-	module::AProbe& prb_fra_sid(rep_fra_stats.create_probe_stream("STREAM_ID"));
+	module::Probe_occurrence prb_fra_fid ("FRAME_ID" );
+	module::Probe_stream     prb_fra_sid ("STREAM_ID");
+	rep_fra_stats.register_probes({ &prb_fra_fid, &prb_fra_sid });
 	prb_fra_sid.set_col_size(11);
 	prb_fra_fid.set_custom_name("Probe<FID>");
 	prb_fra_sid.set_custom_name("Probe<SID>");
 	rep_fra_stats.set_cols_buff_size(200);
 
 	tools::Reporter_probe rep_thr_stats("Throughput, latency", "and time");
-	module::AProbe& prb_thr_thr (rep_thr_stats.create_probe_throughput("FPS"));  // only valid for sequence, invalid for pipeline
-	module::AProbe& prb_thr_lat (rep_thr_stats.create_probe_latency   ("LAT"));  // only valid for sequence, invalid for pipeline
-	module::AProbe& prb_thr_time(rep_thr_stats.create_probe_time      ("TIME")); // only valid for sequence, invalid for pipeline
+	module::Probe_throughput prb_thr_thr ("FPS" ); // only valid for sequence, invalid for pipeline
+	module::Probe_latency    prb_thr_lat ("LAT" ); // only valid for sequence, invalid for pipeline
+	module::Probe_time       prb_thr_time("TIME"); // only valid for sequence, invalid for pipeline
+	rep_thr_stats.register_probes({ &prb_thr_thr, &prb_thr_lat, &prb_thr_time});
 	prb_thr_thr.set_col_size(12);
 	prb_thr_time.set_col_prec(6);
 	prb_thr_time.set_col_size(12);
@@ -234,19 +238,22 @@ int main(int argc, char** argv)
 
 	tools::Reporter_probe rep_timestamp_stats("Timestamps", "(in microseconds) [SX = stage X, B = begin, E = end]");
 	const uint64_t mod = 6000000ul * 60ul * 10; // limit to 60 minutes timestamp
-	module::AProbe& prb_ts_s1b(rep_timestamp_stats.create_probe_timestamp      (mod, "S1_B")); // timestamp stage 1 begin
-	module::AProbe& prb_ts_s1e(rep_timestamp_stats.create_probe_timestamp      (mod, "S1_E")); // timestamp stage 1 end
-	module::AProbe& prb_ts_s2b(rep_timestamp_stats.create_probe_value<uint64_t>(1,   "S2_B")); // timestamp stage 2 begin
-	module::AProbe& prb_ts_s2e(rep_timestamp_stats.create_probe_value<uint64_t>(1,   "S2_E")); // timestamp stage 2 end
-	module::AProbe& prb_ts_s3b(rep_timestamp_stats.create_probe_timestamp      (mod, "S3_B")); // timestamp stage 3 begin
-	module::AProbe& prb_ts_s3e(rep_timestamp_stats.create_probe_timestamp      (mod, "S3_E")); // timestamp stage 3 end
+	module::Probe_timestamp       prb_ts_s1b(mod, "S1_B"); // timestamp stage 1 begin
+	module::Probe_timestamp       prb_ts_s1e(mod, "S1_E"); // timestamp stage 1 end
+	module::Probe_value<uint64_t> prb_ts_s2b(1,   "S2_B"); // timestamp stage 2 begin
+	module::Probe_value<uint64_t> prb_ts_s2e(1,   "S2_E"); // timestamp stage 2 end
+	module::Probe_timestamp       prb_ts_s3b(mod, "S3_B"); // timestamp stage 3 begin
+	module::Probe_timestamp       prb_ts_s3e(mod, "S3_E"); // timestamp stage 3 end
+	rep_timestamp_stats.register_probes({ &prb_ts_s1b, &prb_ts_s1e, &prb_ts_s2b, &prb_ts_s2e, &prb_ts_s3b,
+	                                      &prb_ts_s3e });
 	rep_timestamp_stats.set_cols_buff_size(200); // size of the buffer used by the probes to record values
 	rep_timestamp_stats.set_cols_unit("(us)");
 	rep_timestamp_stats.set_cols_size(12);
 
 	tools::Reporter_probe rep_bitvals("Read bits", "(Unpacked)");
-	module::AProbe& prb_bitvals_cnt(rep_bitvals.create_probe_value<uint32_t>(1, "Count"));
-	module::AProbe& prb_bitvals_data(rep_bitvals.create_probe_value<uint8_t>(data_length, "Bits"));
+	module::Probe_value<uint32_t> prb_bitvals_cnt (1,           "Count");
+	module::Probe_value<uint8_t>  prb_bitvals_data(data_length, "Bits" );
+	rep_bitvals.register_probes({ &prb_bitvals_cnt, &prb_bitvals_data });
 	rep_bitvals.set_cols_buff_size(200);
 	prb_bitvals_cnt.set_col_size(7);
 	prb_bitvals_data.set_col_size(data_length * 4 + 2);
