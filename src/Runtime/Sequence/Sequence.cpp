@@ -497,7 +497,8 @@ void Sequence
 	}
 
 	this->n_tasks = taid;
-	this->check_ctrl_flow(root);
+	// this->check_ctrl_flow(root); // /!\ this check has been commented because it is known to do not work in the
+	                                //     general case
 	this->_init<SS>(root);
 	this->update_firsts_and_lasts_tasks();
 	this->gen_processes();
@@ -2457,6 +2458,8 @@ void Sequence
 	}
 }
 
+// /!\ this check has been commented because it is known to do not work in the general case
+/*
 template<class SS>
 void Sequence
 ::check_ctrl_flow(tools::Digraph_node<SS>* root)
@@ -2548,3 +2551,4 @@ void Sequence
 	std::vector<tools::Digraph_node<SS>*> already_parsed_nodes;
 	return check_control_flow_parity(root, already_parsed_nodes);
 }
+*/

@@ -182,7 +182,6 @@ public:
 	std::vector<std::vector<runtime::Task*>> get_tasks_per_threads() const;
 	std::vector<std::vector<runtime::Task*>> get_tasks_per_types  () const;
 
-
 	inline const std::vector<std::vector<runtime::Task*>>& get_firsts_tasks() const;
 	inline const std::vector<std::vector<runtime::Task*>>& get_lasts_tasks() const;
 

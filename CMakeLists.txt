@@ -172,11 +172,10 @@ if(AFF3CT_CORE_TESTS)
     add_executable(aff3ct-core-test-nested-do-while-loops $<TARGET_OBJECTS:aff3ct-core-obj>
                    ${CMAKE_CURRENT_SOURCE_DIR}/tests/bootstrap/nested_do_while_loops.cpp)
     set_target_properties(aff3ct-core-test-nested-do-while-loops PROPERTIES
-                                                        OUTPUT_NAME test-nested-do-while-loops
-                                                        POSITION_INDEPENDENT_CODE ON) # set -fpie
+                                                                 OUTPUT_NAME test-nested-do-while-loops
+                                                                 POSITION_INDEPENDENT_CODE ON) # set -fpie
     list(APPEND aff3ct_core_tests_list aff3ct-core-test-nested-do-while-loops)
     list(APPEND aff3ct_core_targets_list aff3ct-core-test-nested-do-while-loops)
-
 
     add_executable(aff3ct-core-test-simple-pipeline $<TARGET_OBJECTS:aff3ct-core-obj>
                    ${CMAKE_CURRENT_SOURCE_DIR}/tests/bootstrap/simple_pipeline.cpp)

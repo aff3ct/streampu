@@ -176,21 +176,20 @@ int main(int argc, char** argv)
 	iterator2.set_custom_name("IteratorOut");
 
 	// sockets binding
-
-	switcher2       ["select::in_data1"  ]  = initializer           ["initialize::out"   ];
-	iterator2       ("iterate"           )  = switcher2             ("select"            );
-	switcher2       ["commute::in_ctrl"  ]  = iterator2             ["iterate::out"      ];
-	switcher        ["select::in_data1"  ]  = switcher2             ["select::out_data"  ];
-	iterator        ("iterate"           )  = switcher              ("select"            );
-	switcher        ["commute::in_ctrl"  ]  = iterator              ["iterate::out"      ];
-	(*incs[0])      ["increment::in"     ]  = switcher              ["select::out_data"  ];
+	switcher2       [   "select::in_data1"] = initializer           ["initialize::out"      ];
+	switcher        [   "select::in_data1"] = switcher2             [    "select::out_data" ];
+	iterator        (  "iterate"          ) = switcher              (    "select"           );
+	switcher        [  "commute::in_ctrl" ] = iterator              [   "iterate::out"      ];
+	(*incs[0])      ["increment::in"      ] = switcher              [    "select::out_data" ];
 	for (size_t s = 0; s < incs.size() -1; s++)
-		(*incs[s+1])["increment::in"     ] = (*incs[s])             [ "increment::out"   ];
-	switcher        ["commute::in_data"  ]  = (*incs[incs.size()-1])[ "increment::out"   ];
-	switcher        ["select::in_data0"  ]  = switcher              ["commute::out_data0"];
-	switcher2       ["commute::in_data"  ]  = switcher              ["commute::out_data1"];
-	switcher2       ["select::in_data0"  ]  = switcher2             ["commute::out_data0"];
-	finalizer       ["finalize::in"      ]  = switcher2             ["commute::out_data1"];
+		(*incs[s+1])["increment::in"      ] = (*incs[s])            [ "increment::out"      ];
+	switcher        [  "commute::in_data" ] = (*incs[incs.size()-1])[ "increment::out"      ];
+	switcher        [   "select::in_data0"] = switcher              [   "commute::out_data0"];
+	iterator2       (  "iterate"          ) = switcher              [   "commute::out_data1"];
+	switcher2       [  "commute::in_data" ] = switcher              [   "commute::out_data1"];
+	switcher2       [  "commute::in_ctrl" ] = iterator2             [   "iterate::out"      ];
+	switcher2       [   "select::in_data0"] = switcher2             [   "commute::out_data0"];
+	finalizer       [ "finalize::in"      ] = switcher2             [   "commute::out_data1"];
 
 	runtime::Sequence sequence_nested_loops(initializer("initialize"), n_threads);
 	sequence_nested_loops.set_n_frames(n_inter_frames);
@@ -249,7 +248,7 @@ int main(int argc, char** argv)
 		chain_sleep_time += inc->get_ns();
 
 	auto theoretical_time = ((chain_sleep_time * n_exec * n_inter_frames) / 1000.f / 1000.f / n_threads) *
-	                        (iterator.get_limit() * iterator2.get_limit());
+	                        ((iterator.get_limit() +1) * (iterator2.get_limit() +1));
 	std::cout << "Sequence theoretical time: " << theoretical_time << " ms" << std::endl;
 
 	// verification of the sequence execution
@@ -290,20 +289,21 @@ int main(int argc, char** argv)
 	}
 
 	sequence_nested_loops.set_n_frames(1);
-	/*switcher2 [module::swi::tsk::select ][1]   .unbind(initializer[module::ini::sck::initialize::out]);
-	iterator2 [module::ite::tsk::iterate]      .unbind(switcher2  [module::swi::tsk::select][3]);
-	switcher2 [module::swi::tsk::commute][0]   .unbind(switcher2  [module::swi::tsk::select][2]);
-	switcher2 [module::swi::tsk::commute][1]   .unbind(iterator2  [module::ite::sck::iterate::out]);
-	switcher  [module::swi::tsk::select ][1]   .unbind(switcher2  [module::swi::tsk::commute][2]);
-	iterator  [module::ite::tsk::iterate]      .unbind(switcher   [module::swi::tsk::select ][3]);
-	switcher  [module::swi::tsk::commute][0]   .unbind(switcher   [module::swi::tsk::select ][2]);
-	switcher  [module::swi::tsk::commute][1]   .unbind(iterator   [module::ite::sck::iterate::out]);
-	(*incs[0])[module::inc::sck::increment::in].unbind(switcher   [module::swi::tsk::commute][2]);
+
+	switcher2       [module::swi::tsk::select   ][ 1].unbind(initializer           [module::ini::sck::initialize::out]);
+	switcher        [module::swi::tsk::select   ][ 1].unbind(switcher2             [module::swi::tsk::select    ][  2]);
+	iterator        [module::ite::tsk::iterate      ].unbind(switcher              [module::swi::tsk::select         ]);
+	switcher        [module::swi::tsk::commute  ][ 1].unbind(iterator              [module::ite::sck::iterate   ::out]);
+	(*incs[0])      [module::inc::sck::increment::in].unbind(switcher              [module::swi::tsk::select    ][  2]);
 	for (size_t s = 0; s < incs.size() -1; s++)
-		(*incs[s+1])[module::inc::sck::increment::in].unbind((*incs[s])[module::inc::sck::increment::out]);
-	switcher  [module::swi::tsk::select][0]    .unbind((*incs[incs.size()-1])[module::inc::sck::increment::out]);
-	switcher2 [module::swi::tsk::select][0]    .unbind(switcher   [module::swi::tsk::commute][3]);
-	finalizer [module::fin::sck::finalize::in] .unbind(switcher2  [module::swi::tsk::commute][3]);*/
+		(*incs[s+1])[module::inc::sck::increment::in].unbind((*incs[s])            [module::inc::sck::increment ::out]);
+	switcher        [module::swi::tsk::commute  ][ 0].unbind((*incs[incs.size()-1])[module::inc::sck::increment ::out]);
+	switcher        [module::swi::tsk::select   ][ 0].unbind(switcher              [module::swi::tsk::commute   ][  2]);
+	iterator2       [module::ite::tsk::iterate      ].unbind(switcher              [module::swi::tsk::commute   ][  3]);
+	switcher2       [module::swi::tsk::commute  ][ 0].unbind(switcher              [module::swi::tsk::commute   ][  3]);
+	switcher2       [module::swi::tsk::commute  ][ 1].unbind(iterator2             [module::ite::sck::iterate   ::out]);
+	switcher2       [module::swi::tsk::select   ][ 0].unbind(switcher2             [module::swi::tsk::commute   ][  2]);
+	finalizer       [module::fin::sck::finalize ::in].unbind(switcher2             [module::swi::tsk::commute   ][  3]);
 
 	return test_results;
 }

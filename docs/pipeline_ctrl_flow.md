@@ -163,6 +163,12 @@ void Check_ctrl_flow(Node n, List path_taken):
                 throw an error
 ```
 
+!!! danger
+	<u>Edit 2024-03-31</u>: We found that the previous check algorithm is not 
+	valid in the general case. For instance, in the case of nested do while
+	loops, it will raise an error when there is none. Thus, this check has
+	been disabled until a more robust solution can be found.
+
 ### Tests
 
 Some specific tests have been added to the project to validate the robustness of 
