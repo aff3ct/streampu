@@ -218,8 +218,8 @@ int main(int argc, char** argv)
 
 	// create reporters and probes for the real-time probes file
 	tools::Reporter_probe rep_fra_stats("Counters");
-	module::Probe_occurrence prb_fra_fid ("FRAME_ID" );
-	module::Probe_stream     prb_fra_sid ("STREAM_ID");
+	module::Probe_occurrence prb_fra_fid("FRAME_ID" );
+	module::Probe_stream     prb_fra_sid("STREAM_ID");
 	rep_fra_stats.register_probes({ &prb_fra_fid, &prb_fra_sid });
 	prb_fra_sid.set_col_size(11);
 	prb_fra_fid.set_custom_name("Probe<FID>");
@@ -259,9 +259,7 @@ int main(int argc, char** argv)
 	prb_bitvals_data.set_col_size(data_length * 4 + 2);
 	prb_bitvals_data.set_col_unit("(low-order bit on the left)");
 
-	const std::vector<tools::Reporter*>& reporters = { &rep_fra_stats, &rep_thr_stats, &rep_timestamp_stats,
-	                                                   &rep_bitvals };
-	tools::Terminal_dump terminal_probes(reporters);
+	tools::Terminal_dump terminal_probes({ &rep_fra_stats, &rep_thr_stats, &rep_timestamp_stats, &rep_bitvals });
 
 	std::ofstream probes_file;
 	if (!probes_filepath.empty())
