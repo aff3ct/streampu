@@ -25,10 +25,13 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
-      - name: Generate Headers & Compare
+      - name: Install clang-format
         run: |
           apt-get update
           apt-get -y install clang-format
+        shell: bash
+      - name: Invoke clang-format on the source code & Compare
+        run: |
           mkdir original_code
           cp -r include original_code
           cp -r src original_code
