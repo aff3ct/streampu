@@ -210,18 +210,20 @@ int main(int argc, char** argv)
 	});
 
 	// sockets binding
-	(*rlys[0])[    "relayf::fwd" ] = initializer["initialize::out" ];
-	(*rlys[0])[     "relay::in"  ] = initializer["initialize::out" ];
-	(*incs[0])["incrementf::fwd" ] = (*rlys[0]) [    "relayf::fwd" ];
-	(*incs[1])["incrementf::fwd" ] = (*rlys[0]) [    "relayf::fwd" ];
-	(*incs[1])("incrementf"      ) = (*rlys[0]) (     "relay"      );
-	(*rlys[1])[    "relayf::fwd" ] = (*incs[0]) ["incrementf::fwd" ];
-	comp      [   "compare::fwd0"] = (*rlys[1]) [    "relayf::fwd" ];
-	comp      [   "compare::fwd1"] = (*incs[1]) ["incrementf::fwd" ];
-	comp      [   "compare::fwd2"] = initializer["initialize::out" ];
-	finalizer1[  "finalize::in"  ] = comp       [   "compare::fwd2"];
-	finalizer2[  "finalize::in"  ] = (*rlys[0]) [     "relay::out" ];
-	finalizer2(  "finalize"      ) = finalizer1 (  "finalize"      );
+    // clang-format off
+    (*rlys[0])[    "relayf::fwd" ] = initializer["initialize::out" ];
+    (*rlys[0])[     "relay::in"  ] = initializer["initialize::out" ];
+    (*incs[0])["incrementf::fwd" ] = (*rlys[0]) [    "relayf::fwd" ];
+    (*incs[1])["incrementf::fwd" ] = (*rlys[0]) [    "relayf::fwd" ];
+    (*incs[1])("incrementf"      ) = (*rlys[0]) (     "relay"      );
+    (*rlys[1])[    "relayf::fwd" ] = (*incs[0]) ["incrementf::fwd" ];
+    comp      [   "compare::fwd0"] = (*rlys[1]) [    "relayf::fwd" ];
+    comp      [   "compare::fwd1"] = (*incs[1]) ["incrementf::fwd" ];
+    comp      [   "compare::fwd2"] = initializer["initialize::out" ];
+    finalizer1[  "finalize::in"  ] = comp       [   "compare::fwd2"];
+    finalizer2[  "finalize::in"  ] = (*rlys[0]) [     "relay::out" ];
+    finalizer2(  "finalize"      ) = finalizer1 (  "finalize"      );
+    // clang-format on
 
 	std::unique_ptr<runtime::Sequence> sequence_chain;
 	std::unique_ptr<runtime::Pipeline> pipeline_chain;
@@ -424,18 +426,20 @@ int main(int argc, char** argv)
 		pipeline_chain->unbind_adaptors();
 	}
 
-	(*rlys[0])[module::rly::sck::relayf::fwd].unbind(initializer[module::ini::sck::initialize::out]);
-	(*rlys[0])[module::rly::sck::relay::in].unbind(initializer[module::ini::sck::initialize::out]);
-	(*incs[0])[module::inc::sck::incrementf::fwd].unbind((*rlys[0])[module::rly::sck::relayf::fwd]);
-	(*incs[1])[module::inc::sck::incrementf::fwd].unbind((*rlys[0])[module::rly::sck::relayf::fwd]);
-	(*incs[1])[module::inc::tsk::incrementf].unbind((*rlys[0])[module::rly::sck::relay::status]);
-	(*rlys[1])[module::rly::sck::relayf::fwd].unbind((*incs[0])[module::inc::sck::incrementf::fwd]);
-	comp["compare::fwd0"].unbind((*rlys[1])[module::rly::sck::relayf::fwd]);
-	comp["compare::fwd1"].unbind((*incs[1])[module::inc::sck::incrementf::fwd]);
-	comp["compare::fwd2"].unbind(initializer[module::ini::sck::initialize::out]);
-    finalizer1[module::fin::sck::finalize::in].unbind(comp["compare::fwd2"]);
-	finalizer2[module::fin::sck::finalize::in].unbind((*rlys[0])[module::rly::sck::relay::out]);
-	finalizer2[module::fin::tsk::finalize].unbind(finalizer1[module::fin::sck::finalize::status]);
+    // clang-format off
+    (*rlys[0])[module::rly::sck::relayf    ::fwd  ].unbind(initializer[module::ini::sck::initialize::out   ]);
+    (*rlys[0])[module::rly::sck::relay     ::in   ].unbind(initializer[module::ini::sck::initialize::out   ]);
+    (*incs[0])[module::inc::sck::incrementf::fwd  ].unbind((*rlys[0]) [module::rly::sck::relayf    ::fwd   ]);
+    (*incs[1])[module::inc::sck::incrementf::fwd  ].unbind((*rlys[0]) [module::rly::sck::relayf    ::fwd   ]);
+    (*incs[1])[module::inc::tsk::incrementf       ].unbind((*rlys[0]) [module::rly::sck::relay     ::status]);
+    (*rlys[1])[module::rly::sck::relayf    ::fwd  ].unbind((*incs[0]) [module::inc::sck::incrementf::fwd   ]);
+    comp      [                 "compare   ::fwd0"].unbind((*rlys[1]) [module::rly::sck::relayf    ::fwd   ]);
+    comp      [                 "compare   ::fwd1"].unbind((*incs[1]) [module::inc::sck::incrementf::fwd   ]);
+    comp      [                 "compare   ::fwd2"].unbind(initializer[module::ini::sck::initialize::out   ]);
+    finalizer1[module::fin::sck::finalize  ::in   ].unbind(comp       [                 "compare   ::fwd2" ]);
+    finalizer2[module::fin::sck::finalize  ::in   ].unbind((*rlys[0]) [module::rly::sck::relay     ::out   ]);
+    finalizer2[module::fin::tsk::finalize         ].unbind(finalizer1 [module::fin::sck::finalize  ::status]);
+    // clang-format on
 
 	return test_results;
 }

@@ -23,16 +23,18 @@ class Pipeline : public tools::Interface_get_set_n_frames
 protected:
 	Sequence original_sequence;
 	std::vector<std::shared_ptr<Sequence>> stages;
-	std::vector<std::pair<std::vector<std::shared_ptr<module::Adaptor>>,
-	                      std::vector<std::shared_ptr<module::Adaptor>>>> adaptors;
+    // clang-format off
+    std::vector<std::pair<std::vector<std::shared_ptr<module::Adaptor>>,
+                          std::vector<std::shared_ptr<module::Adaptor>>>> adaptors;
 
-	//                               sck out addr      stage   tsk id  sck id  unbind_pos
-	std::vector<std::pair<std::tuple<runtime::Socket*, size_t, size_t, size_t, size_t>,
-	//                               sck in addr       stage   tsk id  sck id  tsk in addr
-	                      std::tuple<runtime::Socket*, size_t, size_t, size_t, runtime::Task*>>> sck_orphan_binds;
+    //                               sck out addr      stage   tsk id  sck id  unbind_pos
+    std::vector<std::pair<std::tuple<runtime::Socket*, size_t, size_t, size_t, size_t>,
+    //                               sck in addr       stage   tsk id  sck id  tsk in addr
+                          std::tuple<runtime::Socket*, size_t, size_t, size_t, runtime::Task*>>> sck_orphan_binds;
 
-	//                     sck out addr      sck in addr       priority  tsk in addr
-	std::vector<std::tuple<runtime::Socket*, runtime::Socket*, size_t,   runtime::Task*>> adaptors_binds;
+    //                     sck out addr      sck in addr       priority  tsk in addr
+    std::vector<std::tuple<runtime::Socket*, runtime::Socket*, size_t,   runtime::Task*>> adaptors_binds;
+    // clang-format on
 
 	std::vector<std::vector<size_t>> saved_firsts_tasks_id;
 	std::vector<std::vector<size_t>> saved_lasts_tasks_id;

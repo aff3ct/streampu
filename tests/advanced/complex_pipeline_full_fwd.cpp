@@ -205,13 +205,15 @@ int main(int argc, char** argv)
 	});
 
 	// sockets binding
-	(*rlys[0])[    "relayf::fwd" ] = initializer["initialize::out" ];
-	(*incs[0])["incrementf::fwd" ] = (*rlys[0]) [    "relayf::fwd" ];
-	(*incs[1])["incrementf::fwd" ] = (*rlys[0]) [    "relayf::fwd" ];
-	(*rlys[1])[    "relayf::fwd" ] = (*incs[0]) ["incrementf::fwd" ];
-	comp      [   "compare::fwd0"] = (*rlys[1]) [    "relayf::fwd" ];
-	comp      [   "compare::fwd1"] = (*incs[1]) ["incrementf::fwd" ];
-	finalizer [  "finalize::in"  ] = comp       [   "compare::fwd1"];
+	// clang-format off
+    (*rlys[0])[    "relayf::fwd" ] = initializer["initialize::out" ];
+    (*incs[0])["incrementf::fwd" ] = (*rlys[0]) [    "relayf::fwd" ];
+    (*incs[1])["incrementf::fwd" ] = (*rlys[0]) [    "relayf::fwd" ];
+    (*rlys[1])[    "relayf::fwd" ] = (*incs[0]) ["incrementf::fwd" ];
+    comp      [   "compare::fwd0"] = (*rlys[1]) [    "relayf::fwd" ];
+    comp      [   "compare::fwd1"] = (*incs[1]) ["incrementf::fwd" ];
+    finalizer [  "finalize::in"  ] = comp       [   "compare::fwd1"];
+	// clang-format on
 
 	std::unique_ptr<runtime::Sequence> sequence_chain;
 	std::unique_ptr<runtime::Pipeline> pipeline_chain;
@@ -392,13 +394,15 @@ int main(int argc, char** argv)
 		pipeline_chain->unbind_adaptors();
 	}
 
-	(*rlys[0])[module::rly::sck::relayf::fwd].unbind(initializer[module::ini::sck::initialize::out]);
-	(*incs[0])[module::inc::sck::incrementf::fwd].unbind((*rlys[0])[module::rly::sck::relayf::fwd]);
-	(*incs[1])[module::inc::sck::incrementf::fwd].unbind((*rlys[0])[module::rly::sck::relayf::fwd]);
-	(*rlys[1])[module::rly::sck::relayf::fwd].unbind((*incs[0])[module::inc::sck::incrementf::fwd]);
-	comp["compare::fwd1"].unbind((*incs[1])[module::inc::sck::incrementf::fwd]);
-	comp["compare::fwd0"].unbind((*rlys[1])[module::rly::sck::relayf::fwd]);
-	finalizer[module::fin::sck::finalize::in].unbind(comp["compare::fwd1"]);
+    // clang-format off
+    (*rlys[0])[module::rly::sck::relayf    ::fwd  ].unbind(initializer[module::ini::sck::initialize::out  ]);
+    (*incs[0])[module::inc::sck::incrementf::fwd  ].unbind((*rlys[0]) [module::rly::sck::relayf    ::fwd  ]);
+    (*incs[1])[module::inc::sck::incrementf::fwd  ].unbind((*rlys[0]) [module::rly::sck::relayf    ::fwd  ]);
+    (*rlys[1])[module::rly::sck::relayf    ::fwd  ].unbind((*incs[0]) [module::inc::sck::incrementf::fwd  ]);
+    comp      [                 "compare   ::fwd1"].unbind((*incs[1]) [module::inc::sck::incrementf::fwd  ]);
+    comp      [                 "compare   ::fwd0"].unbind((*rlys[1]) [module::rly::sck::relayf    ::fwd  ]);
+    finalizer [module::fin::sck::finalize  ::in   ].unbind(comp       [                 "compare   ::fwd1"]);
+    // clang-format on
 
 	return test_results;
 }

@@ -61,28 +61,30 @@ void Terminal_std
 
 	std::ios::fmtflags f(stream.flags());
 
-	// stream << "# " << "----------------------------------------------||---------------------------------" << std::endl; // line 1
-	// stream << "# " << "          cols_groups[0].first.first          ||   cols_groups[1].first.first    " << std::endl; // line 2
-	// stream << "# " << "          cols_groups[0].first.second         ||   cols_groups[1].first.second   " << std::endl; // line 3
-	// stream << "# " << "----------------------------------------------||---------------------------------" << std::endl; // line 4
-	// stream << "# " << "----------|-----------|-----------|-----------||----------|----------|-----------" << std::endl; // line 5
-	// stream << "# " << "   (1.1)  |    (2.1)  |    (3.1)  |    (4.1)  ||   (5.1)  |   (6.1)  |   (7.1)   " << std::endl; // line 6
-	// stream << "# " << "   (1.2)  |    (2.2)  |    (3.2)  |    (4.2)  ||   (5.2)  |   (6.2)  |   (7.2)   " << std::endl; // line 7
-	// stream << "# " << "----------|-----------|-----------|-----------||----------|----------|-----------" << std::endl; // line 8
-	// note (1.1) is "cols_groups[0].second[0].first"
-	// note (1.2) is "cols_groups[0].second[0].second"
-	// note (2.1) is "cols_groups[0].second[1].first"
-	// note (2.2) is "cols_groups[0].second[1].second"
-	// note (3.1) is "cols_groups[0].second[2].first"
-	// note (3.2) is "cols_groups[0].second[2].second"
-	// note (4.1) is "cols_groups[0].second[3].first"
-	// note (4.2) is "cols_groups[0].second[3].second"
-	// note (5.1) is "cols_groups[1].second[0].first"
-	// note (5.2) is "cols_groups[1].second[0].second"
-	// note (6.1) is "cols_groups[1].second[1].first"
-	// note (6.2) is "cols_groups[1].second[1].second"
-	// note (7.1) is "cols_groups[1].second[2].first"
-	// note (7.2) is "cols_groups[1].second[2].second"
+    // clang-format off
+    // stream << "# " << "----------------------------------------------||---------------------------------" << std::endl; // line 1
+    // stream << "# " << "          cols_groups[0].first.first          ||   cols_groups[1].first.first    " << std::endl; // line 2
+    // stream << "# " << "          cols_groups[0].first.second         ||   cols_groups[1].first.second   " << std::endl; // line 3
+    // stream << "# " << "----------------------------------------------||---------------------------------" << std::endl; // line 4
+    // stream << "# " << "----------|-----------|-----------|-----------||----------|----------|-----------" << std::endl; // line 5
+    // stream << "# " << "   (1.1)  |    (2.1)  |    (3.1)  |    (4.1)  ||   (5.1)  |   (6.1)  |   (7.1)   " << std::endl; // line 6
+    // stream << "# " << "   (1.2)  |    (2.2)  |    (3.2)  |    (4.2)  ||   (5.2)  |   (6.2)  |   (7.2)   " << std::endl; // line 7
+    // stream << "# " << "----------|-----------|-----------|-----------||----------|----------|-----------" << std::endl; // line 8
+    // note (1.1) is "cols_groups[0].second[0].first"
+    // note (1.2) is "cols_groups[0].second[0].second"
+    // note (2.1) is "cols_groups[0].second[1].first"
+    // note (2.2) is "cols_groups[0].second[1].second"
+    // note (3.1) is "cols_groups[0].second[2].first"
+    // note (3.2) is "cols_groups[0].second[2].second"
+    // note (4.1) is "cols_groups[0].second[3].first"
+    // note (4.2) is "cols_groups[0].second[3].second"
+    // note (5.1) is "cols_groups[1].second[0].first"
+    // note (5.2) is "cols_groups[1].second[0].second"
+    // note (6.1) is "cols_groups[1].second[1].first"
+    // note (6.2) is "cols_groups[1].second[1].second"
+    // note (7.1) is "cols_groups[1].second[2].first"
+    // note (7.2) is "cols_groups[1].second[2].second"
+    // clang-format on
 
 	assert(!cols_groups.empty());
 

@@ -285,19 +285,21 @@ int main(int argc, char** argv)
 	});
 
 	// sockets binding
-	relayer_com[      "relay::in"     ] = source     [ "generate::out_data" ];
-	alternator [  "alternate::in"     ] = source     [ "generate::out_data" ];
+    // clang-format off
+    relayer_com[      "relay::in"     ] = source     [ "generate::out_data" ];
+    alternator [  "alternate::in"     ] = source     [ "generate::out_data" ];
 
-	switcher   [   "commute::in_data" ] = relayer_com[    "relay::out"      ];
-	switcher   [   "commute::in_ctrl" ] = alternator ["alternate::path"     ];
-	uppercaser [    "upcase::in"      ] = switcher   [  "commute::out_data0"];
-	lowercaser [   "lowcase::in"      ] = switcher   [  "commute::out_data1"];
-	switcher   [    "select::in_data0"] = uppercaser [   "upcase::out"      ];
-	switcher   [    "select::in_data1"] = lowercaser [  "lowcase::out"      ];
+    switcher   [   "commute::in_data" ] = relayer_com[    "relay::out"      ];
+    switcher   [   "commute::in_ctrl" ] = alternator ["alternate::path"     ];
+    uppercaser [    "upcase::in"      ] = switcher   [  "commute::out_data0"];
+    lowercaser [   "lowcase::in"      ] = switcher   [  "commute::out_data1"];
+    switcher   [    "select::in_data0"] = uppercaser [   "upcase::out"      ];
+    switcher   [    "select::in_data1"] = lowercaser [  "lowcase::out"      ];
 
-	relayer_sel[     "relay::in"      ] = switcher   [   "select::out_data" ];
-	sink       ["send_count::in_data" ] = relayer_sel[    "relay::out"      ];
-	sink       ["send_count::in_count"] = source     [ "generate::out_count"];
+    relayer_sel[     "relay::in"      ] = switcher   [   "select::out_data" ];
+    sink       ["send_count::in_data" ] = relayer_sel[    "relay::out"      ];
+    sink       ["send_count::in_count"] = source     [ "generate::out_count"];
+    // clang-format on
 
 	std::unique_ptr<runtime::Sequence> sequence_chain;
 	std::unique_ptr<runtime::Pipeline> pipeline_chain;

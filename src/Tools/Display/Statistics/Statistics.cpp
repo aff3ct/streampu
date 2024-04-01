@@ -14,56 +14,62 @@ using namespace aff3ct::tools;
 void Statistics
 ::separation1(const bool display_thr, std::ostream &stream)
 {
-	if (display_thr)
-		stream << "# " << rang::style::bold << "-------------------------------------------||------------------------------||--------------------------------||--------------------------------" << rang::style::reset << std::endl;
-	else
-		stream << "# " << rang::style::bold << "-------------------------------------------||------------------------------||--------------------------------" << rang::style::reset << std::endl;
+    // clang-format off
+    if (display_thr)
+        stream << "# " << rang::style::bold << "-------------------------------------------||------------------------------||--------------------------------||--------------------------------" << rang::style::reset << std::endl;
+    else
+        stream << "# " << rang::style::bold << "-------------------------------------------||------------------------------||--------------------------------" << rang::style::reset << std::endl;
+    // clang-format on
 }
 
 void Statistics
 ::separation2(const bool display_thr, std::ostream &stream)
 {
-	if (display_thr)
-		stream << "# " << rang::style::bold << "-------------|-------------------|---------||----------|----------|--------||----------|----------|----------||----------|----------|----------" << rang::style::reset << std::endl;
-	else
-		stream << "# " << rang::style::bold << "-------------|-------------------|---------||----------|----------|--------||----------|----------|----------" << rang::style::reset << std::endl;
+    // clang-format off
+    if (display_thr)
+        stream << "# " << rang::style::bold << "-------------|-------------------|---------||----------|----------|--------||----------|----------|----------||----------|----------|----------" << rang::style::reset << std::endl;
+    else
+        stream << "# " << rang::style::bold << "-------------|-------------------|---------||----------|----------|--------||----------|----------|----------" << rang::style::reset << std::endl;
+    // clang-format on
 }
 
 void Statistics
 ::show_header(const bool display_thr, std::ostream &stream)
 {
-	Statistics::separation1(display_thr, stream);
-	if (display_thr)
-	{
-//		stream << "# " << rang::style::bold << "-------------------------------------------||------------------------------||--------------------------------||--------------------------------" << rang::style::reset << std::endl;
-		stream << "# " << rang::style::bold << "       Statistics for the given task       ||       Basic statistics       ||       Measured throughput      ||        Measured latency        " << rang::style::reset << std::endl;
-		stream << "# " << rang::style::bold << "    ('*' = any, '-' = same as previous)    ||          on the task         ||   considering the last socket  ||                                " << rang::style::reset << std::endl;
-//		stream << "# " << rang::style::bold << "-------------------------------------------||------------------------------||--------------------------------||--------------------------------" << rang::style::reset << std::endl;
-	}
-	else
-	{
-//		stream << "# " << rang::style::bold << "-------------------------------------------||------------------------------||--------------------------------" << rang::style::reset << std::endl;
-		stream << "# " << rang::style::bold << "       Statistics for the given task       ||       Basic statistics       ||        Measured latency        " << rang::style::reset << std::endl;
-		stream << "# " << rang::style::bold << "    ('*' = any, '-' = same as previous)    ||          on the task         ||                                " << rang::style::reset << std::endl;
-//		stream << "# " << rang::style::bold << "-------------------------------------------||------------------------------||--------------------------------" << rang::style::reset << std::endl;
-	}
-	Statistics::separation1(display_thr, stream);
-	Statistics::separation2(display_thr, stream);
-	if (display_thr)
-	{
-//		stream << "# " << rang::style::bold << "-------------|-------------------|---------||----------|----------|--------||----------|----------|----------||----------|----------|----------" << rang::style::reset << std::endl;
-		stream << "# " << rang::style::bold << "      MODULE |              TASK |   TIMER ||    CALLS |     TIME |   PERC ||  AVERAGE |  MINIMUM |  MAXIMUM ||  AVERAGE |  MINIMUM |  MAXIMUM " << rang::style::reset << std::endl;
-		stream << "# " << rang::style::bold << "             |                   |         ||          |      (s) |    (%) ||   (Mb/s) |   (Mb/s) |   (Mb/s) ||     (us) |     (us) |     (us) " << rang::style::reset << std::endl;
-//		stream << "# " << rang::style::bold << "-------------|-------------------|---------||----------|----------|--------||----------|----------|----------||----------|----------|----------" << rang::style::reset << std::endl;
-	}
-	else
-	{
-//		stream << "# " << rang::style::bold << "-------------|-------------------|---------||----------|----------|--------||----------|----------|----------" << rang::style::reset << std::endl;
-		stream << "# " << rang::style::bold << "      MODULE |              TASK |   TIMER ||    CALLS |     TIME |   PERC ||  AVERAGE |  MINIMUM |  MAXIMUM " << rang::style::reset << std::endl;
-		stream << "# " << rang::style::bold << "             |                   |         ||          |      (s) |    (%) ||     (us) |     (us) |     (us) " << rang::style::reset << std::endl;
-//		stream << "# " << rang::style::bold << "-------------|-------------------|---------||----------|----------|--------||----------|----------|----------" << rang::style::reset << std::endl;
-	}
-	Statistics::separation2(display_thr, stream);
+    // clang-format off
+    Statistics::separation1(display_thr, stream);
+    if (display_thr)
+    {
+//      stream << "# " << rang::style::bold << "-------------------------------------------||------------------------------||--------------------------------||--------------------------------" << rang::style::reset << std::endl;
+        stream << "# " << rang::style::bold << "       Statistics for the given task       ||       Basic statistics       ||       Measured throughput      ||        Measured latency        " << rang::style::reset << std::endl;
+        stream << "# " << rang::style::bold << "    ('*' = any, '-' = same as previous)    ||          on the task         ||   considering the last socket  ||                                " << rang::style::reset << std::endl;
+//      stream << "# " << rang::style::bold << "-------------------------------------------||------------------------------||--------------------------------||--------------------------------" << rang::style::reset << std::endl;
+    }
+    else
+    {
+//      stream << "# " << rang::style::bold << "-------------------------------------------||------------------------------||--------------------------------" << rang::style::reset << std::endl;
+        stream << "# " << rang::style::bold << "       Statistics for the given task       ||       Basic statistics       ||        Measured latency        " << rang::style::reset << std::endl;
+        stream << "# " << rang::style::bold << "    ('*' = any, '-' = same as previous)    ||          on the task         ||                                " << rang::style::reset << std::endl;
+//      stream << "# " << rang::style::bold << "-------------------------------------------||------------------------------||--------------------------------" << rang::style::reset << std::endl;
+    }
+    Statistics::separation1(display_thr, stream);
+    Statistics::separation2(display_thr, stream);
+    if (display_thr)
+    {
+//      stream << "# " << rang::style::bold << "-------------|-------------------|---------||----------|----------|--------||----------|----------|----------||----------|----------|----------" << rang::style::reset << std::endl;
+        stream << "# " << rang::style::bold << "      MODULE |              TASK |   TIMER ||    CALLS |     TIME |   PERC ||  AVERAGE |  MINIMUM |  MAXIMUM ||  AVERAGE |  MINIMUM |  MAXIMUM " << rang::style::reset << std::endl;
+        stream << "# " << rang::style::bold << "             |                   |         ||          |      (s) |    (%) ||   (Mb/s) |   (Mb/s) |   (Mb/s) ||     (us) |     (us) |     (us) " << rang::style::reset << std::endl;
+//      stream << "# " << rang::style::bold << "-------------|-------------------|---------||----------|----------|--------||----------|----------|----------||----------|----------|----------" << rang::style::reset << std::endl;
+    }
+    else
+    {
+//      stream << "# " << rang::style::bold << "-------------|-------------------|---------||----------|----------|--------||----------|----------|----------" << rang::style::reset << std::endl;
+        stream << "# " << rang::style::bold << "      MODULE |              TASK |   TIMER ||    CALLS |     TIME |   PERC ||  AVERAGE |  MINIMUM |  MAXIMUM " << rang::style::reset << std::endl;
+        stream << "# " << rang::style::bold << "             |                   |         ||          |      (s) |    (%) ||     (us) |     (us) |     (us) " << rang::style::reset << std::endl;
+//      stream << "# " << rang::style::bold << "-------------|-------------------|---------||----------|----------|--------||----------|----------|----------" << rang::style::reset << std::endl;
+    }
+    Statistics::separation2(display_thr, stream);
+    // clang-format on
 }
 
 void Statistics
@@ -78,73 +84,74 @@ void Statistics
             const bool                     display_thr,
                   std::ostream             &stream)
 {
-	if (task_n_calls == 0)
-		return;
+    // clang-format off
+    if (task_n_calls == 0)
+        return;
 
-	auto tot_dur = ((float)task_tot_duration.count()) * 0.000000001f;
-	auto percent = (tot_dur / total_sec) * 100.f;
-	auto avg_thr = (float)(task_n_calls * task_n_elmts) / ((float)task_tot_duration.count() * 0.001f);
-	auto min_thr = (float)(1.f          * task_n_elmts) / ((float)task_max_duration.count() * 0.001f);
-	auto max_thr = (float)(1.f          * task_n_elmts) / ((float)task_min_duration.count() * 0.001f);
-	auto avg_lat = (float)(task_tot_duration.count() * 0.001f) / task_n_calls;
-	auto min_lat = (float)(task_min_duration.count() * 0.001f);
-	auto max_lat = (float)(task_max_duration.count() * 0.001f);
+    auto tot_dur = ((float)task_tot_duration.count()) * 0.000000001f;
+    auto percent = (tot_dur / total_sec) * 100.f;
+    auto avg_thr = (float)(task_n_calls * task_n_elmts) / ((float)task_tot_duration.count() * 0.001f);
+    auto min_thr = (float)(1.f          * task_n_elmts) / ((float)task_max_duration.count() * 0.001f);
+    auto max_thr = (float)(1.f          * task_n_elmts) / ((float)task_min_duration.count() * 0.001f);
+    auto avg_lat = (float)(task_tot_duration.count() * 0.001f) / task_n_calls;
+    auto min_lat = (float)(task_min_duration.count() * 0.001f);
+    auto max_lat = (float)(task_max_duration.count() * 0.001f);
 
 #ifdef _WIN32
-	auto P = 1;
+    auto P = 1;
 #else
-	auto P = 2;
+    auto P = 2;
 #endif
 
-	unsigned l1 = 99999999;
-	float    l2 = 99999.99f;
+    unsigned l1 = 99999999;
+    float    l2 = 99999.99f;
 
-	std::stringstream ssmodule, ssprocess, sssp, ssn_calls, sstot_dur, sspercent;
-	std::stringstream ssavg_thr, ssmin_thr, ssmax_thr;
-	std::stringstream ssavg_lat, ssmin_lat, ssmax_lat;
+    std::stringstream ssmodule, ssprocess, sssp, ssn_calls, sstot_dur, sspercent;
+    std::stringstream ssavg_thr, ssmin_thr, ssmax_thr;
+    std::stringstream ssavg_lat, ssmin_lat, ssmax_lat;
 
-	ssmodule  << std::setprecision(                        2) <<                                        std::fixed  << std::setw(12) << module_name;
-	ssprocess << std::setprecision(                        2) <<                                        std::fixed  << std::setw(17) << task_name;
-	sssp      << std::setprecision(                        2) <<                                        std::fixed  << std::setw( 7) << "*";
-	ssn_calls << std::setprecision(task_n_calls > l1 ? P : 2) << (task_n_calls > l1 ? std::scientific : std::fixed) << std::setw( 8) << task_n_calls;
-	sstot_dur << std::setprecision(tot_dur      > l1 ? P : 2) << (tot_dur      > l1 ? std::scientific : std::fixed) << std::setw( 8) << tot_dur;
-	sspercent << std::setprecision(                        2) <<                                        std::fixed  << std::setw( 6) << percent;
-	ssavg_thr << std::setprecision(avg_thr      > l1 ? P : 2) << (avg_thr      > l2 ? std::scientific : std::fixed) << std::setw( 8) << avg_thr;
-	ssmin_thr << std::setprecision(min_thr      > l1 ? P : 2) << (min_thr      > l2 ? std::scientific : std::fixed) << std::setw( 8) << min_thr;
-	ssmax_thr << std::setprecision(max_thr      > l1 ? P : 2) << (max_thr      > l2 ? std::scientific : std::fixed) << std::setw( 8) << max_thr;
-	ssavg_lat << std::setprecision(avg_lat      > l1 ? P : 2) << (avg_lat      > l2 ? std::scientific : std::fixed) << std::setw( 8) << avg_lat;
-	ssmin_lat << std::setprecision(min_lat      > l1 ? P : 2) << (min_lat      > l2 ? std::scientific : std::fixed) << std::setw( 8) << min_lat;
-	ssmax_lat << std::setprecision(max_lat      > l1 ? P : 2) << (max_lat      > l2 ? std::scientific : std::fixed) << std::setw( 8) << max_lat;
+    ssmodule  << std::setprecision(                        2) <<                                        std::fixed  << std::setw(12) << module_name;
+    ssprocess << std::setprecision(                        2) <<                                        std::fixed  << std::setw(17) << task_name;
+    sssp      << std::setprecision(                        2) <<                                        std::fixed  << std::setw( 7) << "*";
+    ssn_calls << std::setprecision(task_n_calls > l1 ? P : 2) << (task_n_calls > l1 ? std::scientific : std::fixed) << std::setw( 8) << task_n_calls;
+    sstot_dur << std::setprecision(tot_dur      > l1 ? P : 2) << (tot_dur      > l1 ? std::scientific : std::fixed) << std::setw( 8) << tot_dur;
+    sspercent << std::setprecision(                        2) <<                                        std::fixed  << std::setw( 6) << percent;
+    ssavg_thr << std::setprecision(avg_thr      > l1 ? P : 2) << (avg_thr      > l2 ? std::scientific : std::fixed) << std::setw( 8) << avg_thr;
+    ssmin_thr << std::setprecision(min_thr      > l1 ? P : 2) << (min_thr      > l2 ? std::scientific : std::fixed) << std::setw( 8) << min_thr;
+    ssmax_thr << std::setprecision(max_thr      > l1 ? P : 2) << (max_thr      > l2 ? std::scientific : std::fixed) << std::setw( 8) << max_thr;
+    ssavg_lat << std::setprecision(avg_lat      > l1 ? P : 2) << (avg_lat      > l2 ? std::scientific : std::fixed) << std::setw( 8) << avg_lat;
+    ssmin_lat << std::setprecision(min_lat      > l1 ? P : 2) << (min_lat      > l2 ? std::scientific : std::fixed) << std::setw( 8) << min_lat;
+    ssmax_lat << std::setprecision(max_lat      > l1 ? P : 2) << (max_lat      > l2 ? std::scientific : std::fixed) << std::setw( 8) << max_lat;
 
-	stream << "# ";
-	stream << ssmodule .str() << rang::style::bold << " | "  << rang::style::reset
-	       << ssprocess.str() << rang::style::bold << " | "  << rang::style::reset
-	       << sssp     .str() << rang::style::bold << " || " << rang::style::reset
-	       << ssn_calls.str() << rang::style::bold << " | "  << rang::style::reset
-	       << sstot_dur.str() << rang::style::bold << " | "  << rang::style::reset;
+    stream << "# ";
+    stream << ssmodule .str() << rang::style::bold << " | "  << rang::style::reset
+           << ssprocess.str() << rang::style::bold << " | "  << rang::style::reset
+           << sssp     .str() << rang::style::bold << " || " << rang::style::reset
+           << ssn_calls.str() << rang::style::bold << " | "  << rang::style::reset
+           << sstot_dur.str() << rang::style::bold << " | "  << rang::style::reset;
 
-	     if (percent > 50.0f) stream << rang::fg::red    << sspercent.str() << rang::style::reset;
-	else if (percent > 25.0f) stream << rang::fg::yellow << sspercent.str() << rang::style::reset;
-	else if (percent > 12.5f) stream << rang::fg::green  << sspercent.str() << rang::style::reset;
-	else if (percent <  5.0f) stream << rang::fg::gray   << sspercent.str() << rang::style::reset;
-	else                      stream <<                     sspercent.str();
+         if (percent > 50.0f) stream << rang::fg::red    << sspercent.str() << rang::style::reset;
+    else if (percent > 25.0f) stream << rang::fg::yellow << sspercent.str() << rang::style::reset;
+    else if (percent > 12.5f) stream << rang::fg::green  << sspercent.str() << rang::style::reset;
+    else if (percent <  5.0f) stream << rang::fg::gray   << sspercent.str() << rang::style::reset;
+    else                      stream <<                     sspercent.str();
 
-	if (display_thr)
-		stream <<                    rang::style::bold << " || " << rang::style::reset
-		       << ssavg_thr.str() << rang::style::bold << " | "  << rang::style::reset
-		       << ssmin_thr.str() << rang::style::bold << " | "  << rang::style::reset
-		       << ssmax_thr.str() << rang::style::bold << " || " << rang::style::reset
-		       << ssavg_lat.str() << rang::style::bold << " | "  << rang::style::reset
-		       << ssmin_lat.str() << rang::style::bold << " | "  << rang::style::reset
-		       << ssmax_lat.str() << ""
-		       << std::endl;
-	else
-		stream <<                    rang::style::bold << " || " << rang::style::reset
-		       << ssavg_lat.str() << rang::style::bold << " | "  << rang::style::reset
-		       << ssmin_lat.str() << rang::style::bold << " | "  << rang::style::reset
-		       << ssmax_lat.str() << ""
-		       << std::endl;
-
+    if (display_thr)
+        stream <<                    rang::style::bold << " || " << rang::style::reset
+               << ssavg_thr.str() << rang::style::bold << " | "  << rang::style::reset
+               << ssmin_thr.str() << rang::style::bold << " | "  << rang::style::reset
+               << ssmax_thr.str() << rang::style::bold << " || " << rang::style::reset
+               << ssavg_lat.str() << rang::style::bold << " | "  << rang::style::reset
+               << ssmin_lat.str() << rang::style::bold << " | "  << rang::style::reset
+               << ssmax_lat.str() << ""
+               << std::endl;
+    else
+        stream <<                    rang::style::bold << " || " << rang::style::reset
+               << ssavg_lat.str() << rang::style::bold << " | "  << rang::style::reset
+               << ssmin_lat.str() << rang::style::bold << " | "  << rang::style::reset
+               << ssmax_lat.str() << ""
+               << std::endl;
+    // clang-format on
 }
 
 void Statistics
@@ -158,59 +165,61 @@ void Statistics
              const std::chrono::nanoseconds timer_max_duration,
                    std::ostream             &stream)
 {
-	if (task_n_calls == 0 || timer_n_calls == 0)
-		return;
+    // clang-format off
+    if (task_n_calls == 0 || timer_n_calls == 0)
+        return;
 
-	auto rn_elmts = (timer_n_elmts * task_n_calls) / timer_n_calls;
-	auto rtot_dur = ((float)timer_tot_duration.count()) * 0.000000001f;
-	auto rpercent = (rtot_dur / total_sec) * 100.f;
-	auto ravg_thr = (float)(timer_n_calls * rn_elmts) / ((float)timer_tot_duration.count() * 0.001f);
-	auto rmin_thr = (float)(1.f           * rn_elmts) / ((float)timer_max_duration.count() * 0.001f);
-	auto rmax_thr = (float)(1.f           * rn_elmts) / ((float)timer_min_duration.count() * 0.001f);
-	auto ravg_lat = (float)(timer_tot_duration.count() * 0.001f) / timer_n_calls;
-	auto rmin_lat = (float)(timer_min_duration.count() * 0.001f);
-	auto rmax_lat = (float)(timer_max_duration.count() * 0.001f);
+    auto rn_elmts = (timer_n_elmts * task_n_calls) / timer_n_calls;
+    auto rtot_dur = ((float)timer_tot_duration.count()) * 0.000000001f;
+    auto rpercent = (rtot_dur / total_sec) * 100.f;
+    auto ravg_thr = (float)(timer_n_calls * rn_elmts) / ((float)timer_tot_duration.count() * 0.001f);
+    auto rmin_thr = (float)(1.f           * rn_elmts) / ((float)timer_max_duration.count() * 0.001f);
+    auto rmax_thr = (float)(1.f           * rn_elmts) / ((float)timer_min_duration.count() * 0.001f);
+    auto ravg_lat = (float)(timer_tot_duration.count() * 0.001f) / timer_n_calls;
+    auto rmin_lat = (float)(timer_min_duration.count() * 0.001f);
+    auto rmax_lat = (float)(timer_max_duration.count() * 0.001f);
 
 #ifdef _WIN32
-	auto P = 1;
+    auto P = 1;
 #else
-	auto P = 2;
+    auto P = 2;
 #endif
 
-	unsigned l1 = 99999999;
-	float    l2 = 99999.99f;
+    unsigned l1 = 99999999;
+    float    l2 = 99999.99f;
 
-	std::stringstream spaces, ssprocess, sssp, ssrn_calls, ssrtot_dur, ssrpercent;
-	std::stringstream ssravg_thr, ssrmin_thr, ssrmax_thr;
-	std::stringstream ssravg_lat, ssrmin_lat, ssrmax_lat;
+    std::stringstream spaces, ssprocess, sssp, ssrn_calls, ssrtot_dur, ssrpercent;
+    std::stringstream ssravg_thr, ssrmin_thr, ssrmax_thr;
+    std::stringstream ssravg_lat, ssrmin_lat, ssrmax_lat;
 
-	spaces     <<                                                                                          std::fixed  << std::setw(12) << "-";
-	ssprocess  << std::setprecision(                         2) <<                                         std::fixed  << std::setw(17) << "-";
-	sssp       << std::setprecision(                         2) <<                                         std::fixed  << std::setw( 7) << timer_name;
-	ssrn_calls << std::setprecision(timer_n_calls > l1 ? P : 2) << (timer_n_calls > l1 ? std::scientific : std::fixed) << std::setw( 8) << timer_n_calls;
-	ssrtot_dur << std::setprecision(rtot_dur      > l1 ? P : 2) << (rtot_dur      > l1 ? std::scientific : std::fixed) << std::setw( 8) << rtot_dur;
-	ssrpercent << std::setprecision(                         2) <<                                         std::fixed  << std::setw( 6) << rpercent;
-	ssravg_thr << std::setprecision(ravg_thr      > l1 ? P : 2) << (ravg_thr      > l2 ? std::scientific : std::fixed) << std::setw( 8) << ravg_thr;
-	ssrmin_thr << std::setprecision(rmin_thr      > l1 ? P : 2) << (rmin_thr      > l2 ? std::scientific : std::fixed) << std::setw( 8) << rmin_thr;
-	ssrmax_thr << std::setprecision(rmax_thr      > l1 ? P : 2) << (rmax_thr      > l2 ? std::scientific : std::fixed) << std::setw( 8) << rmax_thr;
-	ssravg_lat << std::setprecision(ravg_lat      > l1 ? P : 2) << (ravg_lat      > l2 ? std::scientific : std::fixed) << std::setw( 8) << ravg_lat;
-	ssrmin_lat << std::setprecision(rmin_lat      > l1 ? P : 2) << (rmin_lat      > l2 ? std::scientific : std::fixed) << std::setw( 8) << rmin_lat;
-	ssrmax_lat << std::setprecision(rmax_lat      > l1 ? P : 2) << (rmax_lat      > l2 ? std::scientific : std::fixed) << std::setw( 8) << rmax_lat;
+    spaces     <<                                                                                          std::fixed  << std::setw(12) << "-";
+    ssprocess  << std::setprecision(                         2) <<                                         std::fixed  << std::setw(17) << "-";
+    sssp       << std::setprecision(                         2) <<                                         std::fixed  << std::setw( 7) << timer_name;
+    ssrn_calls << std::setprecision(timer_n_calls > l1 ? P : 2) << (timer_n_calls > l1 ? std::scientific : std::fixed) << std::setw( 8) << timer_n_calls;
+    ssrtot_dur << std::setprecision(rtot_dur      > l1 ? P : 2) << (rtot_dur      > l1 ? std::scientific : std::fixed) << std::setw( 8) << rtot_dur;
+    ssrpercent << std::setprecision(                         2) <<                                         std::fixed  << std::setw( 6) << rpercent;
+    ssravg_thr << std::setprecision(ravg_thr      > l1 ? P : 2) << (ravg_thr      > l2 ? std::scientific : std::fixed) << std::setw( 8) << ravg_thr;
+    ssrmin_thr << std::setprecision(rmin_thr      > l1 ? P : 2) << (rmin_thr      > l2 ? std::scientific : std::fixed) << std::setw( 8) << rmin_thr;
+    ssrmax_thr << std::setprecision(rmax_thr      > l1 ? P : 2) << (rmax_thr      > l2 ? std::scientific : std::fixed) << std::setw( 8) << rmax_thr;
+    ssravg_lat << std::setprecision(ravg_lat      > l1 ? P : 2) << (ravg_lat      > l2 ? std::scientific : std::fixed) << std::setw( 8) << ravg_lat;
+    ssrmin_lat << std::setprecision(rmin_lat      > l1 ? P : 2) << (rmin_lat      > l2 ? std::scientific : std::fixed) << std::setw( 8) << rmin_lat;
+    ssrmax_lat << std::setprecision(rmax_lat      > l1 ? P : 2) << (rmax_lat      > l2 ? std::scientific : std::fixed) << std::setw( 8) << rmax_lat;
 
-	stream << "# ";
-	stream << spaces.str()                                                  << rang::style::bold << " | "  << rang::style::reset
-	       << rang::style::italic << ssprocess .str() << rang::style::reset << rang::style::bold << " | "  << rang::style::reset
-	       << rang::style::italic << sssp      .str() << rang::style::reset << rang::style::bold << " || " << rang::style::reset
-	       << rang::style::italic << ssrn_calls.str() << rang::style::reset << rang::style::bold << " | "  << rang::style::reset
-	       << rang::style::italic << ssrtot_dur.str() << rang::style::reset << rang::style::bold << " | "  << rang::style::reset
-	       << rang::style::italic << ssrpercent.str() << rang::style::reset << rang::style::bold << " || " << rang::style::reset
-	       << rang::style::italic << ssravg_thr.str() << rang::style::reset << rang::style::bold << " | "  << rang::style::reset
-	       << rang::style::italic << ssrmin_thr.str() << rang::style::reset << rang::style::bold << " | "  << rang::style::reset
-	       << rang::style::italic << ssrmax_thr.str() << rang::style::reset << rang::style::bold << " || " << rang::style::reset
-	       << rang::style::italic << ssravg_lat.str() << rang::style::reset << rang::style::bold << " | "  << rang::style::reset
-	       << rang::style::italic << ssrmin_lat.str() << rang::style::reset << rang::style::bold << " | "  << rang::style::reset
-	       << rang::style::italic << ssrmax_lat.str() << rang::style::reset << ""
-	       << std::endl;
+    stream << "# ";
+    stream << spaces.str()                                                  << rang::style::bold << " | "  << rang::style::reset
+           << rang::style::italic << ssprocess .str() << rang::style::reset << rang::style::bold << " | "  << rang::style::reset
+           << rang::style::italic << sssp      .str() << rang::style::reset << rang::style::bold << " || " << rang::style::reset
+           << rang::style::italic << ssrn_calls.str() << rang::style::reset << rang::style::bold << " | "  << rang::style::reset
+           << rang::style::italic << ssrtot_dur.str() << rang::style::reset << rang::style::bold << " | "  << rang::style::reset
+           << rang::style::italic << ssrpercent.str() << rang::style::reset << rang::style::bold << " || " << rang::style::reset
+           << rang::style::italic << ssravg_thr.str() << rang::style::reset << rang::style::bold << " | "  << rang::style::reset
+           << rang::style::italic << ssrmin_thr.str() << rang::style::reset << rang::style::bold << " | "  << rang::style::reset
+           << rang::style::italic << ssrmax_thr.str() << rang::style::reset << rang::style::bold << " || " << rang::style::reset
+           << rang::style::italic << ssravg_lat.str() << rang::style::reset << rang::style::bold << " | "  << rang::style::reset
+           << rang::style::italic << ssrmin_lat.str() << rang::style::reset << rang::style::bold << " | "  << rang::style::reset
+           << rang::style::italic << ssrmax_lat.str() << rang::style::reset << ""
+           << std::endl;
+    // clang-format on
 }
 
 template <class MODULE_OR_TASK>

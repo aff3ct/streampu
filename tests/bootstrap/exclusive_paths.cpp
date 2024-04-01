@@ -186,23 +186,25 @@ int main(int argc, char** argv)
 	}
 
 	// sockets binding
-	controller(  "control"          ) = initializer["initialize::out"      ];
-	switchex  [  "commute::in_data" ] = initializer["initialize::out"      ];
-	switchex  [  "commute::in_ctrl" ] = controller [   "control::out"      ];
-	// path 0
-	(*incs[0])["increment::in"      ] = switchex   [   "commute::out_data0"];
-	(*incs[1])["increment::in"      ] = (*incs[0]) [ "increment::out"      ];
-	(*incs[2])["increment::in"      ] = (*incs[1]) [ "increment::out"      ];
-	switchex  [   "select::in_data0"] = (*incs[2]) [ "increment::out"      ];
-	// path 1
-	(*incs[3])["increment::in"      ] = switchex   [   "commute::out_data1"];
-	(*incs[4])["increment::in"      ] = (*incs[3]) [ "increment::out"      ];
-	switchex  [   "select::in_data1"] = (*incs[4]) [ "increment::out"      ];
-	// path 2
-	(*incs[5])["increment::in"      ] = switchex   [   "commute::out_data2"];
-	switchex  [   "select::in_data2"] = (*incs[5]) [ "increment::out"      ];
-	// end
-	finalizer [ "finalize::in"      ] = switchex   [    "select::out_data" ];
+    // clang-format off
+    controller(  "control"          ) = initializer["initialize::out"      ];
+    switchex  [  "commute::in_data" ] = initializer["initialize::out"      ];
+    switchex  [  "commute::in_ctrl" ] = controller [   "control::out"      ];
+    // path 0
+    (*incs[0])["increment::in"      ] = switchex   [   "commute::out_data0"];
+    (*incs[1])["increment::in"      ] = (*incs[0]) [ "increment::out"      ];
+    (*incs[2])["increment::in"      ] = (*incs[1]) [ "increment::out"      ];
+    switchex  [   "select::in_data0"] = (*incs[2]) [ "increment::out"      ];
+    // path 1
+    (*incs[3])["increment::in"      ] = switchex   [   "commute::out_data1"];
+    (*incs[4])["increment::in"      ] = (*incs[3]) [ "increment::out"      ];
+    switchex  [   "select::in_data1"] = (*incs[4]) [ "increment::out"      ];
+    // path 2
+    (*incs[5])["increment::in"      ] = switchex   [   "commute::out_data2"];
+    switchex  [   "select::in_data2"] = (*incs[5]) [ "increment::out"      ];
+    // end
+    finalizer [ "finalize::in"      ] = switchex   [    "select::out_data" ];
+    // clang-format on
 
 	runtime::Sequence sequence_exclusive_paths(initializer("initialize"), n_threads);
 	sequence_exclusive_paths.set_n_frames(n_inter_frames);
@@ -303,19 +305,22 @@ int main(int argc, char** argv)
 	}
 
 	sequence_exclusive_paths.set_n_frames(1);
-	controller[module::ctr::tsk::control      ].unbind(initializer[module::ini::sck::initialize::out]);
-	switchex  [module::swi::tsk::commute   ][0].unbind(initializer[module::ini::sck::initialize::out]);
-	switchex  [module::swi::tsk::commute   ][1].unbind(controller [module::ctr::sck::control   ::out]);
-	(*incs[0])[module::inc::sck::increment::in].unbind(switchex   [module::swi::tsk::commute     ][2]);
-	(*incs[1])[module::inc::sck::increment::in].unbind((*incs[0]) [module::inc::sck::increment ::out]);
-	(*incs[2])[module::inc::sck::increment::in].unbind((*incs[1]) [module::inc::sck::increment ::out]);
-	switchex  [module::swi::tsk::select    ][0].unbind((*incs[2]) [module::inc::sck::increment ::out]);
-	(*incs[3])[module::inc::sck::increment::in].unbind(switchex   [module::swi::tsk::commute     ][3]);
-	(*incs[4])[module::inc::sck::increment::in].unbind((*incs[3]) [module::inc::sck::increment ::out]);
-	switchex  [module::swi::tsk::select    ][1].unbind((*incs[4]) [module::inc::sck::increment ::out]);
-	(*incs[5])[module::inc::sck::increment::in].unbind(switchex   [module::swi::tsk::commute     ][4]);
-	switchex  [module::swi::tsk::select    ][2].unbind((*incs[5]) [module::inc::sck::increment ::out]);
-	finalizer [module::fin::sck::finalize ::in].unbind(switchex   [module::swi::tsk::select      ][3]);
+
+    // clang-format off
+    controller[module::ctr::tsk::control      ].unbind(initializer[module::ini::sck::initialize::out]);
+    switchex  [module::swi::tsk::commute   ][0].unbind(initializer[module::ini::sck::initialize::out]);
+    switchex  [module::swi::tsk::commute   ][1].unbind(controller [module::ctr::sck::control   ::out]);
+    (*incs[0])[module::inc::sck::increment::in].unbind(switchex   [module::swi::tsk::commute     ][2]);
+    (*incs[1])[module::inc::sck::increment::in].unbind((*incs[0]) [module::inc::sck::increment ::out]);
+    (*incs[2])[module::inc::sck::increment::in].unbind((*incs[1]) [module::inc::sck::increment ::out]);
+    switchex  [module::swi::tsk::select    ][0].unbind((*incs[2]) [module::inc::sck::increment ::out]);
+    (*incs[3])[module::inc::sck::increment::in].unbind(switchex   [module::swi::tsk::commute     ][3]);
+    (*incs[4])[module::inc::sck::increment::in].unbind((*incs[3]) [module::inc::sck::increment ::out]);
+    switchex  [module::swi::tsk::select    ][1].unbind((*incs[4]) [module::inc::sck::increment ::out]);
+    (*incs[5])[module::inc::sck::increment::in].unbind(switchex   [module::swi::tsk::commute     ][4]);
+    switchex  [module::swi::tsk::select    ][2].unbind((*incs[5]) [module::inc::sck::increment ::out]);
+    finalizer [module::fin::sck::finalize ::in].unbind(switchex   [module::swi::tsk::select      ][3]);
+    // clang-format on
 
 	return test_results;
 }

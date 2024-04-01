@@ -174,14 +174,16 @@ int main(int argc, char** argv)
 	});
 
 	// sockets binding
-	(*inc_calssique)[       "increment::in"  ] = initializer           [      "initialize::out" ];
-	(*incs[0])      [      "incrementf::fwd" ] = (*inc_calssique)      [       "increment::out" ];
-	// Bind the initial data to the multiplier
-	multi_comp      ["multiply_compare::fwd0"] = initializer           [      "initialize::out" ];
-	for (size_t s = 0; s < incs.size() -1; s++)
-		(*incs[s+1])[      "incrementf::fwd" ] = (*incs[s])            [      "incrementf::fwd" ];
-	multi_comp      ["multiply_compare::fwd1"] = (*incs[incs.size()-1])[      "incrementf::fwd" ];
-	finalizer       [        "finalize::in"  ] = multi_comp            ["multiply_compare::fwd1"];
+    // clang-format off
+    (*inc_calssique)[       "increment::in"  ] = initializer           [      "initialize::out" ];
+    (*incs[0])      [      "incrementf::fwd" ] = (*inc_calssique)      [       "increment::out" ];
+    // Bind the initial data to the multiplier
+    multi_comp      ["multiply_compare::fwd0"] = initializer           [      "initialize::out" ];
+    for (size_t s = 0; s < incs.size() -1; s++)
+        (*incs[s+1])[      "incrementf::fwd" ] = (*incs[s])            [      "incrementf::fwd" ];
+    multi_comp      ["multiply_compare::fwd1"] = (*incs[incs.size()-1])[      "incrementf::fwd" ];
+    finalizer       [        "finalize::in"  ] = multi_comp            ["multiply_compare::fwd1"];
+    // clang-format on
 
 	std::unique_ptr<runtime::Pipeline> pipeline_chain;
 	pipeline_chain.reset(new runtime::Pipeline(

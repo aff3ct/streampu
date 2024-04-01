@@ -176,20 +176,22 @@ int main(int argc, char** argv)
 	iterator2.set_custom_name("IteratorOut");
 
 	// sockets binding
-	switcher2       [   "select::in_data1"] = initializer           ["initialize::out"      ];
-	iterator2       (  "iterate"          ) = switcher2             (    "select"           );
-	switcher2       [  "commute::in_data" ] = switcher2             [    "select::out_data" ];
-	switcher2       [  "commute::in_ctrl" ] = iterator2             [   "iterate::out"      ];
-	switcher        [   "select::in_data1"] = switcher2             [   "commute::out_data0"];
-	iterator        (  "iterate"          ) = switcher              (    "select"           );
-	switcher        [  "commute::in_data" ] = switcher              [    "select::out_data" ];
-	switcher        [  "commute::in_ctrl" ] = iterator              [   "iterate::out"      ];
-	(*incs[0])      ["increment::in"      ] = switcher              [   "commute::out_data0"];
-	for (size_t s = 0; s < incs.size() -1; s++)
-		(*incs[s+1])["increment::in"      ] = (*incs[s])            [ "increment::out"      ];
-	switcher        [   "select::in_data0"] = (*incs[incs.size()-1])[ "increment::out"      ];
-	switcher2       [   "select::in_data0"] = switcher              [   "commute::out_data1"];
-	finalizer       [ "finalize::in"      ] = switcher2             [   "commute::out_data1"];
+    // clang-format off
+    switcher2       [   "select::in_data1"] = initializer           ["initialize::out"      ];
+    iterator2       (  "iterate"          ) = switcher2             (    "select"           );
+    switcher2       [  "commute::in_data" ] = switcher2             [    "select::out_data" ];
+    switcher2       [  "commute::in_ctrl" ] = iterator2             [   "iterate::out"      ];
+    switcher        [   "select::in_data1"] = switcher2             [   "commute::out_data0"];
+    iterator        (  "iterate"          ) = switcher              (    "select"           );
+    switcher        [  "commute::in_data" ] = switcher              [    "select::out_data" ];
+    switcher        [  "commute::in_ctrl" ] = iterator              [   "iterate::out"      ];
+    (*incs[0])      ["increment::in"      ] = switcher              [   "commute::out_data0"];
+    for (size_t s = 0; s < incs.size() -1; s++)
+        (*incs[s+1])["increment::in"      ] = (*incs[s])            [ "increment::out"      ];
+    switcher        [   "select::in_data0"] = (*incs[incs.size()-1])[ "increment::out"      ];
+    switcher2       [   "select::in_data0"] = switcher              [   "commute::out_data1"];
+    finalizer       [ "finalize::in"      ] = switcher2             [   "commute::out_data1"];
+    // clang-format on
 
 	runtime::Sequence sequence_nested_loops(initializer("initialize"), n_threads);
 	sequence_nested_loops.set_n_frames(n_inter_frames);
@@ -288,21 +290,23 @@ int main(int argc, char** argv)
 		tools::Stats::show(sequence_nested_loops.get_modules_per_types(), true, false);
 	}
 
-	sequence_nested_loops.set_n_frames(1);
-	switcher2 [module::swi::tsk::select ][1]   .unbind(initializer[module::ini::sck::initialize::out]);
-	iterator2 [module::ite::tsk::iterate]      .unbind(switcher2  [module::swi::tsk::select][3]);
-	switcher2 [module::swi::tsk::commute][0]   .unbind(switcher2  [module::swi::tsk::select][2]);
-	switcher2 [module::swi::tsk::commute][1]   .unbind(iterator2  [module::ite::sck::iterate::out]);
-	switcher  [module::swi::tsk::select ][1]   .unbind(switcher2  [module::swi::tsk::commute][2]);
-	iterator  [module::ite::tsk::iterate]      .unbind(switcher   [module::swi::tsk::select ][3]);
-	switcher  [module::swi::tsk::commute][0]   .unbind(switcher   [module::swi::tsk::select ][2]);
-	switcher  [module::swi::tsk::commute][1]   .unbind(iterator   [module::ite::sck::iterate::out]);
-	(*incs[0])[module::inc::sck::increment::in].unbind(switcher   [module::swi::tsk::commute][2]);
-	for (size_t s = 0; s < incs.size() -1; s++)
-		(*incs[s+1])[module::inc::sck::increment::in].unbind((*incs[s])[module::inc::sck::increment::out]);
-	switcher  [module::swi::tsk::select][0]    .unbind((*incs[incs.size()-1])[module::inc::sck::increment::out]);
-	switcher2 [module::swi::tsk::select][0]    .unbind(switcher   [module::swi::tsk::commute][3]);
-	finalizer [module::fin::sck::finalize::in] .unbind(switcher2  [module::swi::tsk::commute][3]);
+    // clang-format off
+    sequence_nested_loops.set_n_frames(1);
+    switcher2       [module::swi::tsk::select   ][ 1].unbind(initializer           [module::ini::sck::initialize::out]);
+    iterator2       [module::ite::tsk::iterate      ].unbind(switcher2             [module::swi::tsk::select    ][  3]);
+    switcher2       [module::swi::tsk::commute  ][ 0].unbind(switcher2             [module::swi::tsk::select    ][  2]);
+    switcher2       [module::swi::tsk::commute  ][ 1].unbind(iterator2             [module::ite::sck::iterate   ::out]);
+    switcher        [module::swi::tsk::select   ][ 1].unbind(switcher2             [module::swi::tsk::commute   ][  2]);
+    iterator        [module::ite::tsk::iterate      ].unbind(switcher              [module::swi::tsk::select    ][  3]);
+    switcher        [module::swi::tsk::commute  ][ 0].unbind(switcher              [module::swi::tsk::select    ][  2]);
+    switcher        [module::swi::tsk::commute  ][ 1].unbind(iterator              [module::ite::sck::iterate   ::out]);
+    (*incs[0])      [module::inc::sck::increment::in].unbind(switcher              [module::swi::tsk::commute   ][  2]);
+    for (size_t s = 0; s < incs.size() -1; s++)
+        (*incs[s+1])[module::inc::sck::increment::in].unbind((*incs[s])            [module::inc::sck::increment ::out]);
+    switcher        [module::swi::tsk::select   ][ 0].unbind((*incs[incs.size()-1])[module::inc::sck::increment ::out]);
+    switcher2       [module::swi::tsk::select   ][ 0].unbind(switcher              [module::swi::tsk::commute   ][  3]);
+    finalizer       [module::fin::sck::finalize ::in].unbind(switcher2             [module::swi::tsk::commute   ][  3]);
+    // clang-format on
 
 	return test_results;
 }

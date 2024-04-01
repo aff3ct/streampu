@@ -161,15 +161,17 @@ int main(int argc, char** argv)
 	}
 
 	// sockets binding
-	switcher        [   "select::in_data1"] = initializer            ["initialize::out"      ];
-	iterator        (  "iterate"          ) = switcher               (    "select"           );
-	switcher        [  "commute::in_ctrl" ] = iterator               [   "iterate::out"      ];
-	(*incs[0])      ["increment::in"      ] = switcher               [    "select::out_data" ];
-	for (size_t s = 0; s < incs.size() -1; s++)
-		(*incs[s+1])["increment::in"      ] = (*incs[s])             [ "increment::out"      ];
-	switcher        [  "commute::in_data" ] = (*incs[incs.size()-1]) [ "increment::out"      ];
-	switcher        [   "select::in_data0"] = switcher               [   "commute::out_data0"];
-	finalizer       [ "finalize::in"      ] = switcher               [   "commute::out_data1"];
+    // clang-format off
+    switcher        [   "select::in_data1"] = initializer            ["initialize::out"      ];
+    iterator        (  "iterate"          ) = switcher               (    "select"           );
+    switcher        [  "commute::in_ctrl" ] = iterator               [   "iterate::out"      ];
+    (*incs[0])      ["increment::in"      ] = switcher               [    "select::out_data" ];
+    for (size_t s = 0; s < incs.size() -1; s++)
+        (*incs[s+1])["increment::in"      ] = (*incs[s])             [ "increment::out"      ];
+    switcher        [  "commute::in_data" ] = (*incs[incs.size()-1]) [ "increment::out"      ];
+    switcher        [   "select::in_data0"] = switcher               [   "commute::out_data0"];
+    finalizer       [ "finalize::in"      ] = switcher               [   "commute::out_data1"];
+    // clang-format on
 
 	runtime::Sequence sequence_do_while_loop(initializer("initialize"), n_threads);
 	sequence_do_while_loop.set_n_frames(n_inter_frames);
@@ -268,17 +270,20 @@ int main(int argc, char** argv)
 		tools::Stats::show(sequence_do_while_loop.get_modules_per_types(), true, false);
 	}
 
-	// unbind
 	sequence_do_while_loop.set_n_frames(1);
-	switcher  [module::swi::tsk::select ][1]   .unbind(initializer[module::ini::sck::initialize::out]);
-	iterator  [module::ite::tsk::iterate]      .unbind(switcher   [module::swi::tsk::select][3]);
-	switcher  [module::swi::tsk::commute][1]   .unbind(iterator   [module::ite::sck::iterate::out]);
-	(*incs[0])[module::inc::sck::increment::in].unbind(switcher   [module::swi::tsk::select][2]);
-	for (size_t s = 0; s < incs.size() -1; s++)
-		(*incs[s+1])[module::inc::sck::increment::in].unbind((*incs[s])[module::inc::sck::increment::out]);
-	switcher  [module::swi::tsk::commute][0]   .unbind((*incs[5]) [module::inc::sck::increment::out]);
-	switcher  [module::swi::tsk::select ][0]   .unbind(switcher   [module::swi::tsk::commute][2]);
-	finalizer [module::fin::sck::finalize::in] .unbind(switcher   [module::swi::tsk::commute][3]);
+
+	// unbind
+    // clang-format off
+    switcher        [module::swi::tsk::select   ][ 1].unbind(initializer[module::ini::sck::initialize::out]);
+    iterator        [module::ite::tsk::iterate      ].unbind(switcher   [module::swi::tsk::select    ][  3]);
+    switcher        [module::swi::tsk::commute  ][ 1].unbind(iterator   [module::ite::sck::iterate   ::out]);
+    (*incs[0])      [module::inc::sck::increment::in].unbind(switcher   [module::swi::tsk::select    ][  2]);
+    for (size_t s = 0; s < incs.size() -1; s++)
+        (*incs[s+1])[module::inc::sck::increment::in].unbind((*incs[s]) [module::inc::sck::increment ::out]);
+    switcher        [module::swi::tsk::commute  ][ 0].unbind((*incs[5]) [module::inc::sck::increment ::out]);
+    switcher        [module::swi::tsk::select   ][ 0].unbind(switcher   [module::swi::tsk::commute   ][  2]);
+    finalizer       [module::fin::sck::finalize ::in].unbind(switcher   [module::swi::tsk::commute   ][  3]);
+    // clang-format on
 
 	return test_results;
 }
