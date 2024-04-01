@@ -19,6 +19,29 @@ jobs:
         with:
           name: analysis-headers
           path: aff3ct-core.hpp
+  analysis-clang-format:
+    runs-on: ubuntu-latest
+    container: ubuntu:22.04
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      - name: Generate Headers & Compare
+        run: |
+          apt-get update
+          apt-get -y install clang-format
+          mkdir original_code
+          cp -r include original_code
+          cp -r src original_code
+          cp -r tests original_code
+          cp -r signal_tracer original_code
+          ./scripts/apply_clang_format.sh
+          mkdir new_code
+          cp -r include new_code
+          cp -r src new_code
+          cp -r tests new_code
+          cp -r signal_tracer new_code
+          diff -r new_code original_code
+        shell: bash
   build-linux-gcc-x64-avx2:
     runs-on: ubuntu-latest
     needs: [analysis-headers]
