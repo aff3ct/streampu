@@ -29,6 +29,29 @@ analysis-headers:
     - ./scripts/generate_aff3ct_header.sh aff3ct-core.hpp
     - diff aff3ct-core.hpp include/aff3ct-core.hpp
 
+analysis-clang-format:
+  image: ubuntu:22.04
+  stage: analysis
+  tags:
+    - x86_64
+    - linux
+    - docker
+  script:
+    - apt-get update
+    - apt-get -y install clang-format
+    - mkdir original_code
+    - cp -r include original_code
+    - cp -r src original_code
+    - cp -r tests original_code
+    - cp -r signal_tracer original_code
+    - ./scripts/apply_clang_format.sh
+    - mkdir new_code
+    - cp -r include new_code
+    - cp -r src new_code
+    - cp -r tests new_code
+    - cp -r signal_tracer new_code
+    - diff -r new_code original_code
+
 build-linux-gcc-x64-avx2:
   image: registry.gitlab.com/aff3ct/aff3ct/x86_64_ubuntu_gcc:v9.3.0
   stage: build
