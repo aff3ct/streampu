@@ -1,18 +1,18 @@
-#include <type_traits>
 #include <algorithm>
 #include <iomanip>
-#include <sstream>
 #include <ios>
+#include <sstream>
+#include <type_traits>
 
-#include "Tools/Exception/exception.hpp"
-#include "Tools/Display/rang_format/rang_format.h"
 #include "Tools/Display/Statistics/Statistics.hpp"
+#include "Tools/Display/rang_format/rang_format.h"
+#include "Tools/Exception/exception.hpp"
 
 using namespace aff3ct;
 using namespace aff3ct::tools;
 
-void Statistics
-::separation1(const bool display_thr, std::ostream &stream)
+void
+Statistics::separation1(const bool display_thr, std::ostream& stream)
 {
     // clang-format off
     if (display_thr)
@@ -22,8 +22,8 @@ void Statistics
     // clang-format on
 }
 
-void Statistics
-::separation2(const bool display_thr, std::ostream &stream)
+void
+Statistics::separation2(const bool display_thr, std::ostream& stream)
 {
     // clang-format off
     if (display_thr)
@@ -33,8 +33,8 @@ void Statistics
     // clang-format on
 }
 
-void Statistics
-::show_header(const bool display_thr, std::ostream &stream)
+void
+Statistics::show_header(const bool display_thr, std::ostream& stream)
 {
     // clang-format off
     Statistics::separation1(display_thr, stream);
@@ -72,17 +72,17 @@ void Statistics
     // clang-format on
 }
 
-void Statistics
-::show_task(const float                    total_sec,
-            const std::string&             module_name,
-            const std::string&             task_name,
-            const size_t                   task_n_elmts,
-            const uint32_t                 task_n_calls,
-            const std::chrono::nanoseconds task_tot_duration,
-            const std::chrono::nanoseconds task_min_duration,
-            const std::chrono::nanoseconds task_max_duration,
-            const bool                     display_thr,
-                  std::ostream             &stream)
+void
+Statistics::show_task(const float total_sec,
+                      const std::string& module_name,
+                      const std::string& task_name,
+                      const size_t task_n_elmts,
+                      const uint32_t task_n_calls,
+                      const std::chrono::nanoseconds task_tot_duration,
+                      const std::chrono::nanoseconds task_min_duration,
+                      const std::chrono::nanoseconds task_max_duration,
+                      const bool display_thr,
+                      std::ostream& stream)
 {
     // clang-format off
     if (task_n_calls == 0)
@@ -154,16 +154,16 @@ void Statistics
     // clang-format on
 }
 
-void Statistics
-::show_timer(const float                    total_sec,
-             const uint32_t                 task_n_calls,
-             const size_t                   timer_n_elmts,
-             const std::string&             timer_name,
-             const uint32_t                 timer_n_calls,
-             const std::chrono::nanoseconds timer_tot_duration,
-             const std::chrono::nanoseconds timer_min_duration,
-             const std::chrono::nanoseconds timer_max_duration,
-                   std::ostream             &stream)
+void
+Statistics::show_timer(const float total_sec,
+                       const uint32_t task_n_calls,
+                       const size_t timer_n_elmts,
+                       const std::string& timer_name,
+                       const uint32_t timer_n_calls,
+                       const std::chrono::nanoseconds timer_tot_duration,
+                       const std::chrono::nanoseconds timer_min_duration,
+                       const std::chrono::nanoseconds timer_max_duration,
+                       std::ostream& stream)
 {
     // clang-format off
     if (task_n_calls == 0 || timer_n_calls == 0)
@@ -222,361 +222,434 @@ void Statistics
     // clang-format on
 }
 
-template <class MODULE_OR_TASK>
-void Statistics
-::show(std::vector<MODULE_OR_TASK*> modules_or_tasks, const bool ordered, const bool display_thr, std::ostream &stream)
+template<class MODULE_OR_TASK>
+void
+Statistics::show(std::vector<MODULE_OR_TASK*> modules_or_tasks,
+                 const bool ordered,
+                 const bool display_thr,
+                 std::ostream& stream)
 {
-	std::stringstream message;
-	message << "The 'Statistics::show' method expect a 'std::vector' of 'module::Module' or 'runtime::Task'.";
-	throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
+    std::stringstream message;
+    message << "The 'Statistics::show' method expect a 'std::vector' of 'module::Module' or 'runtime::Task'.";
+    throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
 }
 
-namespace aff3ct {
-namespace tools {
-
-template <>
-void Statistics
-::show<module::Module>(std::vector<module::Module*> modules, const bool ordered, const bool display_thr,
-                       std::ostream &stream)
+namespace aff3ct
 {
-	Statistics::show_modules<module::Module>(modules, ordered, display_thr, stream);
-}
-
-template <>
-void Statistics
-::show<const module::Module>(std::vector<const module::Module*> modules, const bool ordered, const bool display_thr,
-                             std::ostream &stream)
+namespace tools
 {
-	Statistics::show_modules<const module::Module>(modules, ordered, display_thr, stream);
-}
 
-template <>
-void Statistics
-::show<runtime::Task>(std::vector<runtime::Task*> tasks, const bool ordered, const bool display_thr,
-                      std::ostream &stream)
+template<>
+void
+Statistics::show<module::Module>(std::vector<module::Module*> modules,
+                                 const bool ordered,
+                                 const bool display_thr,
+                                 std::ostream& stream)
 {
-	Statistics::show_tasks<runtime::Task>(tasks, ordered, display_thr, stream);
+    Statistics::show_modules<module::Module>(modules, ordered, display_thr, stream);
 }
 
-template <>
-void Statistics
-::show<const runtime::Task>(std::vector<const runtime::Task*> tasks, const bool ordered, const bool display_thr,
-                            std::ostream &stream)
+template<>
+void
+Statistics::show<const module::Module>(std::vector<const module::Module*> modules,
+                                       const bool ordered,
+                                       const bool display_thr,
+                                       std::ostream& stream)
 {
-	Statistics::show_tasks<const runtime::Task>(tasks, ordered, display_thr, stream);
+    Statistics::show_modules<const module::Module>(modules, ordered, display_thr, stream);
 }
 
-}
-}
-
-template <class MODULE>
-void Statistics
-::show_modules(std::vector<MODULE*> modules, const bool ordered, const bool display_thr, std::ostream &stream)
+template<>
+void
+Statistics::show<runtime::Task>(std::vector<runtime::Task*> tasks,
+                                const bool ordered,
+                                const bool display_thr,
+                                std::ostream& stream)
 {
-	std::vector<const runtime::Task*> tasks;
-	for (auto& m : modules)
-		if (m != nullptr)
-			for (auto& t : m->tasks)
-				if (t->get_n_calls())
-					tasks.push_back(t.get());
-
-	Statistics::show_tasks(tasks, ordered, display_thr, stream);
+    Statistics::show_tasks<runtime::Task>(tasks, ordered, display_thr, stream);
 }
 
-template <class TASK>
-void Statistics
-::show_tasks(std::vector<TASK*> tasks, const bool ordered, const bool display_thr, std::ostream &stream)
+template<>
+void
+Statistics::show<const runtime::Task>(std::vector<const runtime::Task*> tasks,
+                                      const bool ordered,
+                                      const bool display_thr,
+                                      std::ostream& stream)
 {
-	for (size_t t = 0; t < tasks.size(); t++)
-		if (tasks[t] == nullptr)
-			tasks.erase(tasks.begin()+t);
-
-	if (ordered)
-	{
-		std::sort(tasks.begin(), tasks.end(), [](const runtime::Task* t1, const runtime::Task* t2)
-		{
-			return t1->get_duration_total() > t2->get_duration_total();
-		});
-	}
-
-	auto ttask_tot_duration = std::chrono::nanoseconds(0);
-	auto ttask_min_duration = std::chrono::nanoseconds(0);
-	auto ttask_max_duration = std::chrono::nanoseconds(0);
-
-	for (auto *t : tasks)
-		ttask_tot_duration += t->get_duration_total();
-	auto total_sec = ((float)ttask_tot_duration.count()) * 0.000000001f;
-
-	if (ttask_tot_duration.count())
-	{
-		Statistics::show_header(display_thr, stream);
-
-		size_t   ttask_n_elmts = 0;
-		uint32_t ttask_n_calls = 0;
-
-		auto is_first = true;
-		for (auto *t : tasks)
-		{
-			auto task_n_elmts = t->sockets.end()[-2]->get_n_elmts();
-			auto task_n_calls = t->get_n_calls();
-
-			if (is_first)
-			{
-				if (task_n_calls)
-				{
-					ttask_n_elmts = task_n_elmts;
-					ttask_n_calls = task_n_calls;
-					is_first = false;
-				}
-			}
-			else
-			{
-				ttask_n_elmts = task_n_elmts ? std::min(ttask_n_elmts, task_n_elmts) : ttask_n_elmts;
-				ttask_n_calls = task_n_calls ? std::min(ttask_n_calls, task_n_calls) : ttask_n_calls;
-			}
-		}
-
-		for (auto *t : tasks)
-		{
-			auto module_name       = t->get_module().get_custom_name().empty() ? t->get_module().get_short_name() :
-			                                                                     t->get_module().get_custom_name();
-			auto task_n_elmts      = t->sockets.end()[-2]->get_n_elmts();
-			auto task_name         = t->get_name          ();
-			auto task_n_calls      = t->get_n_calls       ();
-			auto task_tot_duration = t->get_duration_total();
-			auto task_min_duration = t->get_duration_min  ();
-			auto task_max_duration = t->get_duration_max  ();
-
-			ttask_min_duration += (task_min_duration * task_n_calls) / ttask_n_calls;
-			ttask_max_duration += (task_max_duration * task_n_calls) / ttask_n_calls;
-
-			Statistics::show_task(total_sec, module_name, task_name, task_n_elmts, task_n_calls,
-			                      task_tot_duration, task_min_duration, task_max_duration, display_thr, stream);
-
-			auto task_total_sec = ((float)task_tot_duration.count()) * 0.000000001f;
-
-			auto timers_name         = t->get_timers_name();
-			auto timers_n_elmts      = task_n_elmts;
-			auto timers_n_calls      = t->get_timers_n_calls();
-			auto timers_tot_duration = t->get_timers_total();
-			auto timers_min_duration = t->get_timers_min();
-			auto timers_max_duration = t->get_timers_max();
-
-			for (size_t i = 0; i < timers_name.size(); i++)
-			{
-				Statistics::show_timer(task_total_sec, task_n_calls, timers_n_elmts,
-				                       timers_name[i], timers_n_calls[i], timers_tot_duration[i],
-				                       timers_min_duration[i], timers_max_duration[i], stream);
-			}
-		}
-		Statistics::separation2(display_thr, stream);
-
-		Statistics::show_task(total_sec, "TOTAL", "*", ttask_n_elmts, ttask_n_calls,
-		                      ttask_tot_duration, ttask_min_duration, ttask_max_duration, display_thr, stream);
-	}
-	else
-	{
-		stream << rang::tag::comment << rang::tag::info
-		       << "Statistics are unavailable. Did you enable the statistics in the tasks?" << std::endl;
-	}
+    Statistics::show_tasks<const runtime::Task>(tasks, ordered, display_thr, stream);
 }
 
-template <class MODULE_OR_TASK>
-void Statistics
-::show(std::vector<std::vector<MODULE_OR_TASK*>> modules_or_tasks, const bool ordered, const bool display_thr,
-       std::ostream &stream)
+}
+}
+
+template<class MODULE>
+void
+Statistics::show_modules(std::vector<MODULE*> modules, const bool ordered, const bool display_thr, std::ostream& stream)
 {
-	std::stringstream message;
-	message << "The 'Statistics::show' method expect a 'std::vector' of 'std::vector' of 'module::Module' or "
-	        << "'runtime::Task'.";
-	throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
+    std::vector<const runtime::Task*> tasks;
+    for (auto& m : modules)
+        if (m != nullptr)
+            for (auto& t : m->tasks)
+                if (t->get_n_calls()) tasks.push_back(t.get());
+
+    Statistics::show_tasks(tasks, ordered, display_thr, stream);
 }
 
-namespace aff3ct {
-namespace tools {
-
-template <>
-void Statistics
-::show<module::Module>(std::vector<std::vector<module::Module*>> modules, const bool ordered, const bool display_thr,
-                       std::ostream &stream)
+template<class TASK>
+void
+Statistics::show_tasks(std::vector<TASK*> tasks, const bool ordered, const bool display_thr, std::ostream& stream)
 {
-	Statistics::show_modules<module::Module>(modules, ordered, display_thr, stream);
+    for (size_t t = 0; t < tasks.size(); t++)
+        if (tasks[t] == nullptr) tasks.erase(tasks.begin() + t);
+
+    if (ordered)
+    {
+        std::sort(tasks.begin(),
+                  tasks.end(),
+                  [](const runtime::Task* t1, const runtime::Task* t2)
+                  { return t1->get_duration_total() > t2->get_duration_total(); });
+    }
+
+    auto ttask_tot_duration = std::chrono::nanoseconds(0);
+    auto ttask_min_duration = std::chrono::nanoseconds(0);
+    auto ttask_max_duration = std::chrono::nanoseconds(0);
+
+    for (auto* t : tasks)
+        ttask_tot_duration += t->get_duration_total();
+    auto total_sec = ((float)ttask_tot_duration.count()) * 0.000000001f;
+
+    if (ttask_tot_duration.count())
+    {
+        Statistics::show_header(display_thr, stream);
+
+        size_t ttask_n_elmts = 0;
+        uint32_t ttask_n_calls = 0;
+
+        auto is_first = true;
+        for (auto* t : tasks)
+        {
+            auto task_n_elmts = t->sockets.end()[-2]->get_n_elmts();
+            auto task_n_calls = t->get_n_calls();
+
+            if (is_first)
+            {
+                if (task_n_calls)
+                {
+                    ttask_n_elmts = task_n_elmts;
+                    ttask_n_calls = task_n_calls;
+                    is_first = false;
+                }
+            }
+            else
+            {
+                ttask_n_elmts = task_n_elmts ? std::min(ttask_n_elmts, task_n_elmts) : ttask_n_elmts;
+                ttask_n_calls = task_n_calls ? std::min(ttask_n_calls, task_n_calls) : ttask_n_calls;
+            }
+        }
+
+        for (auto* t : tasks)
+        {
+            auto module_name = t->get_module().get_custom_name().empty() ? t->get_module().get_short_name()
+                                                                         : t->get_module().get_custom_name();
+            auto task_n_elmts = t->sockets.end()[-2]->get_n_elmts();
+            auto task_name = t->get_name();
+            auto task_n_calls = t->get_n_calls();
+            auto task_tot_duration = t->get_duration_total();
+            auto task_min_duration = t->get_duration_min();
+            auto task_max_duration = t->get_duration_max();
+
+            ttask_min_duration += (task_min_duration * task_n_calls) / ttask_n_calls;
+            ttask_max_duration += (task_max_duration * task_n_calls) / ttask_n_calls;
+
+            Statistics::show_task(total_sec,
+                                  module_name,
+                                  task_name,
+                                  task_n_elmts,
+                                  task_n_calls,
+                                  task_tot_duration,
+                                  task_min_duration,
+                                  task_max_duration,
+                                  display_thr,
+                                  stream);
+
+            auto task_total_sec = ((float)task_tot_duration.count()) * 0.000000001f;
+
+            auto timers_name = t->get_timers_name();
+            auto timers_n_elmts = task_n_elmts;
+            auto timers_n_calls = t->get_timers_n_calls();
+            auto timers_tot_duration = t->get_timers_total();
+            auto timers_min_duration = t->get_timers_min();
+            auto timers_max_duration = t->get_timers_max();
+
+            for (size_t i = 0; i < timers_name.size(); i++)
+            {
+                Statistics::show_timer(task_total_sec,
+                                       task_n_calls,
+                                       timers_n_elmts,
+                                       timers_name[i],
+                                       timers_n_calls[i],
+                                       timers_tot_duration[i],
+                                       timers_min_duration[i],
+                                       timers_max_duration[i],
+                                       stream);
+            }
+        }
+        Statistics::separation2(display_thr, stream);
+
+        Statistics::show_task(total_sec,
+                              "TOTAL",
+                              "*",
+                              ttask_n_elmts,
+                              ttask_n_calls,
+                              ttask_tot_duration,
+                              ttask_min_duration,
+                              ttask_max_duration,
+                              display_thr,
+                              stream);
+    }
+    else
+    {
+        stream << rang::tag::comment << rang::tag::info
+               << "Statistics are unavailable. Did you enable the statistics in the tasks?" << std::endl;
+    }
 }
 
-template <>
-void Statistics
-::show<const module::Module>(std::vector<std::vector<const module::Module*>> modules, const bool ordered,
-                             const bool display_thr, std::ostream &stream)
+template<class MODULE_OR_TASK>
+void
+Statistics::show(std::vector<std::vector<MODULE_OR_TASK*>> modules_or_tasks,
+                 const bool ordered,
+                 const bool display_thr,
+                 std::ostream& stream)
 {
-	Statistics::show_modules<const module::Module>(modules, ordered, display_thr, stream);
+    std::stringstream message;
+    message << "The 'Statistics::show' method expect a 'std::vector' of 'std::vector' of 'module::Module' or "
+            << "'runtime::Task'.";
+    throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
 }
 
-template <>
-void Statistics
-::show<runtime::Task>(std::vector<std::vector<runtime::Task*>> tasks, const bool ordered, const bool display_thr,
-                      std::ostream &stream)
+namespace aff3ct
 {
-	Statistics::show_tasks<runtime::Task>(tasks, ordered, display_thr, stream);
-}
-
-template <>
-void Statistics
-::show<const runtime::Task>(std::vector<std::vector<const runtime::Task*>> tasks, const bool ordered,
-                            const bool display_thr, std::ostream &stream)
+namespace tools
 {
-	Statistics::show_tasks<const runtime::Task>(tasks, ordered, display_thr, stream);
-}
 
-}
-}
-
-template <class MODULE>
-void Statistics
-::show_modules(std::vector<std::vector<MODULE*>> modules, const bool ordered, const bool display_thr,
-               std::ostream &stream)
+template<>
+void
+Statistics::show<module::Module>(std::vector<std::vector<module::Module*>> modules,
+                                 const bool ordered,
+                                 const bool display_thr,
+                                 std::ostream& stream)
 {
-	std::vector<std::vector<const runtime::Task*>> tasks;
-	for (auto &vm : modules)
-		if (vm.size() > 0 && vm[0] != nullptr)
-		{
-			auto &tasks0 = vm[0]->tasks;
-			for (size_t t = 0; t < tasks0.size(); t++)
-			{
-				std::vector<const runtime::Task*> tsk;
-				for (auto& m : vm)
-					tsk.push_back(m->tasks[t].get());
-				tasks.push_back(tsk);
-			}
-		}
-
-	Statistics::show_tasks(tasks, ordered, display_thr, stream);
+    Statistics::show_modules<module::Module>(modules, ordered, display_thr, stream);
 }
 
-template <class TASK>
-void Statistics
-::show_tasks(std::vector<std::vector<TASK*>> tasks, const bool ordered, const bool display_thr, std::ostream &stream)
+template<>
+void
+Statistics::show<const module::Module>(std::vector<std::vector<const module::Module*>> modules,
+                                       const bool ordered,
+                                       const bool display_thr,
+                                       std::ostream& stream)
 {
-	using namespace std::chrono;
+    Statistics::show_modules<const module::Module>(modules, ordered, display_thr, stream);
+}
 
-	if (tasks.size())
-		for (size_t t = 0; t < tasks[0].size(); t++)
-			if (tasks[0][t] == nullptr)
-				for (size_t i = 0; i < tasks.size(); i++)
-					tasks[i].erase(tasks[i].begin()+t);
+template<>
+void
+Statistics::show<runtime::Task>(std::vector<std::vector<runtime::Task*>> tasks,
+                                const bool ordered,
+                                const bool display_thr,
+                                std::ostream& stream)
+{
+    Statistics::show_tasks<runtime::Task>(tasks, ordered, display_thr, stream);
+}
 
-	if (ordered)
-	{
-		std::sort(tasks.begin(), tasks.end(), [](const std::vector<TASK*> &t1,
-		                                         const std::vector<TASK*> &t2)
-		{
-			auto total1 = nanoseconds(0);
-			auto total2 = nanoseconds(0);
-			for (auto *t : t1) total1 += t->get_duration_total();
-			for (auto *t : t2) total2 += t->get_duration_total();
-			return total1 > total2;
-		});
-	}
+template<>
+void
+Statistics::show<const runtime::Task>(std::vector<std::vector<const runtime::Task*>> tasks,
+                                      const bool ordered,
+                                      const bool display_thr,
+                                      std::ostream& stream)
+{
+    Statistics::show_tasks<const runtime::Task>(tasks, ordered, display_thr, stream);
+}
 
+}
+}
 
-	auto ttask_tot_duration = nanoseconds(0);
-	auto ttask_min_duration = nanoseconds(0);
-	auto ttask_max_duration = nanoseconds(0);
+template<class MODULE>
+void
+Statistics::show_modules(std::vector<std::vector<MODULE*>> modules,
+                         const bool ordered,
+                         const bool display_thr,
+                         std::ostream& stream)
+{
+    std::vector<std::vector<const runtime::Task*>> tasks;
+    for (auto& vm : modules)
+        if (vm.size() > 0 && vm[0] != nullptr)
+        {
+            auto& tasks0 = vm[0]->tasks;
+            for (size_t t = 0; t < tasks0.size(); t++)
+            {
+                std::vector<const runtime::Task*> tsk;
+                for (auto& m : vm)
+                    tsk.push_back(m->tasks[t].get());
+                tasks.push_back(tsk);
+            }
+        }
 
-	for (auto &vt : tasks)
-		for (auto *t : vt)
-			ttask_tot_duration += t->get_duration_total();
-	auto total_sec = ((float)ttask_tot_duration.count()) * 0.000000001f;
+    Statistics::show_tasks(tasks, ordered, display_thr, stream);
+}
 
-	if (ttask_tot_duration.count())
-	{
-		Statistics::show_header(display_thr, stream);
+template<class TASK>
+void
+Statistics::show_tasks(std::vector<std::vector<TASK*>> tasks,
+                       const bool ordered,
+                       const bool display_thr,
+                       std::ostream& stream)
+{
+    using namespace std::chrono;
 
-		size_t ttask_n_elmts = 0;
-		auto   ttask_n_calls = 0;
+    if (tasks.size())
+        for (size_t t = 0; t < tasks[0].size(); t++)
+            if (tasks[0][t] == nullptr)
+                for (size_t i = 0; i < tasks.size(); i++)
+                    tasks[i].erase(tasks[i].begin() + t);
 
-		auto is_first = true;
-		for (auto &vt : tasks)
-		{
-			auto task_n_elmts = vt[0]->sockets.size() >= 2 ? vt[0]->sockets.end()[-2]->get_n_elmts() : 0;
-			auto task_n_calls = 0;
+    if (ordered)
+    {
+        std::sort(tasks.begin(),
+                  tasks.end(),
+                  [](const std::vector<TASK*>& t1, const std::vector<TASK*>& t2)
+                  {
+                      auto total1 = nanoseconds(0);
+                      auto total2 = nanoseconds(0);
+                      for (auto* t : t1)
+                          total1 += t->get_duration_total();
+                      for (auto* t : t2)
+                          total2 += t->get_duration_total();
+                      return total1 > total2;
+                  });
+    }
 
-			for (auto *t : vt)
-				task_n_calls += t->get_n_calls();
+    auto ttask_tot_duration = nanoseconds(0);
+    auto ttask_min_duration = nanoseconds(0);
+    auto ttask_max_duration = nanoseconds(0);
 
-			if (is_first)
-			{
-				if (task_n_calls)
-				{
-					ttask_n_elmts = task_n_elmts;
-					ttask_n_calls = task_n_calls;
-					is_first = false;
-				}
-			}
-			else
-			{
-				ttask_n_elmts = task_n_elmts ? std::min(ttask_n_elmts, task_n_elmts) : ttask_n_elmts;
-				ttask_n_calls = task_n_calls ? std::min(ttask_n_calls, task_n_calls) : ttask_n_calls;
-			}
-		}
+    for (auto& vt : tasks)
+        for (auto* t : vt)
+            ttask_tot_duration += t->get_duration_total();
+    auto total_sec = ((float)ttask_tot_duration.count()) * 0.000000001f;
 
-		for (auto &vt : tasks)
-		{
-			auto module_name       = vt[0]->get_module().get_custom_name().empty() ?
-			                         vt[0]->get_module().get_short_name() :
-			                         vt[0]->get_module().get_custom_name();
-			auto task_n_elmts      = vt[0]->sockets.size() >= 2 ? vt[0]->sockets.end()[-2]->get_n_elmts() : 0;
-			auto task_name         = vt[0]->get_name();
-			auto task_n_calls      = 0;
-			auto task_tot_duration = nanoseconds(0);
-			auto task_min_duration = ttask_tot_duration;
-			auto task_max_duration = nanoseconds(0);
+    if (ttask_tot_duration.count())
+    {
+        Statistics::show_header(display_thr, stream);
 
-			for (auto *t : vt)
-			{
-				task_n_calls      += t->get_n_calls();
-				task_tot_duration += t->get_duration_total();
-				task_min_duration  = std::min(task_min_duration, t->get_duration_min());
-				task_max_duration  = std::max(task_max_duration, t->get_duration_max());
-			}
+        size_t ttask_n_elmts = 0;
+        auto ttask_n_calls = 0;
 
-			ttask_min_duration += (task_min_duration * task_n_calls) / ttask_n_calls;
-			ttask_max_duration += (task_max_duration * task_n_calls) / ttask_n_calls;
+        auto is_first = true;
+        for (auto& vt : tasks)
+        {
+            auto task_n_elmts = vt[0]->sockets.size() >= 2 ? vt[0]->sockets.end()[-2]->get_n_elmts() : 0;
+            auto task_n_calls = 0;
 
-			Statistics::show_task(total_sec, module_name, task_name, task_n_elmts, task_n_calls,
-			                      task_tot_duration, task_min_duration, task_max_duration, display_thr, stream);
+            for (auto* t : vt)
+                task_n_calls += t->get_n_calls();
 
-			auto task_total_sec = ((float)task_tot_duration.count()) * 0.000000001f;
+            if (is_first)
+            {
+                if (task_n_calls)
+                {
+                    ttask_n_elmts = task_n_elmts;
+                    ttask_n_calls = task_n_calls;
+                    is_first = false;
+                }
+            }
+            else
+            {
+                ttask_n_elmts = task_n_elmts ? std::min(ttask_n_elmts, task_n_elmts) : ttask_n_elmts;
+                ttask_n_calls = task_n_calls ? std::min(ttask_n_calls, task_n_calls) : ttask_n_calls;
+            }
+        }
 
-			auto timers_name         = vt[0]->get_timers_name();
-			auto timers_n_elmts      = task_n_elmts;
-			auto timers_n_calls      = std::vector<uint32_t>(timers_name.size(), 0);
-			auto timers_tot_duration = std::vector<nanoseconds>(timers_name.size(), nanoseconds(0));
-			auto timers_min_duration = std::vector<nanoseconds>(timers_name.size(), ttask_tot_duration);
-			auto timers_max_duration = std::vector<nanoseconds>(timers_name.size(), nanoseconds(0));
+        for (auto& vt : tasks)
+        {
+            auto module_name = vt[0]->get_module().get_custom_name().empty() ? vt[0]->get_module().get_short_name()
+                                                                             : vt[0]->get_module().get_custom_name();
+            auto task_n_elmts = vt[0]->sockets.size() >= 2 ? vt[0]->sockets.end()[-2]->get_n_elmts() : 0;
+            auto task_name = vt[0]->get_name();
+            auto task_n_calls = 0;
+            auto task_tot_duration = nanoseconds(0);
+            auto task_min_duration = ttask_tot_duration;
+            auto task_max_duration = nanoseconds(0);
 
-			for (size_t tn = 0; tn < vt[0]->get_timers_name().size(); tn++)
-			{
-				for (auto *t : vt)
-				{
-					timers_n_calls     [tn] += t->get_timers_n_calls()[tn];
-					timers_tot_duration[tn] += t->get_timers_total()[tn];
-					timers_min_duration[tn]  = std::min(task_min_duration, t->get_timers_min()[tn]);
-					timers_max_duration[tn]  = std::max(task_max_duration, t->get_timers_max()[tn]);
-				}
+            for (auto* t : vt)
+            {
+                task_n_calls += t->get_n_calls();
+                task_tot_duration += t->get_duration_total();
+                task_min_duration = std::min(task_min_duration, t->get_duration_min());
+                task_max_duration = std::max(task_max_duration, t->get_duration_max());
+            }
 
-				Statistics::show_timer(task_total_sec, task_n_calls, timers_n_elmts,
-				                       timers_name[tn], timers_n_calls[tn], timers_tot_duration[tn],
-				                       timers_min_duration[tn], timers_max_duration[tn], stream);
-			}
-		}
-		Statistics::separation2(display_thr, stream);
+            ttask_min_duration += (task_min_duration * task_n_calls) / ttask_n_calls;
+            ttask_max_duration += (task_max_duration * task_n_calls) / ttask_n_calls;
 
-		Statistics::show_task(total_sec, "TOTAL", "*", ttask_n_elmts, ttask_n_calls,
-		                      ttask_tot_duration, ttask_min_duration, ttask_max_duration, display_thr, stream);
-	}
-	else
-	{
-		stream << rang::tag::comment << rang::tag::info
-		       << "Statistics are unavailable. Did you enable the statistics in the tasks?" << std::endl;
-	}
+            Statistics::show_task(total_sec,
+                                  module_name,
+                                  task_name,
+                                  task_n_elmts,
+                                  task_n_calls,
+                                  task_tot_duration,
+                                  task_min_duration,
+                                  task_max_duration,
+                                  display_thr,
+                                  stream);
+
+            auto task_total_sec = ((float)task_tot_duration.count()) * 0.000000001f;
+
+            auto timers_name = vt[0]->get_timers_name();
+            auto timers_n_elmts = task_n_elmts;
+            auto timers_n_calls = std::vector<uint32_t>(timers_name.size(), 0);
+            auto timers_tot_duration = std::vector<nanoseconds>(timers_name.size(), nanoseconds(0));
+            auto timers_min_duration = std::vector<nanoseconds>(timers_name.size(), ttask_tot_duration);
+            auto timers_max_duration = std::vector<nanoseconds>(timers_name.size(), nanoseconds(0));
+
+            for (size_t tn = 0; tn < vt[0]->get_timers_name().size(); tn++)
+            {
+                for (auto* t : vt)
+                {
+                    timers_n_calls[tn] += t->get_timers_n_calls()[tn];
+                    timers_tot_duration[tn] += t->get_timers_total()[tn];
+                    timers_min_duration[tn] = std::min(task_min_duration, t->get_timers_min()[tn]);
+                    timers_max_duration[tn] = std::max(task_max_duration, t->get_timers_max()[tn]);
+                }
+
+                Statistics::show_timer(task_total_sec,
+                                       task_n_calls,
+                                       timers_n_elmts,
+                                       timers_name[tn],
+                                       timers_n_calls[tn],
+                                       timers_tot_duration[tn],
+                                       timers_min_duration[tn],
+                                       timers_max_duration[tn],
+                                       stream);
+            }
+        }
+        Statistics::separation2(display_thr, stream);
+
+        Statistics::show_task(total_sec,
+                              "TOTAL",
+                              "*",
+                              ttask_n_elmts,
+                              ttask_n_calls,
+                              ttask_tot_duration,
+                              ttask_min_duration,
+                              ttask_max_duration,
+                              display_thr,
+                              stream);
+    }
+    else
+    {
+        stream << rang::tag::comment << rang::tag::info
+               << "Statistics are unavailable. Did you enable the statistics in the tasks?" << std::endl;
+    }
 }

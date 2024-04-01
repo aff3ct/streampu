@@ -2,40 +2,39 @@
 
 using namespace aff3ct::module;
 
-template <typename B>
-Source_random<B>
-::Source_random(const int max_data_size, const int seed)
-: Source<B>(max_data_size),
-  rd_engine(seed),
-  uniform_dist(0, 1)
+template<typename B>
+Source_random<B>::Source_random(const int max_data_size, const int seed)
+  : Source<B>(max_data_size)
+  , rd_engine(seed)
+  , uniform_dist(0, 1)
 {
-	const std::string name = "Source_random";
-	this->set_name(name);
+    const std::string name = "Source_random";
+    this->set_name(name);
 }
 
-template <typename B>
-Source_random<B>* Source_random<B>
-::clone() const
+template<typename B>
+Source_random<B>*
+Source_random<B>::clone() const
 {
-	auto m = new Source_random(*this);
-	m->deep_copy(*this);
-	return m;
+    auto m = new Source_random(*this);
+    m->deep_copy(*this);
+    return m;
 }
 
-template <typename B>
-void Source_random<B>
-::_generate(B *out_data, const size_t frame_id)
+template<typename B>
+void
+Source_random<B>::_generate(B* out_data, const size_t frame_id)
 {
-	// generate a random k bits vector out_data
-	for (auto i = 0; i < this->max_data_size; i++)
-		out_data[i] = (B)this->uniform_dist(this->rd_engine);
+    // generate a random k bits vector out_data
+    for (auto i = 0; i < this->max_data_size; i++)
+        out_data[i] = (B)this->uniform_dist(this->rd_engine);
 }
 
-template <typename B>
-void Source_random<B>
-::set_seed(const int seed)
+template<typename B>
+void
+Source_random<B>::set_seed(const int seed)
 {
-	rd_engine.seed(seed);
+    rd_engine.seed(seed);
 }
 
 // ==================================================================================== explicit template instantiation

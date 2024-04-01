@@ -3,16 +3,16 @@
 using namespace aff3ct;
 using namespace aff3ct::module;
 
-Switcher* Switcher
-::clone() const
+Switcher*
+Switcher::clone() const
 {
-	auto m = new Switcher(*this);
-	m->deep_copy(*this);
-	return m;
+    auto m = new Switcher(*this);
+    m->deep_copy(*this);
+    return m;
 }
 
-void Switcher
-::reset()
+void
+Switcher::reset()
 {
-	this->path = this->get_n_data_sockets() -1;
+    this->path = this->get_n_data_sockets() - 1;
 }

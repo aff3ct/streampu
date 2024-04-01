@@ -13,14 +13,16 @@ namespace tools
  * \param cmd is the command to run on the system
  * \return the standard and error output mixed
  */
-std::string run_system_command(std::string cmd);
+std::string
+run_system_command(std::string cmd);
 
 /*!
  * \brief return the full location/path of the binary
  *
  * \return the binary path if supported, empty string else
  */
-std::string get_binary_path();
+std::string
+get_binary_path();
 
 /*!
  * \brief split a path in basedir and filename
@@ -29,7 +31,8 @@ std::string get_binary_path();
  * \param basedir is the directory without the filename
  * \param filename is the name of the file without the base directory
  */
-void split_path(const std::string& path, std::string &basedir, std::string &filename);
+void
+split_path(const std::string& path, std::string& basedir, std::string& filename);
 }
 }
 
