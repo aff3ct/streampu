@@ -11,18 +11,18 @@ namespace aff3ct
 {
 namespace module
 {
-template <typename B = int>
+template<typename B = int>
 class Source_AZCW : public Source<B>
 {
-public:
-	Source_AZCW(const int max_data_size);
+  public:
+    Source_AZCW(const int max_data_size);
 
-	virtual ~Source_AZCW() = default;
+    virtual ~Source_AZCW() = default;
 
-	virtual Source_AZCW<B>* clone() const;
+    virtual Source_AZCW<B>* clone() const;
 
-protected:
-	void _generate(B *out_data, const size_t frame_id);
+  protected:
+    void _generate(B* out_data, const size_t frame_id);
 };
 }
 }

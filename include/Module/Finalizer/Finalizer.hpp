@@ -16,50 +16,58 @@ namespace aff3ct
 {
 namespace module
 {
-	namespace fin
-	{
-		enum class tsk : size_t { finalize, SIZE };
-
-		namespace sck
-		{
-			enum class finalize : size_t { in, status };
-		}
-	}
-
-template <typename T = int>
-class Finalizer : public Module, public tools::Interface_reset
+namespace fin
 {
-public:
-	inline runtime::Task&   operator[](const fin::tsk           t);
-	inline runtime::Socket& operator[](const fin::sck::finalize s);
-	inline runtime::Socket& operator[](const std::string &tsk_sck);
+enum class tsk : size_t
+{
+    finalize,
+    SIZE
+};
 
-protected:
-	std::vector<std::vector<std::vector<T>>> data;
-	size_t next_stream_id;
+namespace sck
+{
+enum class finalize : size_t
+{
+    in,
+    status
+};
+}
+}
 
-public:
-	Finalizer(const size_t n_elmts, const size_t history_size = 1);
-	virtual ~Finalizer() = default;
-	virtual Finalizer* clone() const;
+template<typename T = int>
+class Finalizer
+  : public Module
+  , public tools::Interface_reset
+{
+  public:
+    inline runtime::Task& operator[](const fin::tsk t);
+    inline runtime::Socket& operator[](const fin::sck::finalize s);
+    inline runtime::Socket& operator[](const std::string& tsk_sck);
 
-	const std::vector<std::vector<T>>& get_final_data() const;
-	const std::vector<std::vector<std::vector<T>>>& get_histo_data() const;
-	size_t get_next_stream_id() const;
+  protected:
+    std::vector<std::vector<std::vector<T>>> data;
+    size_t next_stream_id;
 
-	void set_n_frames(const size_t n_frames);
+  public:
+    Finalizer(const size_t n_elmts, const size_t history_size = 1);
+    virtual ~Finalizer() = default;
+    virtual Finalizer* clone() const;
 
-	template <class A = std::allocator<T>>
-	void finalize(const std::vector<T,A>& in,
-	              const int frame_id = -1,
-	              const bool managed_memory = true);
+    const std::vector<std::vector<T>>& get_final_data() const;
+    const std::vector<std::vector<std::vector<T>>>& get_histo_data() const;
+    size_t get_next_stream_id() const;
 
-	void finalize(const T *in, const int frame_id = -1, const bool managed_memory = true);
+    void set_n_frames(const size_t n_frames);
 
-	virtual void reset();
+    template<class A = std::allocator<T>>
+    void finalize(const std::vector<T, A>& in, const int frame_id = -1, const bool managed_memory = true);
 
-protected:
-	virtual void _finalize(const T *in, const size_t frame_id);
+    void finalize(const T* in, const int frame_id = -1, const bool managed_memory = true);
+
+    virtual void reset();
+
+  protected:
+    virtual void _finalize(const T* in, const size_t frame_id);
 };
 }
 }

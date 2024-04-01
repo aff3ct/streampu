@@ -15,12 +15,15 @@ namespace tools
 {
 class runtime_error : public exception
 {
-public:
-	runtime_error() noexcept;
-	explicit runtime_error(std::string &&message) noexcept;
-	runtime_error(std::string &&filename, int &&line_num, std::string &&funcname = "", std::string &&message = "") noexcept;
+  public:
+    runtime_error() noexcept;
+    explicit runtime_error(std::string&& message) noexcept;
+    runtime_error(std::string&& filename,
+                  int&& line_num,
+                  std::string&& funcname = "",
+                  std::string&& message = "") noexcept;
 
-	virtual ~runtime_error() = default;
+    virtual ~runtime_error() = default;
 };
 }
 }

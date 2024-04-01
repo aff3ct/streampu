@@ -15,12 +15,15 @@ namespace tools
 {
 class unimplemented_error : public exception
 {
-public:
-	unimplemented_error() noexcept;
-	explicit unimplemented_error(std::string &&message) noexcept;
-	unimplemented_error(std::string &&filename, int &&line_num, std::string &&funcname = "", std::string &&message = "") noexcept;
+  public:
+    unimplemented_error() noexcept;
+    explicit unimplemented_error(std::string&& message) noexcept;
+    unimplemented_error(std::string&& filename,
+                        int&& line_num,
+                        std::string&& funcname = "",
+                        std::string&& message = "") noexcept;
 
-	virtual ~unimplemented_error() = default;
+    virtual ~unimplemented_error() = default;
 };
 }
 }

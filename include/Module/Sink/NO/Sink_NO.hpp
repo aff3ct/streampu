@@ -19,17 +19,17 @@ namespace module
  * \tparam B: type of the data to send or receive.
  *
  */
-template <typename B = int>
+template<typename B = int>
 class Sink_NO : public Sink<B>
 {
-public:
-	Sink_NO(const int max_data_size);
-	~Sink_NO() = default;
+  public:
+    Sink_NO(const int max_data_size);
+    ~Sink_NO() = default;
 
-	virtual Sink_NO<B>* clone() const;
+    virtual Sink_NO<B>* clone() const;
 
-protected:
-	virtual void _send_count(const B *in_data, const uint32_t* in_count, const size_t frame_id);
+  protected:
+    virtual void _send_count(const B* in_data, const uint32_t* in_count, const size_t frame_id);
 };
 
 }

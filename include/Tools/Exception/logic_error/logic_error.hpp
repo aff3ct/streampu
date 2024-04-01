@@ -15,12 +15,15 @@ namespace tools
 {
 class logic_error : public exception
 {
-public:
-	logic_error() noexcept;
-	explicit logic_error(std::string &&message) noexcept;
-	logic_error(std::string &&filename, int &&line_num, std::string &&funcname = "", std::string &&message = "") noexcept;
+  public:
+    logic_error() noexcept;
+    explicit logic_error(std::string&& message) noexcept;
+    logic_error(std::string&& filename,
+                int&& line_num,
+                std::string&& funcname = "",
+                std::string&& message = "") noexcept;
 
-	virtual ~logic_error() = default;
+    virtual ~logic_error() = default;
 };
 }
 }

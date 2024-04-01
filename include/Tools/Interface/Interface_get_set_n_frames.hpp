@@ -13,9 +13,9 @@ namespace tools
 {
 class Interface_get_set_n_frames
 {
-public:
-	virtual size_t get_n_frames() const = 0;
-	virtual void set_n_frames(const size_t n_frames) = 0;
+  public:
+    virtual size_t get_n_frames() const = 0;
+    virtual void set_n_frames(const size_t n_frames) = 0;
 };
 
 }

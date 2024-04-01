@@ -13,11 +13,11 @@ namespace tools
 {
 class Interface_waiting : public Interface_reset
 {
-public:
-	virtual void reset() = 0;
-	virtual void send_cancel_signal() = 0;
-	virtual void wake_up() = 0;
-	virtual void cancel_waiting() = 0;
+  public:
+    virtual void reset() = 0;
+    virtual void send_cancel_signal() = 0;
+    virtual void wake_up() = 0;
+    virtual void cancel_waiting() = 0;
 };
 
 }

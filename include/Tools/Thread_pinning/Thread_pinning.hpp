@@ -9,17 +9,17 @@ namespace tools
 {
 class Thread_pinning
 {
-public:
-	static void init();
-	static void destroy();
-	static void pin(const size_t puid);
-	static void pin(const std::string hwloc_objects);
-	static void unpin();
+  public:
+    static void init();
+    static void destroy();
+    static void pin(const size_t puid);
+    static void pin(const std::string hwloc_objects);
+    static void unpin();
 
-	static std::string get_cur_cpuset_str();
+    static std::string get_cur_cpuset_str();
 
-	static void set_logs(const bool enable_logs);
-	static bool is_logs();
+    static void set_logs(const bool enable_logs);
+    static bool is_logs();
 };
 }
 }

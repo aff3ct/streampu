@@ -11,8 +11,8 @@ namespace tools
 {
 class Interface_set_seed
 {
-public:
-	virtual void set_seed(const int seed) = 0;
+  public:
+    virtual void set_seed(const int seed) = 0;
 };
 
 }

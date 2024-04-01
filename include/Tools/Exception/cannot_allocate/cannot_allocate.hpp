@@ -15,12 +15,15 @@ namespace tools
 {
 class cannot_allocate : public exception
 {
-public:
-	cannot_allocate() noexcept;
-	explicit cannot_allocate(std::string &&message) noexcept;
-	cannot_allocate(std::string &&filename, int &&line_num, std::string &&funcname = "", std::string &&message = "") noexcept;
+  public:
+    cannot_allocate() noexcept;
+    explicit cannot_allocate(std::string&& message) noexcept;
+    cannot_allocate(std::string&& filename,
+                    int&& line_num,
+                    std::string&& funcname = "",
+                    std::string&& message = "") noexcept;
 
-	virtual ~cannot_allocate() = default;
+    virtual ~cannot_allocate() = default;
 };
 }
 }

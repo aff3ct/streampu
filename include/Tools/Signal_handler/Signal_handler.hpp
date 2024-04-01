@@ -7,12 +7,12 @@ namespace tools
 {
 class Signal_handler
 {
-public:
-	static int init();
-	static bool is_sigint();
-	static bool is_sigsegv();
-	static void reset_sigint();
-	static void reset_sigsegv();
+  public:
+    static int init();
+    static bool is_sigint();
+    static bool is_sigsegv();
+    static void reset_sigint();
+    static void reset_sigsegv();
 };
 }
 }

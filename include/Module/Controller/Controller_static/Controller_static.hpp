@@ -16,13 +16,13 @@ namespace module
 
 class Controller_static : public Controller
 {
-public:
-	Controller_static(const size_t init_path = 0);
-	virtual ~Controller_static() = default;
-	virtual Controller_static* clone() const;
+  public:
+    Controller_static(const size_t init_path = 0);
+    virtual ~Controller_static() = default;
+    virtual Controller_static* clone() const;
 
-protected:
-	virtual void _control(int8_t *out, const size_t frame_id);
+  protected:
+    virtual void _control(int8_t* out, const size_t frame_id);
 };
 }
 }

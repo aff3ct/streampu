@@ -15,12 +15,15 @@ namespace tools
 {
 class domain_error : public exception
 {
-public:
-	domain_error() noexcept;
-	explicit domain_error(std::string &&message) noexcept;
-	domain_error(std::string &&filename, int &&line_num, std::string &&funcname = "", std::string &&message = "") noexcept;
+  public:
+    domain_error() noexcept;
+    explicit domain_error(std::string&& message) noexcept;
+    domain_error(std::string&& filename,
+                 int&& line_num,
+                 std::string&& funcname = "",
+                 std::string&& message = "") noexcept;
 
-	virtual ~domain_error() = default;
+    virtual ~domain_error() = default;
 };
 }
 }

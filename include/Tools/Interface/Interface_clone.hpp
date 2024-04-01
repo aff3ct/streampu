@@ -11,8 +11,8 @@ namespace tools
 {
 class Interface_clone
 {
-public:
-	virtual Interface_clone* clone() const = 0;
+  public:
+    virtual Interface_clone* clone() const = 0;
 };
 
 }

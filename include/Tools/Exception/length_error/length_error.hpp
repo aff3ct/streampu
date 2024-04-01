@@ -15,12 +15,15 @@ namespace tools
 {
 class length_error : public exception
 {
-public:
-	length_error() noexcept;
-	explicit length_error(std::string &&message) noexcept;
-	length_error(std::string &&filename, int &&line_num, std::string &&funcname = "", std::string &&message = "") noexcept;
+  public:
+    length_error() noexcept;
+    explicit length_error(std::string&& message) noexcept;
+    length_error(std::string&& filename,
+                 int&& line_num,
+                 std::string&& funcname = "",
+                 std::string&& message = "") noexcept;
 
-	virtual ~length_error() = default;
+    virtual ~length_error() = default;
 };
 }
 }

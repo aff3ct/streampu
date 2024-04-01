@@ -13,38 +13,45 @@ namespace aff3ct
 {
 namespace module
 {
-	namespace slp
-	{
-		enum class tsk : size_t { sleep, SIZE };
+namespace slp
+{
+enum class tsk : size_t
+{
+    sleep,
+    SIZE
+};
 
-		namespace sck
-		{
-			enum class sleep : size_t { status };
-		}
-	}
+namespace sck
+{
+enum class sleep : size_t
+{
+    status
+};
+}
+}
 
 class Sleeper : public Module
 {
-public:
-	inline runtime::Task&   operator[](const slp::tsk           t);
-	inline runtime::Socket& operator[](const slp::sck::sleep    s);
-	inline runtime::Socket& operator[](const std::string &tsk_sck);
+  public:
+    inline runtime::Task& operator[](const slp::tsk t);
+    inline runtime::Socket& operator[](const slp::sck::sleep s);
+    inline runtime::Socket& operator[](const std::string& tsk_sck);
 
-protected:
-	size_t ns;
+  protected:
+    size_t ns;
 
-public:
-	Sleeper(const size_t ns = 0);
-	virtual ~Sleeper() = default;
-	virtual Sleeper* clone() const;
+  public:
+    Sleeper(const size_t ns = 0);
+    virtual ~Sleeper() = default;
+    virtual Sleeper* clone() const;
 
-	size_t get_ns() const;
-	void set_ns(const size_t ns);
+    size_t get_ns() const;
+    void set_ns(const size_t ns);
 
-	void sleep(const int frame_id = -1, const bool managed_memory = true);
+    void sleep(const int frame_id = -1, const bool managed_memory = true);
 
-protected:
-	virtual void _sleep(const size_t frame_id);
+  protected:
+    virtual void _sleep(const size_t frame_id);
 };
 }
 }

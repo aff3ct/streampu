@@ -13,48 +13,54 @@ namespace aff3ct
 {
 namespace module
 {
-	namespace ini
-	{
-		enum class tsk : size_t { initialize, SIZE };
+namespace ini
+{
+enum class tsk : size_t
+{
+    initialize,
+    SIZE
+};
 
-		namespace sck
-		{
-			enum class initialize : size_t { out, status };
-		}
-	}
+namespace sck
+{
+enum class initialize : size_t
+{
+    out,
+    status
+};
+}
+}
 
-template <typename T = int>
+template<typename T = int>
 class Initializer : public Module
 {
-public:
-	inline runtime::Task&   operator[](const ini::tsk             t);
-	inline runtime::Socket& operator[](const ini::sck::initialize s);
-	inline runtime::Socket& operator[](const std::string &tsk_sck  );
+  public:
+    inline runtime::Task& operator[](const ini::tsk t);
+    inline runtime::Socket& operator[](const ini::sck::initialize s);
+    inline runtime::Socket& operator[](const std::string& tsk_sck);
 
-protected:
-	std::vector<std::vector<T>> init_data;
+  protected:
+    std::vector<std::vector<T>> init_data;
 
-public:
-	Initializer(const size_t n_elmts);
-	virtual ~Initializer() = default;
-	virtual Initializer* clone() const;
+  public:
+    Initializer(const size_t n_elmts);
+    virtual ~Initializer() = default;
+    virtual Initializer* clone() const;
 
-	const std::vector<std::vector<T>>& get_init_data() const;
+    const std::vector<std::vector<T>>& get_init_data() const;
 
-	void set_init_data(const std::vector<T>& init_data);
-	void set_init_data(const std::vector<std::vector<T>>& init_data);
-	void set_init_data(const T val);
-	void set_n_frames(const size_t n_frames);
+    void set_init_data(const std::vector<T>& init_data);
+    void set_init_data(const std::vector<std::vector<T>>& init_data);
+    void set_init_data(const T val);
+    void set_n_frames(const size_t n_frames);
 
-	template <class A = std::allocator<T>>
-	void initialize(std::vector<T,A>& out,
-	                const int frame_id = -1,
-	                const bool managed_memory = true);
+    template<class A = std::allocator<T>>
+    void initialize(std::vector<T, A>& out, const int frame_id = -1, const bool managed_memory = true);
 
-	void initialize(T *out, const int frame_id = -1, const bool managed_memory = true);
+    void initialize(T* out, const int frame_id = -1, const bool managed_memory = true);
 
-protected:
-	virtual void _initialize(T *out, const size_t frame_id);
+  protected:
+    virtual void _initialize(T* out, const size_t frame_id);
 };
 }
 }

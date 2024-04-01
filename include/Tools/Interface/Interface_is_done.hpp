@@ -11,8 +11,8 @@ namespace tools
 {
 class Interface_is_done
 {
-public:
-	virtual bool is_done() const = 0;
+  public:
+    virtual bool is_done() const = 0;
 };
 
 }

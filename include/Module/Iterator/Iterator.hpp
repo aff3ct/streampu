@@ -7,51 +7,62 @@
 
 #include <cstdint>
 
-#include "Tools/Interface/Interface_reset.hpp"
 #include "Module/Module.hpp"
+#include "Tools/Interface/Interface_reset.hpp"
 
 namespace aff3ct
 {
 namespace module
 {
-	namespace ite
-	{
-		enum class tsk : size_t { iterate, reset, SIZE };
-
-		namespace sck
-		{
-			enum class iterate : size_t { out, status };
-		}
-	}
-
-class Iterator : public Module, public tools::Interface_reset
+namespace ite
 {
-public:
-	inline runtime::Task&   operator[](const ite::tsk           t);
-	inline runtime::Socket& operator[](const ite::sck::iterate  s);
-	inline runtime::Socket& operator[](const std::string &tsk_sck);
+enum class tsk : size_t
+{
+    iterate,
+    reset,
+    SIZE
+};
 
-protected:
-	size_t limit;
-	size_t counter;
+namespace sck
+{
+enum class iterate : size_t
+{
+    out,
+    status
+};
+}
+}
 
-public:
-	Iterator(const size_t limit);
-	virtual ~Iterator() = default;
-	virtual Iterator* clone() const;
+class Iterator
+  : public Module
+  , public tools::Interface_reset
+{
+  public:
+    inline runtime::Task& operator[](const ite::tsk t);
+    inline runtime::Socket& operator[](const ite::sck::iterate s);
+    inline runtime::Socket& operator[](const std::string& tsk_sck);
 
-	size_t get_limit() const;
-	void set_limit(const size_t limit);
+  protected:
+    size_t limit;
+    size_t counter;
 
-	void reset();
+  public:
+    Iterator(const size_t limit);
+    virtual ~Iterator() = default;
+    virtual Iterator* clone() const;
 
-	template <class A = std::allocator<int8_t>>
-	void iterate(std::vector<int8_t,A>& out, const int frame_id = -1, const bool managed_memory = true);
+    size_t get_limit() const;
+    void set_limit(const size_t limit);
 
-	void iterate(int8_t *out, const int frame_id = -1, const bool managed_memory = true);
+    void reset();
 
-protected:
-	virtual void _iterate(int8_t *out, const size_t frame_id);
+    template<class A = std::allocator<int8_t>>
+    void iterate(std::vector<int8_t, A>& out, const int frame_id = -1, const bool managed_memory = true);
+
+    void iterate(int8_t* out, const int frame_id = -1, const bool managed_memory = true);
+
+  protected:
+    virtual void _iterate(int8_t* out, const size_t frame_id);
 };
 }
 }
