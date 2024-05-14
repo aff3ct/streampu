@@ -737,6 +737,49 @@ if(AFF3CT_CORE_TESTS)
     add_test(NAME pipeline13::aff3ct-core-test-generic-pipeline COMMAND aff3ct-core-test-generic-pipeline -i ${INPUT_FILE} -n "(4,1,2)" -t "(3,1,3)" -R "(SFWD,SIO,SFWD)")
     set_tests_properties(pipeline13::aff3ct-core-test-generic-pipeline PROPERTIES LABELS generic-pipeline)
 
+	############################# Same tests with increment instread of relayers ##########################################################################
+	add_test(NAME sequence4::aff3ct-core-test-generic-pipeline COMMAND aff3ct-core-test-generic-pipeline -T "increment" -n "(3)" -t "(3)" -R "(SIO)" -q)
+    set_tests_properties(sequence4::aff3ct-core-test-generic-pipeline PROPERTIES LABELS generic-pipeline)
+    add_test(NAME sequence5::aff3ct-core-test-generic-pipeline COMMAND aff3ct-core-test-generic-pipeline -T "increment" -n "(3)" -t "(3)" -R "(SFWD)" -q -b)
+    set_tests_properties(sequence5::aff3ct-core-test-generic-pipeline PROPERTIES LABELS generic-pipeline)
+    add_test(NAME sequence6::aff3ct-core-test-generic-pipeline COMMAND aff3ct-core-test-generic-pipeline -T "increment" -n "(4)" -t "(3)" -r "((SFWD,SIO,SFWD,SIO))" -q)
+    set_tests_properties(sequence6::aff3ct-core-test-generic-pipeline PROPERTIES LABELS generic-pipeline)
+    add_test(NAME sequence7::aff3ct-core-test-generic-pipeline COMMAND aff3ct-core-test-generic-pipeline -T "increment" -n "(4,1,2)" -t "(3,1,3)" -r "((SFWD,SIO,SFWD,SIO),(SFWD),(SIO,SIO))" -q -b)
+    set_tests_properties(sequence7::aff3ct-core-test-generic-pipeline PROPERTIES LABELS generic-pipeline)
+    # simple pipeline example
+    add_test(NAME pipeline14::aff3ct-core-test-generic-pipeline COMMAND aff3ct-core-test-generic-pipeline -T "increment" -n "(3)" -t "(3)" -R "(SIO)")
+    set_tests_properties(pipeline14::aff3ct-core-test-generic-pipeline PROPERTIES LABELS generic-pipeline)
+    # simple pipeline FWD example
+    add_test(NAME pipeline15::aff3ct-core-test-generic-pipeline COMMAND aff3ct-core-test-generic-pipeline -T "increment" -n "(3)" -t "(3)" -R "(SFWD)")
+    set_tests_properties(pipeline15::aff3ct-core-test-generic-pipeline PROPERTIES LABELS generic-pipeline)
+    add_test(NAME pipeline16::aff3ct-core-test-generic-pipeline COMMAND aff3ct-core-test-generic-pipeline -T "increment" -n "(3)" -t "(3)" -R "(SFWD)" -p)
+    set_tests_properties(pipeline16::aff3ct-core-test-generic-pipeline PROPERTIES LABELS generic-pipeline)
+    add_test(NAME pipeline17::aff3ct-core-test-generic-pipeline COMMAND aff3ct-core-test-generic-pipeline -T "increment" -n "(3)" -t "(3)" -R "(SFWD)" -w)
+    set_tests_properties(pipeline17::aff3ct-core-test-generic-pipeline PROPERTIES LABELS "generic-pipeline;skip-memcheck") # to exclude this previous test from memchecks, active waiting is too long in Valgrind :-(
+    add_test(NAME pipeline18::aff3ct-core-test-generic-pipeline COMMAND aff3ct-core-test-generic-pipeline -T "increment" -n "(3)" -t "(3)" -R "(SFWD)" -u 1)
+    set_tests_properties(pipeline18::aff3ct-core-test-generic-pipeline PROPERTIES LABELS generic-pipeline)
+    add_test(NAME pipeline19::aff3ct-core-test-generic-pipeline COMMAND aff3ct-core-test-generic-pipeline -T "increment" -n "(3)" -t "(3)" -R "(SFWD)" -u 1024)
+    set_tests_properties(pipeline19::aff3ct-core-test-generic-pipeline PROPERTIES LABELS generic-pipeline)
+    # simple pipeline hybrid
+    add_test(NAME pipeline20::aff3ct-core-test-generic-pipeline COMMAND aff3ct-core-test-generic-pipeline -T "increment" -n "(4)" -t "(3)" -r "((SFWD,SIO,SFWD,SIO))")
+    set_tests_properties(pipeline20::aff3ct-core-test-generic-pipeline PROPERTIES LABELS generic-pipeline)
+    add_test(NAME pipeline21::aff3ct-core-test-generic-pipeline COMMAND aff3ct-core-test-generic-pipeline -T "increment" -n "(4)" -t "(3)" -r "((SFWD,SIO,SFWD,SIO))" -u 1024)
+    set_tests_properties(pipeline21::aff3ct-core-test-generic-pipeline PROPERTIES LABELS generic-pipeline)
+    # pipeline multiple stages
+    add_test(NAME pipeline22::aff3ct-core-test-generic-pipeline COMMAND aff3ct-core-test-generic-pipeline -T "increment" -n "(4,1,2)" -t "(3,1,3)" -r "((SFWD,SIO,SFWD,SIO),(SFWD),(SIO,SIO))")
+    set_tests_properties(pipeline22::aff3ct-core-test-generic-pipeline PROPERTIES LABELS generic-pipeline)
+    add_test(NAME pipeline23::aff3ct-core-test-generic-pipeline COMMAND aff3ct-core-test-generic-pipeline -T "increment" -n "(4,1,2)" -t "(3,1,3)" -r "((SFWD,SIO,SFWD,SIO),(SFWD),(SIO,SIO))" -p)
+    set_tests_properties(pipeline23::aff3ct-core-test-generic-pipeline PROPERTIES LABELS generic-pipeline)
+    add_test(NAME pipeline24::aff3ct-core-test-generic-pipeline COMMAND aff3ct-core-test-generic-pipeline -T "increment" -n "(4,1,2)" -t "(3,1,3)" -r "((SFWD,SIO,SFWD,SIO),(SFWD),(SIO,SIO))" -w)
+    set_tests_properties(pipeline24::aff3ct-core-test-generic-pipeline PROPERTIES LABELS "generic-pipeline;skip-memcheck") # to exclude this previous test from memchecks, active waiting is too long in Valgrind :-(
+    add_test(NAME pipeline25::aff3ct-core-test-generic-pipeline COMMAND aff3ct-core-test-generic-pipeline -T "increment" -n "(4,1,2)" -t "(3,1,3)" -r "((SFWD,SIO,SFWD,SIO),(SFWD),(SIO,SIO))" -u 1)
+    set_tests_properties(pipeline25::aff3ct-core-test-generic-pipeline PROPERTIES LABELS generic-pipeline)
+    add_test(NAME pipeline26::aff3ct-core-test-generic-pipeline COMMAND aff3ct-core-test-generic-pipeline -T "increment" -n "(4,1,2)" -t "(3,1,3)" -r "((SFWD,SIO,SFWD,SIO),(SFWD),(SIO,SIO))" -u 1024)
+    set_tests_properties(pipeline26::aff3ct-core-test-generic-pipeline PROPERTIES LABELS generic-pipeline)
+    # pipeline with socket type per stage
+    add_test(NAME pipeline27::aff3ct-core-test-generic-pipeline COMMAND aff3ct-core-test-generic-pipeline -T "increment" -n "(4,1,2)" -t "(3,1,3)" -R "(SFWD,SIO,SFWD)")
+    set_tests_properties(pipeline27::aff3ct-core-test-generic-pipeline PROPERTIES LABELS generic-pipeline)
+
     add_test(NAME sequence0::aff3ct-core-test-exclusive-paths-pipeline COMMAND aff3ct-core-test-exclusive-paths-pipeline -t 1 -q -i ${INPUT_FILE})
     set_tests_properties(sequence0::aff3ct-core-test-exclusive-paths-pipeline PROPERTIES LABELS exclusive-paths-pipeline)
     add_test(NAME sequence1::aff3ct-core-test-exclusive-paths-pipeline COMMAND aff3ct-core-test-exclusive-paths-pipeline -t 1 -u 13 -q -b -i ${INPUT_FILE})

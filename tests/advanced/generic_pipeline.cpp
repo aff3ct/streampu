@@ -7,6 +7,7 @@
 #include <memory>
 #include <numeric>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include <aff3ct-core.hpp>
@@ -127,6 +128,7 @@ main(int argc, char** argv)
                           { "sck-type-tsk", no_argument, NULL, 'r' },
                           { "sck-type-sta", no_argument, NULL, 'R' },
                           { "pinning-policy", no_argument, NULL, 'P' },
+                          { "task-type", no_argument, NULL, 'T' },
                           { 0 } };
 
     std::string n_threads_param;
@@ -152,10 +154,12 @@ main(int argc, char** argv)
     std::string sck_type_sta_param;
     std::vector<std::string> sck_type_sta;
     std::string pinning_policy;
+    std::string task_type = "relay";
+    std::string check_task;
 
     while (1)
     {
-        const int opt = getopt_long(argc, argv, "t:f:s:d:u:o:i:j:n:r:R:P:cpbgqwh", longopts, 0);
+        const int opt = getopt_long(argc, argv, "t:f:s:d:u:o:i:j:n:r:R:P:T:cpbgqwh", longopts, 0);
         if (opt == -1) break;
         switch (opt)
         {
@@ -220,6 +224,10 @@ main(int argc, char** argv)
             case 'P':
                 pinning_policy = std::string(optarg);
                 break;
+            case 'T':
+                check_task = std::string(optarg);
+                if (check_task == "increment") task_type = check_task;
+                break;
             case 'h':
                 std::cout << "usage: " << argv[0] << " [options]" << std::endl;
                 std::cout << std::endl;
@@ -282,6 +290,9 @@ main(int argc, char** argv)
                           << "Pinning policy for pipeline execution                                 "
                           << "[" << (pinning_policy.empty() ? "empty" : "\"" + pinning_policy + "\"") << "]"
                           << std::endl;
+                std::cout << "  -T, --task-type          "
+                          << "Choose the task type between 'relay' or 'increment'                   "
+                          << "[" << (task_type.empty() ? "empty" : "\"" + task_type + "\"") << "]" << std::endl;
                 std::cout << "  -h, --help               "
                           << "This help                                                             "
                           << "[false]" << std::endl;
@@ -366,12 +377,17 @@ main(int argc, char** argv)
 
     // modules creation
     const bool auto_reset = false;
-    module::Source_user_binary<uint8_t> source(data_length, in_filepath, auto_reset);
-    module::Sink_user_binary<uint8_t> sink(data_length, out_filepath);
+    // Generic first tasks
+    module::Module* first_task =
+      (task_type == "relay")
+        ? (module::Module*)(new module::Source_user_binary<uint8_t>(data_length, in_filepath, auto_reset))
+        : (module::Module*)(new module::Initializer<uint8_t>(data_length));
+    module::Module* last_task = (task_type == "relay")
+                                  ? (module::Module*)(new module::Sink_user_binary<uint8_t>(data_length, out_filepath))
+                                  : (module::Module*)(new module::Finalizer<uint8_t>(data_length));
 
     // Task creation
-    std::vector<std::shared_ptr<module::Relayer<uint8_t>>> rlys(
-      std::accumulate(tsk_per_sta.begin(), tsk_per_sta.end(), 0));
+    std::vector<std::shared_ptr<module::Module>> tasks(std::accumulate(tsk_per_sta.begin(), tsk_per_sta.end(), 0));
     size_t tas = 0;
     for (auto sta : sck_type_tsk)
     {
@@ -379,9 +395,18 @@ main(int argc, char** argv)
         {
             if (str == "SIO" || str == "SFWD")
             {
-                rlys[tas].reset(new module::Relayer<uint8_t>(data_length));
-                rlys[tas]->set_custom_name("Relayer" + std::to_string(tas));
-                rlys[tas]->set_ns(sleep_time_us * 1000);
+                tasks[tas].reset(((task_type == "relay")
+                                    ? (module::Module*)new module::Relayer<uint8_t>(data_length)
+                                    : (module::Module*)new module::Incrementer<uint8_t>(data_length)));
+
+                (task_type == "relay")
+                  ? ((module::Relayer<uint8_t>*)(tasks[tas].get()))->set_custom_name("Relayer" + std::to_string(tas))
+                  : ((module::Incrementer<uint8_t>*)(tasks[tas].get()))
+                      ->set_custom_name("Incrementer" + std::to_string(tas));
+
+                (task_type == "relay")
+                  ? ((module::Relayer<uint8_t>*)(tasks[tas].get()))->set_ns(sleep_time_us * 1000)
+                  : ((module::Incrementer<uint8_t>*)(tasks[tas].get()))->set_ns(sleep_time_us * 1000);
             }
             else
             {
@@ -391,40 +416,65 @@ main(int argc, char** argv)
             tas++;
         }
     }
-
     // Task binding
-    std::string rly_lsck, rly_rsck;
+    std::string tsk_lsck, tsk_rsck;
     tas = 0;
-    rly_lsck = (sck_type_tsk[0][0] == "SFWD") ? "relayf::fwd" : "relay::in";
+    tsk_lsck = (sck_type_tsk[0][0] == "SFWD") ? task_type + "f::fwd" : task_type + "::in";
     // First task to bind to the initializer
-    (*rlys[tas].get())[rly_lsck] = source["generate::out_data"];
+    if (task_type == "relay")
+        (*((module::Relayer<uint8_t>*)(tasks[tas].get())))[tsk_lsck] =
+          (*(module::Source_user_binary<uint8_t>*)(first_task))["generate::out_data"];
+    else
+        (*((module::Incrementer<uint8_t>*)(tasks[tas].get())))[tsk_lsck] =
+          (*((module::Initializer<uint8_t>*)(first_task)))["initialize::out"];
 
     // Binding tasks between them
     for (size_t i = 0; i < sck_type_tsk.size(); ++i)
     {
         for (size_t j = 0; j < sck_type_tsk[i].size() - 1; ++j)
         {
-            rly_lsck = (sck_type_tsk[i][j + 1] == "SFWD") ? "relayf::fwd" : "relay::in";
-            rly_rsck = (sck_type_tsk[i][j] == "SFWD") ? "relayf::fwd" : "relay::out";
-            (*rlys[tas + 1].get())[rly_lsck] = (*rlys[tas].get())[rly_rsck];
+            tsk_lsck = (sck_type_tsk[i][j + 1] == "SFWD") ? task_type + "f::fwd" : task_type + "::in";
+            tsk_rsck = (sck_type_tsk[i][j] == "SFWD") ? task_type + "f::fwd" : task_type + "::out";
+            if (task_type == "relay")
+                ((*((module::Relayer<uint8_t>*)(tasks[tas + 1].get()))))[tsk_lsck] =
+                  ((*((module::Relayer<uint8_t>*)(tasks[tas].get()))))[tsk_rsck];
+            else
+                (*((module::Incrementer<uint8_t>*)(tasks[tas + 1].get())))[tsk_lsck] =
+                  (*((module::Incrementer<uint8_t>*)(tasks[tas].get())))[tsk_rsck];
             tas++;
         }
         // We have to bind the last task of stage i to the first one of task i+1
         if (i < sck_type_tsk.size() - 1)
         {
-            rly_lsck = (sck_type_tsk[i + 1][0] == "SFWD") ? "relayf::fwd" : "relay::in";
-            rly_rsck = (sck_type_tsk[i][sck_type_tsk[i].size() - 1] == "SFWD") ? "relayf::fwd" : "relay::out";
-            (*rlys[tas + 1].get())[rly_lsck] = (*rlys[tas].get())[rly_rsck];
+            tsk_lsck = (sck_type_tsk[i + 1][0] == "SFWD") ? task_type + "f::fwd" : task_type + "::in";
+            tsk_rsck =
+              (sck_type_tsk[i][sck_type_tsk[i].size() - 1] == "SFWD") ? task_type + "f::fwd" : task_type + "::out";
+            if (task_type == "relay")
+                ((*((module::Relayer<uint8_t>*)(tasks[tas + 1].get()))))[tsk_lsck] =
+                  ((*((module::Relayer<uint8_t>*)(tasks[tas].get()))))[tsk_rsck];
+            else
+                (*((module::Incrementer<uint8_t>*)(tasks[tas + 1].get())))[tsk_lsck] =
+                  (*((module::Incrementer<uint8_t>*)(tasks[tas].get())))[tsk_rsck];
             tas++;
         }
     }
 
     // Last stage bind
-    rly_rsck = (sck_type_tsk[sck_type_tsk.size() - 1][sck_type_tsk[sck_type_tsk.size() - 1].size() - 1] == "SFWD")
-                 ? "relayf::fwd"
-                 : "relay::out";
-    sink["send_count::in_data"] = (*rlys[tas].get())[rly_rsck];
-    sink["send_count::in_count"] = source["generate::out_count"];
+    tsk_rsck = (sck_type_tsk[sck_type_tsk.size() - 1][sck_type_tsk[sck_type_tsk.size() - 1].size() - 1] == "SFWD")
+                 ? task_type + "f::fwd"
+                 : task_type + "::out";
+    if (task_type == "relay")
+    {
+        (*((module::Sink_user_binary<uint8_t>*)(last_task)))["send_count::in_data"] =
+          ((*((module::Relayer<uint8_t>*)(tasks[tas].get()))))[tsk_rsck];
+        (*((module::Sink_user_binary<uint8_t>*)(last_task)))["send_count::in_count"] =
+          (*(module::Source_user_binary<uint8_t>*)(first_task))["generate::out_count"];
+    }
+    else
+    {
+        (*(module::Finalizer<uint8_t>*)(last_task))["finalize::in"] =
+          (*((module::Incrementer<uint8_t>*)(tasks[tas].get())))[tsk_rsck];
+    }
 
     std::unique_ptr<runtime::Sequence> sequence_chain;
     std::unique_ptr<runtime::Pipeline> pipeline_chain;
@@ -432,7 +482,10 @@ main(int argc, char** argv)
     // The sequence is executed correctly
     if (force_sequence)
     {
-        sequence_chain.reset(new runtime::Sequence(source("generate"), 1));
+        sequence_chain.reset(new runtime::Sequence(
+          (task_type == "relay") ? (*((module::Source_user_binary<uint8_t>*)(first_task)))("generate")
+                                 : (*((module::Source_user_binary<uint8_t>*)(first_task)))("initialize"),
+          1));
         sequence_chain->set_n_frames(n_inter_frames);
         sequence_chain->set_no_copy_mode(no_copy_mode);
 
@@ -452,10 +505,24 @@ main(int argc, char** argv)
                 tsk->set_stats(print_stats); // enable the statistics
                 tsk->set_fast(true);         // enable the fast mode (= disable the useless verifs in the tasks)
             }
+        // Preparing input data in case of increment
+        if (task_type == "increment")
+        {
+            auto tid = 0;
+            for (auto cur_initializer : sequence_chain.get()->get_cloned_modules<module::Initializer<uint8_t>>(
+                   *((module::Initializer<uint8_t>*)(first_task))))
+            {
+                std::vector<std::vector<uint8_t>> init_data(n_inter_frames, std::vector<uint8_t>(data_length, 0));
+                for (size_t f = 0; f < n_inter_frames; f++)
+                    std::fill(init_data[f].begin(), init_data[f].end(), 42);
+                cur_initializer->set_init_data(init_data);
+                tid++;
+            }
+        }
 
         auto t_start = std::chrono::steady_clock::now();
         if (!step_by_step)
-            sequence_chain->exec();
+            (task_type == "relay") ? sequence_chain->exec() : sequence_chain->exec([]() { return true; });
         else
         {
             do
@@ -469,7 +536,7 @@ main(int argc, char** argv)
                 catch (tools::processing_aborted&)
                 { /* do nothing */
                 }
-            } while (!source.is_done());
+            } while ((task_type == "relay") ? !(*((module::Source_user_binary<uint8_t>*)(first_task))).is_done() : 0);
         }
         std::chrono::nanoseconds duration = std::chrono::steady_clock::now() - t_start;
 
@@ -478,23 +545,36 @@ main(int argc, char** argv)
     }
     else
     {
+
         // Task vector creation
         std::vector<std::pair<std::vector<runtime::Task*>, std::vector<runtime::Task*>>> stage_creat;
         tas = 0;
 
         // First stage contains only the generate task
-        stage_creat.push_back({ { &source("generate") }, { &source("generate") } });
+        stage_creat.push_back(
+          { { (task_type == "relay") ? &(*((module::Source_user_binary<uint8_t>*)(first_task)))("generate")
+                                     : &(*((module::Initializer<uint8_t>*)(first_task)))("initialize") },
+            { (task_type == "relay") ? &(*((module::Source_user_binary<uint8_t>*)(first_task)))("generate")
+                                     : &(*((module::Initializer<uint8_t>*)(first_task)))("initialize") } });
         // Middle stages
         for (size_t i = 0; i < sck_type_tsk.size(); ++i)
         {
-            std::string rly_ltsk = sck_type_tsk[i][0] == "SFWD" ? "relayf" : "relay";
-            std::string rly_rtsk = sck_type_tsk[i][sck_type_tsk[i].size() - 1] == "SFWD" ? "relayf" : "relay";
+            std::string tsk_ltsk = sck_type_tsk[i][0] == "SFWD" ? task_type + "f" : task_type;
+            std::string tsk_rtsk = sck_type_tsk[i][sck_type_tsk[i].size() - 1] == "SFWD" ? task_type + "f" : task_type;
             stage_creat.push_back(
-              { { &(*rlys[tas].get())(rly_ltsk) }, { &(*rlys[tas + sck_type_tsk[i].size() - 1].get())(rly_rtsk) } });
+              { { (task_type == "relay") ? &(*((module::Relayer<uint8_t>*)(tasks[tas].get())))(tsk_ltsk)
+                                         : &(*((module::Incrementer<uint8_t>*)(tasks[tas].get())))(tsk_ltsk) },
+                { (task_type == "relay")
+                    ? &(*((module::Relayer<uint8_t>*)(tasks[tas + sck_type_tsk[i].size() - 1].get())))(tsk_rtsk)
+                    : &(*((module::Incrementer<uint8_t>*)(tasks[tas + sck_type_tsk[i].size() - 1].get())))(
+                        tsk_rtsk) } });
             tas += sck_type_tsk[i].size();
         }
         // Last stage creation 	with the sink
-        stage_creat.push_back({ { &sink("send_count") }, {} });
+        stage_creat.push_back(
+          { { (task_type == "relay") ? &(*((module::Sink_user_binary<uint8_t>*)(last_task)))("send_count")
+                                     : &(*((module::Finalizer<uint8_t>*)(last_task)))("finalize") },
+            {} });
 
         // Buffer vector
         std::vector<size_t> pool_buff;
@@ -505,7 +585,6 @@ main(int argc, char** argv)
         std::vector<bool> wait_vect;
         for (size_t i = 0; i < stages_number + 1; ++i)
             wait_vect.push_back(active_waiting);
-
 #ifdef AFF3CT_CORE_HWLOC
         // Stages to pin
         if (!pinning_policy.empty())
@@ -516,13 +595,25 @@ main(int argc, char** argv)
                 enable_pin.push_back(true);
             enable_pin.push_back(false);
             pipeline_chain.reset(new runtime::Pipeline(
-              source("generate"), stage_creat, n_threads, pool_buff, wait_vect, enable_pin, pinning_policy));
+              (task_type == "relay") ? (*((module::Source_user_binary<uint8_t>*)(first_task)))("generate")
+                                     : (*((module::Initializer<uint8_t>*)(first_task)))("initialize"),
+              stage_creat,
+              n_threads,
+              pool_buff,
+              wait_vect,
+              enable_pin,
+              pinning_policy));
         }
         else
 #endif
         {
-            pipeline_chain.reset(
-              new runtime::Pipeline(source("generate"), stage_creat, n_threads, pool_buff, wait_vect));
+            pipeline_chain.reset(new runtime::Pipeline(
+              (task_type == "relay") ? (*((module::Source_user_binary<uint8_t>*)(first_task)))("generate")
+                                     : (*((module::Initializer<uint8_t>*)(first_task)))("initialize"),
+              stage_creat,
+              n_threads,
+              pool_buff,
+              wait_vect));
         }
         pipeline_chain->set_n_frames(n_inter_frames);
 
@@ -542,29 +633,88 @@ main(int argc, char** argv)
                 tsk->set_stats(print_stats); // enable the statistics
                 tsk->set_fast(true);         // enable the fast mode (= disable the useless verifs in the tasks)
             }
+        // Preparing input data in case of increment
+        if (task_type == "increment")
+        {
+            auto tid = 0;
+            for (auto cur_initializer :
+                 pipeline_chain.get()->get_stages()[0]->get_cloned_modules<module::Initializer<uint8_t>>(
+                   *((module::Initializer<uint8_t>*)(first_task))))
+            {
+                std::vector<std::vector<uint8_t>> init_data(n_inter_frames, std::vector<uint8_t>(data_length, 0));
+                for (size_t f = 0; f < n_inter_frames; f++)
+                    std::fill(init_data[f].begin(), init_data[f].end(), 42);
+                cur_initializer->set_init_data(init_data);
+                tid++;
+            }
+        }
 
         auto t_start = std::chrono::steady_clock::now();
-        pipeline_chain->exec();
+        (task_type == "relay") ? pipeline_chain->exec() : pipeline_chain->exec([]() { return true; });
         std::chrono::nanoseconds duration = std::chrono::steady_clock::now() - t_start;
 
         auto elapsed_time = duration.count() / 1000.f / 1000.f;
         std::cout << "Sequence elapsed time: " << elapsed_time << " ms" << std::endl;
     }
 
-    size_t in_filesize = filesize(in_filepath.c_str());
-    size_t n_frames = ((int)std::ceil((float)(in_filesize * 8) / (float)(data_length * n_inter_frames)));
-    auto theoretical_time = (n_frames * ((rlys.size()) * sleep_time_us * 1000) * n_inter_frames) / 1000.f / 1000.f;
-    std::cout << "Sequence theoretical time: " << theoretical_time << " ms" << std::endl;
-
-    // verification of the sequence execution
-    bool tests_passed = compare_files(in_filepath, out_filepath);
-    if (tests_passed)
-        std::cout << "# " << rang::style::bold << rang::fg::green << "Tests passed!" << rang::style::reset << std::endl;
+    /*######################################Verification step#########################################################*/
+    unsigned int test_results;
+    if (task_type == "relay")
+    {
+        size_t in_filesize = filesize(in_filepath.c_str());
+        size_t n_frames = ((int)std::ceil((float)(in_filesize * 8) / (float)(data_length * n_inter_frames)));
+        auto theoretical_time = (n_frames * ((tasks.size()) * sleep_time_us * 1000) * n_inter_frames) / 1000.f / 1000.f;
+        std::cout << "Sequence theoretical time: " << theoretical_time << " ms" << std::endl;
+        // verification of the sequence execution
+        bool tests_passed = compare_files(in_filepath, out_filepath);
+        if (tests_passed)
+            std::cout << "# " << rang::style::bold << rang::fg::green << "Tests passed!" << rang::style::reset
+                      << std::endl;
+        else
+            std::cout << "# " << rang::style::bold << rang::fg::red << "Tests failed :-(" << rang::style::reset
+                      << std::endl;
+        test_results = !tests_passed;
+    }
     else
-        std::cout << "# " << rang::style::bold << rang::fg::red << "Tests failed :-(" << rang::style::reset
-                  << std::endl;
-    unsigned int test_results = !tests_passed;
+    {
+        bool tests_passed = true;
+        int tid = 0;
 
+        for (auto cur_finalizer :
+             (force_sequence == false)
+               ? pipeline_chain.get()
+                   ->get_stages()[pipeline_chain.get()->get_stages().size() - 1]
+                   ->get_cloned_modules<module::Finalizer<uint8_t>>((*(module::Finalizer<uint8_t>*)(last_task)))
+               : sequence_chain.get()->get_cloned_modules<module::Finalizer<uint8_t>>(
+                   (*(module::Finalizer<uint8_t>*)(last_task))))
+        {
+            for (size_t f = 0; f < n_inter_frames; f++)
+            {
+                const auto& final_data = cur_finalizer->get_final_data()[f];
+                for (size_t d = 0; d < final_data.size(); d++)
+                {
+                    auto expected = (int)(tasks.size() + 42);
+                    expected = expected % 256;
+                    if (final_data[d] != expected)
+                    {
+                        std::cout << "# expected = " << +expected << " - obtained = " << +final_data[d] << " (d = " << d
+                                  << ", tid = " << tid << ")" << std::endl;
+                        tests_passed = false;
+                    }
+                }
+            }
+            tid++;
+        }
+        if (tests_passed)
+            std::cout << "# " << rang::style::bold << rang::fg::green << "Tests passed!" << rang::style::reset
+                      << std::endl;
+        else
+            std::cout << "# " << rang::style::bold << rang::fg::red << "Tests failed :-(" << rang::style::reset
+                      << std::endl;
+
+        test_results = !tests_passed;
+    }
+    /*################################################################################################################*/
     // display the statistics of the tasks (if enabled)
     if (print_stats)
     {
@@ -595,67 +745,67 @@ main(int argc, char** argv)
 
     tas = 0;
 
-    if (sck_type_tsk[0][0] == "SFWD")
-        (*rlys[tas].get())[module::rly::sck::relayf::fwd].unbind(source[module::src::sck::generate::out_data]);
-    else
-        (*rlys[tas].get())[module::rly::sck::relay::in].unbind(source[module::src::sck::generate::out_data]);
-
-    for (size_t i = 0; i < sck_type_tsk.size(); ++i)
-    {
-        for (size_t j = 0; j < sck_type_tsk[i].size() - 1; ++j)
-        {
-            if (sck_type_tsk[i][j + 1] == "SFWD")
-            {
-                if (sck_type_tsk[i][j] == "SFWD")
-                    (*rlys[tas + 1].get())[module::rly::sck::relayf::fwd].unbind(
-                      (*rlys[tas].get())[module::rly::sck::relayf::fwd]);
-                else
-                    (*rlys[tas + 1].get())[module::rly::sck::relayf::fwd].unbind(
-                      (*rlys[tas].get())[module::rly::sck::relay::out]);
-            }
-            else
-            {
-                if (sck_type_tsk[i][j] == "SFWD")
-                    (*rlys[tas + 1].get())[module::rly::sck::relay::in].unbind(
-                      (*rlys[tas].get())[module::rly::sck::relayf::fwd]);
-                else
-                    (*rlys[tas + 1].get())[module::rly::sck::relay::in].unbind(
-                      (*rlys[tas].get())[module::rly::sck::relay::out]);
-            }
-            tas++;
-        }
-        // We have to unbind the last task of stage i to the first one of task i+1
-        if (i < sck_type_tsk.size() - 1)
-        {
-            if (sck_type_tsk[i + 1][0] == "SFWD")
-            {
-                if (sck_type_tsk[i][sck_type_tsk[i].size() - 1] == "SFWD")
-                    (*rlys[tas + 1].get())[module::rly::sck::relayf::fwd].unbind(
-                      (*rlys[tas].get())[module::rly::sck::relayf::fwd]);
-                else
-                    (*rlys[tas + 1].get())[module::rly::sck::relayf::fwd].unbind(
-                      (*rlys[tas].get())[module::rly::sck::relay::out]);
-            }
-            else
-            {
-                if (sck_type_tsk[i][sck_type_tsk[i].size() - 1] == "SFWD")
-                    (*rlys[tas + 1].get())[module::rly::sck::relay::in].unbind(
-                      (*rlys[tas].get())[module::rly::sck::relayf::fwd]);
-                else
-                    (*rlys[tas + 1].get())[module::rly::sck::relay::in].unbind(
-                      (*rlys[tas].get())[module::rly::sck::relay::out]);
-            }
-            tas++;
-        }
-    }
-
-    // Last stage bind
-    if (sck_type_tsk[sck_type_tsk.size() - 1][sck_type_tsk[sck_type_tsk.size() - 1].size() - 1] == "SFWD")
-        sink[module::snk::sck::send_count::in_data].unbind((*rlys[tas].get())[module::rly::sck::relayf::fwd]);
-    else
-        sink[module::snk::sck::send_count::in_data].unbind((*rlys[tas].get())[module::rly::sck::relay::out]);
-
-    sink[module::snk::sck::send_count::in_count].unbind(source[module::src::sck::generate::out_count]);
+    // if (sck_type_tsk[0][0] == "SFWD")
+    //     (*rlys[tas].get())[module::rly::sck::relayf::fwd].unbind(source[module::src::sck::generate::out_data]);
+    // else
+    //     (*rlys[tas].get())[module::rly::sck::relay::in].unbind(source[module::src::sck::generate::out_data]);
+    //
+    // for (size_t i = 0; i < sck_type_tsk.size(); ++i)
+    //{
+    //    for (size_t j = 0; j < sck_type_tsk[i].size() - 1; ++j)
+    //    {
+    //        if (sck_type_tsk[i][j + 1] == "SFWD")
+    //        {
+    //            if (sck_type_tsk[i][j] == "SFWD")
+    //                (*rlys[tas + 1].get())[module::rly::sck::relayf::fwd].unbind(
+    //                  (*rlys[tas].get())[module::rly::sck::relayf::fwd]);
+    //            else
+    //                (*rlys[tas + 1].get())[module::rly::sck::relayf::fwd].unbind(
+    //                  (*rlys[tas].get())[module::rly::sck::relay::out]);
+    //        }
+    //        else
+    //        {
+    //            if (sck_type_tsk[i][j] == "SFWD")
+    //                (*rlys[tas + 1].get())[module::rly::sck::relay::in].unbind(
+    //                  (*rlys[tas].get())[module::rly::sck::relayf::fwd]);
+    //            else
+    //                (*rlys[tas + 1].get())[module::rly::sck::relay::in].unbind(
+    //                  (*rlys[tas].get())[module::rly::sck::relay::out]);
+    //        }
+    //        tas++;
+    //    }
+    //    // We have to unbind the last task of stage i to the first one of task i+1
+    //    if (i < sck_type_tsk.size() - 1)
+    //    {
+    //        if (sck_type_tsk[i + 1][0] == "SFWD")
+    //        {
+    //            if (sck_type_tsk[i][sck_type_tsk[i].size() - 1] == "SFWD")
+    //                (*rlys[tas + 1].get())[module::rly::sck::relayf::fwd].unbind(
+    //                  (*rlys[tas].get())[module::rly::sck::relayf::fwd]);
+    //            else
+    //                (*rlys[tas + 1].get())[module::rly::sck::relayf::fwd].unbind(
+    //                  (*rlys[tas].get())[module::rly::sck::relay::out]);
+    //        }
+    //        else
+    //        {
+    //            if (sck_type_tsk[i][sck_type_tsk[i].size() - 1] == "SFWD")
+    //                (*rlys[tas + 1].get())[module::rly::sck::relay::in].unbind(
+    //                  (*rlys[tas].get())[module::rly::sck::relayf::fwd]);
+    //            else
+    //                (*rlys[tas + 1].get())[module::rly::sck::relay::in].unbind(
+    //                  (*rlys[tas].get())[module::rly::sck::relay::out]);
+    //        }
+    //        tas++;
+    //    }
+    //}
+    //
+    //// Last stage bind
+    // if (sck_type_tsk[sck_type_tsk.size() - 1][sck_type_tsk[sck_type_tsk.size() - 1].size() - 1] == "SFWD")
+    //     sink[module::snk::sck::send_count::in_data].unbind((*rlys[tas].get())[module::rly::sck::relayf::fwd]);
+    // else
+    //     sink[module::snk::sck::send_count::in_data].unbind((*rlys[tas].get())[module::rly::sck::relay::out]);
+    //
+    // sink[module::snk::sck::send_count::in_count].unbind(source[module::src::sck::generate::out_count]);
 
     return test_results;
 }
