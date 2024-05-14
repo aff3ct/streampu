@@ -745,67 +745,131 @@ main(int argc, char** argv)
 
     tas = 0;
 
-    // if (sck_type_tsk[0][0] == "SFWD")
-    //     (*rlys[tas].get())[module::rly::sck::relayf::fwd].unbind(source[module::src::sck::generate::out_data]);
-    // else
-    //     (*rlys[tas].get())[module::rly::sck::relay::in].unbind(source[module::src::sck::generate::out_data]);
-    //
-    // for (size_t i = 0; i < sck_type_tsk.size(); ++i)
-    //{
-    //    for (size_t j = 0; j < sck_type_tsk[i].size() - 1; ++j)
-    //    {
-    //        if (sck_type_tsk[i][j + 1] == "SFWD")
-    //        {
-    //            if (sck_type_tsk[i][j] == "SFWD")
-    //                (*rlys[tas + 1].get())[module::rly::sck::relayf::fwd].unbind(
-    //                  (*rlys[tas].get())[module::rly::sck::relayf::fwd]);
-    //            else
-    //                (*rlys[tas + 1].get())[module::rly::sck::relayf::fwd].unbind(
-    //                  (*rlys[tas].get())[module::rly::sck::relay::out]);
-    //        }
-    //        else
-    //        {
-    //            if (sck_type_tsk[i][j] == "SFWD")
-    //                (*rlys[tas + 1].get())[module::rly::sck::relay::in].unbind(
-    //                  (*rlys[tas].get())[module::rly::sck::relayf::fwd]);
-    //            else
-    //                (*rlys[tas + 1].get())[module::rly::sck::relay::in].unbind(
-    //                  (*rlys[tas].get())[module::rly::sck::relay::out]);
-    //        }
-    //        tas++;
-    //    }
-    //    // We have to unbind the last task of stage i to the first one of task i+1
-    //    if (i < sck_type_tsk.size() - 1)
-    //    {
-    //        if (sck_type_tsk[i + 1][0] == "SFWD")
-    //        {
-    //            if (sck_type_tsk[i][sck_type_tsk[i].size() - 1] == "SFWD")
-    //                (*rlys[tas + 1].get())[module::rly::sck::relayf::fwd].unbind(
-    //                  (*rlys[tas].get())[module::rly::sck::relayf::fwd]);
-    //            else
-    //                (*rlys[tas + 1].get())[module::rly::sck::relayf::fwd].unbind(
-    //                  (*rlys[tas].get())[module::rly::sck::relay::out]);
-    //        }
-    //        else
-    //        {
-    //            if (sck_type_tsk[i][sck_type_tsk[i].size() - 1] == "SFWD")
-    //                (*rlys[tas + 1].get())[module::rly::sck::relay::in].unbind(
-    //                  (*rlys[tas].get())[module::rly::sck::relayf::fwd]);
-    //            else
-    //                (*rlys[tas + 1].get())[module::rly::sck::relay::in].unbind(
-    //                  (*rlys[tas].get())[module::rly::sck::relay::out]);
-    //        }
-    //        tas++;
-    //    }
-    //}
-    //
-    //// Last stage bind
-    // if (sck_type_tsk[sck_type_tsk.size() - 1][sck_type_tsk[sck_type_tsk.size() - 1].size() - 1] == "SFWD")
-    //     sink[module::snk::sck::send_count::in_data].unbind((*rlys[tas].get())[module::rly::sck::relayf::fwd]);
-    // else
-    //     sink[module::snk::sck::send_count::in_data].unbind((*rlys[tas].get())[module::rly::sck::relay::out]);
-    //
-    // sink[module::snk::sck::send_count::in_count].unbind(source[module::src::sck::generate::out_count]);
-
+    if (sck_type_tsk[0][0] == "SFWD")
+	{
+		if (task_type =="relayer")
+        	(*(module::Relayer<uint8_t>*)(tasks[tas].get()))[module::rly::sck::relayf::fwd].unbind((*((module::Source_user_binary<uint8_t>*)(first_task)))[module::src::sck::generate::out_data]);
+		else
+			(*(module::Incrementer<uint8_t>*)(tasks[tas].get()))[module::inc::sck::incrementf::fwd].unbind((*((module::Initializer<uint8_t>*)(first_task)))[module::ini::sck::initialize::out]);
+	}
+     else
+	 {
+         if (task_type =="relayer")
+        	(*(module::Relayer<uint8_t>*)(tasks[tas].get()))[module::rly::sck::relay::in].unbind((*((module::Source_user_binary<uint8_t>*)(first_task)))[module::src::sck::generate::out_data]);
+		else
+			(*(module::Incrementer<uint8_t>*)(tasks[tas].get()))[module::inc::sck::increment::in].unbind((*((module::Initializer<uint8_t>*)(first_task)))[module::ini::sck::initialize::out]);
+	 }
+     for (size_t i = 0; i < sck_type_tsk.size(); ++i)
+    {
+        for (size_t j = 0; j < sck_type_tsk[i].size() - 1; ++j)
+        {
+            if (sck_type_tsk[i][j + 1] == "SFWD")
+            {
+                if (sck_type_tsk[i][j] == "SFWD")
+				{
+					if (task_type =="relayer")
+                    	(*(module::Relayer<uint8_t>*)(tasks[tas + 1].get()))[module::rly::sck::relayf::fwd].unbind(
+                    	  (*(module::Relayer<uint8_t>*)(tasks[tas].get()))[module::rly::sck::relayf::fwd]);
+					else
+						(*(module::Incrementer<uint8_t>*)(tasks[tas + 1].get()))[module::inc::sck::incrementf::fwd].unbind(
+                    	  (*(module::Incrementer<uint8_t>*)(tasks[tas].get()))[module::inc::sck::incrementf::fwd]);
+				}
+                else
+				{
+                    if (task_type =="relayer")
+                    	(*(module::Relayer<uint8_t>*)(tasks[tas + 1].get()))[module::rly::sck::relayf::fwd].unbind(
+                    	  (*(module::Relayer<uint8_t>*)(tasks[tas].get()))[module::rly::sck::relay::out]);
+					else
+						(*(module::Incrementer<uint8_t>*)(tasks[tas + 1].get()))[module::inc::sck::incrementf::fwd].unbind(
+                    	  (*(module::Incrementer<uint8_t>*)(tasks[tas].get()))[module::inc::sck::increment::out]);
+				}
+            }
+            else
+            {
+                if (sck_type_tsk[i][j] == "SFWD")
+				{
+                    if (task_type =="relayer")
+                    	(*(module::Relayer<uint8_t>*)(tasks[tas + 1].get()))[module::rly::sck::relay::in].unbind(
+                    	  (*(module::Relayer<uint8_t>*)(tasks[tas].get()))[module::rly::sck::relayf::fwd]);
+					else
+						(*(module::Incrementer<uint8_t>*)(tasks[tas + 1].get()))[module::inc::sck::increment::in].unbind(
+                    	  (*(module::Incrementer<uint8_t>*)(tasks[tas].get()))[module::inc::sck::incrementf::fwd]);
+				}
+				else
+				{
+                    if (task_type =="relayer")
+                    	(*(module::Relayer<uint8_t>*)(tasks[tas + 1].get()))[module::rly::sck::relay::in].unbind(
+                    	  (*(module::Relayer<uint8_t>*)(tasks[tas].get()))[module::rly::sck::relay::out]);
+					else
+						(*(module::Incrementer<uint8_t>*)(tasks[tas + 1].get()))[module::inc::sck::increment::in].unbind(
+                    	  (*(module::Incrementer<uint8_t>*)(tasks[tas].get()))[module::inc::sck::increment::out]);
+				}
+            }
+            tas++;
+        }
+        // We have to unbind the last task of stage i to the first one of task i+1
+        if (i < sck_type_tsk.size() - 1)
+        {
+            if (sck_type_tsk[i + 1][0] == "SFWD")
+            {
+                if (sck_type_tsk[i][sck_type_tsk[i].size() - 1] == "SFWD")
+				{
+                    if (task_type =="relayer")
+                    	(*(module::Relayer<uint8_t>*)(tasks[tas + 1].get()))[module::rly::sck::relayf::fwd].unbind(
+                    	  (*(module::Relayer<uint8_t>*)(tasks[tas].get()))[module::rly::sck::relayf::fwd]);
+					else
+						(*(module::Incrementer<uint8_t>*)(tasks[tas + 1].get()))[module::inc::sck::incrementf::fwd].unbind(
+                    	  (*(module::Incrementer<uint8_t>*)(tasks[tas].get()))[module::inc::sck::incrementf::fwd]);
+				}
+                else
+				{
+                     if (task_type =="relayer")
+                    	(*(module::Relayer<uint8_t>*)(tasks[tas + 1].get()))[module::rly::sck::relayf::fwd].unbind(
+                    	  (*(module::Relayer<uint8_t>*)(tasks[tas].get()))[module::rly::sck::relay::out]);
+					else
+						(*(module::Incrementer<uint8_t>*)(tasks[tas + 1].get()))[module::inc::sck::incrementf::fwd].unbind(
+                    	  (*(module::Incrementer<uint8_t>*)(tasks[tas].get()))[module::inc::sck::increment::out]);
+				}
+            }
+            else
+            {
+                if (sck_type_tsk[i][sck_type_tsk[i].size() - 1] == "SFWD"){
+					if (task_type =="relayer")
+                    	(*(module::Relayer<uint8_t>*)(tasks[tas + 1].get()))[module::rly::sck::relay::in].unbind(
+                    	  (*(module::Relayer<uint8_t>*)(tasks[tas].get()))[module::rly::sck::relayf::fwd]);
+					else
+						(*(module::Incrementer<uint8_t>*)(tasks[tas + 1].get()))[module::inc::sck::increment::in].unbind(
+                    	  (*(module::Incrementer<uint8_t>*)(tasks[tas].get()))[module::inc::sck::incrementf::fwd]);
+				}
+                else
+				{
+					if (task_type =="relayer")
+                    	(*(module::Relayer<uint8_t>*)(tasks[tas + 1].get()))[module::rly::sck::relay::in].unbind(
+                    	  (*(module::Relayer<uint8_t>*)(tasks[tas].get()))[module::rly::sck::relay::out]);
+					else
+						(*(module::Incrementer<uint8_t>*)(tasks[tas + 1].get()))[module::inc::sck::increment::in].unbind(
+                    	  (*(module::Incrementer<uint8_t>*)(tasks[tas].get()))[module::inc::sck::increment::out]);
+				}
+            }
+			tas++;
+        }
+    }
+    // Last stage bind
+    if (sck_type_tsk[sck_type_tsk.size() - 1][sck_type_tsk[sck_type_tsk.size() - 1].size() - 1] == "SFWD")
+	{
+		if (task_type == "relay")
+		 	(*((module::Sink_user_binary<uint8_t>*)(last_task)))[module::snk::sck::send_count::in_data].unbind(((*(module::Relayer<uint8_t>*)(tasks[tas].get())))[module::rly::sck::relayf::fwd]);
+		else
+			(*((module::Finalizer<uint8_t>*)(last_task)))[module::fin::sck::finalize::in].unbind(((*(module::Incrementer<uint8_t>*)(tasks[tas].get())))[module::inc::sck::incrementf::fwd]);
+	}
+    else
+	{
+        if (task_type == "relay")
+		 	(*((module::Sink_user_binary<uint8_t>*)(last_task)))[module::snk::sck::send_count::in_data].unbind(((*(module::Relayer<uint8_t>*)(tasks[tas].get())))[module::rly::sck::relay::out]);
+		else
+			(*((module::Finalizer<uint8_t>*)(last_task)))[module::fin::sck::finalize::in].unbind(((*(module::Incrementer<uint8_t>*)(tasks[tas].get())))[module::inc::sck::increment::out]);
+	}
+    if (task_type == "relay")
+    	(*((module::Sink_user_binary<uint8_t>*)(last_task)))[module::snk::sck::send_count::in_count].unbind((*((module::Source_user_binary<uint8_t>*)(first_task)))[module::src::sck::generate::out_count]);
     return test_results;
 }
