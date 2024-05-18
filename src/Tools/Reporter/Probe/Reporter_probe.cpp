@@ -6,8 +6,8 @@
 
 #include "Tools/Reporter/Probe/Reporter_probe.hpp"
 
-using namespace aff3ct;
-using namespace aff3ct::tools;
+using namespace spu;
+using namespace spu::tools;
 
 Reporter_probe::Reporter_probe(const std::string& group_name, const std::string& group_description)
   : Reporter()

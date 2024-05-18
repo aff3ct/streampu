@@ -11,7 +11,7 @@ a fixed "sequence" of tasks.
   <figcaption>Example of a simple sequence of tasks (single threaded).</figcaption>
 </figure>
 
-A sequence is a C++ object of the `aff3ct::runtime::Sequence` class. The 
+A sequence is a C++ object of the `spu::runtime::Sequence` class. The 
 following sections try to give an overview of the most important attributes and 
 methods to facilitate the code understanding.
 
@@ -129,8 +129,8 @@ every task they contain, if one of those tasks happens to be a `commute` it will
 select the children node designated by its *path* attribute, thus branching in
 the execution.
 
-`aff3ct::runtime::Sub_sequence` (not to be confused with 
-`aff3ct::module::Subsequence`!) main attributes are described in the following
+`spu::runtime::Sub_sequence` (not to be confused with 
+`spu::module::Subsequence`!) main attributes are described in the following
 section.
 
 ### Main Attributes
@@ -170,7 +170,7 @@ and their `dataptr` to update during the runtime rebinding.
 ## Digraph Node
 
 [Sub-sequences](#Sub-sequence) make up a directed graph. Whenever a sub-sequence 
-is accessed, it is through this class (`aff3ct::tools::Digraph_node`) as 
+is accessed, it is through this class (`spu::tools::Digraph_node`) as 
 sub-sequences themselves do not contain information regarding the graph.
 
 ### Main Attributes

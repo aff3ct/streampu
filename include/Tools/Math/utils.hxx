@@ -10,7 +10,7 @@
 
 #define REAL_COMP_PREC 1e-6
 
-namespace aff3ct
+namespace spu
 {
 namespace tools
 {

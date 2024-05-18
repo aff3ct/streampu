@@ -1,6 +1,6 @@
 #include "Module/Reducer/Reducer.hpp"
 
-namespace aff3ct
+namespace spu
 {
 namespace module
 {

@@ -1,28 +1,28 @@
 #include "Tools/Help/Help.hpp"
 
-using namespace aff3ct;
-using namespace aff3ct::tools;
+using namespace spu;
+using namespace spu::tools;
 
 void
-aff3ct::tools::help(const aff3ct::module::Module& mdl, const bool& verbose, std::ostream& stream)
+spu::tools::help(const spu::module::Module& mdl, const bool& verbose, std::ostream& stream)
 {
     stream << get_help(mdl, verbose) << std::endl;
 }
 
 void
-aff3ct::tools::help(const aff3ct::runtime::Task& tsk, const bool& verbose, std::ostream& stream)
+spu::tools::help(const spu::runtime::Task& tsk, const bool& verbose, std::ostream& stream)
 {
     stream << get_help(tsk, verbose) << std::endl;
 }
 
 void
-aff3ct::tools::help(const aff3ct::runtime::Socket& sck, const bool& verbose, std::ostream& stream)
+spu::tools::help(const spu::runtime::Socket& sck, const bool& verbose, std::ostream& stream)
 {
     stream << get_help(sck, verbose) << std::endl;
 }
 
 std::string
-aff3ct::tools::get_help(const aff3ct::module::Module& mdl, const bool& verbose)
+spu::tools::get_help(const spu::module::Module& mdl, const bool& verbose)
 {
     std::stringstream message;
     message << "# module:\n";
@@ -48,7 +48,7 @@ aff3ct::tools::get_help(const aff3ct::module::Module& mdl, const bool& verbose)
 }
 
 std::string
-aff3ct::tools::get_help(const aff3ct::runtime::Task& tsk, const bool& verbose)
+spu::tools::get_help(const spu::runtime::Task& tsk, const bool& verbose)
 {
     std::stringstream message;
 
@@ -69,7 +69,7 @@ aff3ct::tools::get_help(const aff3ct::runtime::Task& tsk, const bool& verbose)
             auto sck_type = tsk.sockets[i]->get_type();
             std::string line;
             std::istringstream isstr(sck_msg);
-            if (sck_type == aff3ct::runtime::socket_t::SIN || sck_type == aff3ct::runtime::socket_t::SFWD)
+            if (sck_type == runtime::socket_t::SIN || sck_type == runtime::socket_t::SFWD)
             {
                 n_inputs++;
                 while (std::getline(isstr, line))
@@ -89,7 +89,7 @@ aff3ct::tools::get_help(const aff3ct::runtime::Task& tsk, const bool& verbose)
 }
 
 std::string
-aff3ct::tools::get_help(const aff3ct::runtime::Socket& sck, const bool& verbose)
+spu::tools::get_help(const spu::runtime::Socket& sck, const bool& verbose)
 {
     std::stringstream message;
     message << "|- " << sck.get_name() << ": ";

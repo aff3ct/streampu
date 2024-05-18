@@ -6,8 +6,8 @@
 #include "Tools/Algo/Bit_packer/Bit_packer.hpp"
 #include "Tools/Exception/exception.hpp"
 
-using namespace aff3ct;
-using namespace aff3ct::module;
+using namespace spu;
+using namespace spu::module;
 
 template<typename B>
 Sink_user_binary<B>::Sink_user_binary(const int max_data_size, const std::string& filename)
@@ -83,14 +83,14 @@ Sink_user_binary<B>::_send_count(const B* in_data, const uint32_t* in_count, con
 }
 
 // ==================================================================================== explicit template instantiation
-template class aff3ct::module::Sink_user_binary<int8_t>;
-template class aff3ct::module::Sink_user_binary<uint8_t>;
-template class aff3ct::module::Sink_user_binary<int16_t>;
-template class aff3ct::module::Sink_user_binary<uint16_t>;
-template class aff3ct::module::Sink_user_binary<int32_t>;
-template class aff3ct::module::Sink_user_binary<uint32_t>;
-template class aff3ct::module::Sink_user_binary<int64_t>;
-template class aff3ct::module::Sink_user_binary<uint64_t>;
-template class aff3ct::module::Sink_user_binary<float>;
-template class aff3ct::module::Sink_user_binary<double>;
+template class spu::module::Sink_user_binary<int8_t>;
+template class spu::module::Sink_user_binary<uint8_t>;
+template class spu::module::Sink_user_binary<int16_t>;
+template class spu::module::Sink_user_binary<uint16_t>;
+template class spu::module::Sink_user_binary<int32_t>;
+template class spu::module::Sink_user_binary<uint32_t>;
+template class spu::module::Sink_user_binary<int64_t>;
+template class spu::module::Sink_user_binary<uint64_t>;
+template class spu::module::Sink_user_binary<float>;
+template class spu::module::Sink_user_binary<double>;
 // ==================================================================================== explicit template instantiation

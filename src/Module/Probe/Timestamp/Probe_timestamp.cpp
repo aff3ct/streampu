@@ -6,8 +6,8 @@
 #include "Module/Probe/Timestamp/Probe_timestamp.hpp"
 #include "Tools/Exception/exception.hpp"
 
-using namespace aff3ct;
-using namespace aff3ct::module;
+using namespace spu;
+using namespace spu::module;
 
 Probe_timestamp::Probe_timestamp(const uint64_t mod, const std::string& col_name, tools::Reporter_probe* reporter)
   : Probe<uint8_t>(0, col_name)

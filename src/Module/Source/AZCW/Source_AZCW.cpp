@@ -2,7 +2,7 @@
 
 #include "Module/Source/AZCW/Source_AZCW.hpp"
 
-using namespace aff3ct::module;
+using namespace spu::module;
 
 template<typename B>
 Source_AZCW<B>::Source_AZCW(const int max_data_size)
@@ -29,14 +29,14 @@ Source_AZCW<B>::_generate(B* out_data, const size_t frame_id)
 }
 
 // ==================================================================================== explicit template instantiation
-template class aff3ct::module::Source_AZCW<int8_t>;
-template class aff3ct::module::Source_AZCW<uint8_t>;
-template class aff3ct::module::Source_AZCW<int16_t>;
-template class aff3ct::module::Source_AZCW<uint16_t>;
-template class aff3ct::module::Source_AZCW<int32_t>;
-template class aff3ct::module::Source_AZCW<uint32_t>;
-template class aff3ct::module::Source_AZCW<int64_t>;
-template class aff3ct::module::Source_AZCW<uint64_t>;
-template class aff3ct::module::Source_AZCW<float>;
-template class aff3ct::module::Source_AZCW<double>;
+template class spu::module::Source_AZCW<int8_t>;
+template class spu::module::Source_AZCW<uint8_t>;
+template class spu::module::Source_AZCW<int16_t>;
+template class spu::module::Source_AZCW<uint16_t>;
+template class spu::module::Source_AZCW<int32_t>;
+template class spu::module::Source_AZCW<uint32_t>;
+template class spu::module::Source_AZCW<int64_t>;
+template class spu::module::Source_AZCW<uint64_t>;
+template class spu::module::Source_AZCW<float>;
+template class spu::module::Source_AZCW<double>;
 // ==================================================================================== explicit template instantiation

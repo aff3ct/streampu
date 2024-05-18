@@ -2,7 +2,7 @@
 
 #include "Tools/Exception/runtime_error/runtime_error.hpp"
 
-using namespace aff3ct::tools;
+using namespace spu::tools;
 
 #define DEFAULT_MESSAGE "Runtime error."
 

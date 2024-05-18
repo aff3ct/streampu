@@ -12,7 +12,7 @@
 int
 main()
 {
-    std::cout << "aff3ct-core signal tracer is running..." << std::endl;
+    std::cout << "StreamPU signal tracer is running..." << std::endl;
     cpptrace::object_trace trace;
     do
     {
@@ -40,7 +40,7 @@ main()
         }
     } while (true);
 
-#ifdef AFF3CT_CORE_COLORS
+#ifdef SPU_COLORS
     bool enable_color = true;
 #else
     bool enable_color = false;

@@ -8,7 +8,7 @@
 #include "Tools/Algo/Bit_packer/Bit_packer.hpp"
 #include "Tools/Exception/exception.hpp"
 
-namespace aff3ct
+namespace spu
 {
 namespace tools
 {
@@ -340,7 +340,7 @@ Bit_packer::_unpack(const S* symbs_in, B* vec_out, const int n_bits, const bool 
 
 int main(int argc, char** argv)
 {
-        using namespace aff3ct;
+        using namespace spu;
         using B = int;
         using S = short;
 

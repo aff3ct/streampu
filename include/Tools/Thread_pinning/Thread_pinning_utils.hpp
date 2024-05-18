@@ -1,7 +1,7 @@
 #ifndef THREAD_PINNING_UTILS_HPP
 #define THREAD_PINNING_UTILS_HPP
 
-#ifdef AFF3CT_CORE_HWLOC
+#ifdef SPU_HWLOC
 #include <hwloc.h>
 #include <utility>
 #endif
@@ -10,7 +10,7 @@
 #include <string>
 #include <vector>
 
-namespace aff3ct
+namespace spu
 {
 namespace tools
 {
@@ -25,7 +25,7 @@ class Thread_pinning_utils
 
     static std::vector<std::string> thread_parser(std::string const& hwloc_objects_thread);
 
-#ifdef AFF3CT_CORE_HWLOC
+#ifdef SPU_HWLOC
     static std::pair<hwloc_obj_type_t, int> str_to_hwloc_object(std::string& str_object);
 #endif
 };

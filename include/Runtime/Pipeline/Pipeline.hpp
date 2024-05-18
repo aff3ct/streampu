@@ -14,7 +14,7 @@
 #include "Runtime/Sequence/Sequence.hpp"
 #include "Tools/Interface/Interface_get_set_n_frames.hpp"
 
-namespace aff3ct
+namespace spu
 {
 namespace runtime
 {

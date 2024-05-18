@@ -6,8 +6,9 @@
 #include <string>
 #include <vector>
 
-#include <aff3ct-core.hpp>
-using namespace aff3ct;
+#include <streampu.hpp>
+using namespace spu;
+using namespace spu::runtime;
 
 int
 main(int argc, char** argv)
@@ -222,10 +223,10 @@ main(int argc, char** argv)
         std::cout << std::endl;
         std::cout << "Helper information:" << std::endl;
         std::cout << "-------------------" << std::endl;
-        aff3ct::tools::help(initializer);
+        tools::help(initializer);
         for (size_t s = 0; s < incs.size(); s++)
-            aff3ct::tools::help(*incs[s]);
-        aff3ct::tools::help(finalizer);
+            tools::help(*incs[s]);
+        tools::help(finalizer);
     }
 
     std::atomic<unsigned int> counter(0);

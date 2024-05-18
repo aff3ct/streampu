@@ -4,8 +4,8 @@
 #include "Module/Probe/Time/Probe_time.hpp"
 #include "Tools/Exception/exception.hpp"
 
-using namespace aff3ct;
-using namespace aff3ct::module;
+using namespace spu;
+using namespace spu::module;
 
 Probe_time::Probe_time(const std::string& col_name, tools::Reporter_probe* reporter)
   : Probe<uint8_t>(0, col_name)

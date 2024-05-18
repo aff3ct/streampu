@@ -2,8 +2,8 @@
 
 #include "Module/Controller/Controller_cyclic/Controller_cyclic.hpp"
 
-using namespace aff3ct;
-using namespace aff3ct::module;
+using namespace spu;
+using namespace spu::module;
 
 Controller_cyclic::Controller_cyclic(const size_t n_paths, const size_t init_path)
   : Controller(init_path % n_paths)

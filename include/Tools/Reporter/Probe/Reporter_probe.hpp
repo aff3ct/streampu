@@ -17,7 +17,7 @@
 
 #include "Tools/Reporter/Reporter.hpp"
 
-namespace aff3ct
+namespace spu
 {
 namespace module
 {

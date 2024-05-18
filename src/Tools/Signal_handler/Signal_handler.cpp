@@ -14,19 +14,19 @@
 #include "Tools/Display/rang_format/rang_format.h"
 #include "Tools/Signal_handler/Signal_handler.hpp"
 
-using namespace aff3ct;
-using namespace aff3ct::tools;
+using namespace spu;
+using namespace spu::tools;
 
 bool g_sigsegv = false;
 bool g_sigint = false;
 
-#ifdef AFF3CT_CORE_STACKTRACE_SEGFAULT
+#ifdef SPU_STACKTRACE_SEGFAULT
 
 #include <cstring>
 
 #include <cpptrace/cpptrace.hpp>
 
-#ifdef AFF3CT_CORE_STACKTRACE_SEGFAULT_LIBUNWIND
+#ifdef SPU_STACKTRACE_SEGFAULT_LIBUNWIND
 
 #include <sys/wait.h>
 #include <unistd.h>
@@ -56,7 +56,7 @@ signal_sigsegv_handler(int signo, siginfo_t* info, void* context)
     g_sigsegv = true;
 
     // print basic message
-    std::cerr << rang::tag::error << "Signal \"Segmentation Violation\" caught by AFF3CT-core signal handler!"
+    std::cerr << rang::tag::error << "Signal \"Segmentation Violation\" caught by StreamPU signal handler!"
               << std::endl;
     std::cerr << rang::tag::error << "Printing stack trace (if possible) and then, exiting..." << std::endl;
 
@@ -74,7 +74,7 @@ signal_sigsegv_handler(int signo, siginfo_t* info, void* context)
         dup2(input_pipe.read_end, STDIN_FILENO);
         close(input_pipe.read_end);
         close(input_pipe.write_end);
-        execlp("aff3ct-core-signal-tracer", "aff3ct-core-signal-tracer", nullptr);
+        execlp("streampu-signal-tracer", "streampu-signal-tracer", nullptr);
         _exit(1);
     }
 
@@ -94,7 +94,7 @@ signal_sigsegv_handler(int signo, siginfo_t* info, void* context)
     _exit(1);
 }
 
-#else /* AFF3CT_CORE_STACKTRACE_SEGFAULT_LIBUNWIND */
+#else /* SPU_STACKTRACE_SEGFAULT_LIBUNWIND */
 
 // /!\ UNSAFE METHOD
 #if defined(_WIN64) || defined(_WIN32)
@@ -108,11 +108,11 @@ signal_sigsegv_handler(int signo, siginfo_t* info, void* context)
     g_sigsegv = true;
 
     // print basic message
-    std::cerr << rang::tag::error << "Signal \"Segmentation Violation\" caught by AFF3CT-core signal handler!"
+    std::cerr << rang::tag::error << "Signal \"Segmentation Violation\" caught by StreamPU signal handler!"
               << std::endl;
     std::cerr << rang::tag::error << "Printing stack trace (if possible) and then, exiting..." << std::endl;
 
-#ifdef AFF3CT_CORE_COLORS
+#ifdef SPU_COLORS
     bool enable_color = true;
 #else
     bool enable_color = false;
@@ -124,7 +124,7 @@ signal_sigsegv_handler(int signo, siginfo_t* info, void* context)
     std::exit(1);
 }
 
-#endif /* AFF3CT_CORE_STACKTRACE_SEGFAULT_LIBUNWIND */
+#endif /* SPU_STACKTRACE_SEGFAULT_LIBUNWIND */
 
 void
 warmup_cpptrace()
@@ -136,7 +136,7 @@ warmup_cpptrace()
     cpptrace::get_safe_object_frame(buffer[0], &frame);
 }
 
-#endif /* AFF3CT_CORE_STACKTRACE_SEGFAULT */
+#endif /* SPU_STACKTRACE_SEGFAULT */
 
 bool g_is_interrupt = false;
 #if defined(_WIN64) || defined(_WIN32)
@@ -151,7 +151,7 @@ signal_sigint_handler(int signo, siginfo_t* info, void* context)
     {
         // print basic message
         std::cerr << std::endl
-                  << rang::tag::error << "Signal \"Interruption\" caught twice by AFF3CT-core signal handler!"
+                  << rang::tag::error << "Signal \"Interruption\" caught twice by StreamPU signal handler!"
                   << std::endl;
         std::cerr << rang::tag::error << "Killing the application RIGHT NOW sir!" << std::endl;
         exit(1);
@@ -163,7 +163,7 @@ signal_sigint_handler(int signo, siginfo_t* info, void* context)
 
         // print basic message
         std::clog << std::endl
-                  << rang::tag::info << "Signal \"Interruption\" caught by AFF3CT-core signal handler!" << std::endl;
+                  << rang::tag::info << "Signal \"Interruption\" caught by StreamPU signal handler!" << std::endl;
         std::clog << rang::tag::info << "Stopping Sequence::exec() and/or Pipeline::exec()..." << std::endl;
 
         g_sigint = true;
@@ -176,7 +176,7 @@ int
 Signal_handler::init()
 {
 // SIGSEGV handler
-#ifdef AFF3CT_CORE_STACKTRACE_SEGFAULT
+#ifdef SPU_STACKTRACE_SEGFAULT
     cpptrace::absorb_trace_exceptions(false);
     // cpptrace::register_terminate_handler();
     warmup_cpptrace();
@@ -189,7 +189,7 @@ Signal_handler::init()
     action_sigsegv.sa_sigaction = &signal_sigsegv_handler;
     if (sigaction(SIGSEGV, &action_sigsegv, NULL) == -1) perror("sigaction SIGSEGV");
 #endif /* defined(_WIN64) || defined(_WIN32) */
-#endif /* AFF3CT_CORE_STACKTRACE_SEGFAULT */
+#endif /* SPU_STACKTRACE_SEGFAULT */
 
 // SIGINT handler
 #if defined(_WIN64) || defined(_WIN32)

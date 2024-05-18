@@ -6,8 +6,8 @@
 
 #include "Module/Initializer/Initializer.hpp"
 
-using namespace aff3ct;
-using namespace aff3ct::module;
+using namespace spu;
+using namespace spu::module;
 
 template<typename T>
 Initializer<T>::Initializer(const size_t n_elmts)
@@ -133,14 +133,14 @@ Initializer<T>::_initialize(T* out, const size_t frame_id)
 }
 
 // ==================================================================================== explicit template instantiation
-template class aff3ct::module::Initializer<int8_t>;
-template class aff3ct::module::Initializer<uint8_t>;
-template class aff3ct::module::Initializer<int16_t>;
-template class aff3ct::module::Initializer<uint16_t>;
-template class aff3ct::module::Initializer<int32_t>;
-template class aff3ct::module::Initializer<uint32_t>;
-template class aff3ct::module::Initializer<int64_t>;
-template class aff3ct::module::Initializer<uint64_t>;
-template class aff3ct::module::Initializer<float>;
-template class aff3ct::module::Initializer<double>;
+template class spu::module::Initializer<int8_t>;
+template class spu::module::Initializer<uint8_t>;
+template class spu::module::Initializer<int16_t>;
+template class spu::module::Initializer<uint16_t>;
+template class spu::module::Initializer<int32_t>;
+template class spu::module::Initializer<uint32_t>;
+template class spu::module::Initializer<int64_t>;
+template class spu::module::Initializer<uint64_t>;
+template class spu::module::Initializer<float>;
+template class spu::module::Initializer<double>;
 // ==================================================================================== explicit template instantiation

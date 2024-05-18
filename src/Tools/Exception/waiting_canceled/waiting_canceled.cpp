@@ -2,7 +2,7 @@
 
 #include "Tools/Exception/waiting_canceled/waiting_canceled.hpp"
 
-using namespace aff3ct::tools;
+using namespace spu::tools;
 
 #define DEFAULT_MESSAGE "Waiting canceled thread."
 

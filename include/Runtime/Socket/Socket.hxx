@@ -6,14 +6,14 @@
 
 #include "Runtime/Socket/Socket.hpp"
 #include "Tools/Exception/exception.hpp"
-#ifdef AFF3CT_CORE_SHOW_DEPRECATED
+#ifdef SPU_SHOW_DEPRECATED
 #include "Tools/Display/rang_format/rang_format.h"
-#ifdef AFF3CT_CORE_STACKTRACE
+#ifdef SPU_STACKTRACE
 #include <cpptrace/cpptrace.hpp>
 #endif
 #endif
 
-namespace aff3ct
+namespace spu
 {
 namespace runtime
 {
@@ -132,11 +132,11 @@ Socket::_get_dataptr(const size_t start_col) const
 void*
 Socket::get_dataptr(const size_t start_col) const
 {
-#ifdef AFF3CT_CORE_SHOW_DEPRECATED
+#ifdef SPU_SHOW_DEPRECATED
     std::clog << rang::tag::warning
               << "Deprecated: 'Socket::get_dataptr' should be replaced by 'Socket::get_dataptr<T>'." << std::endl;
-#ifdef AFF3CT_CORE_STACKTRACE
-#ifdef AFF3CT_CORE_COLORS
+#ifdef SPU_STACKTRACE
+#ifdef SPU_COLORS
     bool enable_color = true;
 #else
     bool enable_color = false;
@@ -156,11 +156,11 @@ Socket::_get_dptr(const size_t start_col) const
 void*
 Socket::get_dptr(const size_t start_col) const
 {
-#ifdef AFF3CT_CORE_SHOW_DEPRECATED
+#ifdef SPU_SHOW_DEPRECATED
     std::clog << rang::tag::warning << "Deprecated: 'Socket::get_dptr' should be replaced by 'Socket::get_dptr<T>'."
               << std::endl;
-#ifdef AFF3CT_CORE_STACKTRACE
-#ifdef AFF3CT_CORE_COLORS
+#ifdef SPU_STACKTRACE
+#ifdef SPU_COLORS
     bool enable_color = true;
 #else
     bool enable_color = false;
@@ -195,11 +195,11 @@ Socket::_get_2d_dataptr(const size_t start_row, const size_t start_col)
 void**
 Socket::get_2d_dataptr(const size_t start_row, const size_t start_col)
 {
-#ifdef AFF3CT_CORE_SHOW_DEPRECATED
+#ifdef SPU_SHOW_DEPRECATED
     std::clog << rang::tag::warning
               << "Deprecated: 'Socket::get_2d_dataptr' should be replaced by 'Socket::get_2d_dataptr<T>'." << std::endl;
-#ifdef AFF3CT_CORE_STACKTRACE
-#ifdef AFF3CT_CORE_COLORS
+#ifdef SPU_STACKTRACE
+#ifdef SPU_COLORS
     bool enable_color = true;
 #else
     bool enable_color = false;
@@ -219,11 +219,11 @@ Socket::_get_2d_dptr(const size_t start_row, const size_t start_col)
 void**
 Socket::get_2d_dptr(const size_t start_row, const size_t start_col)
 {
-#ifdef AFF3CT_CORE_SHOW_DEPRECATED
+#ifdef SPU_SHOW_DEPRECATED
     std::clog << rang::tag::warning
               << "Deprecated: 'Socket::get_2d_dptr' should be replaced by 'Socket::get_2d_dptr<T>'." << std::endl;
-#ifdef AFF3CT_CORE_STACKTRACE
-#ifdef AFF3CT_CORE_COLORS
+#ifdef SPU_STACKTRACE
+#ifdef SPU_COLORS
     bool enable_color = true;
 #else
     bool enable_color = false;
@@ -238,7 +238,7 @@ template<typename T>
 T*
 Socket::get_dataptr(const size_t start_col) const
 {
-#ifndef AFF3CT_CORE_FAST
+#ifndef SPU_FAST
     if (this->get_type() == socket_t::SIN && !std::is_const<T>::value)
     {
         std::stringstream message;
@@ -265,7 +265,7 @@ template<typename T>
 T**
 Socket::get_2d_dataptr(const size_t start_row, const size_t start_col)
 {
-#ifndef AFF3CT_CORE_FAST
+#ifndef SPU_FAST
     if (this->get_type() == socket_t::SIN && !std::is_const<T>::value)
     {
         std::stringstream message;
@@ -291,7 +291,7 @@ Socket::get_2d_dptr(const size_t start_row, const size_t start_col)
 bool
 Socket::is_fast() const
 {
-#ifndef AFF3CT_CORE_FAST
+#ifndef SPU_FAST
     return fast;
 #else
     return true;
@@ -349,7 +349,7 @@ Socket::set_fast(const bool fast)
 void
 Socket::_bind(Socket& s_out, const int priority)
 {
-#ifndef AFF3CT_CORE_FAST
+#ifndef SPU_FAST
     if (!is_fast())
     {
         if (s_out.datatype != this->datatype)
@@ -390,7 +390,7 @@ Socket::_bind(Socket& s_out, const int priority)
 
     if (this->bound_socket == &s_out) this->unbind(s_out);
 
-#ifndef AFF3CT_CORE_FAST
+#ifndef SPU_FAST
     if (this->bound_socket != nullptr && this->get_type() == socket_t::SIN)
     {
         std::stringstream message;
@@ -410,7 +410,7 @@ Socket::_bind(Socket& s_out, const int priority)
 
     this->bound_socket = &s_out;
 
-#ifndef AFF3CT_CORE_FAST
+#ifndef SPU_FAST
     if (std::find(s_out.bound_sockets.begin(), s_out.bound_sockets.end(), this) != s_out.bound_sockets.end())
     {
         std::stringstream message;
@@ -435,11 +435,11 @@ Socket::_bind(Socket& s_out, const int priority)
 void
 Socket::bind(Socket& s_out, const int priority)
 {
-#ifdef AFF3CT_CORE_SHOW_DEPRECATED
+#ifdef SPU_SHOW_DEPRECATED
     std::clog << rang::tag::warning << "Deprecated: 'Socket::bind()' should be replaced by 'Socket::operator='."
               << std::endl;
-#ifdef AFF3CT_CORE_STACKTRACE
-#ifdef AFF3CT_CORE_COLORS
+#ifdef SPU_STACKTRACE
+#ifdef SPU_COLORS
     bool enable_color = true;
 #else
     bool enable_color = false;
@@ -453,11 +453,11 @@ Socket::bind(Socket& s_out, const int priority)
 void
 Socket::operator()(Socket& s_out, const int priority)
 {
-#ifdef AFF3CT_CORE_SHOW_DEPRECATED
+#ifdef SPU_SHOW_DEPRECATED
     std::clog << rang::tag::warning << "Deprecated: 'Socket::operator()' should be replaced by 'Socket::operator='."
               << std::endl;
-#ifdef AFF3CT_CORE_STACKTRACE
-#ifdef AFF3CT_CORE_COLORS
+#ifdef SPU_STACKTRACE
+#ifdef SPU_COLORS
     bool enable_color = true;
 #else
     bool enable_color = false;
@@ -472,11 +472,11 @@ template<typename T>
 void
 Socket::operator=(const void* array)
 {
-#ifndef AFF3CT_CORE_FAST
+#ifndef SPU_FAST
     if (this->get_type() == socket_t::SIN || this->get_type() == socket_t::SFWD)
 #endif
         this->_bind(array);
-#ifndef AFF3CT_CORE_FAST
+#ifndef SPU_FAST
     else
     {
         std::stringstream message;
@@ -498,11 +498,11 @@ template<typename T>
 void
 Socket::operator=(void* array)
 {
-#ifndef AFF3CT_CORE_FAST
+#ifndef SPU_FAST
     if (this->get_type() == socket_t::SIN || this->get_type() == socket_t::SFWD)
 #endif
         this->_bind(array);
-#ifndef AFF3CT_CORE_FAST
+#ifndef SPU_FAST
     else
     {
         std::stringstream message;
@@ -524,11 +524,11 @@ template<typename T>
 void
 Socket::operator=(const T* array)
 {
-#ifndef AFF3CT_CORE_FAST
+#ifndef SPU_FAST
     if (this->get_type() == socket_t::SIN || this->get_type() == socket_t::SFWD)
 #endif
         this->_bind(array);
-#ifndef AFF3CT_CORE_FAST
+#ifndef SPU_FAST
     else
     {
         std::stringstream message;
@@ -550,11 +550,11 @@ template<typename T>
 void
 Socket::operator=(T* array)
 {
-#ifndef AFF3CT_CORE_FAST
+#ifndef SPU_FAST
     if (this->get_type() == socket_t::SIN || this->get_type() == socket_t::SFWD)
 #endif
         this->_bind(array);
-#ifndef AFF3CT_CORE_FAST
+#ifndef SPU_FAST
     else
     {
         std::stringstream message;
@@ -576,11 +576,11 @@ template<typename T, class A>
 void
 Socket::operator=(const std::vector<T, A>& vector)
 {
-#ifndef AFF3CT_CORE_FAST
+#ifndef SPU_FAST
     if (this->get_type() == socket_t::SIN || this->get_type() == socket_t::SFWD)
 #endif
         this->_bind(vector);
-#ifndef AFF3CT_CORE_FAST
+#ifndef SPU_FAST
     else
     {
         std::stringstream message;
@@ -602,11 +602,11 @@ template<typename T, class A>
 void
 Socket::operator=(std::vector<T, A>& vector)
 {
-#ifndef AFF3CT_CORE_FAST
+#ifndef SPU_FAST
     if (this->get_type() == socket_t::SIN || this->get_type() == socket_t::SFWD)
 #endif
         this->_bind(vector);
-#ifndef AFF3CT_CORE_FAST
+#ifndef SPU_FAST
     else
     {
         std::stringstream message;
@@ -636,7 +636,7 @@ Socket::operator=(Socket& s)
     // Socket forward bind
     else if (s.get_type() == socket_t::SFWD && this->get_type() == socket_t::SFWD)
         this->_bind(s);
-#ifndef AFF3CT_CORE_FAST
+#ifndef SPU_FAST
     else
     {
         std::stringstream message;
@@ -665,11 +665,11 @@ Socket::operator=(Socket& s)
 void
 Socket::operator=(Task& t)
 {
-#ifndef AFF3CT_CORE_FAST
+#ifndef SPU_FAST
     if (this->get_type() == socket_t::SOUT || this->get_type() == socket_t::SFWD)
 #endif
         t._bind(*this);
-#ifndef AFF3CT_CORE_FAST
+#ifndef SPU_FAST
     else
     {
         std::stringstream message;
@@ -698,11 +698,11 @@ template<typename T, class A>
 void
 Socket::bind(const std::vector<T, A>& vector)
 {
-#ifdef AFF3CT_CORE_SHOW_DEPRECATED
+#ifdef SPU_SHOW_DEPRECATED
     std::clog << rang::tag::warning << "Deprecated: 'Socket::bind()' should be replaced by 'Socket::operator='."
               << std::endl;
-#ifdef AFF3CT_CORE_STACKTRACE
-#ifdef AFF3CT_CORE_COLORS
+#ifdef SPU_STACKTRACE
+#ifdef SPU_COLORS
     bool enable_color = true;
 #else
     bool enable_color = false;
@@ -717,11 +717,11 @@ template<typename T, class A>
 void
 Socket::_bind(std::vector<T, A>& vector)
 {
-#ifndef AFF3CT_CORE_FAST
+#ifndef SPU_FAST
     if (is_fast())
 #endif
         this->dataptr = static_cast<void*>(vector.data());
-#ifndef AFF3CT_CORE_FAST
+#ifndef SPU_FAST
     else
     {
         if (vector.size() != this->get_n_elmts())
@@ -744,11 +744,11 @@ template<typename T, class A>
 void
 Socket::bind(std::vector<T, A>& vector)
 {
-#ifdef AFF3CT_CORE_SHOW_DEPRECATED
+#ifdef SPU_SHOW_DEPRECATED
     std::clog << rang::tag::warning << "Deprecated: 'Socket::bind()' should be replaced by 'Socket::operator='."
               << std::endl;
-#ifdef AFF3CT_CORE_STACKTRACE
-#ifdef AFF3CT_CORE_COLORS
+#ifdef SPU_STACKTRACE
+#ifdef SPU_COLORS
     bool enable_color = true;
 #else
     bool enable_color = false;
@@ -763,11 +763,11 @@ template<typename T, class A>
 void
 Socket::operator()(std::vector<T, A>& vector)
 {
-#ifdef AFF3CT_CORE_SHOW_DEPRECATED
+#ifdef SPU_SHOW_DEPRECATED
     std::clog << rang::tag::warning << "Deprecated: 'Socket::operator()' should be replaced by 'Socket::operator='."
               << std::endl;
-#ifdef AFF3CT_CORE_STACKTRACE
-#ifdef AFF3CT_CORE_COLORS
+#ifdef SPU_STACKTRACE
+#ifdef SPU_COLORS
     bool enable_color = true;
 #else
     bool enable_color = false;
@@ -789,11 +789,11 @@ template<typename T>
 void
 Socket::bind(const T* array)
 {
-#ifdef AFF3CT_CORE_SHOW_DEPRECATED
+#ifdef SPU_SHOW_DEPRECATED
     std::clog << rang::tag::warning << "Deprecated: 'Socket::bind()' should be replaced by 'Socket::operator='."
               << std::endl;
-#ifdef AFF3CT_CORE_STACKTRACE
-#ifdef AFF3CT_CORE_COLORS
+#ifdef SPU_STACKTRACE
+#ifdef SPU_COLORS
     bool enable_color = true;
 #else
     bool enable_color = false;
@@ -808,11 +808,11 @@ template<typename T>
 void
 Socket::_bind(T* array)
 {
-#ifndef AFF3CT_CORE_FAST
+#ifndef SPU_FAST
     if (is_fast())
 #endif
         this->dataptr = static_cast<void*>(array);
-#ifndef AFF3CT_CORE_FAST
+#ifndef SPU_FAST
     else
     {
         if (type_to_string[typeid(T)] != type_to_string[this->datatype])
@@ -833,11 +833,11 @@ template<typename T>
 void
 Socket::bind(T* array)
 {
-#ifdef AFF3CT_CORE_SHOW_DEPRECATED
+#ifdef SPU_SHOW_DEPRECATED
     std::clog << rang::tag::warning << "Deprecated: 'Socket::bind()' should be replaced by 'Socket::operator='."
               << std::endl;
-#ifdef AFF3CT_CORE_STACKTRACE
-#ifdef AFF3CT_CORE_COLORS
+#ifdef SPU_STACKTRACE
+#ifdef SPU_COLORS
     bool enable_color = true;
 #else
     bool enable_color = false;
@@ -852,11 +852,11 @@ template<typename T>
 void
 Socket::operator()(T* array)
 {
-#ifdef AFF3CT_CORE_SHOW_DEPRECATED
+#ifdef SPU_SHOW_DEPRECATED
     std::clog << rang::tag::warning << "Deprecated: 'Socket::operator()' should be replaced by 'Socket::operator='."
               << std::endl;
-#ifdef AFF3CT_CORE_STACKTRACE
-#ifdef AFF3CT_CORE_COLORS
+#ifdef SPU_STACKTRACE
+#ifdef SPU_COLORS
     bool enable_color = true;
 #else
     bool enable_color = false;
@@ -870,7 +870,7 @@ Socket::operator()(T* array)
 void
 Socket::_bind(void* dataptr)
 {
-#ifndef AFF3CT_CORE_FAST
+#ifndef SPU_FAST
     if (!is_fast())
     {
         if (dataptr == nullptr)
@@ -888,11 +888,11 @@ Socket::_bind(void* dataptr)
 void
 Socket::bind(void* dataptr)
 {
-#ifdef AFF3CT_CORE_SHOW_DEPRECATED
+#ifdef SPU_SHOW_DEPRECATED
     std::clog << rang::tag::warning << "Deprecated: 'Socket::bind()' should be replaced by 'Socket::operator='."
               << std::endl;
-#ifdef AFF3CT_CORE_STACKTRACE
-#ifdef AFF3CT_CORE_COLORS
+#ifdef SPU_STACKTRACE
+#ifdef SPU_COLORS
     bool enable_color = true;
 #else
     bool enable_color = false;
@@ -906,11 +906,11 @@ Socket::bind(void* dataptr)
 void
 Socket::operator()(void* dataptr)
 {
-#ifdef AFF3CT_CORE_SHOW_DEPRECATED
+#ifdef SPU_SHOW_DEPRECATED
     std::clog << rang::tag::warning << "Deprecated: 'Socket::operator()' should be replaced by 'Socket::operator='."
               << std::endl;
-#ifdef AFF3CT_CORE_STACKTRACE
-#ifdef AFF3CT_CORE_COLORS
+#ifdef SPU_STACKTRACE
+#ifdef SPU_COLORS
     bool enable_color = true;
 #else
     bool enable_color = false;
@@ -933,7 +933,7 @@ Socket::reset()
 size_t
 Socket::unbind(Socket& s_out)
 {
-#ifndef AFF3CT_CORE_FAST
+#ifndef SPU_FAST
     if (this->bound_socket == nullptr)
     {
         std::stringstream message;
@@ -969,13 +969,13 @@ Socket::unbind(Socket& s_out)
     size_t unbind_pos = 0;
     auto it = std::find(s_out.bound_sockets.begin(), s_out.bound_sockets.end(), this);
 
-#ifndef AFF3CT_CORE_FAST
+#ifndef SPU_FAST
     if (it != s_out.bound_sockets.end())
     {
 #endif
         unbind_pos = (size_t)std::distance(s_out.bound_sockets.begin(), it);
         s_out.bound_sockets.erase(it);
-#ifndef AFF3CT_CORE_FAST
+#ifndef SPU_FAST
     }
     else
     {

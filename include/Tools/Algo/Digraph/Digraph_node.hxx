@@ -2,7 +2,7 @@
 
 #include "Tools/Algo/Digraph/Digraph_node.hpp"
 
-namespace aff3ct
+namespace spu
 {
 namespace tools
 {

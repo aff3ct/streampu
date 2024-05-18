@@ -8,22 +8,22 @@
 #include "Tools/Display/rang_format/rang_format.h"
 #include "Tools/Exception/exception.hpp"
 
-using namespace aff3ct;
-using namespace aff3ct::tools;
+using namespace spu;
+using namespace spu::tools;
 
-const char aff3ct::tools::Terminal_std::line_separator = '-';
-const std::string aff3ct::tools::Terminal_std::col_separator = "|";
-const std::string aff3ct::tools::Terminal_std::group_separator = "||";
-const std::string aff3ct::tools::Terminal_std::spaced_scol_separator = " |";
-const std::string aff3ct::tools::Terminal_std::spaced_dcol_separator = " ||";
-const std::string aff3ct::tools::Terminal_std::data_tag = "  ";
-const rang::style aff3ct::tools::Terminal_std::legend_style = rang::style::bold;
-const rang::style aff3ct::tools::Terminal_std::report_style = rang::style::bold;
+const char spu::tools::Terminal_std::line_separator = '-';
+const std::string spu::tools::Terminal_std::col_separator = "|";
+const std::string spu::tools::Terminal_std::group_separator = "||";
+const std::string spu::tools::Terminal_std::spaced_scol_separator = " |";
+const std::string spu::tools::Terminal_std::spaced_dcol_separator = " ||";
+const std::string spu::tools::Terminal_std::data_tag = "  ";
+const rang::style spu::tools::Terminal_std::legend_style = rang::style::bold;
+const rang::style spu::tools::Terminal_std::report_style = rang::style::bold;
 
 #ifdef _WIN32
-const size_t aff3ct::tools::Terminal_std::def_column_width = 11;
+const size_t spu::tools::Terminal_std::def_column_width = 11;
 #else
-const size_t aff3ct::tools::Terminal_std::def_column_width = 10;
+const size_t spu::tools::Terminal_std::def_column_width = 10;
 #endif
 
 Terminal_std::Terminal_std(const std::vector<tools::Reporter*>& reporters)

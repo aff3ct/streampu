@@ -10,9 +10,9 @@
 #include <string>
 #include <vector>
 
-#include <aff3ct-core.hpp>
-using namespace aff3ct;
-using namespace aff3ct::runtime;
+#include <streampu.hpp>
+using namespace spu;
+using namespace spu::runtime;
 
 int
 main(int argc, char** argv)
@@ -219,8 +219,8 @@ main(int argc, char** argv)
                           << std::endl
                           << "Stage: " << 0 << ", Thread number: " << 0 << std::endl
                           << "Expected: 0, Real: " << finalizers[0]->get_histo_data()[i][f][0] << std::endl;
-#ifndef AFF3CT_CORE_HWLOC
-                std::cout << "You need to compile with the '-DAFF3CT_CORE_LINK_HWLOC=ON' CMake option!" << std::endl;
+#ifndef SPU_HWLOC
+                std::cout << "You need to compile with the '-DSPU_LINK_HWLOC=ON' CMake option!" << std::endl;
 #endif
                 break;
             }
@@ -233,8 +233,8 @@ main(int argc, char** argv)
                           << "Stage: " << 1 << ", Thread number: " << (i % 3) << std::endl
                           << "Expected: " << (i % 3) << ", Real: " << finalizers[1]->get_histo_data()[i][f][0]
                           << std::endl;
-#ifndef AFF3CT_CORE_HWLOC
-                std::cout << "You need to compile with the '-DAFF3CT_CORE_LINK_HWLOC=ON' CMake option!" << std::endl;
+#ifndef SPU_HWLOC
+                std::cout << "You need to compile with the '-DSPU_LINK_HWLOC=ON' CMake option!" << std::endl;
 #endif
                 break;
             }
@@ -246,8 +246,8 @@ main(int argc, char** argv)
                           << std::endl
                           << "Stage: " << 2 << ", Thread number: " << 0 << std::endl
                           << "Expected: 3, Real: " << finalizers[2]->get_histo_data()[i][f][0] << std::endl;
-#ifndef AFF3CT_CORE_HWLOC
-                std::cout << "You need to compile with the '-DAFF3CT_CORE_LINK_HWLOC=ON' CMake option!" << std::endl;
+#ifndef SPU_HWLOC
+                std::cout << "You need to compile with the '-DSPU_LINK_HWLOC=ON' CMake option!" << std::endl;
 #endif
                 break;
             }

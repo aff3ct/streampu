@@ -1,6 +1,6 @@
 #include "Module/Unaryop/Unaryop.hpp"
 
-namespace aff3ct
+namespace spu
 {
 namespace module
 {

@@ -5,7 +5,7 @@
 
 #include "Module/Initializer/Initializer.hpp"
 
-namespace aff3ct
+namespace spu
 {
 namespace module
 {

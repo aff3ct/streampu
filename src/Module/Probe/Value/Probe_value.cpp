@@ -4,8 +4,8 @@
 #include "Module/Probe/Value/Probe_value.hpp"
 #include "Tools/Exception/exception.hpp"
 
-using namespace aff3ct;
-using namespace aff3ct::module;
+using namespace spu;
+using namespace spu::module;
 
 template<typename T>
 Probe_value<T>::Probe_value(const int size, const std::string& col_name, tools::Reporter_probe* reporter)
@@ -47,14 +47,14 @@ Probe_value<T>::_probe(const T* in, const size_t frame_id)
 }
 
 // ==================================================================================== explicit template instantiation
-template class aff3ct::module::Probe_value<int8_t>;
-template class aff3ct::module::Probe_value<uint8_t>;
-template class aff3ct::module::Probe_value<int16_t>;
-template class aff3ct::module::Probe_value<uint16_t>;
-template class aff3ct::module::Probe_value<int32_t>;
-template class aff3ct::module::Probe_value<uint32_t>;
-template class aff3ct::module::Probe_value<int64_t>;
-template class aff3ct::module::Probe_value<uint64_t>;
-template class aff3ct::module::Probe_value<float>;
-template class aff3ct::module::Probe_value<double>;
+template class spu::module::Probe_value<int8_t>;
+template class spu::module::Probe_value<uint8_t>;
+template class spu::module::Probe_value<int16_t>;
+template class spu::module::Probe_value<uint16_t>;
+template class spu::module::Probe_value<int32_t>;
+template class spu::module::Probe_value<uint32_t>;
+template class spu::module::Probe_value<int64_t>;
+template class spu::module::Probe_value<uint64_t>;
+template class spu::module::Probe_value<float>;
+template class spu::module::Probe_value<double>;
 // ==================================================================================== explicit template instantiation

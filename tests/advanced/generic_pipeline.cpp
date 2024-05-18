@@ -9,8 +9,9 @@
 #include <string>
 #include <vector>
 
-#include <aff3ct-core.hpp>
-using namespace aff3ct;
+#include <streampu.hpp>
+using namespace spu;
+using namespace spu::runtime;
 
 // Error message variable
 std::stringstream message;
@@ -506,7 +507,7 @@ main(int argc, char** argv)
         for (size_t i = 0; i < stages_number + 1; ++i)
             wait_vect.push_back(active_waiting);
 
-#ifdef AFF3CT_CORE_HWLOC
+#ifdef SPU_HWLOC
         // Stages to pin
         if (!pinning_policy.empty())
         {

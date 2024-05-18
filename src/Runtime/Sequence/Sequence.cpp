@@ -21,8 +21,8 @@
 #include "Tools/Thread_pinning/Thread_pinning.hpp"
 #include "Tools/Thread_pinning/Thread_pinning_utils.hpp"
 
-using namespace aff3ct;
-using namespace aff3ct::runtime;
+using namespace spu;
+using namespace spu::runtime;
 
 Sequence::Sequence(const std::vector<const runtime::Task*>& firsts,
                    const std::vector<const runtime::Task*>& lasts,
@@ -48,10 +48,10 @@ Sequence::Sequence(const std::vector<const runtime::Task*>& firsts,
   , cur_task_id(n_threads, 0)
   , cur_ss(n_threads, nullptr)
 {
-#ifndef AFF3CT_CORE_HWLOC
+#ifndef SPU_HWLOC
     if (thread_pinning)
         std::clog << rang::tag::warning
-                  << "AFF3CT has not been linked with the 'hwloc' library, the 'thread_pinning' "
+                  << "StreamPU has not been linked with the 'hwloc' library, the 'thread_pinning' "
                      "option of the 'runtime::Sequence' will have no effect."
                   << std::endl;
 #endif
@@ -222,10 +222,10 @@ Sequence::Sequence(const std::vector<const runtime::Task*>& firsts,
   , cur_task_id(n_threads, 0)
   , cur_ss(n_threads, nullptr)
 {
-#ifndef AFF3CT_CORE_HWLOC
+#ifndef SPU_HWLOC
     if (thread_pinning)
         std::clog << rang::tag::warning
-                  << "AFF3CT has not been linked with the 'hwloc' library, the 'thread_pinning' "
+                  << "StreamPU has not been linked with the 'hwloc' library, the 'thread_pinning' "
                      "option of the 'runtime::Sequence' will have no effect."
                   << std::endl;
 #endif

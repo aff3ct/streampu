@@ -3,8 +3,8 @@
 
 #include "Tools/Display/Terminal/Terminal.hpp"
 
-using namespace aff3ct;
-using namespace aff3ct::tools;
+using namespace spu;
+using namespace spu::tools;
 
 Terminal::Terminal()
   : stop_terminal(false)

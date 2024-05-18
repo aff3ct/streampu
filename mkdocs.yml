@@ -1,5 +1,5 @@
-site_name: AFF3CT-core Documentation
-site_url: https://aff3ct.github.io/aff3ct-core/
+site_name: StreamPU Documentation
+site_url: https://aff3ct.github.io/streampu/
 theme:
   logo: assets/diagram-project-solid.svg
   features:
@@ -42,7 +42,7 @@ theme:
 
   language: en
 
-repo_url: https://github.com/aff3ct/aff3ct-core
+repo_url: https://github.com/aff3ct/streampu
 
 markdown_extensions:
   - toc:

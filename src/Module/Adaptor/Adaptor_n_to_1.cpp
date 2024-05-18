@@ -3,8 +3,8 @@
 #include "Module/Adaptor/Adaptor_n_to_1.hpp"
 #include "Tools/Exception/exception.hpp"
 
-using namespace aff3ct;
-using namespace aff3ct::module;
+using namespace spu;
+using namespace spu::module;
 
 Adaptor_n_to_1*
 Adaptor_n_to_1::clone() const

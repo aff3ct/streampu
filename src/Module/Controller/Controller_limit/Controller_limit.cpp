@@ -2,8 +2,8 @@
 
 #include "Module/Controller/Controller_limit/Controller_limit.hpp"
 
-using namespace aff3ct;
-using namespace aff3ct::module;
+using namespace spu;
+using namespace spu::module;
 
 Controller_limit::Controller_limit(const size_t limit, const size_t init_path)
   : Controller(init_path)

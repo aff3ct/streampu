@@ -1,13 +1,13 @@
 /*!
  * \file
- * \brief AFF3CT-core main header file, include all the other headers.
+ * \brief StreamPU main header file, include all the other headers.
  *
  * \section LICENSE
  * This file is under MIT license (https://opensource.org/licenses/MIT).
  */
 
-#ifndef AFF3CT_CORE_HPP
-#define AFF3CT_CORE_HPP
+#ifndef STREAMPU_HPP
+#define STREAMPU_HPP
 
 #ifndef ADAPTOR_1_TO_N_HPP_
 #include <Module/Adaptor/Adaptor_1_to_n.hpp>

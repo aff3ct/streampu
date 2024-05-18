@@ -3,8 +3,8 @@
 
 #include "Module/Finalizer/Finalizer.hpp"
 
-using namespace aff3ct;
-using namespace aff3ct::module;
+using namespace spu;
+using namespace spu::module;
 
 template<typename T>
 Finalizer<T>::Finalizer(const size_t n_elmts, const size_t history_size)
@@ -114,14 +114,14 @@ Finalizer<T>::reset()
 }
 
 // ==================================================================================== explicit template instantiation
-template class aff3ct::module::Finalizer<int8_t>;
-template class aff3ct::module::Finalizer<uint8_t>;
-template class aff3ct::module::Finalizer<int16_t>;
-template class aff3ct::module::Finalizer<uint16_t>;
-template class aff3ct::module::Finalizer<int32_t>;
-template class aff3ct::module::Finalizer<uint32_t>;
-template class aff3ct::module::Finalizer<int64_t>;
-template class aff3ct::module::Finalizer<uint64_t>;
-template class aff3ct::module::Finalizer<float>;
-template class aff3ct::module::Finalizer<double>;
+template class spu::module::Finalizer<int8_t>;
+template class spu::module::Finalizer<uint8_t>;
+template class spu::module::Finalizer<int16_t>;
+template class spu::module::Finalizer<uint16_t>;
+template class spu::module::Finalizer<int32_t>;
+template class spu::module::Finalizer<uint32_t>;
+template class spu::module::Finalizer<int64_t>;
+template class spu::module::Finalizer<uint64_t>;
+template class spu::module::Finalizer<float>;
+template class spu::module::Finalizer<double>;
 // ==================================================================================== explicit template instantiation

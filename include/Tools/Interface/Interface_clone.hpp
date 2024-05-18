@@ -5,7 +5,7 @@
 #ifndef INTERFACE_CLONE_HPP__
 #define INTERFACE_CLONE_HPP__
 
-namespace aff3ct
+namespace spu
 {
 namespace tools
 {

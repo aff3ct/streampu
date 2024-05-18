@@ -6,7 +6,7 @@
 #include "Tools/Exception/exception.hpp"
 #include "Tools/compute_bytes.h"
 
-namespace aff3ct
+namespace spu
 {
 namespace module
 {

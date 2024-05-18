@@ -1,6 +1,6 @@
 #include "Module/Binaryop/Binaryop.hpp"
 
-namespace aff3ct
+namespace spu
 {
 namespace module
 {

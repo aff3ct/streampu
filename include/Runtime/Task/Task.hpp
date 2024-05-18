@@ -19,7 +19,7 @@
 #include "Tools/Interface/Interface_reset.hpp"
 #include "Tools/System/memory.hpp"
 
-namespace aff3ct
+namespace spu
 {
 namespace module
 {

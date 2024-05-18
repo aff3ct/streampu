@@ -2,8 +2,8 @@
 #include "Tools/Algo/Bit_packer/Bit_packer.hpp"
 #include "Tools/Exception/exception.hpp"
 
-using namespace aff3ct;
-using namespace aff3ct::module;
+using namespace spu;
+using namespace spu::module;
 
 template<typename B>
 Source_user_binary<B>::Source_user_binary(const int max_data_size,
@@ -135,14 +135,14 @@ Source_user_binary<B>::_generate(B* out_data, uint32_t* out_count, const size_t 
 }
 
 // ==================================================================================== explicit template instantiation
-template class aff3ct::module::Source_user_binary<int8_t>;
-template class aff3ct::module::Source_user_binary<uint8_t>;
-template class aff3ct::module::Source_user_binary<int16_t>;
-template class aff3ct::module::Source_user_binary<uint16_t>;
-template class aff3ct::module::Source_user_binary<int32_t>;
-template class aff3ct::module::Source_user_binary<uint32_t>;
-template class aff3ct::module::Source_user_binary<int64_t>;
-template class aff3ct::module::Source_user_binary<uint64_t>;
-template class aff3ct::module::Source_user_binary<float>;
-template class aff3ct::module::Source_user_binary<double>;
+template class spu::module::Source_user_binary<int8_t>;
+template class spu::module::Source_user_binary<uint8_t>;
+template class spu::module::Source_user_binary<int16_t>;
+template class spu::module::Source_user_binary<uint16_t>;
+template class spu::module::Source_user_binary<int32_t>;
+template class spu::module::Source_user_binary<uint32_t>;
+template class spu::module::Source_user_binary<int64_t>;
+template class spu::module::Source_user_binary<uint64_t>;
+template class spu::module::Source_user_binary<float>;
+template class spu::module::Source_user_binary<double>;
 // ==================================================================================== explicit template instantiation

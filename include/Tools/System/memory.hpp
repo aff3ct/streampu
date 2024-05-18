@@ -7,7 +7,7 @@
 
 #include <new>
 
-namespace aff3ct
+namespace spu
 {
 namespace tools
 {

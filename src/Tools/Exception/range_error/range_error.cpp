@@ -2,7 +2,7 @@
 
 #include "Tools/Exception/range_error/range_error.hpp"
 
-using namespace aff3ct::tools;
+using namespace spu::tools;
 
 #define DEFAULT_MESSAGE "Range error."
 

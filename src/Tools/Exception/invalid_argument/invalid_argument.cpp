@@ -2,7 +2,7 @@
 
 #include "Tools/Exception/invalid_argument/invalid_argument.hpp"
 
-using namespace aff3ct::tools;
+using namespace spu::tools;
 
 #define DEFAULT_MESSAGE "Given argument is invalid."
 

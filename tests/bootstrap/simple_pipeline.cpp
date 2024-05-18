@@ -8,8 +8,9 @@
 #include <string>
 #include <vector>
 
-#include <aff3ct-core.hpp>
-using namespace aff3ct;
+#include <streampu.hpp>
+using namespace spu;
+using namespace spu::runtime;
 
 std::ifstream::pos_type
 filesize(const char* filename)

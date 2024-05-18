@@ -1,6 +1,6 @@
 #include "Module/Set/Set.hpp"
 
-namespace aff3ct
+namespace spu
 {
 namespace module
 {

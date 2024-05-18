@@ -3,8 +3,8 @@
 
 #include "Module/Incrementer/Incrementer.hpp"
 
-using namespace aff3ct;
-using namespace aff3ct::module;
+using namespace spu;
+using namespace spu::module;
 
 template<typename T>
 Incrementer<T>::Incrementer(const size_t n_elmts, const size_t ns)
@@ -105,14 +105,14 @@ Incrementer<T>::_increment(const T* in, T* out, const size_t frame_id)
 }
 
 // ==================================================================================== explicit template instantiation
-template class aff3ct::module::Incrementer<int8_t>;
-template class aff3ct::module::Incrementer<uint8_t>;
-template class aff3ct::module::Incrementer<int16_t>;
-template class aff3ct::module::Incrementer<uint16_t>;
-template class aff3ct::module::Incrementer<int32_t>;
-template class aff3ct::module::Incrementer<uint32_t>;
-template class aff3ct::module::Incrementer<int64_t>;
-template class aff3ct::module::Incrementer<uint64_t>;
-template class aff3ct::module::Incrementer<float>;
-template class aff3ct::module::Incrementer<double>;
+template class spu::module::Incrementer<int8_t>;
+template class spu::module::Incrementer<uint8_t>;
+template class spu::module::Incrementer<int16_t>;
+template class spu::module::Incrementer<uint16_t>;
+template class spu::module::Incrementer<int32_t>;
+template class spu::module::Incrementer<uint32_t>;
+template class spu::module::Incrementer<int64_t>;
+template class spu::module::Incrementer<uint64_t>;
+template class spu::module::Incrementer<float>;
+template class spu::module::Incrementer<double>;
 // ==================================================================================== explicit template instantiation

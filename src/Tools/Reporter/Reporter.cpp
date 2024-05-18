@@ -1,7 +1,7 @@
 #include "Tools/Reporter/Reporter.hpp"
 
-using namespace aff3ct;
-using namespace aff3ct::tools;
+using namespace spu;
+using namespace spu::tools;
 
 void
 Reporter::init()

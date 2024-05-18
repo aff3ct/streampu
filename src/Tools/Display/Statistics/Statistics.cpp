@@ -8,8 +8,8 @@
 #include "Tools/Display/rang_format/rang_format.h"
 #include "Tools/Exception/exception.hpp"
 
-using namespace aff3ct;
-using namespace aff3ct::tools;
+using namespace spu;
+using namespace spu::tools;
 
 void
 Statistics::separation1(const bool display_thr, std::ostream& stream)
@@ -234,7 +234,7 @@ Statistics::show(std::vector<MODULE_OR_TASK*> modules_or_tasks,
     throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
 }
 
-namespace aff3ct
+namespace spu
 {
 namespace tools
 {
@@ -427,7 +427,7 @@ Statistics::show(std::vector<std::vector<MODULE_OR_TASK*>> modules_or_tasks,
     throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
 }
 
-namespace aff3ct
+namespace spu
 {
 namespace tools
 {

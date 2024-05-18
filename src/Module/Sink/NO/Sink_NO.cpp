@@ -2,8 +2,8 @@
 
 #include "Module/Sink/NO/Sink_NO.hpp"
 
-using namespace aff3ct;
-using namespace aff3ct::module;
+using namespace spu;
+using namespace spu::module;
 
 template<typename B>
 Sink_NO<B>::Sink_NO(const int max_data_size)
@@ -30,14 +30,14 @@ Sink_NO<B>::_send_count(const B* in_data, const uint32_t* in_count, const size_t
 }
 
 // ==================================================================================== explicit template instantiation
-template class aff3ct::module::Sink_NO<int8_t>;
-template class aff3ct::module::Sink_NO<uint8_t>;
-template class aff3ct::module::Sink_NO<int16_t>;
-template class aff3ct::module::Sink_NO<uint16_t>;
-template class aff3ct::module::Sink_NO<int32_t>;
-template class aff3ct::module::Sink_NO<uint32_t>;
-template class aff3ct::module::Sink_NO<int64_t>;
-template class aff3ct::module::Sink_NO<uint64_t>;
-template class aff3ct::module::Sink_NO<float>;
-template class aff3ct::module::Sink_NO<double>;
+template class spu::module::Sink_NO<int8_t>;
+template class spu::module::Sink_NO<uint8_t>;
+template class spu::module::Sink_NO<int16_t>;
+template class spu::module::Sink_NO<uint16_t>;
+template class spu::module::Sink_NO<int32_t>;
+template class spu::module::Sink_NO<uint32_t>;
+template class spu::module::Sink_NO<int64_t>;
+template class spu::module::Sink_NO<uint64_t>;
+template class spu::module::Sink_NO<float>;
+template class spu::module::Sink_NO<double>;
 // ==================================================================================== explicit template instantiation

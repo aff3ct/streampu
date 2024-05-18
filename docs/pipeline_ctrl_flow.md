@@ -2,7 +2,7 @@
 
 ## Introduction
 
-`AFF3CT-core` allows the user to control the execution flow of sequences through
+`StreamPU` allows the user to control the execution flow of sequences through
 the use of [switcher](switcher.md), however sequences are often used within the
 context of [pipelines](pipeline.md) and thus some slight behavior adjustments 
 were required for them to work consistently.
@@ -107,7 +107,7 @@ Node Last_Subseq(Node n):
 This is simple and efficient.
 
 !!! info
-    This is the current implementation in `AFF3CT-core`.
+    This is the current implementation in `StreamPU`.
 
 ### Finding Invalid Switchers
 

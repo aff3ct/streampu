@@ -1,6 +1,6 @@
 #include "Runtime/Pipeline/Pipeline.hpp"
 
-namespace aff3ct
+namespace spu
 {
 namespace runtime
 {

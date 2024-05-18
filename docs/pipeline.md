@@ -1,6 +1,6 @@
 # Pipeline
 
-A **pipeline** is a feature offered by `AFF3CT-core` allowing to split a
+A **pipeline** is a feature offered by `StreamPU` allowing to split a
 [sequence](sequence.md) into multiple [stages](#Stage). Each stage is executed 
 on one or more threads in parallel. The pipeline takes care of the 
 **synchronizations between stages**. This is achieved through an implementation 
@@ -11,7 +11,7 @@ of **a producer/consumer algorithm**.
   <figcaption>Example of a sequence on the left and a pipeline on the right.</figcaption>
 </figure>
 
-A pipeline is a C++ object of the `aff3ct::runtime::Pipeline` class. The 
+A pipeline is a C++ object of the `spu::runtime::Pipeline` class. The 
 following sections try to give an overview of the most important attributes and 
 methods to facilitate the code understanding.
 
@@ -71,7 +71,7 @@ This method creates the pipeline given:
 - The type of waiting for the adaptor tasks (`synchro_active_waiting`).
 
 !!! note
-	AFF3CT doesn't support consecutive multi-threaded stages yet.
+	StreamPU doesn't support consecutive multi-threaded stages yet.
 
 ```cpp
 void create_adaptors(const std::vector<size_t> &synchro_buffer_sizes = {},
@@ -91,7 +91,7 @@ consecutive stages, the target sockets to bind are stored in the vector
 <a name="Adaptor"></a>
 ## Adaptor
 
-`aff3ct::module::Adaptor` is a special module automatically inserted between 
+`spu::module::Adaptor` is a special module automatically inserted between 
 stages when creating a pipeline and serve as "bridges" between them, they are 
 bound to first and last tasks of the consecutive stages. The purpose of adaptors 
 is to synchronize data exchange between each stage using pre-allocated buffer 

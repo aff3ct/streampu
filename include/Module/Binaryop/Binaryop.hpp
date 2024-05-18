@@ -14,7 +14,7 @@
 #include "Runtime/Task/Task.hpp"
 #include "Tools/Math/binaryop.h"
 
-namespace aff3ct
+namespace spu
 {
 
 namespace module

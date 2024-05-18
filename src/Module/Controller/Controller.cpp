@@ -2,8 +2,8 @@
 
 #include "Module/Controller/Controller.hpp"
 
-using namespace aff3ct;
-using namespace aff3ct::module;
+using namespace spu;
+using namespace spu::module;
 
 Controller::Controller(const size_t init_path)
   : Module()

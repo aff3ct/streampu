@@ -5,7 +5,7 @@
 #include "Tools/compute_bytes.h"
 
 size_t
-aff3ct::tools::compute_bytes(const size_t n_elmts, const std::type_index type)
+spu::tools::compute_bytes(const size_t n_elmts, const std::type_index type)
 {
     if (type == typeid(int8_t))
         return n_elmts * sizeof(int8_t);
@@ -36,7 +36,7 @@ aff3ct::tools::compute_bytes(const size_t n_elmts, const std::type_index type)
 }
 
 std::vector<size_t>
-aff3ct::tools::compute_bytes(const std::vector<size_t>& n_elmts, const std::vector<std::type_index>& type)
+spu::tools::compute_bytes(const std::vector<size_t>& n_elmts, const std::vector<std::type_index>& type)
 {
     if (n_elmts.size() != type.size())
     {
@@ -48,6 +48,6 @@ aff3ct::tools::compute_bytes(const std::vector<size_t>& n_elmts, const std::vect
 
     std::vector<size_t> bytes(n_elmts.size());
     for (size_t i = 0; i < n_elmts.size(); i++)
-        bytes[i] = aff3ct::tools::compute_bytes(n_elmts[i], type[i]);
+        bytes[i] = spu::tools::compute_bytes(n_elmts[i], type[i]);
     return bytes;
 }

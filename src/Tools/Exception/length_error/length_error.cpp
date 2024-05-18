@@ -2,7 +2,7 @@
 
 #include "Tools/Exception/length_error/length_error.hpp"
 
-using namespace aff3ct::tools;
+using namespace spu::tools;
 
 #define DEFAULT_MESSAGE "Length error."
 

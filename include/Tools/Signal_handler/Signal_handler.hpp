@@ -1,7 +1,7 @@
 #ifndef SIGNAL_HANDLER_HPP_
 #define SIGNAL_HANDLER_HPP_
 
-namespace aff3ct
+namespace spu
 {
 namespace tools
 {

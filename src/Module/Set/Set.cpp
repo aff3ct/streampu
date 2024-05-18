@@ -5,8 +5,8 @@
 #include "Runtime/Sequence/Sequence.hpp"
 #include "Tools/Exception/exception.hpp"
 
-using namespace aff3ct;
-using namespace aff3ct::module;
+using namespace spu;
+using namespace spu::module;
 
 Set::Set(runtime::Sequence& sequence)
   : Module()

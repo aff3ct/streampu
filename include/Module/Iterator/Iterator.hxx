@@ -5,7 +5,7 @@
 
 #include "Module/Iterator/Iterator.hpp"
 
-namespace aff3ct
+namespace spu
 {
 namespace module
 {
