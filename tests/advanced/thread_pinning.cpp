@@ -285,5 +285,8 @@ main(int argc, char** argv)
     (*finalizers[1])["finalize::in"].unbind((*pin_mod2)["pin::val"]);
     (*finalizers[2])["finalize::in"].unbind((*pin_mod3)["pin::val"]);
 
+    hwloc_topology_destroy(g_topology);
+    tools::Thread_pinning::destroy();
+
     return test_results;
 }
