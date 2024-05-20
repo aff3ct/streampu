@@ -185,9 +185,7 @@ test-memcheck-regression:
     - export CMAKE_OPT="-DCMAKE_BUILD_TYPE=RelWithDebInfo -DSPU_TESTS=ON -DSPU_COMPILE_STATIC_LIB=ON -DSPU_COMPILE_SHARED_LIB=ON -DSPU_LINK_HWLOC=ON"
     - source ./ci/tools/threads.sh
     - ./ci/build-linux-macos.sh
-    - cd build
-    - ctest -LE "^skip-memcheck$" -T memcheck 2>&1 | tee memcheck.txt
-    - cat memcheck.txt | grep "Memory Leak"; if [[ $? == 0 ]]; then exit 1; fi
+    - ./ci/test-memcheck-regression.sh
 
 coverage-linux:
   image: registry.gitlab.com/aff3ct/aff3ct/x86_64_ubuntu_coverage
