@@ -206,7 +206,7 @@ jobs:
           # coverage summary in the PR comment.
           coverage-summary-title: "Code Coverage Summary"
   deploy:
-    if: contains( github.ref, 'development')
+    if: contains( github.ref, 'develop')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
