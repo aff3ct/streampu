@@ -20,10 +20,10 @@ This DSEL/library is suitable for SDR systems, audio/video processing and more
 generally it matches single-rate Synchronous DataFlow (SDF) streaming 
 applications.
 
-Please note that this library was previously named "`AFF3CT-core`" as it was 
-first extracted from [AFF3CT](https://github.com/aff3ct/aff3ct). Now that 
-it is no longer specific to channel coding and digital communications, the 
-project been has been renamed to `StreamPU`, which is a more meaningful name.
+Please note that this library was previously named `AFF3CT-core` as it was first 
+extracted from [AFF3CT](https://github.com/aff3ct/aff3ct). Now that it is no 
+longer specific to channel coding and digital communications, the project has 
+been renamed to `StreamPU`, which is a more meaningful name.
 
 ## Linking with the Library
 
