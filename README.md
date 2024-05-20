@@ -1,7 +1,7 @@
 # StreamPU
 
-[![GitLab Pipeline Status](https://img.shields.io/gitlab/pipeline-status/aff3ct/streampu.svg?branch=development)](https://gitlab.com/aff3ct/streampu/pipelines)
-[![GitLab Code Coverage](https://img.shields.io/gitlab/pipeline-coverage/aff3ct/streampu?branch=development)](https://aff3ct.gitlab.io/streampu/)
+[![GitLab Pipeline Status](https://img.shields.io/gitlab/pipeline-status/aff3ct/streampu.svg?branch=develop)](https://gitlab.com/aff3ct/streampu/pipelines)
+[![GitLab Code Coverage](https://img.shields.io/gitlab/pipeline-coverage/aff3ct/streampu?branch=develop)](https://aff3ct.gitlab.io/streampu/)
 [![Documentation](https://img.shields.io/badge/doc-passing-green)](https://aff3ct.github.io/streampu/)
 [![License: MIT](https://img.shields.io/github/license/aff3ct/streampu.svg)](./LICENSE)
 
