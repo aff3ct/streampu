@@ -136,8 +136,8 @@ main(int argc, char** argv)
                            });
 
     module::Stateless* pin_mod1 = &pin_mod;
-    module::Stateless* pin_mod2 = pin_mod.clone();
-    module::Stateless* pin_mod3 = pin_mod.clone();
+    std::shared_ptr<module::Stateless> pin_mod2 = std::shared_ptr<module::Stateless>(pin_mod.clone());
+    std::shared_ptr<module::Stateless> pin_mod3 = std::shared_ptr<module::Stateless>(pin_mod.clone());
 
     // sockets binding
     (*pin_mod2)("pin") = (*pin_mod1)["pin::val"];
