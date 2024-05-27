@@ -53,6 +53,23 @@ set(LIBRARY_OUTPUT_PATH lib/)
 file(GLOB_RECURSE source_files ${CMAKE_CURRENT_SOURCE_DIR}/src/*)
 
 # ---------------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------------------------------ GENERATE FILES
+# ---------------------------------------------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------------------------------------- VERSION
+set(SPU_VERSION_MAJOR 0)
+set(SPU_VERSION_MINOR 1)
+set(SPU_VERSION_PATCH 0)
+
+message(STATUS "StreamPU - Version: ${SPU_VERSION_MAJOR}.${SPU_VERSION_MINOR}.${SPU_VERSION_PATCH}")
+
+# Auto generate cmake config version file to link with StreamPU lib (only if an StreamPU library has been compiled)
+if (SPU_COMPILE_STATIC_LIB OR SPU_COMPILE_SHARED_LIB)
+    configure_file("${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules/streampu-config-version.cmake.in"
+                   "lib/cmake/streampu/streampu-config-version.cmake" @ONLY)
+endif()
+
+# ---------------------------------------------------------------------------------------------------------------------
 # ------------------------------------------------------------------------------------------------------ CREATE FILTERS
 # ---------------------------------------------------------------------------------------------------------------------
 
@@ -290,7 +307,7 @@ macro(spu_target_include_directories targets privacy dir_build dir_install)
         target_include_directories(${_target}
                                    ${privacy}
                                    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${dir_build}/>
-                                   $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/streampu/${dir_install}>)
+                                   $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/${dir_install}>)
     endforeach()
 endmacro()
 
@@ -412,28 +429,25 @@ if (SPU_COMPILE_SHARED_LIB OR SPU_COMPILE_STATIC_LIB)
             DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/streampu/"
             NAMESPACE spu::
             COMPONENT library)
+    install(FILES "${CMAKE_CURRENT_BINARY_DIR}/lib/cmake/streampu/streampu-config-version.cmake"
+            DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/streampu/"
+            COMPONENT library)
     install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/"
-            DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/streampu/streampu
+            DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/streampu/
             COMPONENT headers
             FILES_MATCHING PATTERN "*.h")
     install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/"
-            DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/streampu/streampu
+            DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/streampu/
             COMPONENT headers
             FILES_MATCHING PATTERN "*.hpp")
     install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/"
-            DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/streampu/streampu
+            DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/streampu/
             COMPONENT headers
             FILES_MATCHING PATTERN "*.hxx")
     install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/lib/rang/include/"
-            DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/streampu/rang
+            DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/rang
             COMPONENT headers
             FILES_MATCHING PATTERN "*.hpp")
-    if(SPU_STACKTRACE OR SPU_STACKTRACE_SEGFAULT)
-        install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/lib/cpptrace/include/"
-                DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/streampu/cpptrace
-                COMPONENT headers
-                FILES_MATCHING PATTERN "*.hpp")
-    endif()
 endif()
 
 # ---------------------------------------------------------------------------------------------------------------------

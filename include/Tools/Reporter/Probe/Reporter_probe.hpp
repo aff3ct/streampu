@@ -15,6 +15,7 @@
 #include <typeindex>
 #include <vector>
 
+#include "Tools/Interface/Interface_get_set_n_frames.hpp"
 #include "Tools/Reporter/Reporter.hpp"
 
 namespace spu
