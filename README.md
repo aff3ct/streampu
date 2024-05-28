@@ -138,7 +138,7 @@ if (cpptrace_FOUND)
 endif()
 
 # find and link with `StreamPU` -----------------------------------------------
-find_package(StreamPU CONFIG 0.1.0 REQUIRED)
+find_package(StreamPU CONFIG 0.0.0 REQUIRED)
 target_link_libraries(my-exe PUBLIC spu::spu-static-lib)
 ```
 
