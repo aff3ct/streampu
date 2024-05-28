@@ -15,15 +15,16 @@ project(streampu CXX)
 # ------------------------------------------------------------------------------------------------------- CMAKE OPTIONS
 # ---------------------------------------------------------------------------------------------------------------------
 
-option(SPU_COMPILE_STATIC_LIB  "Compile the static library"                             ON )
-option(SPU_COMPILE_SHARED_LIB  "Compile the shared library"                             OFF)
-option(SPU_LINK_HWLOC          "Link with the hwloc library (used for threads pinning)" OFF)
-option(SPU_COLORS              "Enable the colors in the terminal"                      ON )
-option(SPU_TESTS               "Enable the compilation of the tests"                    ON )
-option(SPU_STACKTRACE          "Print the stack trace when an exception is raised"      ON )
-option(SPU_STACKTRACE_SEGFAULT "Try to print the stack trace when a segfault occurs"    OFF)
-option(SPU_SHOW_DEPRECATED     "Print message each time a deprecated func. is called"   OFF)
-option(SPU_FAST                "Remove checks to speedup the code"                      OFF)
+option(SPU_COMPILE_STATIC_LIB  "Compile the static library"                                  ON )
+option(SPU_COMPILE_SHARED_LIB  "Compile the shared library"                                  OFF)
+option(SPU_LINK_HWLOC          "Link with the hwloc library (used for threads pinning)"      OFF)
+option(SPU_COLORS              "Enable the colors in the terminal"                           ON )
+option(SPU_TESTS               "Enable the compilation of the tests"                         ON )
+option(SPU_STACKTRACE          "Print the stack trace when an exception is raised"           ON )
+option(SPU_STACKTRACE_SEGFAULT "Try to print the stack trace when a segfault occurs"         OFF)
+option(SPU_SHOW_DEPRECATED     "Print message each time a deprecated func. is called"        OFF)
+option(SPU_FAST                "Remove checks to speedup the code"                           OFF)
+option(SPU_OVERRIDE_VERSION    "Compile without .git directory, provided a version and hash" OFF)
 
 if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/.git" AND NOT SPU_OVERRIDE_VERSION)
     message(FATAL_ERROR "The '.git' folder can't be found, StreamPU can't be compiled if it is not cloned "
@@ -53,15 +54,49 @@ set(LIBRARY_OUTPUT_PATH lib/)
 file(GLOB_RECURSE source_files ${CMAKE_CURRENT_SOURCE_DIR}/src/*)
 
 # ---------------------------------------------------------------------------------------------------------------------
-# ------------------------------------------------------------------------------------------------------ GENERATE FILES
+# ------------------------------------------------------------------------------------------------ GET VERSION FROM GIT
 # ---------------------------------------------------------------------------------------------------------------------
 
-# ------------------------------------------------------------------------------------------------------------- VERSION
-set(SPU_VERSION_MAJOR 0)
-set(SPU_VERSION_MINOR 1)
-set(SPU_VERSION_PATCH 0)
+if(NOT SPU_OVERRIDE_VERSION)
+    include(GetGitRevisionDescription)
+    get_git_head_revision(GIT_REFSPEC GIT_SHA1)
+    git_describe(GIT_VERSION "--tags" "--abbrev=7")
+else()
+    set(GIT_VERSION ${SPU_OVERRIDE_VERSION})
+endif()
 
-message(STATUS "StreamPU - Version: ${SPU_VERSION_MAJOR}.${SPU_VERSION_MINOR}.${SPU_VERSION_PATCH}")
+string(REGEX REPLACE "^v"             ""    SPU_VERSION_FULL  ${GIT_VERSION})
+string(REGEX REPLACE "-.*"            ""    SPU_VERSION       ${SPU_VERSION_FULL})
+string(REGEX REPLACE "^.*-"           ""    SPU_HASH          ${SPU_VERSION_FULL})
+string(      REPLACE "-"              ""    SPU_BUILD         ${SPU_VERSION_FULL})
+string(      REPLACE "${SPU_VERSION}" ""    SPU_BUILD         ${SPU_BUILD})
+string(REGEX REPLACE "(.*)\\..*\\..*" "\\1" SPU_VERSION_MAJOR ${SPU_VERSION})
+string(REGEX REPLACE ".*\\.(.*)\\..*" "\\1" SPU_VERSION_MINOR ${SPU_VERSION})
+string(REGEX REPLACE ".*\\..*\\.(.*)" "\\1" SPU_VERSION_PATCH ${SPU_VERSION})
+
+if(NOT "${SPU_BUILD}" STREQUAL "")
+    string(REPLACE "${SPU_HASH}" "" SPU_BUILD ${SPU_BUILD})
+else()
+    set(SPU_HASH "")
+endif()
+
+message(STATUS "StreamPU - Version: ${SPU_VERSION}")
+if(NOT "${SPU_BUILD}" STREQUAL "")
+    message(STATUS "StreamPU - Build: ${SPU_BUILD}")
+endif()
+if(NOT "${SPU_HASH}" STREQUAL "")
+    message(STATUS "StreamPU - Hash: ${SPU_HASH}")
+endif()
+
+if(("${SPU_BUILD}" STREQUAL "") OR ("${SPU_HASH}" STREQUAL ""))
+    set(SPU_VERSION_EXTRA "")
+else()
+    set(SPU_VERSION_EXTRA "-${SPU_BUILD}-${SPU_HASH}")
+endif()
+
+# ---------------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------------------------------ GENERATE FILES
+# ---------------------------------------------------------------------------------------------------------------------
 
 # Auto generate cmake config version file to link with StreamPU lib (only if an StreamPU library has been compiled)
 if (SPU_COMPILE_STATIC_LIB OR SPU_COMPILE_SHARED_LIB)
