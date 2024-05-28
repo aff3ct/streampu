@@ -148,7 +148,7 @@ If `StreamPU` is installed in a specific location (for instance:
 cmake .. -DStreamPU_DIR=/opt/streampu/lib/cmake/streampu
 ```
 
-Or, if StreamPU has been compiled with the `cpptrace` library:
+Or, if `StreamPU` has been compiled with the `cpptrace` library:
 ```bash
 cmake .. -DStreamPU_DIR=/opt/streampu/lib/cmake/streampu -Dcpptrace_DIR=/opt/streampu/lib/cmake/cpptrace
 ```
