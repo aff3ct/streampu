@@ -107,6 +107,12 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/lib/streampu/)
 # `my-exe` links with `StreamPU` static lib -----------------------------------
 target_link_libraries(my-exe PUBLIC spu::spu-static-lib)
 
+# `my-exe` finds and links with thread library --------------------------------
+set(CMAKE_THREAD_PREFER_PTHREAD ON)
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)
+target_link_libraries(my-exe PUBLIC Threads::Threads)
+
 # `my-exe` links with `cpptrace` (`SPU_STACKTRACE=ON`) ------------------------
 if(SPU_STACKTRACE OR SPU_STACKTRACE_SEGFAULT)
   target_link_libraries(my-exe PUBLIC cpptrace::cpptrace)
@@ -130,6 +136,12 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # create the `my-exe` executable from `src/main.cpp` --------------------------
 add_executable(my-exe ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp)
+
+# find and link with thread library -------------------------------------------
+set(CMAKE_THREAD_PREFER_PTHREAD ON)
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)
+target_link_libraries(my-exe PUBLIC Threads::Threads)
 
 # find and link with `cpptrace` if installed (if not, don't) ------------------
 find_package(cpptrace CONFIG 0.4.1)
