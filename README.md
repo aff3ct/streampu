@@ -48,7 +48,7 @@ Build the library in `debug` mode:
 mkdir build_debug
 cd build_debug
 cmake ..
-make -j4
+cmake --build . -j 4
 ctest
 ```
 
@@ -57,7 +57,7 @@ Build the library in `release` mode:
 mkdir build_release
 cd build_release
 cmake .. -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_CXX_FLAGS="-Wall -march=native -funroll-loops"
-make -j4
+cmake --build . -j 4
 ctest
 ```
 
