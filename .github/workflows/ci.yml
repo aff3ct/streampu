@@ -56,12 +56,12 @@ jobs:
           submodules: true
       - name: Build
         run: |
+          git fetch -a
           export CXX="g++"
           export CFLAGS="-Wall -funroll-loops -m64 -mavx2 -mfma"
           export LFLAGS="-static -static-libgcc -static-libstdc++ -Wl,--whole-archive -lrt -lpthread -Wl,--no-whole-archive"
           export GIT_TAG=$(git describe --tags)
-          echo $GIT_TAG
-          export CMAKE_OPT="-DSPU_TESTS=ON -DSPU_COMPILE_STATIC_LIB=ON -DSPU_COMPILE_SHARED_LIB=ON -DSPU_STACKTRACE=OFF -DSPU_OVERRIDE_VERSION=$GIT_TAG"
+          export CMAKE_OPT="-DSPU_TESTS=ON -DSPU_COMPILE_STATIC_LIB=ON -DSPU_COMPILE_SHARED_LIB=ON -DSPU_STACKTRACE=OFF"
           export NAME="build_linux_gcc_x64_avx2"
           source ./ci/tools/threads.sh
           ./ci/build-linux-macos.sh
@@ -82,12 +82,12 @@ jobs:
           submodules: true
       - name: Build
         run: |
+          git fetch -a
           export CXX="g++"
           export CFLAGS="-Wall -funroll-loops -msse4.2 --coverage"
           export LFLAGS="--coverage"
           export GIT_TAG=$(git describe --tags)
-          echo $GIT_TAG
-          export CMAKE_OPT="-DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS_DEBUG=-O0 -DSPU_TESTS=ON -DSPU_COMPILE_STATIC_LIB=ON -DSPU_COMPILE_SHARED_LIB=ON -DSPU_OVERRIDE_VERSION=$GIT_TAG"
+          export CMAKE_OPT="-DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS_DEBUG=-O0 -DSPU_TESTS=ON -DSPU_COMPILE_STATIC_LIB=ON -DSPU_COMPILE_SHARED_LIB=ON"
           source ./ci/tools/threads.sh
           ./ci/build-linux-macos.sh
         shell: bash
@@ -107,11 +107,11 @@ jobs:
           submodules: true
       - name: Build
         run: |
+          git fetch -a
           export CXX="clang++"
           export CFLAGS="-Wall -Wno-overloaded-virtual -funroll-loops"
           export GIT_TAG=$(git describe --tags)
-          echo $GIT_TAG
-          export CMAKE_OPT="-DSPU_TESTS=ON -DSPU_COMPILE_STATIC_LIB=ON -DSPU_COMPILE_SHARED_LIB=ON -DSPU_OVERRIDE_VERSION=$GIT_TAG"
+          export CMAKE_OPT="-DSPU_TESTS=ON -DSPU_COMPILE_STATIC_LIB=ON -DSPU_COMPILE_SHARED_LIB=ON"
           export NAME="build_linux_clang"
           source ./ci/tools/threads.sh
           ./ci/build-linux-macos.sh
@@ -161,11 +161,11 @@ jobs:
           submodules: true
       - name: Build & Memcheck
         run: |
+          git fetch -a
           export CXX="g++"
           export CFLAGS="-Wall -funroll-loops -m64 -mavx2 -mfma"
           export GIT_TAG=$(git describe --tags)
-          echo $GIT_TAG
-          export CMAKE_OPT="-DCMAKE_BUILD_TYPE=RelWithDebInfo -DSPU_TESTS=ON -DSPU_COMPILE_STATIC_LIB=ON -DSPU_COMPILE_SHARED_LIB=ON -DSPU_LINK_HWLOC=ON -DSPU_OVERRIDE_VERSION=$GIT_TAG"
+          export CMAKE_OPT="-DCMAKE_BUILD_TYPE=RelWithDebInfo -DSPU_TESTS=ON -DSPU_COMPILE_STATIC_LIB=ON -DSPU_COMPILE_SHARED_LIB=ON -DSPU_LINK_HWLOC=ON"
           source ./ci/tools/threads.sh
           ./ci/build-linux-macos.sh
           ./ci/test-memcheck-regression.sh
