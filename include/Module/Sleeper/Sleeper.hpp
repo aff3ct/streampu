@@ -9,7 +9,7 @@
 
 #include "Module/Module.hpp"
 
-namespace aff3ct
+namespace spu
 {
 namespace module
 {

@@ -12,8 +12,8 @@
 #include "Tools/Interface/Interface_waiting.hpp"
 #include "Tools/Thread_pinning/Thread_pinning_utils.hpp"
 
-using namespace aff3ct;
-using namespace aff3ct::runtime;
+using namespace spu;
+using namespace spu::runtime;
 
 // Pipeline
 // ::Pipeline(const runtime::Task &first,

@@ -2,7 +2,7 @@
 
 #include "Tools/Exception/control_flow_error/control_flow_error.hpp"
 
-using namespace aff3ct::tools;
+using namespace spu::tools;
 
 #define DEFAULT_MESSAGE "Control flow error."
 

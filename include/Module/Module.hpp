@@ -17,7 +17,7 @@
 #include "Tools/Interface/Interface_clone.hpp"
 #include "Tools/Interface/Interface_get_set_n_frames.hpp"
 
-namespace aff3ct
+namespace spu
 {
 namespace module
 {

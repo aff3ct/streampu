@@ -5,8 +5,8 @@
 #include "Tools/Exception/exception.hpp"
 #include "Tools/Interface/Interface_reset.hpp"
 
-using namespace aff3ct;
-using namespace aff3ct::module;
+using namespace spu;
+using namespace spu::module;
 
 Module::Module()
   : n_frames(1)
@@ -447,7 +447,7 @@ Module::set_fast(const bool fast)
 void
 Module::create_reset_task()
 {
-    auto iface = dynamic_cast<aff3ct::tools::Interface_reset*>(this);
+    auto iface = dynamic_cast<spu::tools::Interface_reset*>(this);
     if (iface == nullptr)
     {
         std::stringstream message;
@@ -459,7 +459,7 @@ Module::create_reset_task()
     this->create_codelet(p,
                          [](Module& m, runtime::Task& t, const size_t frame_id) -> int
                          {
-                             auto& iface = dynamic_cast<aff3ct::tools::Interface_reset&>(m);
+                             auto& iface = dynamic_cast<tools::Interface_reset&>(m);
                              iface.reset();
                              return 0;
                          });

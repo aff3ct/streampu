@@ -11,7 +11,7 @@
 
 #include "Module/Probe/Probe.hpp"
 
-namespace aff3ct
+namespace spu
 {
 namespace module
 {

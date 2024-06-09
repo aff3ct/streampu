@@ -1,13 +1,13 @@
-# AFF3CT-core Documentation
+# StreamPU Documentation
 
 ## Introduction
 
-`AFF3CT-core` is a DSEL for streaming applications written in C++. This 
+`StreamPU` is a DSEL for streaming applications written in C++. This 
 documentation maily focuses on explaining the basic elements of the language 
 from the **developer point of view**. The user documention is is currently 
 underway.
 
-Here are the main features of `AFF3CT-core`:
+Here are the main features of `StreamPU`:
 
 - Definition of modules, tasks and sockets (dataflow)
 - Elementary modules and tasks implementations
@@ -17,14 +17,20 @@ The DSEL is suitable for SDR systems, video processing and more generally it
 matches **single-rate SDF streaming applications**.
 
 !!! note
-    The **DSEL term** can be sometimes confusing and `AFF3CT-core` can also be
+    This library was previously named `AFF3CT-core` as it was first extracted 
+    from [AFF3CT](https://github.com/aff3ct/aff3ct). Now that it is no longer 
+    specific to channel coding and digital communications, the project has been 
+    renamed to `StreamPU`, which is a more meaningful name.
+
+!!! note
+    The **DSEL term** can be sometimes confusing and `StreamPU` can also be
     seen as a **standard C++ library**. The name "DSEL" comes from the ability 
     to write **interpreted Turing-complete programs** using the C++ library.
 
 !!! warning
     This library is **NOT intended to address data and task parallelisms**.
-    `AFF3CT-core` focus on replication and pipeline parallelisms. For data 
-    parallelism, `AFF3CT-core` combines well with OpenMP. If you look for task
+    `StreamPU` focus on replication and pipeline parallelisms. For data 
+    parallelism, `StreamPU` combines well with OpenMP. If you look for task
     parallelism, using OpenMP can also be a possible solution, or other runtime 
     like the excellent [StarPU](https://starpu.gitlabpages.inria.fr) can be a 
     good choice.
@@ -52,4 +58,3 @@ matches **single-rate SDF streaming applications**.
     1. [Forward sockets](socket_fwd.md)
     2. [Pipeline & Control Flow](pipeline_ctrl_flow.md)
     3. [Work in Progress](wip.md)
-

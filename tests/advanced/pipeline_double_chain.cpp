@@ -8,9 +8,9 @@
 #include <string>
 #include <vector>
 
-#include <aff3ct-core.hpp>
-using namespace aff3ct;
-using namespace aff3ct::runtime;
+#include <streampu.hpp>
+using namespace spu;
+using namespace spu::runtime;
 
 int
 main(int argc, char** argv)

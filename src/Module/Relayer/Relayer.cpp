@@ -3,8 +3,8 @@
 
 #include "Module/Relayer/Relayer.hpp"
 
-using namespace aff3ct;
-using namespace aff3ct::module;
+using namespace spu;
+using namespace spu::module;
 
 template<typename T>
 Relayer<T>::Relayer(const size_t n_elmts, const size_t ns)
@@ -104,14 +104,14 @@ Relayer<T>::_relay(const T* in, T* out, const size_t frame_id)
 }
 
 // ==================================================================================== explicit template instantiation
-template class aff3ct::module::Relayer<int8_t>;
-template class aff3ct::module::Relayer<uint8_t>;
-template class aff3ct::module::Relayer<int16_t>;
-template class aff3ct::module::Relayer<uint16_t>;
-template class aff3ct::module::Relayer<int32_t>;
-template class aff3ct::module::Relayer<uint32_t>;
-template class aff3ct::module::Relayer<int64_t>;
-template class aff3ct::module::Relayer<uint64_t>;
-template class aff3ct::module::Relayer<float>;
-template class aff3ct::module::Relayer<double>;
+template class spu::module::Relayer<int8_t>;
+template class spu::module::Relayer<uint8_t>;
+template class spu::module::Relayer<int16_t>;
+template class spu::module::Relayer<uint16_t>;
+template class spu::module::Relayer<int32_t>;
+template class spu::module::Relayer<uint32_t>;
+template class spu::module::Relayer<int64_t>;
+template class spu::module::Relayer<uint64_t>;
+template class spu::module::Relayer<float>;
+template class spu::module::Relayer<double>;
 // ==================================================================================== explicit template instantiation

@@ -16,7 +16,7 @@
 #include "Tools/Interface/Interface_reset.hpp"
 #include "Tools/Interface/Interface_set_seed.hpp"
 
-namespace aff3ct
+namespace spu
 {
 namespace module
 {

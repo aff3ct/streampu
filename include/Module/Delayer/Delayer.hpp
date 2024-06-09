@@ -5,9 +5,9 @@
 #include <string>
 #include <vector>
 
-#include <aff3ct-core.hpp>
+#include "Module/Module.hpp"
 
-namespace aff3ct
+namespace spu
 {
 namespace module
 {

@@ -1,6 +1,6 @@
 #include "Module/Delayer/Delayer.hpp"
 
-namespace aff3ct
+namespace spu
 {
 namespace module
 {

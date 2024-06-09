@@ -4,7 +4,7 @@
 
 #include "Runtime/Task/Task.hpp"
 
-namespace aff3ct
+namespace spu
 {
 namespace runtime
 {
@@ -23,7 +23,7 @@ Task::is_stats() const
 bool
 Task::is_fast() const
 {
-#ifndef AFF3CT_CORE_FAST
+#ifndef SPU_FAST
     return this->fast;
 #else
     return true;

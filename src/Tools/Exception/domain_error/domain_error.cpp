@@ -2,7 +2,7 @@
 
 #include "Tools/Exception/domain_error/domain_error.hpp"
 
-using namespace aff3ct::tools;
+using namespace spu::tools;
 
 #define DEFAULT_MESSAGE "Domain error."
 

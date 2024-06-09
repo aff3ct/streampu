@@ -1,7 +1,7 @@
 #include "Module/Probe/Probe.hpp"
 
-using namespace aff3ct;
-using namespace aff3ct::module;
+using namespace spu;
+using namespace spu::module;
 
 AProbe::AProbe()
   : Module()

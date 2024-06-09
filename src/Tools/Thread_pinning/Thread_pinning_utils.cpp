@@ -4,10 +4,10 @@
 #include "Tools/Exception/exception.hpp"
 #include <Tools/Thread_pinning/Thread_pinning_utils.hpp>
 
-using namespace aff3ct;
-using namespace aff3ct::tools;
+using namespace spu;
+using namespace spu::tools;
 
-#ifdef AFF3CT_CORE_HWLOC
+#ifdef SPU_HWLOC
 static std::map<std::string, hwloc_obj_type_t> object_map = {
     { "NUMA", HWLOC_OBJ_NUMANODE }, { "PACKAGE", HWLOC_OBJ_PACKAGE }, { "CORE", HWLOC_OBJ_CORE },
     { "PU", HWLOC_OBJ_PU },         { "L1D", HWLOC_OBJ_L1CACHE },     { "L2D", HWLOC_OBJ_L2CACHE },
@@ -118,7 +118,7 @@ Thread_pinning_utils::thread_parser(std::string const& hwloc_objects_thread)
     return vector_objets;
 }
 
-#ifdef AFF3CT_CORE_HWLOC
+#ifdef SPU_HWLOC
 std::pair<hwloc_obj_type_t, int>
 Thread_pinning_utils::str_to_hwloc_object(std::string& str_object)
 {

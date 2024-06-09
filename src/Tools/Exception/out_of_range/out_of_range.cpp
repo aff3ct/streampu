@@ -2,7 +2,7 @@
 
 #include "Tools/Exception/out_of_range/out_of_range.hpp"
 
-using namespace aff3ct::tools;
+using namespace spu::tools;
 
 #define DEFAULT_MESSAGE "Out of range."
 

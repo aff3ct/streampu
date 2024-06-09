@@ -1,6 +1,6 @@
 #include "Module/Source/Random/Source_random.hpp"
 
-using namespace aff3ct::module;
+using namespace spu::module;
 
 template<typename B>
 Source_random<B>::Source_random(const int max_data_size, const int seed)
@@ -38,14 +38,14 @@ Source_random<B>::set_seed(const int seed)
 }
 
 // ==================================================================================== explicit template instantiation
-template class aff3ct::module::Source_random<int8_t>;
-template class aff3ct::module::Source_random<uint8_t>;
-template class aff3ct::module::Source_random<int16_t>;
-template class aff3ct::module::Source_random<uint16_t>;
-template class aff3ct::module::Source_random<int32_t>;
-template class aff3ct::module::Source_random<uint32_t>;
-template class aff3ct::module::Source_random<int64_t>;
-template class aff3ct::module::Source_random<uint64_t>;
-template class aff3ct::module::Source_random<float>;
-template class aff3ct::module::Source_random<double>;
+template class spu::module::Source_random<int8_t>;
+template class spu::module::Source_random<uint8_t>;
+template class spu::module::Source_random<int16_t>;
+template class spu::module::Source_random<uint16_t>;
+template class spu::module::Source_random<int32_t>;
+template class spu::module::Source_random<uint32_t>;
+template class spu::module::Source_random<int64_t>;
+template class spu::module::Source_random<uint64_t>;
+template class spu::module::Source_random<float>;
+template class spu::module::Source_random<double>;
 // ==================================================================================== explicit template instantiation

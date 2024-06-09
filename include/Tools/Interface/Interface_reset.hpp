@@ -5,7 +5,7 @@
 #ifndef INTERFACE_RESET_HPP__
 #define INTERFACE_RESET_HPP__
 
-namespace aff3ct
+namespace spu
 {
 namespace tools
 {

@@ -7,15 +7,15 @@
 
 #include <exception>
 #include <string>
-#ifdef AFF3CT_CORE_STACKTRACE
+#ifdef SPU_STACKTRACE
 #include <cpptrace/cpptrace.hpp>
 #endif
 
-namespace aff3ct
+namespace spu
 {
 namespace tools
 {
-#ifdef AFF3CT_CORE_STACKTRACE
+#ifdef SPU_STACKTRACE
 class exception : public cpptrace::exception_with_message
 {
 #else
@@ -26,7 +26,7 @@ class exception : public std::exception
     static bool no_stacktrace;
 
   private:
-#ifdef AFF3CT_CORE_STACKTRACE
+#ifdef SPU_STACKTRACE
     mutable std::string what_string;
 #else
     std::string message; // the message only

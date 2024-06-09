@@ -20,14 +20,14 @@ analysis-headers:
     name: analysis-headers
     when: always
     paths:
-      - aff3ct-core.hpp
+      - streampu.hpp
   tags:
     - x86_64
     - linux
     - docker
   script:
-    - ./scripts/generate_aff3ct_header.sh aff3ct-core.hpp
-    - diff aff3ct-core.hpp include/aff3ct-core.hpp
+    - ./scripts/generate_streampu_header.sh streampu.hpp
+    - diff streampu.hpp include/streampu.hpp
 
 analysis-clang-format:
   image: ubuntu:22.04
@@ -74,7 +74,7 @@ build-linux-gcc-x64-avx2:
     - export CXX="g++"
     - export CFLAGS="-Wall -funroll-loops -m64 -mavx2 -mfma"
     - export LFLAGS="-static -static-libgcc -static-libstdc++ -Wl,--whole-archive -lrt -lpthread -Wl,--no-whole-archive"
-    - export CMAKE_OPT="-DAFF3CT_CORE_TESTS=ON -DAFF3CT_CORE_COMPILE_STATIC_LIB=ON -DAFF3CT_CORE_COMPILE_SHARED_LIB=ON -DAFF3CT_CORE_STACKTRACE=OFF"
+    - export CMAKE_OPT="-DSPU_TESTS=ON -DSPU_COMPILE_STATIC_LIB=ON -DSPU_COMPILE_SHARED_LIB=ON -DSPU_STACKTRACE=OFF"
     - export NAME="build_linux_gcc_x64_avx2"
     - source ./ci/tools/threads.sh
     - ./ci/build-linux-macos.sh
@@ -100,7 +100,7 @@ build-linux-gcc-coverage-regression:
     - export CXX="g++"
     - export CFLAGS="-Wall -funroll-loops -msse4.2 --coverage"
     - export LFLAGS="--coverage"
-    - export CMAKE_OPT="-DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS_DEBUG=-O0 -DAFF3CT_CORE_TESTS=ON -DAFF3CT_CORE_COMPILE_STATIC_LIB=ON -DAFF3CT_CORE_COMPILE_SHARED_LIB=ON -DAFF3CT_CORE_LINK_HWLOC=ON"
+    - export CMAKE_OPT="-DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS_DEBUG=-O0 -DSPU_TESTS=ON -DSPU_COMPILE_STATIC_LIB=ON -DSPU_COMPILE_SHARED_LIB=ON -DSPU_LINK_HWLOC=ON"
     - source ./ci/tools/threads.sh
     - ./ci/build-linux-macos.sh
     - ./ci/test-coverage-regression.sh
@@ -128,7 +128,7 @@ build-linux-clang:
   script:
     - export CXX="clang++"
     - export CFLAGS="-Wall -Wno-overloaded-virtual -funroll-loops"
-    - export CMAKE_OPT="-DAFF3CT_CORE_TESTS=ON -DAFF3CT_CORE_COMPILE_STATIC_LIB=ON -DAFF3CT_CORE_COMPILE_SHARED_LIB=ON"
+    - export CMAKE_OPT="-DSPU_TESTS=ON -DSPU_COMPILE_STATIC_LIB=ON -DSPU_COMPILE_SHARED_LIB=ON"
     - export NAME="build_linux_clang"
     - source ./ci/tools/threads.sh
     - ./ci/build-linux-macos.sh
@@ -154,7 +154,7 @@ build-linux-icpc:
   script:
     - export CXX="icpc"
     - export CFLAGS="-Wall -funroll-loops -march=native -std=c++11"
-    - export CMAKE_OPT="-DAFF3CT_CORE_TESTS=ON -DAFF3CT_CORE_COMPILE_STATIC_LIB=ON -DAFF3CT_CORE_COMPILE_SHARED_LIB=ON"
+    - export CMAKE_OPT="-DSPU_TESTS=ON -DSPU_COMPILE_STATIC_LIB=ON -DSPU_COMPILE_SHARED_LIB=ON"
     - export NAME="build_linux_icpc"
     - source ./ci/tools/threads.sh
     - ./ci/build-linux-macos.sh
@@ -182,11 +182,10 @@ test-memcheck-regression:
   script:
     - export CXX="g++"
     - export CFLAGS="-Wall -funroll-loops -m64 -mavx2 -mfma"
-    - export CMAKE_OPT="-DCMAKE_BUILD_TYPE=RelWithDebInfo -DAFF3CT_CORE_TESTS=ON -DAFF3CT_CORE_COMPILE_STATIC_LIB=ON -DAFF3CT_CORE_COMPILE_SHARED_LIB=ON -DAFF3CT_CORE_LINK_HWLOC=ON"
+    - export CMAKE_OPT="-DCMAKE_BUILD_TYPE=RelWithDebInfo -DSPU_TESTS=ON -DSPU_COMPILE_STATIC_LIB=ON -DSPU_COMPILE_SHARED_LIB=ON -DSPU_LINK_HWLOC=ON"
     - source ./ci/tools/threads.sh
     - ./ci/build-linux-macos.sh
-    - cd build
-    - ctest -LE "^skip-memcheck$" -T memcheck
+    - ./ci/test-memcheck-regression.sh
 
 coverage-linux:
   image: registry.gitlab.com/aff3ct/aff3ct/x86_64_ubuntu_coverage
@@ -225,4 +224,4 @@ pages:
       - public
     expire_in: 30 days
   only:
-    - development
+    - develop

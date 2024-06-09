@@ -4,7 +4,7 @@
 #include "Module/Adaptor/Adaptor_n_to_1.hpp"
 #include "Tools/Exception/exception.hpp"
 
-namespace aff3ct
+namespace spu
 {
 namespace module
 {

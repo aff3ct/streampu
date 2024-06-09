@@ -1,6 +1,6 @@
 #include "Module/Relayer/Relayer.hpp"
 
-namespace aff3ct
+namespace spu
 {
 namespace module
 {

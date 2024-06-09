@@ -18,7 +18,7 @@
 #include "Runtime/Task/Task.hpp"
 #include "Tools/Interface/Interface_waiting.hpp"
 
-namespace aff3ct
+namespace spu
 {
 namespace module
 {

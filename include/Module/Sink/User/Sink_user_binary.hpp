@@ -12,7 +12,7 @@
 
 #include "Module/Sink/Sink.hpp"
 
-namespace aff3ct
+namespace spu
 {
 namespace module
 {

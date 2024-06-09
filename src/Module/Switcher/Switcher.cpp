@@ -1,7 +1,7 @@
 #include "Module/Switcher/Switcher.hpp"
 
-using namespace aff3ct;
-using namespace aff3ct::module;
+using namespace spu;
+using namespace spu::module;
 
 Switcher*
 Switcher::clone() const

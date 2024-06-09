@@ -7,7 +7,7 @@
 
 #include <cstddef> // size_t
 
-namespace aff3ct
+namespace spu
 {
 namespace tools
 {

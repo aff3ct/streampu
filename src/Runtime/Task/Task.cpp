@@ -11,8 +11,8 @@
 #include "Runtime/Task/Task.hpp"
 #include "Tools/Exception/exception.hpp"
 
-using namespace aff3ct;
-using namespace aff3ct::runtime;
+using namespace spu;
+using namespace spu::runtime;
 
 Task::Task(module::Module& module,
            const std::string& name,
@@ -369,14 +369,14 @@ Task::_exec(const int frame_id, const bool managed_memory)
 const std::vector<int>&
 Task::exec(const int frame_id, const bool managed_memory)
 {
-#ifndef AFF3CT_CORE_FAST
+#ifndef SPU_FAST
     if (this->is_fast() && !this->is_debug() && !this->is_stats())
     {
 #endif
         this->_exec(frame_id, managed_memory);
         this->n_calls++;
         return this->get_status();
-#ifndef AFF3CT_CORE_FAST
+#ifndef SPU_FAST
     }
 
     if (frame_id != -1 && (size_t)frame_id >= this->get_module().get_n_frames())
@@ -722,7 +722,7 @@ Task::exec(const int frame_id, const bool managed_memory)
                 << this->get_name() << ", 'module.name' = " << module->get_name() << ", " << socs.str() << ").";
         throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
     }
-#endif /* !AFF3CT_CORE_FAST */
+#endif /* !SPU_FAST */
 }
 
 template<typename T>
@@ -1327,11 +1327,11 @@ Task::_bind(Socket& s_out, const int priority)
 void
 Task::bind(Socket& s_out, const int priority)
 {
-#ifdef AFF3CT_CORE_SHOW_DEPRECATED
+#ifdef SPU_SHOW_DEPRECATED
     std::clog << rang::tag::warning << "Deprecated: 'Task::bind()' should be replaced by 'Task::operator='."
               << std::endl;
-#ifdef AFF3CT_CORE_STACKTRACE
-#ifdef AFF3CT_CORE_COLORS
+#ifdef SPU_STACKTRACE
+#ifdef SPU_COLORS
     bool enable_color = true;
 #else
     bool enable_color = false;
@@ -1351,11 +1351,11 @@ Task::_bind(Task& t_out, const int priority)
 void
 Task::bind(Task& t_out, const int priority)
 {
-#ifdef AFF3CT_CORE_SHOW_DEPRECATED
+#ifdef SPU_SHOW_DEPRECATED
     std::clog << rang::tag::warning << "Deprecated: 'Task::bind()' should be replaced by 'Task::operator='."
               << std::endl;
-#ifdef AFF3CT_CORE_STACKTRACE
-#ifdef AFF3CT_CORE_COLORS
+#ifdef SPU_STACKTRACE
+#ifdef SPU_COLORS
     bool enable_color = true;
 #else
     bool enable_color = false;
@@ -1369,11 +1369,11 @@ Task::bind(Task& t_out, const int priority)
 void
 Task::operator=(Socket& s_out)
 {
-#ifndef AFF3CT_CORE_FAST
+#ifndef SPU_FAST
     if (s_out.get_type() == socket_t::SOUT || s_out.get_type() == socket_t::SFWD)
 #endif
         this->_bind(s_out);
-#ifndef AFF3CT_CORE_FAST
+#ifndef SPU_FAST
     else
     {
         std::stringstream message;

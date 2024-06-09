@@ -2,7 +2,7 @@
 
 #include "Tools/Exception/unimplemented_error/unimplemented_error.hpp"
 
-using namespace aff3ct::tools;
+using namespace spu::tools;
 
 #define DEFAULT_MESSAGE "Unimplemented function or method."
 

@@ -3,12 +3,12 @@
 #include "Tools/Exception/exception.hpp"
 #include "Tools/system_functions.h"
 
-using namespace aff3ct::tools;
+using namespace spu::tools;
 
-bool aff3ct::tools::exception::no_stacktrace = false;
+bool spu::tools::exception::no_stacktrace = false;
 
 exception::exception() noexcept
-#ifdef AFF3CT_CORE_STACKTRACE
+#ifdef SPU_STACKTRACE
   : cpptrace::exception_with_message("")
 #else
   : message("")
@@ -17,7 +17,7 @@ exception::exception() noexcept
 }
 
 exception::exception(std::string&& message) noexcept
-#ifdef AFF3CT_CORE_STACKTRACE
+#ifdef SPU_STACKTRACE
   : cpptrace::exception_with_message(std::move(message))
 #else
   : message(message)
@@ -26,7 +26,7 @@ exception::exception(std::string&& message) noexcept
 }
 
 exception::exception(std::string&& filename, int&& line_num, std::string&& funcname, std::string&& message) noexcept
-#ifdef AFF3CT_CORE_STACKTRACE
+#ifdef SPU_STACKTRACE
   : cpptrace::exception_with_message((!filename.empty() ? "In the '" + filename + "' file" : "") +
                                      (line_num >= 0 ? " at line " + std::to_string(line_num) : "") +
                                      (!funcname.empty() ? " ('" + funcname + "' function)" : "") + ": " + "\"" +
@@ -42,14 +42,14 @@ exception::exception(std::string&& filename, int&& line_num, std::string&& funcn
 const char*
 exception::what() const noexcept
 {
-#ifdef AFF3CT_CORE_STACKTRACE
+#ifdef SPU_STACKTRACE
     if (no_stacktrace)
     {
         return this->message();
     }
     else
     {
-#ifdef AFF3CT_CORE_COLORS
+#ifdef SPU_COLORS
         if (what_string.empty())
         {
             const bool enable_color = true;

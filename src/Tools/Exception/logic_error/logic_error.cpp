@@ -2,7 +2,7 @@
 
 #include "Tools/Exception/logic_error/logic_error.hpp"
 
-using namespace aff3ct::tools;
+using namespace spu::tools;
 
 #define DEFAULT_MESSAGE "Logic error."
 

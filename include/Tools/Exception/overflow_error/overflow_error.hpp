@@ -9,7 +9,7 @@
 
 #include "Tools/Exception/exception.hpp"
 
-namespace aff3ct
+namespace spu
 {
 namespace tools
 {

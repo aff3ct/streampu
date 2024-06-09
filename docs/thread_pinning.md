@@ -1,6 +1,6 @@
 # Thread Pinning
 
-`AFF3CT-core` enables to select on which process units (PUs) the threads are 
+`StreamPU` enables to select on which process units (PUs) the threads are 
 effectively run. This is called *thread pinning* and it can significantly 
 benefit to the performance, especially on modern heterogeneous architectures. 
 To do so, the runtime relies on the 
@@ -8,12 +8,12 @@ To do so, the runtime relies on the
 
 !!! warning
     To use thread pinning, `hwloc` library has to be installed on the system and
-    `AFF3CT-core` needs to be compiled with the `AFF3CT_CORE_HWLOC` preprocessor 
+    `StreamPU` needs to be compiled with the `SPU_HWLOC` preprocessor 
     definition. It can simply be achieved using the following CMake option:
     ```bash
-    cmake .. -DAFF3CT_CORE_LINK_HWLOC=ON
+    cmake .. -DSPU_LINK_HWLOC=ON
     ``` 
-    If `AFF3CT-core` is not linked with the `hwloc` library, then the thread 
+    If `StreamPU` is not linked with the `hwloc` library, then the thread 
     pinning interface will have no effect and the threads will not be pinned.
 
 !!! info
@@ -51,13 +51,13 @@ set.
 !!! warning
 	The indexes given by `hwloc` can be different from those given by the OS: 
 	they are logical indexes that express the real locality. **Consequently, in 
-	`AFF3CT-core`, it is important to use `hwloc` logical indexes.** The 
+	`StreamPU`, it is important to use `hwloc` logical indexes.** The 
 	`hwloc-ls` command gives an overview of the current topology with these 
 	logical indexes.
 
 ## Sequence & Pipeline
 
-In `AFF3CT-core`, thread pinning can be set in `runtime::Sequence` and 
+In `StreamPU`, thread pinning can be set in `runtime::Sequence` and 
 `runtime::Pipeline` class constructors. In both cases, there is a dedicated 
 argument of `std::string` type named `sequence_pinning_policy` for 
 `runtime::Sequence` or `pipeline_pinning_policy` for `runtime::Pipeline`.

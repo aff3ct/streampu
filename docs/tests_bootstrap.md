@@ -1,6 +1,6 @@
 # Bootstrap
 
-`AFF3CT-core` comes with simple tests to validate its behavior. The later are
+`StreamPU` comes with simple tests to validate its behavior. The later are
 always a good way to bootstrap when you want to write your first code with the
 DSEL. The source codes of the following tests are located in the 
 `tests/bootstrap` folder. Each file corresponds to an executable test.

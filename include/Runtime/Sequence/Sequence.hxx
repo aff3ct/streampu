@@ -3,7 +3,7 @@
 #include "Module/Set/Set.hpp"
 #include "Runtime/Sequence/Sequence.hpp"
 
-namespace aff3ct
+namespace spu
 {
 namespace runtime
 {

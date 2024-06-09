@@ -1,7 +1,7 @@
 #ifndef UNARYOP_H
 #define UNARYOP_H
 
-namespace aff3ct
+namespace spu
 {
 namespace tools
 {

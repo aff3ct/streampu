@@ -20,7 +20,7 @@
 #include "Tools/Interface/Interface_get_set_n_frames.hpp"
 #include "Tools/Interface/Interface_is_done.hpp"
 
-namespace aff3ct
+namespace spu
 {
 namespace module
 {

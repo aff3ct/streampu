@@ -6,7 +6,7 @@
 #include <mutex>
 #include <sstream>
 #include <vector>
-#ifdef AFF3CT_CORE_HWLOC
+#ifdef SPU_HWLOC
 #include <hwloc.h>
 #endif
 
@@ -14,10 +14,10 @@
 #include "Tools/Thread_pinning/Thread_pinning.hpp"
 #include "Tools/Thread_pinning/Thread_pinning_utils.hpp"
 
-using namespace aff3ct;
-using namespace aff3ct::tools;
+using namespace spu;
+using namespace spu::tools;
 
-#ifdef AFF3CT_CORE_HWLOC
+#ifdef SPU_HWLOC
 static hwloc_topology_t g_topology;
 static int g_topodepth = 0;
 #endif
@@ -35,7 +35,7 @@ Thread_pinning::init()
         {
             g_is_init = true;
 
-#ifdef AFF3CT_CORE_HWLOC
+#ifdef SPU_HWLOC
             /* Allocate and initialize topology object. */
             hwloc_topology_init(&g_topology);
 
@@ -65,7 +65,7 @@ Thread_pinning::destroy()
         g_mtx.lock();
         if (g_is_init)
         {
-#ifdef AFF3CT_CORE_HWLOC
+#ifdef SPU_HWLOC
             /* Destroy topology object. */
             hwloc_topology_destroy(g_topology);
             g_topodepth = 0;
@@ -94,7 +94,7 @@ void
 Thread_pinning::pin(const size_t puid)
 {
     g_mtx.lock();
-#ifdef AFF3CT_CORE_HWLOC
+#ifdef SPU_HWLOC
     if (g_is_init)
     {
         int pu_depth = hwloc_get_type_or_below_depth(g_topology, HWLOC_OBJ_PU);
@@ -149,7 +149,7 @@ Thread_pinning::pin(const size_t puid)
 #else
     if (g_enable_logs)
     {
-        std::clog << "'pin' method do nothing as AFF3CT has not been linked with the 'hwloc' library." << std::endl;
+        std::clog << "'pin' method do nothing as StreamPU has not been linked with the 'hwloc' library." << std::endl;
     }
 #endif
     g_mtx.unlock();
@@ -161,7 +161,7 @@ Thread_pinning::pin(const std::string hwloc_objects)
 {
     g_mtx.lock();
 
-#ifdef AFF3CT_CORE_HWLOC
+#ifdef SPU_HWLOC
     if (g_is_init)
     {
         // Objects parsing
@@ -231,7 +231,7 @@ Thread_pinning::pin(const std::string hwloc_objects)
 #else
     if (g_enable_logs)
     {
-        std::clog << "'pin' method do nothing as AFF3CT has not been linked with the 'hwloc' library." << std::endl;
+        std::clog << "'pin' method do nothing as StreamPU has not been linked with the 'hwloc' library." << std::endl;
     }
 #endif
     g_mtx.unlock();
@@ -241,7 +241,7 @@ void
 Thread_pinning::unpin()
 {
     g_mtx.lock();
-#ifdef AFF3CT_CORE_HWLOC
+#ifdef SPU_HWLOC
     if (!g_is_init)
     {
         if (g_enable_logs)
@@ -268,7 +268,7 @@ Thread_pinning::unpin()
 #else
     if (g_enable_logs)
     {
-        std::clog << "'unpin' method do nothing as AFF3CT has not been linked with the 'hwloc' library." << std::endl;
+        std::clog << "'unpin' method do nothing as StreamPU has not been linked with the 'hwloc' library." << std::endl;
     }
 #endif
     g_mtx.unlock();
@@ -277,7 +277,7 @@ Thread_pinning::unpin()
 std::string
 Thread_pinning::get_cur_cpuset_str()
 {
-#ifdef AFF3CT_CORE_HWLOC
+#ifdef SPU_HWLOC
     hwloc_cpuset_t cur_cpuset = hwloc_bitmap_alloc();
 
     hwloc_get_cpubind(g_topology, cur_cpuset, HWLOC_CPUBIND_THREAD);
@@ -291,7 +291,7 @@ Thread_pinning::get_cur_cpuset_str()
     return std::string(c);
 #else
     std::stringstream message;
-    message << "'get_cur_cpuset_str' method can be called only if AFF3CT is linked with the 'hwloc' library.";
+    message << "'get_cur_cpuset_str' method can be called only if StreamPU is linked with the 'hwloc' library.";
     throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
 #endif
 }

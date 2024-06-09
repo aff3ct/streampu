@@ -1,6 +1,6 @@
 #include "Module/Finalizer/Finalizer.hpp"
 
-namespace aff3ct
+namespace spu
 {
 namespace module
 {

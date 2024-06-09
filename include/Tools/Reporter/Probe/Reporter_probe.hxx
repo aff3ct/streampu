@@ -1,6 +1,6 @@
 #include "Tools/Reporter/Probe/Reporter_probe.hpp"
 
-namespace aff3ct
+namespace spu
 {
 namespace tools
 {

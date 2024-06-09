@@ -1,5 +1,5 @@
-site_name: AFF3CT-core Documentation
-site_url: https://aff3ct.github.io/aff3ct-core/
+site_name: StreamPU Documentation
+site_url: https://aff3ct.github.io/streampu/
 theme:
   logo: assets/diagram-project-solid.svg
   features:
@@ -13,26 +13,17 @@ theme:
     - navigation.footer
   name: material
   palette:
-    scheme: default
-    primary: black
-    secondary: black
-    hljs_style: monokai
-
-  palette:
-
     # Palette toggle for automatic mode
     - media: "(prefers-color-scheme)"
       toggle:
         icon: material/brightness-auto
         name: Switch to light mode
-
     # Palette toggle for light mode
     - media: "(prefers-color-scheme: light)"
       scheme: default
       toggle:
         icon: material/brightness-7
         name: Switch to dark mode
-
     # Palette toggle for dark mode
     - media: "(prefers-color-scheme: dark)"
       scheme: slate
@@ -42,7 +33,7 @@ theme:
 
   language: en
 
-repo_url: https://github.com/aff3ct/aff3ct-core
+repo_url: https://github.com/aff3ct/streampu
 
 markdown_extensions:
   - toc:

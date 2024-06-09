@@ -4,8 +4,8 @@
 #include "Module/Probe/Throughput/Probe_throughput.hpp"
 #include "Tools/Exception/exception.hpp"
 
-using namespace aff3ct;
-using namespace aff3ct::module;
+using namespace spu;
+using namespace spu::module;
 
 Probe_throughput::Probe_throughput(const size_t data_size,
                                    const std::string& col_name,

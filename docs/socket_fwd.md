@@ -2,7 +2,7 @@
 
 ## Introduction
 
-The forward socket is a new feature added to `AFF3CT-core` to improve the
+The forward socket is a new feature added to `StreamPU` to improve the
 performance and the flexibility in some applications. As mentioned in the 
 [Socket](socket.md) section, the `SFWD` works as an input and output at the same 
 time. It receives its `dataptr` from the input bound socket and this same 

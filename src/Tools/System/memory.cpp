@@ -1,7 +1,7 @@
 #include "Tools/System/memory.hpp"
 #include <cstdlib>
 
-namespace aff3ct
+namespace spu
 {
 namespace tools
 {

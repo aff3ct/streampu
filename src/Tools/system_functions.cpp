@@ -24,7 +24,7 @@
 #include "Tools/system_functions.h"
 
 std::string
-aff3ct::tools::run_system_command(std::string cmd)
+spu::tools::run_system_command(std::string cmd)
 {
     std::string data;
 
@@ -60,7 +60,7 @@ aff3ct::tools::run_system_command(std::string cmd)
 }
 
 std::string
-aff3ct::tools::get_binary_path()
+spu::tools::get_binary_path()
 {
     std::string binary_path;
 
@@ -110,7 +110,7 @@ aff3ct::tools::get_binary_path()
 }
 
 void
-aff3ct::tools::split_path(const std::string& path, std::string& basedir, std::string& filename)
+spu::tools::split_path(const std::string& path, std::string& basedir, std::string& filename)
 {
     size_t found;
     found = path.find_last_of("/\\");

@@ -18,7 +18,7 @@
 #include "Tools/Interface/Interface_reset.hpp"
 #include "Tools/Reporter/Probe/Reporter_probe.hpp"
 
-namespace aff3ct
+namespace spu
 {
 namespace module
 {

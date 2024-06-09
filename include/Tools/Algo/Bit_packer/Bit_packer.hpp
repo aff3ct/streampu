@@ -9,7 +9,7 @@
 #include <memory>
 #include <vector>
 
-namespace aff3ct
+namespace spu
 {
 namespace tools
 {

@@ -9,7 +9,7 @@ sockets model the data that are consumed (input socket) and produced (output
 socket) by the current task. Finally, the code to execute is stored in a 
 so-called *codelet*.
 
-A task is a C++ object of the `aff3ct::runtime::Task` class. The following
+A task is a C++ object of the `spu::runtime::Task` class. The following
 sections try to give an overview of the most important attributes and methods
 to facilitate the code understanding.
 
@@ -45,7 +45,7 @@ sockets are ignored during the codelet execution.
 ```cpp
 bool autoalloc;
 ```
-If set to `true`, let `AFF3CT-core` allocate and reallocate memory needed by 
+If set to `true`, let `StreamPU` allocate and reallocate memory needed by 
 the task. Data are only allocated in the output sockets. By default this 
 attribute is set to `true`.
 

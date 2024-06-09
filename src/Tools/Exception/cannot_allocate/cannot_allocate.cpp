@@ -2,7 +2,7 @@
 
 #include "Tools/Exception/cannot_allocate/cannot_allocate.hpp"
 
-using namespace aff3ct::tools;
+using namespace spu::tools;
 
 #define DEFAULT_MESSAGE "Cannot allocate the object."
 

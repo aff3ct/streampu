@@ -4,7 +4,7 @@
 #include "Module/Sink/Sink.hpp"
 #include "Tools/Exception/exception.hpp"
 
-namespace aff3ct
+namespace spu
 {
 namespace module
 {

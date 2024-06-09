@@ -1,6 +1,6 @@
 /*!
  * \file
- * \brief AFF3CT helper.
+ * \brief StreamPU helper.
  */
 #ifndef HELP_HPP_
 #define HELP_HPP_
@@ -12,7 +12,7 @@
 #include "Runtime/Socket/Socket.hpp"
 #include "Runtime/Task/Task.hpp"
 
-namespace aff3ct
+namespace spu
 {
 namespace tools
 {
@@ -22,7 +22,7 @@ namespace tools
 \param stream Output stream to write help.
 */
 void
-help(const aff3ct::module::Module& mdl, const bool& verbose = false, std::ostream& stream = std::cout);
+help(const module::Module& mdl, const bool& verbose = false, std::ostream& stream = std::cout);
 
 /*! Print help for a task.
 \param tsk A reference on the task.
@@ -30,7 +30,7 @@ help(const aff3ct::module::Module& mdl, const bool& verbose = false, std::ostrea
 \param stream Output stream to write help.
 */
 void
-help(const aff3ct::runtime::Task& tsk, const bool& verbose = false, std::ostream& stream = std::cout);
+help(const runtime::Task& tsk, const bool& verbose = false, std::ostream& stream = std::cout);
 
 /*! Print help for a socket.
 \param sck A reference on the socket.
@@ -38,7 +38,7 @@ help(const aff3ct::runtime::Task& tsk, const bool& verbose = false, std::ostream
 \param stream Output stream to write help.
 */
 void
-help(const aff3ct::runtime::Socket& sck, const bool& verbose = false, std::ostream& stream = std::cout);
+help(const runtime::Socket& sck, const bool& verbose = false, std::ostream& stream = std::cout);
 
 /*! Get the help string for a module.
 \param mdl A reference on the module.
@@ -46,7 +46,7 @@ help(const aff3ct::runtime::Socket& sck, const bool& verbose = false, std::ostre
 \return The help string for the module object.
 */
 std::string
-get_help(const aff3ct::module::Module& mdl, const bool& verbose = false);
+get_help(const module::Module& mdl, const bool& verbose = false);
 
 /*! Get the help string for a task.
 \param tsk A reference on the task.
@@ -54,7 +54,7 @@ get_help(const aff3ct::module::Module& mdl, const bool& verbose = false);
 \return The help string for the task object.
 */
 std::string
-get_help(const aff3ct::runtime::Task& tsk, const bool& verbose = false);
+get_help(const runtime::Task& tsk, const bool& verbose = false);
 
 /*! Get the help string for a socket.
 \param sck A reference on the socket.
@@ -62,7 +62,7 @@ get_help(const aff3ct::runtime::Task& tsk, const bool& verbose = false);
 \return The help string for the socket object.
 */
 std::string
-get_help(const aff3ct::runtime::Socket& sck, const bool& verbose = false);
+get_help(const runtime::Socket& sck, const bool& verbose = false);
 }
 }
 

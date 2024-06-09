@@ -2,7 +2,7 @@
 
 #include "Tools/Math/unaryop.h"
 
-namespace aff3ct
+namespace spu
 {
 namespace tools
 {

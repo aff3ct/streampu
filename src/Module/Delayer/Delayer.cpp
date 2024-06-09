@@ -3,7 +3,8 @@
 
 #include "Module/Delayer/Delayer.hpp"
 
-using namespace aff3ct::module;
+using namespace spu;
+using namespace spu::module;
 
 template<typename D>
 Delayer<D>::Delayer(const size_t size, const D init_val)
@@ -20,25 +21,25 @@ Delayer<D>::Delayer(const size_t size, const D init_val)
     {
         std::stringstream message;
         message << "'size' has to be greater than 0 ('size' = " << size << ").";
-        throw aff3ct::tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
+        throw spu::tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
     }
 
     auto& p1 = this->create_task("memorize");
     auto p1s_in = this->template create_socket_in<D>(p1, "in", this->size);
     this->create_codelet(p1,
-                         [p1s_in](aff3ct::module::Module& m, aff3ct::runtime::Task& t, const size_t frame_id) -> int
+                         [p1s_in](module::Module& m, runtime::Task& t, const size_t frame_id) -> int
                          {
                              static_cast<Delayer<D>&>(m)._memorize(t[p1s_in].template get_dataptr<const D>(), frame_id);
-                             return aff3ct::runtime::status_t::SUCCESS;
+                             return runtime::status_t::SUCCESS;
                          });
 
     auto& p2 = this->create_task("produce");
     auto p2s_out = this->template create_socket_out<D>(p2, "out", this->size);
     this->create_codelet(p2,
-                         [p2s_out](aff3ct::module::Module& m, aff3ct::runtime::Task& t, const size_t frame_id) -> int
+                         [p2s_out](module::Module& m, runtime::Task& t, const size_t frame_id) -> int
                          {
                              static_cast<Delayer<D>&>(m)._produce(t[p2s_out].template get_dataptr<D>(), frame_id);
-                             return aff3ct::runtime::status_t::SUCCESS;
+                             return runtime::status_t::SUCCESS;
                          });
 }
 
@@ -96,7 +97,7 @@ Delayer<D>::set_data(const std::vector<D>& init)
         std::stringstream message;
         message << "'init.size()' has to be greater than data.size() ('init.size(' = " << init.size()
                 << ", 'data.size()' = " << this->data.size() << ").";
-        throw aff3ct::tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
+        throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
     }
     std::copy(init.begin(), init.begin() + this->data.size(), this->data.begin());
 }
@@ -109,14 +110,14 @@ Delayer<D>::set_data(const D* init)
 }
 
 // ==================================================================================== explicit template instantiation
-template class aff3ct::module::Delayer<int8_t>;
-template class aff3ct::module::Delayer<uint8_t>;
-template class aff3ct::module::Delayer<int16_t>;
-template class aff3ct::module::Delayer<uint16_t>;
-template class aff3ct::module::Delayer<int32_t>;
-template class aff3ct::module::Delayer<uint32_t>;
-template class aff3ct::module::Delayer<int64_t>;
-template class aff3ct::module::Delayer<uint64_t>;
-template class aff3ct::module::Delayer<float>;
-template class aff3ct::module::Delayer<double>;
+template class spu::module::Delayer<int8_t>;
+template class spu::module::Delayer<uint8_t>;
+template class spu::module::Delayer<int16_t>;
+template class spu::module::Delayer<uint16_t>;
+template class spu::module::Delayer<int32_t>;
+template class spu::module::Delayer<uint32_t>;
+template class spu::module::Delayer<int64_t>;
+template class spu::module::Delayer<uint64_t>;
+template class spu::module::Delayer<float>;
+template class spu::module::Delayer<double>;
 // ==================================================================================== explicit template instantiation

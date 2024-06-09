@@ -15,7 +15,7 @@ This is illustrated in the following figure:
   <figcaption>Tasks with different socket types.</figcaption>
 </figure>
 
-A socket is a C++ object of the `aff3ct::runtime::Socket` class. The following
+A socket is a C++ object of the `spu::runtime::Socket` class. The following
 sections try to give an overview of the most important attributes and methods
 to facilitate the code understanding.
 
@@ -81,7 +81,7 @@ Below some examples of valid and invalids socket bindings :
         <figcaption>Examples of **invalid** socket bindings.</figcaption>
     </figure>
 
-For invalid socket bindings, `AFF3CT-core` will throw an exception at runtime.
+For invalid socket bindings, `StreamPU` will throw an exception at runtime.
 
 ```cpp
 void unbind(Socket &s_out, const int priority = -1);
@@ -89,7 +89,7 @@ void unbind(Socket &s_out, const int priority = -1);
 This function is used to disconnect sockets from each other. 
 
 !!! note
-    `s_out` must be bound to the caller socket otherwise `AFF3CT-core` will
+    `s_out` must be bound to the caller socket otherwise `StreamPU` will
     throw an exception.
 
 ## Standard `SIN`/`SOUT` Sockets versus `SFWD` Socket

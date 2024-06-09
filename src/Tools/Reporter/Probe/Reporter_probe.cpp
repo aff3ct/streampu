@@ -6,11 +6,12 @@
 
 #include "Tools/Reporter/Probe/Reporter_probe.hpp"
 
-using namespace aff3ct;
-using namespace aff3ct::tools;
+using namespace spu;
+using namespace spu::tools;
 
 Reporter_probe::Reporter_probe(const std::string& group_name, const std::string& group_description)
   : Reporter()
+  , Interface_get_set_n_frames()
   , n_frames(1)
   , mtx(100)
 {
@@ -393,7 +394,7 @@ Reporter_probe::set_cols_size(const size_t col_size)
 }
 
 void
-Reporter_probe::register_probes(const std::initializer_list<module::AProbe*>& probes)
+Reporter_probe::register_probes(const std::vector<module::AProbe*>& probes)
 {
     for (auto p : probes)
     {

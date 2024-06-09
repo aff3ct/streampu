@@ -17,7 +17,7 @@
 #include "Runtime/Task/Task.hpp"
 #include "Tools/Interface/Interface_reset.hpp"
 
-namespace aff3ct
+namespace spu
 {
 namespace module
 {

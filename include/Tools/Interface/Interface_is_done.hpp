@@ -5,7 +5,7 @@
 #ifndef INTERFACE_IS_DONE_HPP__
 #define INTERFACE_IS_DONE_HPP__
 
-namespace aff3ct
+namespace spu
 {
 namespace tools
 {

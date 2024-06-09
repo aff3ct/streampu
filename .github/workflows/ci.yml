@@ -11,14 +11,14 @@ jobs:
         uses: actions/checkout@v4
       - name: Generate Headers & Compare
         run: |
-          ./scripts/generate_aff3ct_header.sh aff3ct-core.hpp
-          diff aff3ct-core.hpp include/aff3ct-core.hpp
+          ./scripts/generate_streampu_header.sh streampu.hpp
+          diff streampu.hpp include/streampu.hpp
         shell: bash
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: analysis-headers
-          path: aff3ct-core.hpp
+          path: streampu.hpp
   analysis-clang-format:
     runs-on: ubuntu-latest
     container: ubuntu:22.04
@@ -59,7 +59,8 @@ jobs:
           export CXX="g++"
           export CFLAGS="-Wall -funroll-loops -m64 -mavx2 -mfma"
           export LFLAGS="-static -static-libgcc -static-libstdc++ -Wl,--whole-archive -lrt -lpthread -Wl,--no-whole-archive"
-          export CMAKE_OPT="-DAFF3CT_CORE_TESTS=ON -DAFF3CT_CORE_COMPILE_STATIC_LIB=ON -DAFF3CT_CORE_COMPILE_SHARED_LIB=ON -DAFF3CT_CORE_STACKTRACE=OFF"
+          export GIT_TAG="v0.0.0"
+          export CMAKE_OPT="-DSPU_TESTS=ON -DSPU_COMPILE_STATIC_LIB=ON -DSPU_COMPILE_SHARED_LIB=ON -DSPU_STACKTRACE=OFF -DSPU_OVERRIDE_VERSION=$GIT_TAG"
           export NAME="build_linux_gcc_x64_avx2"
           source ./ci/tools/threads.sh
           ./ci/build-linux-macos.sh
@@ -83,7 +84,8 @@ jobs:
           export CXX="g++"
           export CFLAGS="-Wall -funroll-loops -msse4.2 --coverage"
           export LFLAGS="--coverage"
-          export CMAKE_OPT="-DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS_DEBUG=-O0 -DAFF3CT_CORE_TESTS=ON -DAFF3CT_CORE_COMPILE_STATIC_LIB=ON -DAFF3CT_CORE_COMPILE_SHARED_LIB=ON"
+          export GIT_TAG="v0.0.0"
+          export CMAKE_OPT="-DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS_DEBUG=-O0 -DSPU_TESTS=ON -DSPU_COMPILE_STATIC_LIB=ON -DSPU_COMPILE_SHARED_LIB=ON -DSPU_OVERRIDE_VERSION=$GIT_TAG"
           source ./ci/tools/threads.sh
           ./ci/build-linux-macos.sh
         shell: bash
@@ -105,7 +107,8 @@ jobs:
         run: |
           export CXX="clang++"
           export CFLAGS="-Wall -Wno-overloaded-virtual -funroll-loops"
-          export CMAKE_OPT="-DAFF3CT_CORE_TESTS=ON -DAFF3CT_CORE_COMPILE_STATIC_LIB=ON -DAFF3CT_CORE_COMPILE_SHARED_LIB=ON"
+          export GIT_TAG="v0.0.0"
+          export CMAKE_OPT="-DSPU_TESTS=ON -DSPU_COMPILE_STATIC_LIB=ON -DSPU_COMPILE_SHARED_LIB=ON -DSPU_OVERRIDE_VERSION=$GIT_TAG"
           export NAME="build_linux_clang"
           source ./ci/tools/threads.sh
           ./ci/build-linux-macos.sh
@@ -157,11 +160,11 @@ jobs:
         run: |
           export CXX="g++"
           export CFLAGS="-Wall -funroll-loops -m64 -mavx2 -mfma"
-          export CMAKE_OPT="-DCMAKE_BUILD_TYPE=RelWithDebInfo -DAFF3CT_CORE_TESTS=ON -DAFF3CT_CORE_COMPILE_STATIC_LIB=ON -DAFF3CT_CORE_COMPILE_SHARED_LIB=ON -DAFF3CT_CORE_LINK_HWLOC=ON"
+          export GIT_TAG="v0.0.0"
+          export CMAKE_OPT="-DCMAKE_BUILD_TYPE=RelWithDebInfo -DSPU_TESTS=ON -DSPU_COMPILE_STATIC_LIB=ON -DSPU_COMPILE_SHARED_LIB=ON -DSPU_LINK_HWLOC=ON -DSPU_OVERRIDE_VERSION=$GIT_TAG"
           source ./ci/tools/threads.sh
           ./ci/build-linux-macos.sh
-          cd build
-          ctest -LE "^skip-memcheck$" -T memcheck
+          ./ci/test-memcheck-regression.sh
         shell: bash
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
@@ -183,7 +186,7 @@ jobs:
         uses: insightsengineering/coverage-action@v2
         with:
           # Path to the Cobertura XML report.
-          path: ./test_regression_code_coverage_report/code_coverage_report/aff3ct-core.xml
+          path: ./test_regression_code_coverage_report/code_coverage_report/streampu.xml
           # Minimum total coverage, if you want to the
           # workflow to enforce it as a standard.
           # This has no effect if the `fail` arg is set to `false`.
@@ -207,7 +210,7 @@ jobs:
           # coverage summary in the PR comment.
           coverage-summary-title: "Code Coverage Summary"
   deploy:
-    if: contains( github.ref, 'development')
+    if: contains( github.ref, 'develop')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

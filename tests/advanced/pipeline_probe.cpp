@@ -8,8 +8,9 @@
 #include <string>
 #include <vector>
 
-#include <aff3ct-core.hpp>
-using namespace aff3ct;
+#include <streampu.hpp>
+using namespace spu;
+using namespace spu::runtime;
 
 std::ifstream::pos_type
 filesize(const char* filename)
@@ -270,21 +271,21 @@ main(int argc, char** argv)
     }
 
     // create on-the-fly stateless modules to collect timestamps in the stage 2 (parallel) of the pipeline
-    std::unique_ptr<aff3ct::module::Stateless> ts_s2b(new aff3ct::module::Stateless());
+    std::unique_ptr<module::Stateless> ts_s2b(new module::Stateless());
     ts_s2b->set_name("Timestamper");
     ts_s2b->set_short_name("Timestamper");
     auto& tsk = ts_s2b->create_task("exec");
     auto ts_out_val = ts_s2b->create_socket_out<uint64_t>(tsk, "out", 1);
-    ts_s2b->create_codelet(
-      tsk,
-      [ts_out_val](aff3ct::module::Module& m, aff3ct::runtime::Task& t, const size_t frame_id) -> int
-      {
-          std::chrono::microseconds us =
-            std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now().time_since_epoch());
-          (*t[ts_out_val].get_dataptr<uint64_t>()) = mod ? (uint64_t)us.count() % mod : (uint64_t)us.count();
-          return aff3ct::runtime::status_t::SUCCESS;
-      });
-    std::unique_ptr<aff3ct::module::Stateless> ts_s2e(ts_s2b->clone());
+    ts_s2b->create_codelet(tsk,
+                           [ts_out_val](module::Module& m, runtime::Task& t, const size_t frame_id) -> int
+                           {
+                               std::chrono::microseconds us = std::chrono::duration_cast<std::chrono::microseconds>(
+                                 std::chrono::steady_clock::now().time_since_epoch());
+                               (*t[ts_out_val].get_dataptr<uint64_t>()) =
+                                 mod ? (uint64_t)us.count() % mod : (uint64_t)us.count();
+                               return runtime::status_t::SUCCESS;
+                           });
+    std::unique_ptr<module::Stateless> ts_s2e(ts_s2b->clone());
     ts_s2b->set_custom_name("Tsta<S2_B>");
     ts_s2e->set_custom_name("Tsta<S2_E>");
 

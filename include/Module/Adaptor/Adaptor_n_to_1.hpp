@@ -18,7 +18,7 @@
 #include "Runtime/Socket/Socket.hpp"
 #include "Runtime/Task/Task.hpp"
 
-namespace aff3ct
+namespace spu
 {
 namespace module
 {

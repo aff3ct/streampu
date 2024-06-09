@@ -2,8 +2,8 @@
 
 #include "Module/Controller/Controller_static/Controller_static.hpp"
 
-using namespace aff3ct;
-using namespace aff3ct::module;
+using namespace spu;
+using namespace spu::module;
 
 Controller_static::Controller_static(const size_t init_path)
   : Controller(init_path)

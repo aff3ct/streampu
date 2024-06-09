@@ -2,7 +2,7 @@
 
 #include "Tools/Exception/processing_aborted/processing_aborted.hpp"
 
-using namespace aff3ct::tools;
+using namespace spu::tools;
 
 #define DEFAULT_MESSAGE "Processing aborted."
 

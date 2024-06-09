@@ -8,8 +8,8 @@
 #include "Tools/Display/rang_format/rang_format.h"
 #include "Tools/Exception/exception.hpp"
 
-using namespace aff3ct;
-using namespace aff3ct::tools;
+using namespace spu;
+using namespace spu::tools;
 
 Terminal_dump::Terminal_dump(const std::vector<tools::Reporter*>& reporters)
   : Terminal_std(reporters)

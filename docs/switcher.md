@@ -4,7 +4,7 @@ A **switcher** is a control flow [module](module.md) used to break sequences
 into *exclusive paths* through its two tasks: [`select`](#Select) and 
 [`commute`](#Commute).  
 
-A switcher is a C++ object of the `aff3ct::module::Switcher` class. The 
+A switcher is a C++ object of the `spu::module::Switcher` class. The 
 following sections try to give an overview of the most important attributes and 
 methods to facilitate the code understanding.
 

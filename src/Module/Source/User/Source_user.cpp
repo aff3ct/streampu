@@ -4,8 +4,8 @@
 #include "Module/Source/User/Source_user.hpp"
 #include "Tools/Exception/exception.hpp"
 
-using namespace aff3ct;
-using namespace aff3ct::module;
+using namespace spu;
+using namespace spu::module;
 
 template<typename B>
 Source_user<B>::Source_user(const int max_data_size,
@@ -122,14 +122,14 @@ Source_user<B>::_generate(B* out_data, const size_t frame_id)
 }
 
 // ==================================================================================== explicit template instantiation
-template class aff3ct::module::Source_user<int8_t>;
-template class aff3ct::module::Source_user<uint8_t>;
-template class aff3ct::module::Source_user<int16_t>;
-template class aff3ct::module::Source_user<uint16_t>;
-template class aff3ct::module::Source_user<int32_t>;
-template class aff3ct::module::Source_user<uint32_t>;
-template class aff3ct::module::Source_user<int64_t>;
-template class aff3ct::module::Source_user<uint64_t>;
-template class aff3ct::module::Source_user<float>;
-template class aff3ct::module::Source_user<double>;
+template class spu::module::Source_user<int8_t>;
+template class spu::module::Source_user<uint8_t>;
+template class spu::module::Source_user<int16_t>;
+template class spu::module::Source_user<uint16_t>;
+template class spu::module::Source_user<int32_t>;
+template class spu::module::Source_user<uint32_t>;
+template class spu::module::Source_user<int64_t>;
+template class spu::module::Source_user<uint64_t>;
+template class spu::module::Source_user<float>;
+template class spu::module::Source_user<double>;
 // ==================================================================================== explicit template instantiation

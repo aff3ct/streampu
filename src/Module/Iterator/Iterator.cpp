@@ -5,8 +5,8 @@
 
 #include "Module/Iterator/Iterator.hpp"
 
-using namespace aff3ct;
-using namespace aff3ct::module;
+using namespace spu;
+using namespace spu::module;
 
 Iterator::Iterator(const size_t limit)
   : Module()

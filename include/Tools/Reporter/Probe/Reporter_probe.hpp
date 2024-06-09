@@ -15,9 +15,10 @@
 #include <typeindex>
 #include <vector>
 
+#include "Tools/Interface/Interface_get_set_n_frames.hpp"
 #include "Tools/Reporter/Reporter.hpp"
 
-namespace aff3ct
+namespace spu
 {
 namespace module
 {
@@ -26,7 +27,9 @@ class AProbe;
 namespace tools
 {
 
-class Reporter_probe : public Reporter
+class Reporter_probe
+  : public Reporter
+  , public Interface_get_set_n_frames
 {
     friend module::AProbe;
 
@@ -73,7 +76,7 @@ class Reporter_probe : public Reporter
     void set_cols_prec(const size_t precision);
     void set_cols_size(const size_t col_size);
 
-    void register_probes(const std::initializer_list<module::AProbe*>& probes);
+    void register_probes(const std::vector<module::AProbe*>& probes);
 
   protected:
     void register_probe(module::AProbe& probe,

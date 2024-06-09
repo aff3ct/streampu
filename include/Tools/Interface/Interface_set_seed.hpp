@@ -5,7 +5,7 @@
 #ifndef INTERFACE_SET_SEED_HPP__
 #define INTERFACE_SET_SEED_HPP__
 
-namespace aff3ct
+namespace spu
 {
 namespace tools
 {
