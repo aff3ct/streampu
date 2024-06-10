@@ -141,7 +141,7 @@ Here are some examples of generated pipelines:
       <figcaption>`test-generic-pipeline`: input/output sockets & 3-stage pipeline.</figcaption>
     </figure>
     ```bash
-    test-generic-pipeline -n "(3)" -t "(3)" -R "(SIO)"
+    test-generic-pipeline -i INPUT_FILE -n "1,3,1" -t "1,3,1" -R "(Read,Relay_SIO,Write)"
     ```
 
 === "Simple pipeline forward"
@@ -150,7 +150,7 @@ Here are some examples of generated pipelines:
       <figcaption>`test-generic-pipeline`: forward sockets & 3-stage pipeline.</figcaption>
     </figure>
     ```bash
-    test-generic-pipeline -n "(3)" -t "(3)" -R "(SFWD)"
+    test-generic-pipeline -i INPUT_FILE -n "1,3,1" -t "1,3,1" -R "(Read,Relay_SFWD,Write)"
     ```
 
 === "Simple pipeline hybrid"
@@ -159,7 +159,7 @@ Here are some examples of generated pipelines:
       <figcaption>`test-generic-pipeline`: hybrid in/out and forward sockets & 3-stage pipeline.</figcaption>
     </figure>
     ```bash
-    test-generic-pipeline -n "(3)" -t "(3)" -r "((SFWD,SIO,SFWD))"
+    test-generic-pipeline -i INPUT_FILE -t "1,3,1" -r "((Read),(Relay_SFWD,Relay_SIO,Relay_SFWD),(Write))"
     ```
 
 === "Simple pipeline hybrid with a 5-stage pipeline"
@@ -168,5 +168,5 @@ Here are some examples of generated pipelines:
       <figcaption>`test-generic-pipeline`: hybrid in/out and forward sockets & 5-stage pipeline.</figcaption>
     </figure>
     ```bash
-    test-generic-pipeline -n "(4,1,2)" -t "(3,1,2)" -r "((SFWD,SIO,SFWD,SIO),(SFWD),(SIO,SIO))"
+    test-generic-pipeline -i INPUT_FILE -t "1,3,1,2,1" -r "((Read),(Relay_SFWD,Relay_SIO,Relay_SFWD,Relay_SIO),(Relay_SFWD),(Relay_SIO,Relay_SIO),(Write))"
     ```
