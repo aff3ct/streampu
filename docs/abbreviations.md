@@ -13,6 +13,7 @@
 *[AZCWs]: All Zero Code Words
 *[BFER]: Bit and Frame Error Rate
 *[CISC]: Complex Instruction Set Computer
+*[CLI]: Command Line Interface
 *[codec]: coder/decoder
 *[codecs]: coders/decodes
 *[CPU]: Central Process Unit

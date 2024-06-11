@@ -8,24 +8,24 @@
     %%%%%%%%%%%%%%%%%%
     %% create tasks %%
     %%%%%%%%%%%%%%%%%%
-    %     options             id   coords  label                   sin sout sfwd attributes
-    %     -------             --   ------  -----                   --- ---- ---- ----------
-    \task                     {t1} {-0.5, 0}   {generate\\($t_1$)} {0} {1}  {0}  {"seq"};
-    \task [right=1.0cm of t1] {t2} {}          {relayf\\($t_2$)}   {0} {0}  {1}  {};
-    \task [right=1.0cm of t2] {t3} {}          {relay\\($t_3$)}    {1} {1}  {0}  {};
-    \task [right=1.0cm of t3] {t4} {}          {relayf\\($t_4$)}   {0} {0}  {1}  {};
-    \task [right=1.0cm of t4] {t5} {}          {send\\($t_5$)}     {1} {0}  {0}  {"seq"};
+    %     options             id   coords  label                     sin sout sfwd attributes
+    %     -------             --   ------  -----                     --- ---- ---- ----------
+    \task                     {t1} {-0.5, 0}   {read\\($t_1$)}       {0} {1}  {0}  {"seq"};
+    \task [right=1.0cm of t1] {t2} {}          {relayf\\($t_2$)}     {0} {0}  {1}  {};
+    \task [right=1.0cm of t2] {t3} {}          {incrementf\\($t_3$)} {0} {0}  {1}  {};
+    \task [right=1.0cm of t3] {t4} {}          {relay\\($t_4$)}      {1} {1}  {0}  {};
+    \task [right=1.0cm of t4] {t5} {}          {write\\($t_5$)}      {1} {0}  {0}  {"seq"};
 
     %%%%%%%%%%%%%%%%%%%%
     %% create modules %%
     %%%%%%%%%%%%%%%%%%%%
     %       options  task ids id   label
     %       -------  -------- --   -----
-    \module          {"t1"}   {m1} {Source};
+    \module          {"t1"}   {m1} {Reader};
     \module          {"t2"}   {m2} {Relayer};
-    \module          {"t3"}   {m3} {Relayer};
+    \module          {"t3"}   {m3} {Incrementer};
     \module          {"t4"}   {m4} {Relayer};
-    \module          {"t5"}   {m5} {Sink};
+    \module          {"t5"}   {m5} {Writer};
 
     %%%%%%%%%%%%%%%%
     %% bind tasks %%

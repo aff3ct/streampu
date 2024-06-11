@@ -8,32 +8,32 @@
     %%%%%%%%%%%%%%%%%%
     %% create tasks %%
     %%%%%%%%%%%%%%%%%%
-    %     options             id   coords    label               sin sout sfwd attributes
-    %     -------             --   ------    -----               --- ---- ---- ----------
-    \task                     {t1} {-0.5, 0} {generate\\($t_1$)} {0} {1}  {0}  {"seq"};
-    \task [right=1.0cm of t1] {t2} {}        {relayf\\($t_2$)}   {0} {0}  {1}  {};
-    \task [right=1.0cm of t2] {t3} {}        {relay\\($t_3$)}    {1} {1}  {0}  {};
-    \task [right=1.0cm of t3] {t4} {}        {relayf\\($t_4$)}   {0} {0}  {1}  {};
-    \task [right=1.0cm of t4] {t5} {}        {relay\\($t_5$)}    {1} {1}  {0}  {};
-    \task [right=1.0cm of t5] {t6} {}        {relayf\\($t_6$)}   {0} {0}  {1}  {};
-    \task [right=1.0cm of t6] {t7} {}        {relay\\($t_7$)}    {1} {1}  {0}  {};
-    \task [right=1.0cm of t7] {t8} {}        {relay\\($t_8$)}    {1} {1}  {0}  {};
-    \task [right=1.0cm of t8] {t9} {}        {send\\($t_9$)}     {1} {0}  {0}  {"seq"};
+    %     options             id   coords    label                 sin sout sfwd attributes
+    %     -------             --   ------    -----                 --- ---- ---- ----------
+    \task                     {t1} {-0.5, 0} {initialize\\($t_1$)} {0} {1}  {0}  {};
+    \task [right=1.0cm of t1] {t2} {}        {relayf\\($t_2$)}     {0} {0}  {1}  {};
+    \task [right=1.0cm of t2] {t3} {}        {increment\\($t_3$)}  {1} {1}  {0}  {};
+    \task [right=1.0cm of t3] {t4} {}        {relayf\\($t_4$)}     {0} {0}  {1}  {};
+    \task [right=1.0cm of t4] {t5} {}        {relay\\($t_5$)}      {1} {1}  {0}  {};
+    \task [right=1.0cm of t5] {t6} {}        {incrementf\\($t_6$)} {0} {0}  {1}  {};
+    \task [right=1.0cm of t6] {t7} {}        {relay\\($t_7$)}      {1} {1}  {0}  {};
+    \task [right=1.0cm of t7] {t8} {}        {relay\\($t_8$)}      {1} {1}  {0}  {};
+    \task [right=1.0cm of t8] {t9} {}        {finalize\\($t_9$)}   {1} {0}  {0}  {};
 
     %%%%%%%%%%%%%%%%%%%%
     %% create modules %%
     %%%%%%%%%%%%%%%%%%%%
     %       options  task ids id   label
     %       -------  -------- --   -----
-    \module          {"t1"}   {m1} {Source};
+    \module          {"t1"}   {m1} {Initializer};
     \module          {"t2"}   {m2} {Relayer};
-    \module          {"t3"}   {m3} {Relayer};
+    \module          {"t3"}   {m3} {Incrementer};
     \module          {"t4"}   {m4} {Relayer};
     \module          {"t5"}   {m5} {Relayer};
-    \module          {"t6"}   {m6} {Relayer};
+    \module          {"t6"}   {m6} {Incrementer};
     \module          {"t7"}   {m7} {Relayer};
     \module          {"t8"}   {m8} {Relayer};
-    \module          {"t9"}   {m9} {Sink};
+    \module          {"t9"}   {m9} {Finalizer};
 
     %%%%%%%%%%%%%%%%
     %% bind tasks %%
@@ -54,11 +54,11 @@
     %%%%%%%%%%%%%%%%%%%
     %      options                 object ids       id   label     n_threads
     %      -------                 ----------       --   -----     ---------
-    \stage [minimum height=3.00cm] {"m1"}                {s1} {Stage 1} {1}
-    \stage [minimum height=3.00cm] {"m2","m3","m4","m5"} {s2} {Stage 2} {3}
-    \stage [minimum height=3.00cm] {"m6"}                {s3} {Stage 3} {1}
-    \stage [minimum height=3.00cm] {"m7","m8"}           {s4} {Stage 4} {2}
-    \stage [minimum height=3.00cm] {"m9"}                {s5} {Stage 5} {1}
+    \stage [minimum height=3.00cm] {"m1","m2","m3"} {s1} {Stage 1} {1}
+    \stage [minimum height=3.00cm] {"m4","m5"}      {s2} {Stage 2} {3}
+    \stage [minimum height=3.00cm] {"m6"}           {s3} {Stage 3} {1}
+    \stage [minimum height=3.00cm] {"m7"}           {s4} {Stage 4} {2}
+    \stage [minimum height=3.00cm] {"m8","m9"}      {s5} {Stage 5} {1}
 
     %%%%%%%%%%%%%%%%%%%%%
     %% clone the tasks %%

@@ -97,16 +97,17 @@ split_string(std::string s, const std::string delimiter = "_")
 void
 parse_int_string(std::string& vector_param, std::vector<size_t>& vector)
 {
-    // for (size_t i = 0; i < vector_param.size(); ++i)
-    //     if (vector_param[i] != '(' && vector_param[i] != ',' && vector_param[i] != ')')
-    //         vector.push_back(atoi(&vector_param[i]));
     std::vector<std::string> tokens = split_string(vector_param, ",");
     for (size_t i = 0; i < tokens.size(); ++i)
-        vector.push_back(std::atoi(tokens[i].c_str()));
+    {
+        std::string token = tokens[i];
+        token.erase(remove_if(token.begin(), token.end(), isspace), token.end());
+        vector.push_back(std::atoi(token.c_str()));
+    }
 }
 
 std::pair<tsk_e, int>
-extract_tsk_sck_type(const std::string& label)
+extract_tsk_type(const std::string& label)
 {
     tsk_e tsk = tsk_e::relay;
     int duration = -1;
@@ -130,8 +131,11 @@ extract_tsk_sck_type(const std::string& label)
             }
             else
             {
-                message << "Current token is incompatible (token = '" << token << "').";
-                throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
+                if (!token.empty())
+                {
+                    message << "Current token is incompatible (token = '" << token << "').";
+                    throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
+                }
             }
             i++;
         };
@@ -146,41 +150,41 @@ extract_tsk_sck_type(const std::string& label)
 }
 
 void
-parse_tsk_sck_type(std::string& tsk_sck_type_param, std::vector<std::vector<std::pair<tsk_e, int>>>& tsk_sck_type)
+parse_tsk_types(std::string& tsk_types_param, std::vector<std::vector<std::pair<tsk_e, int>>>& tsk_types)
 {
     size_t i = 0;
     size_t sta = 0;
     std::string tmp;
-    while (i < tsk_sck_type_param.size())
+    while (i < tsk_types_param.size())
     {
-        if (tsk_sck_type_param[i] == '(' && tsk_sck_type_param[i + 1] != '(')
+        if (tsk_types_param[i] == '(' && tsk_types_param[i + 1] != '(')
         {
-            tsk_sck_type.push_back({});
+            tsk_types.push_back({});
             tmp.clear();
         }
-        else if (tsk_sck_type_param[i] == ',' && tsk_sck_type_param[i + 1] != '(')
+        else if (tsk_types_param[i] == ',' && tsk_types_param[i + 1] != '(')
         {
-            tsk_sck_type[sta].push_back(extract_tsk_sck_type(tmp));
+            tsk_types[sta].push_back(extract_tsk_type(tmp));
             tmp.clear();
         }
-        else if (tsk_sck_type_param[i] == ')')
+        else if (tsk_types_param[i] == ')')
         {
-            if (tsk_sck_type_param[i + 1] != ')')
+            if (tsk_types_param[i + 1] != ')')
             {
-                tsk_sck_type[sta].push_back(extract_tsk_sck_type(tmp));
+                tsk_types[sta].push_back(extract_tsk_type(tmp));
                 tmp.clear();
                 sta++;
             }
         }
         else
-            tmp.push_back(tsk_sck_type_param[i]);
+            tmp.push_back(tsk_types_param[i]);
 
         i++;
     }
 }
 
 void
-parse_tsk_sck_type_sta(std::string& sck_type_sta_param, std::vector<std::pair<tsk_e, int>>& tsk_sck_type)
+parse_tsk_types_sta(std::string& sck_type_sta_param, std::vector<std::pair<tsk_e, int>>& tsk_types)
 {
     size_t i = 0;
     std::string tmp;
@@ -190,7 +194,7 @@ parse_tsk_sck_type_sta(std::string& sck_type_sta_param, std::vector<std::pair<ts
             tmp.clear();
         else if (sck_type_sta_param[i] == ',' || sck_type_sta_param[i] == ')')
         {
-            tsk_sck_type.push_back(extract_tsk_sck_type(tmp));
+            tsk_types.push_back(extract_tsk_type(tmp));
             tmp.clear();
         }
         else
@@ -221,8 +225,8 @@ main(int argc, char** argv)
                           { "active-waiting", no_argument, NULL, 'w' },
                           { "help", no_argument, NULL, 'h' },
                           { "tsk-per-sta", no_argument, NULL, 'n' },
-                          { "sck-type-tsk", no_argument, NULL, 'r' },
-                          { "sck-type-sta", no_argument, NULL, 'R' },
+                          { "tsk-types", no_argument, NULL, 'r' },
+                          { "tsk-types-sta", no_argument, NULL, 'R' },
 #ifdef SPU_HWLOC
                           { "pinning-policy", no_argument, NULL, 'P' },
 #endif
@@ -246,10 +250,10 @@ main(int argc, char** argv)
     bool active_waiting = false;
     std::string tsk_per_sta_param;
     std::vector<size_t> tsk_per_sta;
-    std::string tsk_sck_type_param;
-    std::vector<std::vector<std::pair<tsk_e, int>>> tsk_sck_type;
-    std::string tsk_sck_type_sta_param;
-    std::vector<std::pair<tsk_e, int>> tsk_sck_type_sta;
+    std::string tsk_types_param;
+    std::vector<std::vector<std::pair<tsk_e, int>>> tsk_types;
+    std::string tsk_types_sta_param;
+    std::vector<std::pair<tsk_e, int>> tsk_types_sta;
     std::string pinning_policy;
     std::string check_task;
 
@@ -310,12 +314,12 @@ main(int argc, char** argv)
                 parse_int_string(tsk_per_sta_param, tsk_per_sta);
                 break;
             case 'r':
-                tsk_sck_type_param = std::string(optarg);
-                parse_tsk_sck_type(tsk_sck_type_param, tsk_sck_type);
+                tsk_types_param = std::string(optarg);
+                parse_tsk_types(tsk_types_param, tsk_types);
                 break;
             case 'R':
-                tsk_sck_type_sta_param = std::string(optarg);
-                parse_tsk_sck_type_sta(tsk_sck_type_sta_param, tsk_sck_type_sta);
+                tsk_types_sta_param = std::string(optarg);
+                parse_tsk_types_sta(tsk_types_sta_param, tsk_types_sta);
                 break;
 #ifdef SPU_HWLOC
             case 'P':
@@ -375,14 +379,14 @@ main(int argc, char** argv)
                           << "The number of tasks on each stage of the pipeline                     "
                           << "[" << (tsk_per_sta_param.empty() ? "empty" : "\"" + tsk_per_sta_param + "\"") << "]"
                           << std::endl;
-                std::cout << "  -r, --sck-type-tsk       "
+                std::cout << "  -r, --tsk-types          "
                           << "The socket type of each task (SFWD or SIO)                            "
-                          << "[" << (tsk_sck_type_param.empty() ? "empty" : "\"" + tsk_sck_type_param + "\"") << "]"
+                          << "[" << (tsk_types_param.empty() ? "empty" : "\"" + tsk_types_param + "\"") << "]"
                           << std::endl;
-                std::cout << "  -R, --sck-type-sta       "
+                std::cout << "  -R, --tsk-types-sta      "
                           << "The socket type of tasks on each stage (SFWD or SIO)                  "
-                          << "[" << (tsk_sck_type_sta_param.empty() ? "empty" : "\"" + tsk_sck_type_sta_param + "\"")
-                          << "]" << std::endl;
+                          << "[" << (tsk_types_sta_param.empty() ? "empty" : "\"" + tsk_types_sta_param + "\"") << "]"
+                          << std::endl;
 #ifdef SPU_HWLOC
                 std::cout << "  -P, --pinning-policy     "
                           << "Pinning policy for pipeline execution                                 "
@@ -404,26 +408,26 @@ main(int argc, char** argv)
 #endif
 
     // Checking for errors
-    if (!tsk_sck_type_sta.empty() && !tsk_sck_type.empty())
+    if (!tsk_types_sta.empty() && !tsk_types.empty())
     {
         message << "You have to select only one parameter for socket type ('-r' exclusive or '-R').";
         throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
     }
 
     // Building the socket type vector in case of stage socket
-    for (size_t i = 0; i < tsk_sck_type_sta.size(); ++i)
+    for (size_t i = 0; i < tsk_types_sta.size(); ++i)
     {
-        tsk_sck_type.push_back({});
+        tsk_types.push_back({});
         for (size_t j = 0; j < tsk_per_sta[i]; ++j)
-            tsk_sck_type[i].push_back(tsk_sck_type_sta[i]);
+            tsk_types[i].push_back(tsk_types_sta[i]);
     }
 
     size_t n_tsk = 0;
-    tsk_per_sta.resize(tsk_sck_type.size());
+    tsk_per_sta.resize(tsk_types.size());
     for (size_t i = 0; i < tsk_per_sta.size(); i++)
     {
-        tsk_per_sta[i] = tsk_sck_type[i].size();
-        n_tsk += tsk_sck_type[i].size();
+        tsk_per_sta[i] = tsk_types[i].size();
+        n_tsk += tsk_types[i].size();
     }
 
     if (n_tsk < 2)
@@ -432,10 +436,10 @@ main(int argc, char** argv)
         throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
     }
 
-    std::vector<std::pair<tsk_e, int>> tsk_sck_type_1d;
-    for (size_t i = 0; i < tsk_sck_type.size(); i++)
-        for (size_t j = 0; j < tsk_sck_type[i].size(); j++)
-            tsk_sck_type_1d.push_back(tsk_sck_type[i][j]);
+    std::vector<std::pair<tsk_e, int>> tsk_types_1d;
+    for (size_t i = 0; i < tsk_types.size(); i++)
+        for (size_t j = 0; j < tsk_types[i].size(); j++)
+            tsk_types_1d.push_back(tsk_types[i][j]);
 
     if (n_threads.size() == 0) n_threads.push_back(1);
 
@@ -445,32 +449,32 @@ main(int argc, char** argv)
     std::cout << "#" << std::endl;
 
     std::cout << "# Command line arguments:" << std::endl;
-    std::cout << "#   - n_threads        = " << (n_threads_param.empty() ? "[empty] (def: 1)" : n_threads_param.c_str())
+    std::cout << "#   - n_threads      = " << (n_threads_param.empty() ? "[empty] (def: 1)" : n_threads_param.c_str())
               << std::endl;
-    std::cout << "#   - tsk_per_sta      = " << (tsk_per_sta_param.empty() ? "[empty]" : tsk_per_sta_param.c_str())
+    std::cout << "#   - tsk_per_sta    = " << (tsk_per_sta_param.empty() ? "[empty]" : tsk_per_sta_param.c_str())
               << std::endl;
-    std::cout << "#   - tsk_sck_type     = " << (tsk_sck_type_param.empty() ? "[empty]" : tsk_sck_type_param.c_str())
+    std::cout << "#   - tsk_types      = " << (tsk_types_param.empty() ? "[empty]" : tsk_types_param.c_str())
               << std::endl;
-    std::cout << "#   - tsk_sck_type_sta = "
-              << (tsk_sck_type_sta_param.empty() ? "[empty]" : tsk_sck_type_sta_param.c_str()) << std::endl;
+    std::cout << "#   - tsk_types_sta  = " << (tsk_types_sta_param.empty() ? "[empty]" : tsk_types_sta_param.c_str())
+              << std::endl;
 #ifdef SPU_HWLOC
-    std::cout << "#   - pinning_policy   = " << (pinning_policy.empty() ? "[empty]" : pinning_policy.c_str())
+    std::cout << "#   - pinning_policy = " << (pinning_policy.empty() ? "[empty]" : pinning_policy.c_str())
               << std::endl;
 #endif
-    std::cout << "#   - n_inter_frames   = " << n_inter_frames << std::endl;
-    std::cout << "#   - sleep_time_us    = " << sleep_time_us << std::endl;
-    std::cout << "#   - data_length      = " << data_length << std::endl;
-    std::cout << "#   - n_exec           = " << n_exec << std::endl;
-    std::cout << "#   - buffer_size      = " << buffer_size << std::endl;
-    std::cout << "#   - dot_filepath     = " << (dot_filepath.empty() ? "[empty]" : dot_filepath.c_str()) << std::endl;
-    std::cout << "#   - in_filepath      = " << (in_filepath.empty() ? "[empty]" : in_filepath.c_str()) << std::endl;
-    std::cout << "#   - out_filepath     = " << (out_filepath.empty() ? "[empty]" : out_filepath.c_str()) << std::endl;
-    std::cout << "#   - no_copy_mode     = " << (no_copy_mode ? "true" : "false") << std::endl;
-    std::cout << "#   - print_stats      = " << (print_stats ? "true" : "false") << std::endl;
-    std::cout << "#   - step_by_step     = " << (step_by_step ? "true" : "false") << std::endl;
-    std::cout << "#   - debug            = " << (debug ? "true" : "false") << std::endl;
-    std::cout << "#   - force_sequence   = " << (force_sequence ? "true" : "false") << std::endl;
-    std::cout << "#   - active_waiting   = " << (active_waiting ? "true" : "false") << std::endl;
+    std::cout << "#   - n_inter_frames = " << n_inter_frames << std::endl;
+    std::cout << "#   - sleep_time_us  = " << sleep_time_us << std::endl;
+    std::cout << "#   - data_length    = " << data_length << std::endl;
+    std::cout << "#   - n_exec         = " << n_exec << std::endl;
+    std::cout << "#   - buffer_size    = " << buffer_size << std::endl;
+    std::cout << "#   - dot_filepath   = " << (dot_filepath.empty() ? "[empty]" : dot_filepath.c_str()) << std::endl;
+    std::cout << "#   - in_filepath    = " << (in_filepath.empty() ? "[empty]" : in_filepath.c_str()) << std::endl;
+    std::cout << "#   - out_filepath   = " << (out_filepath.empty() ? "[empty]" : out_filepath.c_str()) << std::endl;
+    std::cout << "#   - no_copy_mode   = " << (no_copy_mode ? "true" : "false") << std::endl;
+    std::cout << "#   - print_stats    = " << (print_stats ? "true" : "false") << std::endl;
+    std::cout << "#   - step_by_step   = " << (step_by_step ? "true" : "false") << std::endl;
+    std::cout << "#   - debug          = " << (debug ? "true" : "false") << std::endl;
+    std::cout << "#   - force_sequence = " << (force_sequence ? "true" : "false") << std::endl;
+    std::cout << "#   - active_waiting = " << (active_waiting ? "true" : "false") << std::endl;
     std::cout << "#" << std::endl;
 
     if (!force_sequence && !no_copy_mode)
@@ -482,7 +486,7 @@ main(int argc, char** argv)
     // modules creation
     std::vector<std::shared_ptr<module::Module>> modules(n_tsk, nullptr);
     size_t tas = 0;
-    for (auto sta : tsk_sck_type)
+    for (auto sta : tsk_types)
     {
         for (auto tst : sta)
         {
@@ -606,19 +610,19 @@ main(int argc, char** argv)
     }
 
     // sockets binding
-    for (size_t t = 0; t < tsk_sck_type_1d.size() - 1; t++)
+    for (size_t t = 0; t < tsk_types_1d.size() - 1; t++)
     {
-        size_t tskid_out = std::get<0>(tsk_2_ids[tsk_sck_type_1d[t].first])[0];
-        size_t sckid_out = std::get<2>(tsk_2_ids[tsk_sck_type_1d[t].first])[0];
-        size_t tskid_in = std::get<0>(tsk_2_ids[tsk_sck_type_1d[t + 1].first])[0];
-        size_t sckid_in = std::get<1>(tsk_2_ids[tsk_sck_type_1d[t + 1].first])[0];
+        size_t tskid_out = std::get<0>(tsk_2_ids[tsk_types_1d[t].first])[0];
+        size_t sckid_out = std::get<2>(tsk_2_ids[tsk_types_1d[t].first])[0];
+        size_t tskid_in = std::get<0>(tsk_2_ids[tsk_types_1d[t + 1].first])[0];
+        size_t sckid_in = std::get<1>(tsk_2_ids[tsk_types_1d[t + 1].first])[0];
 
-        if (tsk_sck_type_1d[t + 1].first == tsk_e::write && tsk_sck_type_1d[0].first == tsk_e::read)
-            tskid_in = std::get<0>(tsk_2_ids[tsk_sck_type_1d[t + 1].first])[1];
+        if (tsk_types_1d[t + 1].first == tsk_e::write && tsk_types_1d[0].first == tsk_e::read)
+            tskid_in = std::get<0>(tsk_2_ids[tsk_types_1d[t + 1].first])[1];
 
         (*modules[t + 1].get())[tskid_in][sckid_in] = (*modules[t].get())[tskid_out][sckid_out];
     }
-    if (tsk_sck_type_1d[n_tsk - 1].first == tsk_e::write && tsk_sck_type_1d[0].first == tsk_e::read)
+    if (tsk_types_1d[n_tsk - 1].first == tsk_e::write && tsk_types_1d[0].first == tsk_e::read)
         (*modules[n_tsk - 1].get())[1][1] = (*modules[0].get())[0][1];
 
     std::unique_ptr<runtime::Sequence> sequence_chain;
@@ -631,7 +635,7 @@ main(int argc, char** argv)
     if (force_sequence)
     {
         size_t tskid_last =
-          (tsk_sck_type_1d[n_tsk - 1].first == tsk_e::write && tsk_sck_type_1d[0].first == tsk_e::read) ? 1 : 0;
+          (tsk_types_1d[n_tsk - 1].first == tsk_e::write && tsk_types_1d[0].first == tsk_e::read) ? 1 : 0;
         sequence_chain.reset(
           new runtime::Sequence((*modules[0].get())[0], (*modules[n_tsk - 1].get())[tskid_last], n_threads[0]));
         sequence_chain->set_n_frames(n_inter_frames);
@@ -655,7 +659,7 @@ main(int argc, char** argv)
             }
 
         // prepare input data in case of initializer first
-        if (tsk_sck_type[0][0].first == tsk_e::initialize)
+        if (tsk_types[0][0].first == tsk_e::initialize)
         {
             auto tid = 0;
             for (auto cur_initializer : sequence_chain.get()->get_cloned_modules<module::Initializer<uint8_t>>(
@@ -687,7 +691,7 @@ main(int argc, char** argv)
                 { /* do nothing */
                 }
             } while ((!n_exec || ++counter < (n_exec / n_threads[0])) &&
-                     ((tsk_sck_type_1d[0].first == tsk_e::read)
+                     ((tsk_types_1d[0].first == tsk_e::read)
                         ? !(*((module::Source_user_binary<uint8_t>*)(modules[0].get()))).is_done()
                         : true));
         }
@@ -696,7 +700,7 @@ main(int argc, char** argv)
         auto elapsed_time = duration.count() / 1000.f / 1000.f;
         std::cout << "Sequence elapsed time: " << elapsed_time << " ms" << std::endl;
 
-        if (tsk_sck_type_1d[n_tsk - 1].first == tsk_e::finalize)
+        if (tsk_types_1d[n_tsk - 1].first == tsk_e::finalize)
             finalizer_list = sequence_chain.get()->get_cloned_modules<module::Finalizer<uint8_t>>(
               *((module::Finalizer<uint8_t>*)modules[n_tsk - 1].get()));
     }
@@ -708,20 +712,21 @@ main(int argc, char** argv)
         // create the stages
         std::vector<std::pair<std::vector<runtime::Task*>, std::vector<runtime::Task*>>> stages;
         tas = 0;
-        for (size_t s = 0; s < tsk_sck_type.size(); ++s)
+        for (size_t s = 0; s < tsk_types.size(); ++s)
         {
-            size_t n_tsk_cur_sta = tsk_sck_type[s].size();
-            size_t tskid_first = std::get<0>(tsk_2_ids[tsk_sck_type[s][0].first])[0];
-            if (tsk_sck_type[s][0].first == tsk_e::write && tsk_sck_type[0][0].first == tsk_e::read) tskid_first = 1;
+            size_t n_tsk_cur_sta = tsk_types[s].size();
+            size_t tskid_first = std::get<0>(tsk_2_ids[tsk_types[s][0].first])[0];
+            if (tsk_types[s][0].first == tsk_e::write && tsk_types[0][0].first == tsk_e::read) tskid_first = 1;
 
-            size_t tskid_last = std::get<0>(tsk_2_ids[tsk_sck_type[s][n_tsk_cur_sta - 1].first])[0];
-            if (tsk_sck_type[s][n_tsk_cur_sta - 1].first == tsk_e::write && tsk_sck_type[0][0].first == tsk_e::read)
+            size_t tskid_last = std::get<0>(tsk_2_ids[tsk_types[s][n_tsk_cur_sta - 1].first])[0];
+            if (tsk_types[s][n_tsk_cur_sta - 1].first == tsk_e::write && tsk_types[0][0].first == tsk_e::read)
                 tskid_last = 1;
 
             spu::runtime::Task* first_stage_task = &(*modules[tas].get())[tskid_first];
             spu::runtime::Task* last_stage_task = &(*modules[tas + n_tsk_cur_sta - 1].get())[tskid_last];
 
-            if (tsk_sck_type[s][n_tsk_cur_sta - 1].first == tsk_e::write && n_tsk_cur_sta > 1)
+            if (tsk_types[s][n_tsk_cur_sta - 1].first == tsk_e::write && tsk_types[0][0].first == tsk_e::read &&
+                n_tsk_cur_sta > 1)
                 stages.push_back({ { first_stage_task, last_stage_task }, {} });
             else
                 stages.push_back({ { first_stage_task }, { last_stage_task } });
@@ -730,15 +735,15 @@ main(int argc, char** argv)
 
         // buffer vector
         std::vector<size_t> pool_buff;
-        for (size_t s = 0; s < tsk_sck_type.size() - 1; ++s)
+        for (size_t s = 0; s < tsk_types.size() - 1; ++s)
             pool_buff.push_back(buffer_size);
 
         // waiting type
         std::vector<bool> wait_vect;
-        for (size_t s = 0; s < tsk_sck_type.size() - 1; ++s)
+        for (size_t s = 0; s < tsk_types.size() - 1; ++s)
             wait_vect.push_back(active_waiting);
 
-        std::vector<bool> enable_pin = std::vector<bool>(tsk_sck_type.size(), pinning_policy.empty() ? false : true);
+        std::vector<bool> enable_pin = std::vector<bool>(tsk_types.size(), pinning_policy.empty() ? false : true);
         pipeline_chain.reset(new runtime::Pipeline(
           (*modules[0].get())[0], stages, n_threads, pool_buff, wait_vect, enable_pin, pinning_policy));
         pipeline_chain->set_n_frames(n_inter_frames);
@@ -761,7 +766,7 @@ main(int argc, char** argv)
             }
 
         // prepare input data in case of increment
-        if (tsk_sck_type[0][0].first == tsk_e::initialize)
+        if (tsk_types[0][0].first == tsk_e::initialize)
         {
             auto tid = 0;
             for (auto cur_initializer :
@@ -784,7 +789,7 @@ main(int argc, char** argv)
         auto elapsed_time = duration.count() / 1000.f / 1000.f;
         std::cout << "Pipeline elapsed time: " << elapsed_time << " ms" << std::endl;
 
-        if (tsk_sck_type_1d[n_tsk - 1].first == tsk_e::finalize)
+        if (tsk_types_1d[n_tsk - 1].first == tsk_e::finalize)
             finalizer_list = pipeline_chain.get()
                                ->get_stages()[pipeline_chain.get()->get_stages().size() - 1]
                                ->get_cloned_modules<module::Finalizer<uint8_t>>(
@@ -793,12 +798,12 @@ main(int argc, char** argv)
 
     // count the number of incrementers in the chain
     size_t n_incr_count = 0;
-    for (auto& t : tsk_sck_type_1d)
+    for (auto& t : tsk_types_1d)
         if (t.first == tsk_e::increment || t.first == tsk_e::incrementf) n_incr_count++;
 
     // verification of the pipeline/sequence execution
     unsigned int test_results = 1;
-    if (tsk_sck_type_1d[0].first == tsk_e::initialize && tsk_sck_type_1d[n_tsk - 1].first == tsk_e::finalize &&
+    if (tsk_types_1d[0].first == tsk_e::initialize && tsk_types_1d[n_tsk - 1].first == tsk_e::finalize &&
         (n_threads[0] == n_threads[n_threads.size() - 1] || force_sequence))
     {
         bool tests_passed = true;
@@ -833,8 +838,7 @@ main(int argc, char** argv)
 
         test_results = !tests_passed;
     }
-    else if (tsk_sck_type_1d[0].first == tsk_e::read && tsk_sck_type_1d[n_tsk - 1].first == tsk_e::write &&
-             n_incr_count == 0)
+    else if (tsk_types_1d[0].first == tsk_e::read && tsk_types_1d[n_tsk - 1].first == tsk_e::write && n_incr_count == 0)
     {
         size_t in_filesize = filesize(in_filepath.c_str());
         size_t n_frames = ((int)std::ceil((float)(in_filesize * 8) / (float)(data_length * n_inter_frames)));
@@ -885,19 +889,19 @@ main(int argc, char** argv)
         pipeline_chain->unbind_adaptors();
     }
 
-    for (size_t t = 0; t < tsk_sck_type_1d.size() - 1; t++)
+    for (size_t t = 0; t < tsk_types_1d.size() - 1; t++)
     {
-        size_t tskid_out = std::get<0>(tsk_2_ids[tsk_sck_type_1d[t].first])[0];
-        size_t sckid_out = std::get<2>(tsk_2_ids[tsk_sck_type_1d[t].first])[0];
-        size_t tskid_in = std::get<0>(tsk_2_ids[tsk_sck_type_1d[t + 1].first])[0];
-        size_t sckid_in = std::get<1>(tsk_2_ids[tsk_sck_type_1d[t + 1].first])[0];
+        size_t tskid_out = std::get<0>(tsk_2_ids[tsk_types_1d[t].first])[0];
+        size_t sckid_out = std::get<2>(tsk_2_ids[tsk_types_1d[t].first])[0];
+        size_t tskid_in = std::get<0>(tsk_2_ids[tsk_types_1d[t + 1].first])[0];
+        size_t sckid_in = std::get<1>(tsk_2_ids[tsk_types_1d[t + 1].first])[0];
 
-        if (tsk_sck_type_1d[t + 1].first == tsk_e::write && tsk_sck_type_1d[0].first == tsk_e::read)
-            tskid_in = std::get<0>(tsk_2_ids[tsk_sck_type_1d[t + 1].first])[1];
+        if (tsk_types_1d[t + 1].first == tsk_e::write && tsk_types_1d[0].first == tsk_e::read)
+            tskid_in = std::get<0>(tsk_2_ids[tsk_types_1d[t + 1].first])[1];
 
         (*modules[t + 1].get())[tskid_in][sckid_in].unbind((*modules[t].get())[tskid_out][sckid_out]);
     }
-    if (tsk_sck_type_1d[n_tsk - 1].first == tsk_e::write && tsk_sck_type_1d[0].first == tsk_e::read)
+    if (tsk_types_1d[n_tsk - 1].first == tsk_e::write && tsk_types_1d[0].first == tsk_e::read)
         (*modules[n_tsk - 1].get())[1][1].unbind((*modules[0].get())[0][1]);
 
 #ifdef SPU_HWLOC

@@ -2,23 +2,68 @@
 
 ## Generic Pipeline
 
-A new test with a generic pipeline has also been added. It is possible to define 
-the middle tasks from the command line (the initial `Init` and last task `Sink` 
-are automatically added) using these parameters:
+This test is useful to build and execute new generic chains (and pipelines) 
+directly from the command line interface (CLI).
 
-- `-n`: the number of tasks on each stage.
-- `-t`: the number of threads on each stage.
-- The socket type (`SIO` or `SFWD`) of the tasks:
-    - `-r`: specifying each socket type (`SIO` $\rightarrow$ `relay` task and 
-            `SFWD` $\rightarrow$  `relayf` task).
-    - `-R`: specifying socket type by stage (all the sockets of the stage will
-      be of this type).
+Basically, there are 3 different types of task that can be instantiated:
+
+- **First task**: A chain should start with a task that have no input socket. 
+  There is only one first task and it is possible to choose between `read` and 
+  `init` tasks.
+- **Middle task**: A task that have an input and an output socket. It is up to 
+  the user to decide the number and the combination of middle tasks he wants. It 
+  is possible to select between `relay`, `relayf`, `increment` and `incrementf` 
+  tasks.
+- **Last task**: A chain should always end with a task that does not have an 
+  output socket. There is only one last task and it is possible to choose 
+  between `write` or `finalize` tasks.
+
+Here is a description of the available tasks and their behavior:
+
+- `read`: Reads data from a binary file and output the read bytes on its output 
+  socket.
+- `init`: Arbitrary initializes the data in its output socket (useful for 
+  benchmark and validation).
+- `relay`: Copies the data from its input socket into its output socket.
+- `relayf`: Variant of the `relay` task that uses forward sockets, consequently, 
+  this task does NOTHING.
+- `increment` or `incr`: Increments (+1) the data of its input socket and writes 
+  the result in its output socket.
+- `incrementf` or `incrf`: Variant of the `increment` task that uses socket 
+  forward to write the result in place.
+- `write`: Writes contents of its input socket into a binary file (expects 0 or 
+  1 values in its input socket to work correctly). 
+- `finalize` or `fin`: Memorizes (= copies) the input data for further 
+  validation (if there is a validation). 
+
+There is two main ways to describe a processing chain:
+
+1. Specify homogeneous types of task per stage. This is performed with the 
+   combination of the `-R` and `-n` CLI parameters. `-R` gives the tasks type per 
+   stage (ex. of a 4-stage pipeline: `-R (read,incr,relayf,write)`) and `-n` 
+   gives how many tasks of the same type will be created per stage. For 
+   instance, the combination of `-R (read,incr,relayf,write) -n "1,2,3,1"` will 
+   produce the following chain: `read` $\rightarrow$ `incr` $\rightarrow$ `incr` 
+   $\rightarrow$ `relayf` $\rightarrow$ `relayf` $\rightarrow$ `relayf` 
+   $\rightarrow$ `write`.
+
+2. Specify heterogeneous types of task per stage. This is achieved with `-r` CLI
+   parameter. For instance, `-r ((init),(incrf,relay,incr),(fin))` will produce
+   a 3-stage pipeline of the following chain: `init` $\rightarrow$ `incrf` 
+   $\rightarrow$ `relay` $\rightarrow$ `incr` $\rightarrow$ `fin`.
 
 !!! note
     You cannot use `-r` and `-R` parameters at the same time, they are 
     exclusive.
 
-Here are some examples of generated pipelines:
+!!! tip
+    For the `increment`, `incrementf`, `relay` and `relayf` tasks it is possible
+    to specify the duration in microseconds. For instance, `relay_12` means that 
+    the `relay` task will spend 12 microseconds in active waiting.
+
+Then, for each stage you can specify the number of replications (= number of
+threads that will execute the stage) with the `-t` parameter. Here are some 
+examples of generated pipelines:
 
 === "Simple pipeline" 
     <figure markdown>
@@ -26,7 +71,7 @@ Here are some examples of generated pipelines:
       <figcaption>`test-generic-pipeline`: input/output sockets & 3-stage pipeline.</figcaption>
     </figure>
     ```bash
-    test-generic-pipeline -i INPUT_FILE -n "1,3,1" -t "1,3,1" -R "(read,relay,write)"
+    test-generic-pipeline -e 100 -n "1,3,1" -t "3,1,3" -R "(init,increment,fin)"
     ```
 
 === "Simple pipeline forward"
@@ -44,7 +89,7 @@ Here are some examples of generated pipelines:
       <figcaption>`test-generic-pipeline`: hybrid in/out and forward sockets & 3-stage pipeline.</figcaption>
     </figure>
     ```bash
-    test-generic-pipeline -i INPUT_FILE -t "1,3,1" -r "((read),(relayf,relay,relayf),(write))"
+    test-generic-pipeline -i INPUT_FILE -t "1,3,1" -r "((read),(relayf,incrementf,relay),(write))"
     ```
 
 === "Simple pipeline hybrid with a 5-stage pipeline"
@@ -53,5 +98,35 @@ Here are some examples of generated pipelines:
       <figcaption>`test-generic-pipeline`: hybrid in/out and forward sockets & 5-stage pipeline.</figcaption>
     </figure>
     ```bash
-    test-generic-pipeline -i INPUT_FILE -t "1,3,1,2,1" -r "((read),(relayf,relay,relayf,relay),(relayf),(relay,relay),(write))"
+    test-generic-pipeline -e 100 -t "1,3,1,2,1" -r "((init,relayf,incr),(relayf,relay),(incrf),(relay),(relay,fin))"
     ```
+
+------
+
+**Command Line Arguments**
+
+The following verbatim is a copy-paste from the `-h` stdout:
+
+```bash
+usage: ./bin/test-generic-pipeline [options]
+
+  -t, --n-threads          Number of threads to run in parallel for each stage                   [empty]
+  -f, --n-inter-frames     Number of frames to process in one task                               [1]
+  -s, --sleep-time         Sleep time duration in one task (microseconds)                        [5]
+  -d, --data-length        Size of data to process in one task (in bytes)                        [2048]
+  -e, --n-exec             Number of executions (0 means -> never stop because of this counter)  [0]
+  -u, --buffer-size        Size of the buffer between the different stages of the pipeline       [2048]
+  -o, --dot-filepath       Path to dot output file                                               [empty]
+  -i, --in-filepath        Path to the input file (used to generate bits of the chain)           [empty]
+  -j, --out-filepath       Path to the output file (written at the end of the chain)             ["file.out"]
+  -c, --copy-mode          Enable to copy data in sequence (performance will be reduced)         [false]
+  -b, --step-by-step       Enable step-by-step sequence execution (performance will be reduced)  [false]
+  -p, --print-stats        Enable to print per task statistics (performance will be reduced)     [false]
+  -g, --debug              Enable task debug mode (print socket data)                            [false]
+  -q, --force-sequence     Force sequence instead of pipeline                                    [false]
+  -w, --active-waiting     Enable active waiting in the pipeline synchronizations                [false]
+  -n, --tsk-per-sta        The number of tasks on each stage of the pipeline                     [empty]
+  -r, --tsk-types          The socket type of each task (SFWD or SIO)                            [empty]
+  -R, --tsk-types-sta      The socket type of tasks on each stage (SFWD or SIO)                  [empty]
+  -h, --help               This help                                                             [false]
+```
