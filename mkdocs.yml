@@ -79,6 +79,7 @@ nav:
   - For Users:
     - Tests:
       - tests_bootstrap.md
+      - tests_advanced.md
     - Runtime:
       - thread_pinning.md
   - For Developers:

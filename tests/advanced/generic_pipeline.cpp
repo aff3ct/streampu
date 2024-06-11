@@ -17,31 +17,35 @@ using namespace spu::runtime;
 enum class tsk_e : uint8_t
 {
     initialize,
-    read_file,
+    read,
     relay,
+    relayf,
     increment,
+    incrementf,
     finalize,
-    write_file,
-};
-
-enum class sck_e : uint8_t
-{
-    IO,
-    FWD,
+    write,
 };
 
 static std::map<std::string, tsk_e> str_2_tsk = {
-    { "I", tsk_e::initialize },   { "Init", tsk_e::initialize }, { "R", tsk_e::read_file },
-    { "Read", tsk_e::read_file }, { "Y", tsk_e::relay },         { "Relay", tsk_e::relay },
-    { "C", tsk_e::increment },    { "Incr", tsk_e::increment },  { "F", tsk_e::finalize },
-    { "Fin", tsk_e::finalize },   { "W", tsk_e::write_file },    { "Write", tsk_e::write_file },
+    { "initialize", tsk_e::initialize }, { "init", tsk_e::initialize },       { "read", tsk_e::read },
+    { "relay", tsk_e::relay },           { "relayf", tsk_e::relayf },         { "increment", tsk_e::increment },
+    { "incr", tsk_e::increment },        { "incrementf", tsk_e::incrementf }, { "incrf", tsk_e::incrementf },
+    { "finalize", tsk_e::finalize },     { "fin", tsk_e::finalize },          { "write", tsk_e::write },
 };
-static std::map<std::string, sck_e> str_2_sck = {
-    { "SIO", sck_e::IO },
-    { "IO", sck_e::IO },
-    { "SFWD", sck_e::FWD },
-    { "FWD", sck_e::FWD },
+
+// clang-format off
+//              task              tsk ids              sck IN ids           sck OUT ids
+static std::map<tsk_e, std::tuple<std::vector<size_t>, std::vector<size_t>, std::vector<size_t>>> tsk_2_ids = {
+    { tsk_e::initialize, {  { 0    }, {      }, { 0    } } },
+    { tsk_e::read,       {  { 0    }, {      }, { 0, 1 } } },
+    { tsk_e::relay,      {  { 0    }, { 0    }, { 1    } } },
+    { tsk_e::relayf,     {  { 1    }, { 0    }, { 0    } } },
+    { tsk_e::increment,  {  { 0    }, { 0    }, { 1    } } },
+    { tsk_e::incrementf, {  { 1    }, { 0    }, { 0    } } },
+    { tsk_e::finalize,   {  { 0    }, { 0    }, {      } } },
+    { tsk_e::write,      {  { 0, 1 }, { 0, 1 }, {      } } },
 };
+// clang-format on
 
 // Error message variable
 std::stringstream message;
@@ -101,11 +105,11 @@ parse_int_string(std::string& vector_param, std::vector<size_t>& vector)
         vector.push_back(std::atoi(tokens[i].c_str()));
 }
 
-std::pair<tsk_e, sck_e>
+std::pair<tsk_e, int>
 extract_tsk_sck_type(const std::string& label)
 {
     tsk_e tsk = tsk_e::relay;
-    sck_e sck = sck_e::IO;
+    int duration = -1;
 
     std::vector<std::string> tokens = split_string(label);
 
@@ -120,9 +124,9 @@ extract_tsk_sck_type(const std::string& label)
             {
                 tsk = str_2_tsk[token];
             }
-            else if (str_2_sck.find(token) != str_2_sck.end())
+            else if (std::atoi(token.c_str()))
             {
-                sck = str_2_sck[token];
+                duration = std::atoi(token.c_str());
             }
             else
             {
@@ -138,11 +142,11 @@ extract_tsk_sck_type(const std::string& label)
         throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
     }
 
-    return std::make_pair(tsk, sck);
+    return std::make_pair(tsk, duration);
 }
 
 void
-parse_tsk_sck_type(std::string& tsk_sck_type_param, std::vector<std::vector<std::pair<tsk_e, sck_e>>>& tsk_sck_type)
+parse_tsk_sck_type(std::string& tsk_sck_type_param, std::vector<std::vector<std::pair<tsk_e, int>>>& tsk_sck_type)
 {
     size_t i = 0;
     size_t sta = 0;
@@ -176,7 +180,7 @@ parse_tsk_sck_type(std::string& tsk_sck_type_param, std::vector<std::vector<std:
 }
 
 void
-parse_tsk_sck_type_sta(std::string& sck_type_sta_param, std::vector<std::pair<tsk_e, sck_e>>& tsk_sck_type)
+parse_tsk_sck_type_sta(std::string& sck_type_sta_param, std::vector<std::pair<tsk_e, int>>& tsk_sck_type)
 {
     size_t i = 0;
     std::string tmp;
@@ -243,9 +247,9 @@ main(int argc, char** argv)
     std::string tsk_per_sta_param;
     std::vector<size_t> tsk_per_sta;
     std::string tsk_sck_type_param;
-    std::vector<std::vector<std::pair<tsk_e, sck_e>>> tsk_sck_type;
+    std::vector<std::vector<std::pair<tsk_e, int>>> tsk_sck_type;
     std::string tsk_sck_type_sta_param;
-    std::vector<std::pair<tsk_e, sck_e>> tsk_sck_type_sta;
+    std::vector<std::pair<tsk_e, int>> tsk_sck_type_sta;
     std::string pinning_policy;
     std::string check_task;
 
@@ -428,7 +432,7 @@ main(int argc, char** argv)
         throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
     }
 
-    std::vector<std::pair<tsk_e, sck_e>> tsk_sck_type_1d;
+    std::vector<std::pair<tsk_e, int>> tsk_sck_type_1d;
     for (size_t i = 0; i < tsk_sck_type.size(); i++)
         for (size_t j = 0; j < tsk_sck_type[i].size(); j++)
             tsk_sck_type_1d.push_back(tsk_sck_type[i][j]);
@@ -491,31 +495,36 @@ main(int argc, char** argv)
                         message << "An 'Initializer' can only be at the begining of the chain (tas = '" << tas << "').";
                         throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
                     }
-                    if (tst.second == sck_e::FWD)
+                    if (tst.second != -1)
                     {
-                        message << "An 'Initializer' can only have IO socket (tas = '" << tas << "').";
+                        message << "An 'Initializer' can't have a duration (tas = '" << tas << "').";
                         throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
                     }
-                    modules[tas].reset(new module::Initializer<uint8_t>(data_length));
+                    auto initializer = new module::Initializer<uint8_t>(data_length);
+                    modules[tas].reset(initializer);
+                    initializer->set_custom_name("Init" + std::to_string(tas));
                     break;
                 }
-                case tsk_e::read_file:
+                case tsk_e::read:
                 {
                     if (tas != 0)
                     {
                         message << "A 'Source' can only be at the begining of the chain (tas = '" << tas << "').";
                         throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
                     }
-                    if (tst.second == sck_e::FWD)
+                    if (tst.second != -1)
                     {
-                        message << "A 'Source' can only have IO socket (tas = '" << tas << "').";
+                        message << "A 'Source' can't have a duration (tas = '" << tas << "').";
                         throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
                     }
                     const bool auto_reset = false;
-                    modules[tas].reset(new module::Source_user_binary<uint8_t>(data_length, in_filepath, auto_reset));
+                    auto source = new module::Source_user_binary<uint8_t>(data_length, in_filepath, auto_reset);
+                    modules[tas].reset(source);
+                    source->set_custom_name("Reader" + std::to_string(tas));
                     break;
                 }
                 case tsk_e::relay:
+                case tsk_e::relayf:
                 {
                     if (tas == 0 || tas == n_tsk - 1)
                     {
@@ -523,11 +532,19 @@ main(int argc, char** argv)
                                 << "').";
                         throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
                     }
-                    modules[tas].reset(new module::Relayer<uint8_t>(data_length));
-                    ((module::Relayer<uint8_t>*)(modules[tas].get()))->set_ns(sleep_time_us * 1000);
+                    auto relayer = new module::Relayer<uint8_t>(data_length);
+                    modules[tas].reset(relayer);
+                    size_t sleep_duration_us = (tst.second == -1) ? sleep_time_us : tst.second;
+                    relayer->set_ns(sleep_duration_us * 1000);
+                    if (tst.second != -1)
+                        relayer->set_custom_name("Rly" + std::to_string(tas) + "_d" +
+                                                 std::to_string(sleep_duration_us));
+                    else
+                        relayer->set_custom_name("Relayer" + std::to_string(tas));
                     break;
                 }
                 case tsk_e::increment:
+                case tsk_e::incrementf:
                 {
                     if (tas == 0 || tas == n_tsk - 1)
                     {
@@ -535,8 +552,15 @@ main(int argc, char** argv)
                                 << tas << "').";
                         throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
                     }
-                    modules[tas].reset(new module::Incrementer<uint8_t>(data_length));
-                    ((module::Incrementer<uint8_t>*)(modules[tas].get()))->set_ns(sleep_time_us * 1000);
+                    auto incrementer = new module::Incrementer<uint8_t>(data_length);
+                    modules[tas].reset(incrementer);
+                    size_t sleep_duration_us = (tst.second == -1) ? sleep_time_us : tst.second;
+                    incrementer->set_ns(sleep_duration_us * 1000);
+                    if (tst.second != -1)
+                        incrementer->set_custom_name("Incr" + std::to_string(tas) + "_d" +
+                                                     std::to_string(sleep_duration_us));
+                    else
+                        incrementer->set_custom_name("Incr" + std::to_string(tas));
                     break;
                 }
                 case tsk_e::finalize:
@@ -546,34 +570,37 @@ main(int argc, char** argv)
                         message << "A 'Finalizer' can only be at the end of the chain (tas = '" << tas << "').";
                         throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
                     }
-                    if (tst.second == sck_e::FWD)
+                    if (tst.second != -1)
                     {
-                        message << "A 'Finalizer' can only have IO socket (tas = '" << tas << "').";
+                        message << "A 'Finalizer' can't have a duration (tas = '" << tas << "').";
                         throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
                     }
-                    modules[tas].reset(new module::Finalizer<uint8_t>(data_length));
+                    auto finalizer = new module::Finalizer<uint8_t>(data_length);
+                    modules[tas].reset(finalizer);
+                    finalizer->set_custom_name("Fin" + std::to_string(tas));
                     break;
                 }
-                case tsk_e::write_file:
+                case tsk_e::write:
                 {
                     if (tas != n_tsk - 1)
                     {
                         message << "A 'Sink' can only be at the end of the chain (tas = '" << tas << "').";
                         throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
                     }
-                    if (tst.second == sck_e::FWD)
+                    if (tst.second != -1)
                     {
-                        message << "A 'Sink' can only have IO socket (tas = '" << tas << "').";
+                        message << "A 'Sink' can't have a duration (tas = '" << tas << "').";
                         throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
                     }
-                    modules[tas].reset(new module::Sink_user_binary<uint8_t>(data_length, out_filepath));
+                    auto sink = new module::Sink_user_binary<uint8_t>(data_length, out_filepath);
+                    modules[tas].reset(sink);
+                    sink->set_custom_name("Writer" + std::to_string(tas));
                     break;
                 }
                 default:
                     message << "Unsupported case (tas = '" << tas << "').";
                     throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
             };
-            (modules[tas].get())->set_custom_name(modules[tas]->get_short_name() + std::to_string(tas));
             tas++;
         }
     }
@@ -581,15 +608,17 @@ main(int argc, char** argv)
     // sockets binding
     for (size_t t = 0; t < tsk_sck_type_1d.size() - 1; t++)
     {
-        size_t tskid_out = tsk_sck_type_1d[t].second == sck_e::FWD;
-        size_t sckid_out = tsk_sck_type_1d[t].second != sck_e::FWD && t != 0;
-        size_t tskid_in = tsk_sck_type_1d[t + 1].second == sck_e::FWD;
-        if (tsk_sck_type_1d[t + 1].first == tsk_e::write_file && tsk_sck_type_1d[0].first == tsk_e::read_file)
-            tskid_in = 1;
+        size_t tskid_out = std::get<0>(tsk_2_ids[tsk_sck_type_1d[t].first])[0];
+        size_t sckid_out = std::get<2>(tsk_2_ids[tsk_sck_type_1d[t].first])[0];
+        size_t tskid_in = std::get<0>(tsk_2_ids[tsk_sck_type_1d[t + 1].first])[0];
+        size_t sckid_in = std::get<1>(tsk_2_ids[tsk_sck_type_1d[t + 1].first])[0];
 
-        (*modules[t + 1].get())[tskid_in][0] = (*modules[t].get())[tskid_out][sckid_out];
+        if (tsk_sck_type_1d[t + 1].first == tsk_e::write && tsk_sck_type_1d[0].first == tsk_e::read)
+            tskid_in = std::get<0>(tsk_2_ids[tsk_sck_type_1d[t + 1].first])[1];
+
+        (*modules[t + 1].get())[tskid_in][sckid_in] = (*modules[t].get())[tskid_out][sckid_out];
     }
-    if (tsk_sck_type_1d[n_tsk - 1].first == tsk_e::write_file && tsk_sck_type_1d[0].first == tsk_e::read_file)
+    if (tsk_sck_type_1d[n_tsk - 1].first == tsk_e::write && tsk_sck_type_1d[0].first == tsk_e::read)
         (*modules[n_tsk - 1].get())[1][1] = (*modules[0].get())[0][1];
 
     std::unique_ptr<runtime::Sequence> sequence_chain;
@@ -602,8 +631,7 @@ main(int argc, char** argv)
     if (force_sequence)
     {
         size_t tskid_last =
-          (tsk_sck_type_1d[n_tsk - 1].first == tsk_e::write_file && tsk_sck_type_1d[0].first == tsk_e::read_file) ? 1
-                                                                                                                  : 0;
+          (tsk_sck_type_1d[n_tsk - 1].first == tsk_e::write && tsk_sck_type_1d[0].first == tsk_e::read) ? 1 : 0;
         sequence_chain.reset(
           new runtime::Sequence((*modules[0].get())[0], (*modules[n_tsk - 1].get())[tskid_last], n_threads[0]));
         sequence_chain->set_n_frames(n_inter_frames);
@@ -659,7 +687,7 @@ main(int argc, char** argv)
                 { /* do nothing */
                 }
             } while ((!n_exec || ++counter < (n_exec / n_threads[0])) &&
-                     ((tsk_sck_type_1d[0].first == tsk_e::read_file)
+                     ((tsk_sck_type_1d[0].first == tsk_e::read)
                         ? !(*((module::Source_user_binary<uint8_t>*)(modules[0].get()))).is_done()
                         : true));
         }
@@ -683,19 +711,17 @@ main(int argc, char** argv)
         for (size_t s = 0; s < tsk_sck_type.size(); ++s)
         {
             size_t n_tsk_cur_sta = tsk_sck_type[s].size();
-            size_t tskid_first = tsk_sck_type[s][0].second == sck_e::FWD;
-            if (tsk_sck_type[s][0].first == tsk_e::write_file && tsk_sck_type[0][0].first == tsk_e::read_file)
-                tskid_first = 1;
+            size_t tskid_first = std::get<0>(tsk_2_ids[tsk_sck_type[s][0].first])[0];
+            if (tsk_sck_type[s][0].first == tsk_e::write && tsk_sck_type[0][0].first == tsk_e::read) tskid_first = 1;
 
-            size_t tskid_last = tsk_sck_type[s][n_tsk_cur_sta - 1].second == sck_e::FWD;
-            if (tsk_sck_type[s][n_tsk_cur_sta - 1].first == tsk_e::write_file &&
-                tsk_sck_type[0][0].first == tsk_e::read_file)
+            size_t tskid_last = std::get<0>(tsk_2_ids[tsk_sck_type[s][n_tsk_cur_sta - 1].first])[0];
+            if (tsk_sck_type[s][n_tsk_cur_sta - 1].first == tsk_e::write && tsk_sck_type[0][0].first == tsk_e::read)
                 tskid_last = 1;
 
             spu::runtime::Task* first_stage_task = &(*modules[tas].get())[tskid_first];
             spu::runtime::Task* last_stage_task = &(*modules[tas + n_tsk_cur_sta - 1].get())[tskid_last];
 
-            if (tsk_sck_type[s][n_tsk_cur_sta - 1].first == tsk_e::write_file && n_tsk_cur_sta > 1)
+            if (tsk_sck_type[s][n_tsk_cur_sta - 1].first == tsk_e::write && n_tsk_cur_sta > 1)
                 stages.push_back({ { first_stage_task, last_stage_task }, {} });
             else
                 stages.push_back({ { first_stage_task }, { last_stage_task } });
@@ -768,7 +794,7 @@ main(int argc, char** argv)
     // count the number of incrementers in the chain
     size_t n_incr_count = 0;
     for (auto& t : tsk_sck_type_1d)
-        if (t.first == tsk_e::increment) n_incr_count++;
+        if (t.first == tsk_e::increment || t.first == tsk_e::incrementf) n_incr_count++;
 
     // verification of the pipeline/sequence execution
     unsigned int test_results = 1;
@@ -807,7 +833,7 @@ main(int argc, char** argv)
 
         test_results = !tests_passed;
     }
-    else if (tsk_sck_type_1d[0].first == tsk_e::read_file && tsk_sck_type_1d[n_tsk - 1].first == tsk_e::write_file &&
+    else if (tsk_sck_type_1d[0].first == tsk_e::read && tsk_sck_type_1d[n_tsk - 1].first == tsk_e::write &&
              n_incr_count == 0)
     {
         size_t in_filesize = filesize(in_filepath.c_str());
@@ -861,15 +887,17 @@ main(int argc, char** argv)
 
     for (size_t t = 0; t < tsk_sck_type_1d.size() - 1; t++)
     {
-        size_t tskid_out = tsk_sck_type_1d[t].second == sck_e::FWD;
-        size_t sckid_out = tsk_sck_type_1d[t].second != sck_e::FWD && t != 0;
-        size_t tskid_in = tsk_sck_type_1d[t + 1].second == sck_e::FWD;
-        if (tsk_sck_type_1d[t + 1].first == tsk_e::write_file && tsk_sck_type_1d[0].first == tsk_e::read_file)
-            tskid_in = 1;
+        size_t tskid_out = std::get<0>(tsk_2_ids[tsk_sck_type_1d[t].first])[0];
+        size_t sckid_out = std::get<2>(tsk_2_ids[tsk_sck_type_1d[t].first])[0];
+        size_t tskid_in = std::get<0>(tsk_2_ids[tsk_sck_type_1d[t + 1].first])[0];
+        size_t sckid_in = std::get<1>(tsk_2_ids[tsk_sck_type_1d[t + 1].first])[0];
 
-        (*modules[t + 1].get())[tskid_in][0].unbind((*modules[t].get())[tskid_out][sckid_out]);
+        if (tsk_sck_type_1d[t + 1].first == tsk_e::write && tsk_sck_type_1d[0].first == tsk_e::read)
+            tskid_in = std::get<0>(tsk_2_ids[tsk_sck_type_1d[t + 1].first])[1];
+
+        (*modules[t + 1].get())[tskid_in][sckid_in].unbind((*modules[t].get())[tskid_out][sckid_out]);
     }
-    if (tsk_sck_type_1d[n_tsk - 1].first == tsk_e::write_file && tsk_sck_type_1d[0].first == tsk_e::read_file)
+    if (tsk_sck_type_1d[n_tsk - 1].first == tsk_e::write && tsk_sck_type_1d[0].first == tsk_e::read)
         (*modules[n_tsk - 1].get())[1][1].unbind((*modules[0].get())[0][1]);
 
 #ifdef SPU_HWLOC

@@ -43,6 +43,7 @@ matches **single-rate SDF streaming applications**.
     1. [Thread Pinning](thread_pinning.md)
   - Tests:
     1. [Bootstrap](tests_bootstrap.md)
+    2. [Advanced](tests_advanced.md)
 
 **For Developpers**
 
