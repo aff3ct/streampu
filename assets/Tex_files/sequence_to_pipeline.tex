@@ -1,0 +1,82 @@
+\documentclass{standalone}
+
+\usepackage{tikz}
+\usetikzlibrary{streampu}
+
+\begin{document}
+  \begin{tikzpicture}[background rectangle/.style={thick, draw=gray!60, fill=white, fill opacity=1.0, rounded corners=2px}, show background rectangle]
+    %%%%%%%%%%%%%%%%%%
+    %% create tasks %%
+    %%%%%%%%%%%%%%%%%%
+    %     options              id   coords  label                 sin sout sfwd attributes
+    %     -------              --   ------  -----                 --- ---- ---- ----------
+    \task                      {t1} {0, 0}  {initialize\\($t_1$)} {0} {1}  {0}  {"seq"};
+    \task [right=1.0cm of t1]  {t2}  {}     {$t_2$}               {1} {1}  {0}  {};
+    \task [right=1.0cm of t2]  {t3}  {}     {$t_3$}               {0} {0}  {1}  {};
+    \task [right=1.0cm of t3]  {t4}  {}     {$t_4$}               {0} {0}  {1}  {};
+    \task [right=1.0cm of t4]  {t5}  {}     {finalize\\($t_6$)}   {1} {0}  {0}  {"seq"};
+    \task [right=2.0cm of t5]  {t12} {}     {initialize\\($t_1$)} {0} {1}  {0}  {"seq"};
+    \task [right=1.0cm of t12] {t22} {}     {$t_2$}               {1} {1}  {0}  {};
+    \task [right=1.0cm of t22] {t32} {}     {$t_3$}               {0} {0}  {1}  {};
+    \task [right=1.0cm of t32] {t42} {}     {$t_4$}               {0} {0}  {1}  {};
+    \task [right=1.0cm of t42] {t52} {}     {finalize\\($t_6$)}   {1} {0}  {0}  {"seq"};
+
+    %%%%%%%%%%%%%%%%%%%%
+    %% create modules %%
+    %%%%%%%%%%%%%%%%%%%%
+    %       options task ids id    label
+    %       ------- -------- --    -----
+    \module         {"t1"}   {m1}  {Initializer};
+    \module         {"t12"}  {m12} {Initializer};
+    \module         {"t2"}   {m2}  {$M_2$};
+    \module         {"t22"}  {m22} {$M_2$};
+    \module         {"t3"}   {m3}  {$M_3$};
+    \module         {"t32"}  {m32} {$M_3$};
+    \module         {"t4"}   {m4}  {$M_4$};
+    \module         {"t42"}  {m42} {$M_4$};
+    \module         {"t5"}   {m5}  {Finalizer};
+    \module         {"t52"}  {m52} {Finalizer};
+ 
+    %%%%%%%%%%%%%%%%
+    %% bind tasks %%
+    %%%%%%%%%%%%%%%%
+    %     options start id path end id
+    %     ------- -------- ---- ------
+    \draw [bind]  (t1_so1) --   (t2_si1);
+    \draw [bind]  (t2_so1) --   (t3_si1);
+    \draw [bind]  (t3_so1) --   (t4_si1);
+    \draw [bind]  (t4_so1) --   (t5_si1);
+
+    %Pipline bind
+    \draw [bind]  (t12_so1) -- (t22_si1);
+    \draw [bind]  (t22_so1) -- (t32_si1);
+    \draw [bind]  (t32_so1) -- (t42_si1);
+    \draw [bind]  (t42_so1) -- (t52_si1);
+
+    %%%%%%%%%%%%%%%%%%%
+    %% create stages %%
+    %%%%%%%%%%%%%%%%%%%
+    %      options                  object ids                 id   label      n_threads
+    %      -------                  ----------                 --   -----      ---------
+    \stage [minimum height=3.00cm] {"m1","m2","m3","m4","m5"} {s1} {Sequence}  {1}
+    
+    %Pipeline stages
+    \stage [minimum height=3.00cm] {"m12"}                    {s12} {Stage 1 } {1}
+    \stage [minimum height=3.00cm] {"m22","m32","m42"}        {s22} {Stage 2 } {3}
+    \stage [minimum height=3.00cm] {"m52"}                    {s32} {Stage 3 } {1}
+
+    \stage [dashdotted, minimum height=4.25cm,minimum width=11.50cm, Paired-9, label={[Paired-9,align=center]below:3-stage pipeline}] {"s12","s22","s32"} {pip} {} {0}
+
+    %%%%%%%%%%%%%%%%%%%%%
+    %% clone the tasks %%
+    %%%%%%%%%%%%%%%%%%%%%
+    %      options task ids            n clones
+    %      ------- --------            --------
+    \clone []      {"t22","t32","t42"} {2}
+
+    %%%%%%%%%%%%%%%%%%%%%
+    %% draw the legend %%
+    %%%%%%%%%%%%%%%%%%%%%
+    \legend [shift={(5.1,2.5)}]
+  \end{tikzpicture}
+\end{document}
