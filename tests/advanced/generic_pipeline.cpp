@@ -441,7 +441,12 @@ main(int argc, char** argv)
         for (size_t j = 0; j < tsk_types[i].size(); j++)
             tsk_types_1d.push_back(tsk_types[i][j]);
 
-    if (n_threads.size() == 0) n_threads.push_back(1);
+    // initialize the threads
+    if (n_threads.size() == 0) n_threads = std::vector<size_t>(tsk_types.size(), 1);
+    if (force_sequence) n_threads = std::vector<size_t>(1, n_threads[0]);
+    n_threads_param = "";
+    for (size_t t = 0; t < n_threads.size(); t++)
+        n_threads_param += std::to_string(n_threads[t]) + ((t < n_threads.size() - 1) ? "," : "");
 
     std::cout << "#####################################" << std::endl;
     std::cout << "# Micro-benchmark: Generic pipeline #" << std::endl;
@@ -449,7 +454,7 @@ main(int argc, char** argv)
     std::cout << "#" << std::endl;
 
     std::cout << "# Command line arguments:" << std::endl;
-    std::cout << "#   - n_threads      = " << (n_threads_param.empty() ? "[empty] (def: 1)" : n_threads_param.c_str())
+    std::cout << "#   - n_threads      = " << (n_threads_param.empty() ? "[empty]" : n_threads_param.c_str())
               << std::endl;
     std::cout << "#   - tsk_per_sta    = " << (tsk_per_sta_param.empty() ? "[empty]" : tsk_per_sta_param.c_str())
               << std::endl;
