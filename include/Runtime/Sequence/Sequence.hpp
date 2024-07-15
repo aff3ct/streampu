@@ -26,6 +26,10 @@ namespace module
 {
 class Task;
 class Module;
+} // namespace module
+namespace tools
+{
+class Scheduler;
 }
 namespace runtime
 {
@@ -48,7 +52,8 @@ class Sub_sequence_generic
     std::vector<size_t> tasks_id;
     size_t id;
 
-    // usefull in case of adaptor to make zero copy and restore original states at the end of the chain execution
+    // usefull in case of adaptor to make zero copy and restore original states at
+    // the end of the chain execution
     std::vector<std::vector<std::vector<Socket*>>> rebind_sockets;
     std::vector<std::vector<std::vector<void*>>> rebind_dataptrs;
 
@@ -69,6 +74,7 @@ class Sequence
   , public tools::Interface_is_done
 {
     friend Pipeline;
+    friend tools::Scheduler;
 
   protected:
     size_t n_threads;
@@ -256,6 +262,8 @@ class Sequence
 
     virtual bool is_done() const;
 
+    bool is_control_flow() const;
+
   protected:
     template<class SS>
     void delete_tree(tools::Digraph_node<SS>* node, std::vector<tools::Digraph_node<SS>*>& already_deleted_nodes);
@@ -324,8 +332,8 @@ class Sequence
     template<class SS>
     inline void _init(tools::Digraph_node<SS>* root);
 };
-}
-}
+} // namespace runtime
+} // namespace spu
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #include "Runtime/Sequence/Sequence.hxx"

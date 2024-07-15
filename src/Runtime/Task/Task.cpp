@@ -27,6 +27,7 @@ Task::Task(module::Module& module,
   , fast(fast)
   , debug(debug)
   , debug_hex(false)
+  , stateful(true)
   , debug_limit(-1)
   , debug_precision(2)
   , debug_frame_max(-1)
@@ -135,6 +136,12 @@ void
 Task::set_debug_frame_max(const uint32_t limit)
 {
     this->debug_frame_max = limit;
+}
+
+void
+Task::set_stateful(const bool stateful)
+{
+    this->stateful = stateful;
 }
 
 // trick to compile on the GNU compiler version 4 (where 'std::hexfloat' is unavailable)
@@ -701,9 +708,9 @@ Task::exec(const int frame_id, const bool managed_memory)
 
         // if (exec_status < 0)
         // {
-        // 	std::stringstream message;
-        // 	message << "'exec_status' can't be negative ('exec_status' = " << exec_status << ").";
-        // 	throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
+        //  std::stringstream message;
+        //  message << "'exec_status' can't be negative ('exec_status' = " << exec_status << ").";
+        //  throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
         // }
 
         return this->get_status();

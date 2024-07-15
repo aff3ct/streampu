@@ -83,6 +83,7 @@ class Task
     bool fast;
     bool debug;
     bool debug_hex;
+    bool stateful;
     int32_t debug_limit;
     uint8_t debug_precision;
     int32_t debug_frame_max;
@@ -137,6 +138,7 @@ class Task
     void set_debug_limit(const uint32_t limit);
     void set_debug_precision(const uint8_t prec);
     void set_debug_frame_max(const uint32_t limit);
+    void set_stateful(const bool stateful);
 
     inline bool is_autoalloc() const;
     inline bool is_stats() const;
@@ -144,6 +146,7 @@ class Task
     inline bool is_debug() const;
     inline bool is_debug_hex() const;
     inline bool is_last_input_socket(const Socket& s_in) const;
+    inline bool is_stateful() const;
     bool can_exec() const;
 
     inline module::Module& get_module() const;

@@ -2505,6 +2505,12 @@ Sequence::set_n_frames(const size_t n_frames)
     }
 }
 
+bool
+Sequence::is_control_flow() const
+{
+    return this->sequences[0]->get_children().size();
+}
+
 // /!\ this check has been commented because it is known to do not work in the general case
 /*
 template<class SS>

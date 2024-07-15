@@ -75,6 +75,12 @@ Task::operator[](const size_t id)
     return *this->sockets[id];
 }
 
+bool
+Task::is_stateful() const
+{
+    return this->stateful;
+}
+
 void
 Task::update_timer(const size_t id, const std::chrono::nanoseconds& duration)
 {

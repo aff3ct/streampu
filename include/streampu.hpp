@@ -237,6 +237,12 @@
 #ifndef REPORTER_HPP__
 #include <Tools/Reporter/Reporter.hpp>
 #endif
+#ifndef SCHEDULER_OTAC_HPP__
+#include <Tools/Scheduler/OTAC/Scheduler_OTAC.hpp>
+#endif
+#ifndef SCHEDULER_HPP__
+#include <Tools/Scheduler/Scheduler.hpp>
+#endif
 #ifndef SIGNAL_HANDLER_HPP_
 #include <Tools/Signal_handler/Signal_handler.hpp>
 #endif
