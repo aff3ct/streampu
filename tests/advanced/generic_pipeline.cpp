@@ -106,11 +106,12 @@ parse_int_string(std::string& vector_param, std::vector<size_t>& vector)
     }
 }
 
-std::pair<tsk_e, int>
-extract_tsk_type(const std::string& label)
+std::tuple<tsk_e, int, bool>
+extract_tsk_type(const std::string& label, const bool check_stateful)
 {
     tsk_e tsk = tsk_e::relay;
     int duration = -1;
+    bool stateful = false;
 
     std::vector<std::string> tokens = split_string(label);
 
@@ -124,10 +125,15 @@ extract_tsk_type(const std::string& label)
             if (str_2_tsk.find(token) != str_2_tsk.end())
             {
                 tsk = str_2_tsk[token];
+                if (tsk == tsk_e::read || tsk == tsk_e::write) stateful = true;
             }
             else if (std::atoi(token.c_str()))
             {
                 duration = std::atoi(token.c_str());
+            }
+            else if (check_stateful && token == "S")
+            {
+                stateful = true;
             }
             else
             {
@@ -146,11 +152,13 @@ extract_tsk_type(const std::string& label)
         throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
     }
 
-    return std::make_pair(tsk, duration);
+    return std::make_tuple(tsk, duration, stateful);
 }
 
 void
-parse_tsk_types(std::string& tsk_types_param, std::vector<std::vector<std::pair<tsk_e, int>>>& tsk_types)
+parse_tsk_types(std::string& tsk_types_param,
+                std::vector<std::vector<std::tuple<tsk_e, int, bool>>>& tsk_types,
+                const bool check_stateful)
 {
     size_t i = 0;
     size_t sta = 0;
@@ -164,14 +172,14 @@ parse_tsk_types(std::string& tsk_types_param, std::vector<std::vector<std::pair<
         }
         else if (tsk_types_param[i] == ',' && tsk_types_param[i + 1] != '(')
         {
-            tsk_types[sta].push_back(extract_tsk_type(tmp));
+            tsk_types[sta].push_back(extract_tsk_type(tmp, check_stateful));
             tmp.clear();
         }
         else if (tsk_types_param[i] == ')')
         {
             if (tsk_types_param[i + 1] != ')')
             {
-                tsk_types[sta].push_back(extract_tsk_type(tmp));
+                tsk_types[sta].push_back(extract_tsk_type(tmp, check_stateful));
                 tmp.clear();
                 sta++;
             }
@@ -184,7 +192,9 @@ parse_tsk_types(std::string& tsk_types_param, std::vector<std::vector<std::pair<
 }
 
 void
-parse_tsk_types_sta(std::string& sck_type_sta_param, std::vector<std::pair<tsk_e, int>>& tsk_types)
+parse_tsk_types_sta(std::string& sck_type_sta_param,
+                    std::vector<std::tuple<tsk_e, int, bool>>& tsk_types,
+                    const bool check_stateful)
 {
     size_t i = 0;
     std::string tmp;
@@ -194,7 +204,7 @@ parse_tsk_types_sta(std::string& sck_type_sta_param, std::vector<std::pair<tsk_e
             tmp.clear();
         else if (sck_type_sta_param[i] == ',' || sck_type_sta_param[i] == ')')
         {
-            tsk_types.push_back(extract_tsk_type(tmp));
+            tsk_types.push_back(extract_tsk_type(tmp, check_stateful));
             tmp.clear();
         }
         else
@@ -227,6 +237,8 @@ main(int argc, char** argv)
                           { "tsk-per-sta", no_argument, NULL, 'n' },
                           { "tsk-types", no_argument, NULL, 'r' },
                           { "tsk-types-sta", no_argument, NULL, 'R' },
+                          { "chain", no_argument, NULL, 'C' },
+                          { "sched", no_argument, NULL, 'S' },
 #ifdef SPU_HWLOC
                           { "pinning-policy", no_argument, NULL, 'P' },
 #endif
@@ -251,15 +263,18 @@ main(int argc, char** argv)
     std::string tsk_per_sta_param;
     std::vector<size_t> tsk_per_sta;
     std::string tsk_types_param;
-    std::vector<std::vector<std::pair<tsk_e, int>>> tsk_types;
+    std::vector<std::vector<std::tuple<tsk_e, int, bool>>> tsk_types;
     std::string tsk_types_sta_param;
-    std::vector<std::pair<tsk_e, int>> tsk_types_sta;
+    std::vector<std::tuple<tsk_e, int, bool>> tsk_types_sta;
     std::string pinning_policy;
     std::string check_task;
+    std::string chain_param;
+    std::string scheduler = "OTAC";
+    std::vector<std::tuple<tsk_e, int, bool>> tsk_chain;
 
     while (1)
     {
-        const int opt = getopt_long(argc, argv, "t:f:s:d:e:u:o:i:j:n:r:R:P:cpbgqwh", longopts, 0);
+        const int opt = getopt_long(argc, argv, "t:f:s:d:e:u:o:i:j:n:r:R:P:C:S:cpbgqwh", longopts, 0);
         if (opt == -1) break;
         switch (opt)
         {
@@ -315,11 +330,18 @@ main(int argc, char** argv)
                 break;
             case 'r':
                 tsk_types_param = std::string(optarg);
-                parse_tsk_types(tsk_types_param, tsk_types);
+                parse_tsk_types(tsk_types_param, tsk_types, false);
                 break;
             case 'R':
                 tsk_types_sta_param = std::string(optarg);
-                parse_tsk_types_sta(tsk_types_sta_param, tsk_types_sta);
+                parse_tsk_types_sta(tsk_types_sta_param, tsk_types_sta, false);
+                break;
+            case 'C':
+                chain_param = std::string(optarg);
+                parse_tsk_types_sta(chain_param, tsk_chain, true);
+                break;
+            case 'S':
+                scheduler = std::string(optarg);
                 break;
 #ifdef SPU_HWLOC
             case 'P':
@@ -387,6 +409,12 @@ main(int argc, char** argv)
                           << "The socket type of tasks on each stage (SFWD or SIO)                  "
                           << "[" << (tsk_types_sta_param.empty() ? "empty" : "\"" + tsk_types_sta_param + "\"") << "]"
                           << std::endl;
+                std::cout << "  -C, --chain              "
+                          << "Description of the tasks chain (to be combined with '-S' param)       "
+                          << "[" << (chain_param.empty() ? "empty" : "\"" + chain_param + "\"") << "]" << std::endl;
+                std::cout << "  -S, --sched              "
+                          << "Scheduler algorithm for the pipeline creation ('none' or 'OTAC')      "
+                          << "[" << (scheduler.empty() ? "empty" : "\"" + scheduler + "\"") << "]" << std::endl;
 #ifdef SPU_HWLOC
                 std::cout << "  -P, --pinning-policy     "
                           << "Pinning policy for pipeline execution                                 "
@@ -408,26 +436,33 @@ main(int argc, char** argv)
 #endif
 
     // Checking for errors
-    if (!tsk_types_sta.empty() && !tsk_types.empty())
+    if (!tsk_types_sta.empty() && !tsk_types.empty() && !tsk_chain.empty())
     {
-        message << "You have to select only one parameter for socket type ('-r' exclusive or '-R').";
+        message << "You have to select only one of these parameters: '-r', '-R', and '-C'.";
         throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
     }
 
-    // Building the socket type vector in case of stage socket
-    for (size_t i = 0; i < tsk_types_sta.size(); ++i)
-    {
-        tsk_types.push_back({});
-        for (size_t j = 0; j < tsk_per_sta[i]; ++j)
-            tsk_types[i].push_back(tsk_types_sta[i]);
-    }
-
     size_t n_tsk = 0;
-    tsk_per_sta.resize(tsk_types.size());
-    for (size_t i = 0; i < tsk_per_sta.size(); i++)
+    if (tsk_chain.empty())
     {
-        tsk_per_sta[i] = tsk_types[i].size();
-        n_tsk += tsk_types[i].size();
+        // Building the socket type vector in case of stage socket
+        for (size_t i = 0; i < tsk_types_sta.size(); ++i)
+        {
+            tsk_types.push_back({});
+            for (size_t j = 0; j < tsk_per_sta[i]; ++j)
+                tsk_types[i].push_back(tsk_types_sta[i]);
+        }
+
+        tsk_per_sta.resize(tsk_types.size());
+        for (size_t i = 0; i < tsk_per_sta.size(); i++)
+        {
+            tsk_per_sta[i] = tsk_types[i].size();
+            n_tsk += tsk_types[i].size();
+        }
+    }
+    else
+    {
+        n_tsk = tsk_chain.size();
     }
 
     if (n_tsk < 2)
@@ -436,14 +471,26 @@ main(int argc, char** argv)
         throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
     }
 
-    std::vector<std::pair<tsk_e, int>> tsk_types_1d;
-    for (size_t i = 0; i < tsk_types.size(); i++)
-        for (size_t j = 0; j < tsk_types[i].size(); j++)
-            tsk_types_1d.push_back(tsk_types[i][j]);
+    std::vector<std::tuple<tsk_e, int, bool>> tsk_types_1d;
+    if (tsk_chain.empty())
+    {
+        for (size_t i = 0; i < tsk_types.size(); i++)
+            for (size_t j = 0; j < tsk_types[i].size(); j++)
+                tsk_types_1d.push_back(tsk_types[i][j]);
+    }
+    else
+        tsk_types_1d = tsk_chain;
 
-    // initialize the threads
-    if (n_threads.size() == 0) n_threads = std::vector<size_t>(tsk_types.size(), 1);
-    if (force_sequence) n_threads = std::vector<size_t>(1, n_threads[0]);
+    if (tsk_chain.empty())
+    {
+        // initialize the threads
+        if (n_threads.size() == 0) n_threads = std::vector<size_t>(tsk_types.size(), 1);
+        if (force_sequence) n_threads = std::vector<size_t>(1, n_threads[0]);
+    }
+    else
+    {
+        if (n_threads.size() == 0) n_threads = std::vector<size_t>(std::thread::hardware_concurrency(), 1);
+    }
     n_threads_param = "";
     for (size_t t = 0; t < n_threads.size(); t++)
         n_threads_param += std::to_string(n_threads[t]) + ((t < n_threads.size() - 1) ? "," : "");
@@ -462,6 +509,9 @@ main(int argc, char** argv)
               << std::endl;
     std::cout << "#   - tsk_types_sta  = " << (tsk_types_sta_param.empty() ? "[empty]" : tsk_types_sta_param.c_str())
               << std::endl;
+    std::cout << "#   - chain          = " << (chain_param.empty() ? "[empty]" : chain_param.c_str()) << std::endl;
+    if (!chain_param.empty())
+        std::cout << "#   - scheduler      = " << (scheduler.empty() ? "[empty]" : scheduler.c_str()) << std::endl;
 #ifdef SPU_HWLOC
     std::cout << "#   - pinning_policy = " << (pinning_policy.empty() ? "[empty]" : pinning_policy.c_str())
               << std::endl;
@@ -491,143 +541,147 @@ main(int argc, char** argv)
     // modules creation
     std::vector<std::shared_ptr<module::Module>> modules(n_tsk, nullptr);
     size_t tas = 0;
-    for (auto sta : tsk_types)
+    for (auto tst : tsk_types_1d)
     {
-        for (auto tst : sta)
+        switch (std::get<0>(tst))
         {
-            switch (tst.first)
+            case tsk_e::initialize:
             {
-                case tsk_e::initialize:
+                if (tas != 0)
                 {
-                    if (tas != 0)
-                    {
-                        message << "An 'Initializer' can only be at the begining of the chain (tas = '" << tas << "').";
-                        throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
-                    }
-                    if (tst.second != -1)
-                    {
-                        message << "An 'Initializer' can't have a duration (tas = '" << tas << "').";
-                        throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
-                    }
-                    auto initializer = new module::Initializer<uint8_t>(data_length);
-                    modules[tas].reset(initializer);
-                    initializer->set_custom_name("Init" + std::to_string(tas));
-                    break;
-                }
-                case tsk_e::read:
-                {
-                    if (tas != 0)
-                    {
-                        message << "A 'Source' can only be at the begining of the chain (tas = '" << tas << "').";
-                        throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
-                    }
-                    if (tst.second != -1)
-                    {
-                        message << "A 'Source' can't have a duration (tas = '" << tas << "').";
-                        throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
-                    }
-                    const bool auto_reset = false;
-                    auto source = new module::Source_user_binary<uint8_t>(data_length, in_filepath, auto_reset);
-                    modules[tas].reset(source);
-                    source->set_custom_name("Reader" + std::to_string(tas));
-                    break;
-                }
-                case tsk_e::relay:
-                case tsk_e::relayf:
-                {
-                    if (tas == 0 || tas == n_tsk - 1)
-                    {
-                        message << "A 'Relayer' can't be at the begining or at the end of the chain (tas = '" << tas
-                                << "').";
-                        throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
-                    }
-                    auto relayer = new module::Relayer<uint8_t>(data_length);
-                    modules[tas].reset(relayer);
-                    size_t sleep_duration_us = (tst.second == -1) ? sleep_time_us : tst.second;
-                    relayer->set_ns(sleep_duration_us * 1000);
-                    if (tst.second != -1)
-                        relayer->set_custom_name("Rly" + std::to_string(tas) + "_d" +
-                                                 std::to_string(sleep_duration_us));
-                    else
-                        relayer->set_custom_name("Relayer" + std::to_string(tas));
-                    break;
-                }
-                case tsk_e::increment:
-                case tsk_e::incrementf:
-                {
-                    if (tas == 0 || tas == n_tsk - 1)
-                    {
-                        message << "An 'Incrementer' can't be at the begining or at the end of the chain (tas = '"
-                                << tas << "').";
-                        throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
-                    }
-                    auto incrementer = new module::Incrementer<uint8_t>(data_length);
-                    modules[tas].reset(incrementer);
-                    size_t sleep_duration_us = (tst.second == -1) ? sleep_time_us : tst.second;
-                    incrementer->set_ns(sleep_duration_us * 1000);
-                    if (tst.second != -1)
-                        incrementer->set_custom_name("Incr" + std::to_string(tas) + "_d" +
-                                                     std::to_string(sleep_duration_us));
-                    else
-                        incrementer->set_custom_name("Incr" + std::to_string(tas));
-                    break;
-                }
-                case tsk_e::finalize:
-                {
-                    if (tas != n_tsk - 1)
-                    {
-                        message << "A 'Finalizer' can only be at the end of the chain (tas = '" << tas << "').";
-                        throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
-                    }
-                    if (tst.second != -1)
-                    {
-                        message << "A 'Finalizer' can't have a duration (tas = '" << tas << "').";
-                        throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
-                    }
-                    auto finalizer = new module::Finalizer<uint8_t>(data_length);
-                    modules[tas].reset(finalizer);
-                    finalizer->set_custom_name("Fin" + std::to_string(tas));
-                    break;
-                }
-                case tsk_e::write:
-                {
-                    if (tas != n_tsk - 1)
-                    {
-                        message << "A 'Sink' can only be at the end of the chain (tas = '" << tas << "').";
-                        throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
-                    }
-                    if (tst.second != -1)
-                    {
-                        message << "A 'Sink' can't have a duration (tas = '" << tas << "').";
-                        throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
-                    }
-                    auto sink = new module::Sink_user_binary<uint8_t>(data_length, out_filepath);
-                    modules[tas].reset(sink);
-                    sink->set_custom_name("Writer" + std::to_string(tas));
-                    break;
-                }
-                default:
-                    message << "Unsupported case (tas = '" << tas << "').";
+                    message << "An 'Initializer' can only be at the begining of the chain (tas = '" << tas << "').";
                     throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
-            };
-            tas++;
+                }
+                if (std::get<1>(tst) != -1)
+                {
+                    message << "An 'Initializer' can't have a duration (tas = '" << tas << "').";
+                    throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
+                }
+                auto initializer = new module::Initializer<uint8_t>(data_length);
+                modules[tas].reset(initializer);
+                initializer->set_custom_name("Init" + std::to_string(tas));
+                break;
+            }
+            case tsk_e::read:
+            {
+                if (tas != 0)
+                {
+                    message << "A 'Source' can only be at the begining of the chain (tas = '" << tas << "').";
+                    throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
+                }
+                if (std::get<1>(tst) != -1)
+                {
+                    message << "A 'Source' can't have a duration (tas = '" << tas << "').";
+                    throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
+                }
+                const bool auto_reset = false;
+                auto source = new module::Source_user_binary<uint8_t>(data_length, in_filepath, auto_reset);
+                modules[tas].reset(source);
+                source->set_custom_name("Reader" + std::to_string(tas));
+                break;
+            }
+            case tsk_e::relay:
+            case tsk_e::relayf:
+            {
+                if (tas == 0 || tas == n_tsk - 1)
+                {
+                    message << "A 'Relayer' can't be at the begining or at the end of the chain (tas = '" << tas
+                            << "').";
+                    throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
+                }
+                auto relayer = new module::Relayer<uint8_t>(data_length);
+                modules[tas].reset(relayer);
+                size_t sleep_duration_us = (std::get<1>(tst) == -1) ? sleep_time_us : std::get<1>(tst);
+                relayer->set_ns(sleep_duration_us * 1000);
+                if (std::get<1>(tst) != -1)
+                    relayer->set_custom_name("Rly" + std::to_string(tas) + "_d" + std::to_string(sleep_duration_us));
+                else
+                    relayer->set_custom_name("Relayer" + std::to_string(tas));
+                break;
+            }
+            case tsk_e::increment:
+            case tsk_e::incrementf:
+            {
+                if (tas == 0 || tas == n_tsk - 1)
+                {
+                    message << "An 'Incrementer' can't be at the begining or at the end of the chain (tas = '" << tas
+                            << "').";
+                    throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
+                }
+                auto incrementer = new module::Incrementer<uint8_t>(data_length);
+                modules[tas].reset(incrementer);
+                size_t sleep_duration_us = (std::get<1>(tst) == -1) ? sleep_time_us : std::get<1>(tst);
+                incrementer->set_ns(sleep_duration_us * 1000);
+                if (std::get<1>(tst) != -1)
+                    incrementer->set_custom_name("Incr" + std::to_string(tas) + "_d" +
+                                                 std::to_string(sleep_duration_us));
+                else
+                    incrementer->set_custom_name("Incr" + std::to_string(tas));
+                break;
+            }
+            case tsk_e::finalize:
+            {
+                if (tas != n_tsk - 1)
+                {
+                    message << "A 'Finalizer' can only be at the end of the chain (tas = '" << tas << "').";
+                    throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
+                }
+                if (std::get<1>(tst) != -1)
+                {
+                    message << "A 'Finalizer' can't have a duration (tas = '" << tas << "').";
+                    throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
+                }
+                auto finalizer = new module::Finalizer<uint8_t>(data_length);
+                modules[tas].reset(finalizer);
+                finalizer->set_custom_name("Fin" + std::to_string(tas));
+                break;
+            }
+            case tsk_e::write:
+            {
+                if (tas != n_tsk - 1)
+                {
+                    message << "A 'Sink' can only be at the end of the chain (tas = '" << tas << "').";
+                    throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
+                }
+                if (std::get<1>(tst) != -1)
+                {
+                    message << "A 'Sink' can't have a duration (tas = '" << tas << "').";
+                    throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
+                }
+                auto sink = new module::Sink_user_binary<uint8_t>(data_length, out_filepath);
+                modules[tas].reset(sink);
+                sink->set_custom_name("Writer" + std::to_string(tas));
+                break;
+            }
+            default:
+                message << "Unsupported case (tas = '" << tas << "').";
+                throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
+        };
+
+        if (std::get<2>(tst))
+        {
+            auto tsk_ids = std::get<0>(tsk_2_ids[std::get<0>(tst)]);
+            for (auto tid : tsk_ids)
+                (*modules[tas])[tid].set_stateful(true);
         }
+
+        tas++;
     }
 
     // sockets binding
     for (size_t t = 0; t < tsk_types_1d.size() - 1; t++)
     {
-        size_t tskid_out = std::get<0>(tsk_2_ids[tsk_types_1d[t].first])[0];
-        size_t sckid_out = std::get<2>(tsk_2_ids[tsk_types_1d[t].first])[0];
-        size_t tskid_in = std::get<0>(tsk_2_ids[tsk_types_1d[t + 1].first])[0];
-        size_t sckid_in = std::get<1>(tsk_2_ids[tsk_types_1d[t + 1].first])[0];
+        size_t tskid_out = std::get<0>(tsk_2_ids[std::get<0>(tsk_types_1d[t])])[0];
+        size_t sckid_out = std::get<2>(tsk_2_ids[std::get<0>(tsk_types_1d[t])])[0];
+        size_t tskid_in = std::get<0>(tsk_2_ids[std::get<0>(tsk_types_1d[t + 1])])[0];
+        size_t sckid_in = std::get<1>(tsk_2_ids[std::get<0>(tsk_types_1d[t + 1])])[0];
 
-        if (tsk_types_1d[t + 1].first == tsk_e::write && tsk_types_1d[0].first == tsk_e::read)
-            tskid_in = std::get<0>(tsk_2_ids[tsk_types_1d[t + 1].first])[1];
+        if (std::get<0>(tsk_types_1d[t + 1]) == tsk_e::write && std::get<0>(tsk_types_1d[0]) == tsk_e::read)
+            tskid_in = std::get<0>(tsk_2_ids[std::get<0>(tsk_types_1d[t + 1])])[1];
 
         (*modules[t + 1].get())[tskid_in][sckid_in] = (*modules[t].get())[tskid_out][sckid_out];
     }
-    if (tsk_types_1d[n_tsk - 1].first == tsk_e::write && tsk_types_1d[0].first == tsk_e::read)
+    if (std::get<0>(tsk_types_1d[n_tsk - 1]) == tsk_e::write && std::get<0>(tsk_types_1d[0]) == tsk_e::read)
         (*modules[n_tsk - 1].get())[1][1] = (*modules[0].get())[0][1];
 
     std::unique_ptr<runtime::Sequence> sequence_chain;
@@ -640,7 +694,7 @@ main(int argc, char** argv)
     if (force_sequence)
     {
         size_t tskid_last =
-          (tsk_types_1d[n_tsk - 1].first == tsk_e::write && tsk_types_1d[0].first == tsk_e::read) ? 1 : 0;
+          (std::get<0>(tsk_types_1d[n_tsk - 1]) == tsk_e::write && std::get<0>(tsk_types_1d[0]) == tsk_e::read) ? 1 : 0;
         sequence_chain.reset(
           new runtime::Sequence((*modules[0].get())[0], (*modules[n_tsk - 1].get())[tskid_last], n_threads[0]));
         sequence_chain->set_n_frames(n_inter_frames);
@@ -664,7 +718,7 @@ main(int argc, char** argv)
             }
 
         // prepare input data in case of initializer first
-        if (tsk_types[0][0].first == tsk_e::initialize)
+        if (std::get<0>(tsk_types[0][0]) == tsk_e::initialize)
         {
             auto tid = 0;
             for (auto cur_initializer : sequence_chain.get()->get_cloned_modules<module::Initializer<uint8_t>>(
@@ -696,7 +750,7 @@ main(int argc, char** argv)
                 { /* do nothing */
                 }
             } while ((!n_exec || ++counter < (n_exec / n_threads[0])) &&
-                     ((tsk_types_1d[0].first == tsk_e::read)
+                     ((std::get<0>(tsk_types_1d[0]) == tsk_e::read)
                         ? !(*((module::Source_user_binary<uint8_t>*)(modules[0].get()))).is_done()
                         : true));
         }
@@ -705,7 +759,7 @@ main(int argc, char** argv)
         auto elapsed_time = duration.count() / 1000.f / 1000.f;
         std::cout << "Sequence elapsed time: " << elapsed_time << " ms" << std::endl;
 
-        if (tsk_types_1d[n_tsk - 1].first == tsk_e::finalize)
+        if (std::get<0>(tsk_types_1d[n_tsk - 1]) == tsk_e::finalize)
             finalizer_list = sequence_chain.get()->get_cloned_modules<module::Finalizer<uint8_t>>(
               *((module::Finalizer<uint8_t>*)modules[n_tsk - 1].get()));
     }
@@ -714,43 +768,70 @@ main(int argc, char** argv)
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     else
     {
-        // create the stages
-        std::vector<std::pair<std::vector<runtime::Task*>, std::vector<runtime::Task*>>> stages;
-        tas = 0;
-        for (size_t s = 0; s < tsk_types.size(); ++s)
+
+        // --------------------------------------------------------------------------------------------------------- //
+        // ----------------------------------------------------------------------------- AUTOMATIC PIPELINE CREATION //
+        // --------------------------------------------------------------------------------------------------------- //
+        if (!tsk_chain.empty())
         {
-            size_t n_tsk_cur_sta = tsk_types[s].size();
-            size_t tskid_first = std::get<0>(tsk_2_ids[tsk_types[s][0].first])[0];
-            if (tsk_types[s][0].first == tsk_e::write && tsk_types[0][0].first == tsk_e::read) tskid_first = 1;
+            // size_t R = n_threads[0];
 
-            size_t tskid_last = std::get<0>(tsk_2_ids[tsk_types[s][n_tsk_cur_sta - 1].first])[0];
-            if (tsk_types[s][n_tsk_cur_sta - 1].first == tsk_e::write && tsk_types[0][0].first == tsk_e::read)
-                tskid_last = 1;
+            // TODO
 
-            spu::runtime::Task* first_stage_task = &(*modules[tas].get())[tskid_first];
-            spu::runtime::Task* last_stage_task = &(*modules[tas + n_tsk_cur_sta - 1].get())[tskid_last];
+            // pipeline_chain.reset( /* ? */ );
+        }
+        // --------------------------------------------------------------------------------------------------------- //
+        // -------------------------------------------------------------------------------- MANUAL PIPELINE CREATION //
+        // --------------------------------------------------------------------------------------------------------- //
+        else
+        {
+            // create the stages
+            std::vector<std::pair<std::vector<runtime::Task*>, std::vector<runtime::Task*>>> stages;
+            tas = 0;
+            for (size_t s = 0; s < tsk_types.size(); ++s)
+            {
+                size_t n_tsk_cur_sta = tsk_types[s].size();
+                size_t tskid_first = std::get<0>(tsk_2_ids[std::get<0>(tsk_types[s][0])])[0];
+                if (std::get<0>(tsk_types[s][0]) == tsk_e::write && std::get<0>(tsk_types[0][0]) == tsk_e::read)
+                    tskid_first = 1;
 
-            if (tsk_types[s][n_tsk_cur_sta - 1].first == tsk_e::write && tsk_types[0][0].first == tsk_e::read &&
-                n_tsk_cur_sta > 1)
-                stages.push_back({ { first_stage_task, last_stage_task }, {} });
-            else
-                stages.push_back({ { first_stage_task }, { last_stage_task } });
-            tas += n_tsk_cur_sta;
+                size_t tskid_last = std::get<0>(tsk_2_ids[std::get<0>(tsk_types[s][n_tsk_cur_sta - 1])])[0];
+                if (std::get<0>(tsk_types[s][n_tsk_cur_sta - 1]) == tsk_e::write &&
+                    std::get<0>(tsk_types[0][0]) == tsk_e::read)
+                    tskid_last = 1;
+
+                spu::runtime::Task* first_stage_task = &(*modules[tas].get())[tskid_first];
+                spu::runtime::Task* last_stage_task = &(*modules[tas + n_tsk_cur_sta - 1].get())[tskid_last];
+
+                if (std::get<0>(tsk_types[s][n_tsk_cur_sta - 1]) == tsk_e::write &&
+                    std::get<0>(tsk_types[0][0]) == tsk_e::read && n_tsk_cur_sta > 1)
+                    stages.push_back({ { first_stage_task, last_stage_task }, {} });
+                else
+                    stages.push_back({ { first_stage_task }, { last_stage_task } });
+                tas += n_tsk_cur_sta;
+            }
+
+            // buffer vector
+            std::vector<size_t> pool_buff;
+            for (size_t s = 0; s < tsk_types.size() - 1; ++s)
+                pool_buff.push_back(buffer_size);
+
+            // waiting type
+            std::vector<bool> wait_vect;
+            for (size_t s = 0; s < tsk_types.size() - 1; ++s)
+                wait_vect.push_back(active_waiting);
+
+            std::vector<bool> enable_pin = std::vector<bool>(tsk_types.size(), pinning_policy.empty() ? false : true);
+            pipeline_chain.reset(new runtime::Pipeline(
+              (*modules[0].get())[0], stages, n_threads, pool_buff, wait_vect, enable_pin, pinning_policy));
         }
 
-        // buffer vector
-        std::vector<size_t> pool_buff;
-        for (size_t s = 0; s < tsk_types.size() - 1; ++s)
-            pool_buff.push_back(buffer_size);
+        if (pipeline_chain == nullptr)
+        {
+            message << "Allocation of the pipeline failed!";
+            throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
+        }
 
-        // waiting type
-        std::vector<bool> wait_vect;
-        for (size_t s = 0; s < tsk_types.size() - 1; ++s)
-            wait_vect.push_back(active_waiting);
-
-        std::vector<bool> enable_pin = std::vector<bool>(tsk_types.size(), pinning_policy.empty() ? false : true);
-        pipeline_chain.reset(new runtime::Pipeline(
-          (*modules[0].get())[0], stages, n_threads, pool_buff, wait_vect, enable_pin, pinning_policy));
         pipeline_chain->set_n_frames(n_inter_frames);
 
         if (!dot_filepath.empty())
@@ -771,7 +852,7 @@ main(int argc, char** argv)
             }
 
         // prepare input data in case of increment
-        if (tsk_types[0][0].first == tsk_e::initialize)
+        if (std::get<0>(tsk_types[0][0]) == tsk_e::initialize)
         {
             auto tid = 0;
             for (auto cur_initializer :
@@ -794,7 +875,7 @@ main(int argc, char** argv)
         auto elapsed_time = duration.count() / 1000.f / 1000.f;
         std::cout << "Pipeline elapsed time: " << elapsed_time << " ms" << std::endl;
 
-        if (tsk_types_1d[n_tsk - 1].first == tsk_e::finalize)
+        if (std::get<0>(tsk_types_1d[n_tsk - 1]) == tsk_e::finalize)
             finalizer_list = pipeline_chain.get()
                                ->get_stages()[pipeline_chain.get()->get_stages().size() - 1]
                                ->get_cloned_modules<module::Finalizer<uint8_t>>(
@@ -804,11 +885,11 @@ main(int argc, char** argv)
     // count the number of incrementers in the chain
     size_t n_incr_count = 0;
     for (auto& t : tsk_types_1d)
-        if (t.first == tsk_e::increment || t.first == tsk_e::incrementf) n_incr_count++;
+        if (std::get<0>(t) == tsk_e::increment || std::get<0>(t) == tsk_e::incrementf) n_incr_count++;
 
     // verification of the pipeline/sequence execution
     unsigned int test_results = 1;
-    if (tsk_types_1d[0].first == tsk_e::initialize && tsk_types_1d[n_tsk - 1].first == tsk_e::finalize &&
+    if (std::get<0>(tsk_types_1d[0]) == tsk_e::initialize && std::get<0>(tsk_types_1d[n_tsk - 1]) == tsk_e::finalize &&
         (n_threads[0] == n_threads[n_threads.size() - 1] || force_sequence))
     {
         bool tests_passed = true;
@@ -843,7 +924,8 @@ main(int argc, char** argv)
 
         test_results = !tests_passed;
     }
-    else if (tsk_types_1d[0].first == tsk_e::read && tsk_types_1d[n_tsk - 1].first == tsk_e::write && n_incr_count == 0)
+    else if (std::get<0>(tsk_types_1d[0]) == tsk_e::read && std::get<0>(tsk_types_1d[n_tsk - 1]) == tsk_e::write &&
+             n_incr_count == 0)
     {
         size_t in_filesize = filesize(in_filepath.c_str());
         size_t n_frames = ((int)std::ceil((float)(in_filesize * 8) / (float)(data_length * n_inter_frames)));
@@ -896,17 +978,17 @@ main(int argc, char** argv)
 
     for (size_t t = 0; t < tsk_types_1d.size() - 1; t++)
     {
-        size_t tskid_out = std::get<0>(tsk_2_ids[tsk_types_1d[t].first])[0];
-        size_t sckid_out = std::get<2>(tsk_2_ids[tsk_types_1d[t].first])[0];
-        size_t tskid_in = std::get<0>(tsk_2_ids[tsk_types_1d[t + 1].first])[0];
-        size_t sckid_in = std::get<1>(tsk_2_ids[tsk_types_1d[t + 1].first])[0];
+        size_t tskid_out = std::get<0>(tsk_2_ids[std::get<0>(tsk_types_1d[t])])[0];
+        size_t sckid_out = std::get<2>(tsk_2_ids[std::get<0>(tsk_types_1d[t])])[0];
+        size_t tskid_in = std::get<0>(tsk_2_ids[std::get<0>(tsk_types_1d[t + 1])])[0];
+        size_t sckid_in = std::get<1>(tsk_2_ids[std::get<0>(tsk_types_1d[t + 1])])[0];
 
-        if (tsk_types_1d[t + 1].first == tsk_e::write && tsk_types_1d[0].first == tsk_e::read)
-            tskid_in = std::get<0>(tsk_2_ids[tsk_types_1d[t + 1].first])[1];
+        if (std::get<0>(tsk_types_1d[t + 1]) == tsk_e::write && std::get<0>(tsk_types_1d[0]) == tsk_e::read)
+            tskid_in = std::get<0>(tsk_2_ids[std::get<0>(tsk_types_1d[t + 1])])[1];
 
         (*modules[t + 1].get())[tskid_in][sckid_in].unbind((*modules[t].get())[tskid_out][sckid_out]);
     }
-    if (tsk_types_1d[n_tsk - 1].first == tsk_e::write && tsk_types_1d[0].first == tsk_e::read)
+    if (std::get<0>(tsk_types_1d[n_tsk - 1]) == tsk_e::write && std::get<0>(tsk_types_1d[0]) == tsk_e::read)
         (*modules[n_tsk - 1].get())[1][1].unbind((*modules[0].get())[0][1]);
 
 #ifdef SPU_HWLOC
