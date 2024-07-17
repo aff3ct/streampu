@@ -658,12 +658,9 @@ main(int argc, char** argv)
                 throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
         };
 
-        if (std::get<2>(tst))
-        {
-            auto tsk_ids = std::get<0>(tsk_2_ids[std::get<0>(tst)]);
-            for (auto tid : tsk_ids)
-                (*modules[tas])[tid].set_stateful(true);
-        }
+        auto tsk_ids = std::get<0>(tsk_2_ids[std::get<0>(tst)]);
+        for (auto tid : tsk_ids)
+            (*modules[tas])[tid].set_stateful(std::get<2>(tst));
 
         tas++;
     }
@@ -774,11 +771,25 @@ main(int argc, char** argv)
         // --------------------------------------------------------------------------------------------------------- //
         if (!tsk_chain.empty())
         {
-            // size_t R = n_threads[0];
+            size_t tskid_last =
+              (std::get<0>(tsk_types_1d[n_tsk - 1]) == tsk_e::write && std::get<0>(tsk_types_1d[0]) == tsk_e::read) ? 1
+                                                                                                                    : 0;
+            sequence_chain.reset(
+              new runtime::Sequence((*modules[0].get())[0], (*modules[n_tsk - 1].get())[tskid_last], 1));
 
-            // TODO
+            std::unique_ptr<tools::Scheduler_OTAC> sched_otac;
+            size_t R = n_threads[0];
+            sched_otac.reset(new tools::Scheduler_OTAC(sequence_chain.get(), R));
+            sched_otac->profile();
+            sched_otac->print_profiling();
+            pipeline_chain.reset(sched_otac->generate_pipeline());
 
-            // pipeline_chain.reset( /* ? */ );
+            std::vector<Sequence*> stages_chain = pipeline_chain->get_stages();
+            n_threads.resize(0);
+            for (auto& s : stages_chain)
+            {
+                n_threads.push_back(s->get_n_threads());
+            }
         }
         // --------------------------------------------------------------------------------------------------------- //
         // -------------------------------------------------------------------------------- MANUAL PIPELINE CREATION //
@@ -852,7 +863,7 @@ main(int argc, char** argv)
             }
 
         // prepare input data in case of increment
-        if (std::get<0>(tsk_types[0][0]) == tsk_e::initialize)
+        if (std::get<0>(tsk_types_1d[0]) == tsk_e::initialize)
         {
             auto tid = 0;
             for (auto cur_initializer :
