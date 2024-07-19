@@ -731,7 +731,7 @@ if(SPU_TESTS)
     add_test(NAME pipeline13::spu-test-generic-pipeline COMMAND spu-test-generic-pipeline -i ${INPUT_FILE} -n "1,4,3,2,1" -t "1,3,1,3,1" -R "(read,relayf,relay,relayf,write)")
     set_tests_properties(pipeline13::spu-test-generic-pipeline PROPERTIES LABELS generic-pipeline)
 
-	############################# same tests with increment instread of relayers ######################################
+	############################# same tests with increment instead of relayers #######################################
 
     # simple sequence example
     add_test(NAME sequence4::spu-test-generic-pipeline COMMAND spu-test-generic-pipeline -e 100 -n "1,3,1" -t "3" -R "(init,incr,fin)" -q)
@@ -775,6 +775,18 @@ if(SPU_TESTS)
     # pipeline with socket type per stage
     add_test(NAME pipeline27::spu-test-generic-pipeline COMMAND spu-test-generic-pipeline -e 12 -n "1,4,3,2,1" -t "1,3,1,3,1" -R "(init,incrf,incr,relayf,fin)")
     set_tests_properties(pipeline27::spu-test-generic-pipeline PROPERTIES LABELS generic-pipeline)
+
+    # scheduler tests
+    add_test(NAME pipeline28::spu-test-generic-pipeline COMMAND spu-test-generic-pipeline -e 12 -t "1" -S "OTAC" -C "(init,relayf_15,incrementf_S_20,relay_15,fin)")
+    set_tests_properties(pipeline28::spu-test-generic-pipeline PROPERTIES LABELS generic-pipeline)
+    add_test(NAME pipeline29::spu-test-generic-pipeline COMMAND spu-test-generic-pipeline -e 13 -t "4" -S "OTAC" -C "(init,relayf_15,incrementf_20,relay_15,fin)")
+    set_tests_properties(pipeline29::spu-test-generic-pipeline PROPERTIES LABELS generic-pipeline)
+    add_test(NAME pipeline30::spu-test-generic-pipeline COMMAND spu-test-generic-pipeline -e 50 -t "3" -S "OTAC" -C "(init_S,relayf_S_15,incrementf_S_20,relay_S_15,fin_S)")
+    set_tests_properties(pipeline30::spu-test-generic-pipeline PROPERTIES LABELS generic-pipeline)
+    add_test(NAME pipeline31::spu-test-generic-pipeline COMMAND spu-test-generic-pipeline -e 67 -t "6" -S "OTAC" -C "(init_S,relayf_S_15,incrementf_120,relay_S_15,fin_S)")
+    set_tests_properties(pipeline31::spu-test-generic-pipeline PROPERTIES LABELS generic-pipeline)
+    add_test(NAME pipeline32::spu-test-generic-pipeline COMMAND spu-test-generic-pipeline -e 21 -t "3" -S "OTAC" -C "(init,relayf_15,incrementf_S_60,relay_15,fin)")
+    set_tests_properties(pipeline32::spu-test-generic-pipeline PROPERTIES LABELS generic-pipeline)
 
     add_test(NAME sequence0::spu-test-exclusive-paths-pipeline COMMAND spu-test-exclusive-paths-pipeline -t 1 -q -i ${INPUT_FILE})
     set_tests_properties(sequence0::spu-test-exclusive-paths-pipeline PROPERTIES LABELS exclusive-paths-pipeline)
