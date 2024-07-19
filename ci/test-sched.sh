@@ -1,6 +1,12 @@
 #!/bin/bash
 
-bin=../build/bin/test-generic-pipeline
+if [ -z "$BIN_PATH" ]
+then
+   bin=../build/bin/test-generic-pipeline
+else
+   bin=$BIN_PATH
+fi
+
 file=out.txt
 res="# Solution stages {(n,r)}:"
 rm -f $file
