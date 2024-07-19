@@ -6,7 +6,7 @@
 using namespace spu;
 using namespace spu::tools;
 
-#define DEBUG false;
+/*#define VERBOSE*/
 
 Scheduler_OTAC::Scheduler_OTAC(runtime::Sequence& sequence, const size_t R)
   : Scheduler(&sequence)
@@ -161,7 +161,7 @@ main_loop_packing(std::vector<task_desc_t>& chain, double P, int& e, std::vector
 
     while ((e <= N) && (weight(s, 1) + chain.at(e - 1).exec_duration.count() <= P))
     {
-#ifdef DEBUG
+#ifdef VERBOSE
         std::cout << "main loop packing: weight = " << weight(s, 1);
         std::cout << " new_task=" << chain.at(e - 1).exec_duration.count();
         std::cout << " weight+new_task= " << (weight(s, 1) + chain.at(e - 1).exec_duration.count());
@@ -236,7 +236,7 @@ go_back_packing(std::vector<task_desc_t>& chain, int f, int& e, std::vector<runt
 void
 print_solution(std::vector<std::pair<int, int>>& solution, std::string tag)
 {
-    std::cout << tag << ":" << std::endl;
+    std::cout << tag << ": {";
     for (auto& pair_s : solution)
     {
         std::cout << "(" << pair_s.first << ", " << pair_s.second << ")";
@@ -256,7 +256,9 @@ bool
 PROBE(std::vector<task_desc_t>& chain, double& P, int R, std::vector<std::pair<int, int>>& solution)
 {
     solution.clear();
+#ifdef VERBOSE
     std::cout << "--" << std::endl;
+#endif
     // Initial state
     int i = 0; // current sub-sequence index
     // int b = 0; // begin index of the current sub sequence
@@ -295,7 +297,9 @@ PROBE(std::vector<task_desc_t>& chain, double& P, int R, std::vector<std::pair<i
 
         // Resources needed for a packing
         r = std::ceil(weight(s, 1) / P);
+#ifdef VERBOSE
         std::cout << "r=" << r << " weight=" << weight(s, 1) << " P=" << P << std::endl;
+#endif
 
         // All tasks do not fit with the last packing and si stateless
         if ((e <= N) && is_stateless(s))
@@ -332,7 +336,7 @@ PROBE(std::vector<task_desc_t>& chain, double& P, int R, std::vector<std::pair<i
             maxWeight = w;
         }
     }
-#ifdef DEBUG
+#ifdef VERBOSE
     print_solution(solution, "Probe");
 #endif
     int sum = 0;
@@ -368,7 +372,7 @@ SOLVE(std::vector<task_desc_t>& chain, int R, double& P)
     double Pmin = weight_t(chain, R) > maxTf ? weight_t(chain, R) : maxTf;
     double Pmax = Pmin + maxWeight;
     std::vector<std::pair<int, int>> solution;
-#ifdef DEBUG
+#ifdef VERBOSE
     std::cout << "Pmin=" << Pmin << " Pmax=" << Pmax << " maxWeight=" << maxWeight << std::endl;
 #endif
 
@@ -391,7 +395,7 @@ SOLVE(std::vector<task_desc_t>& chain, int R, double& P)
             {
                 Pmax = P;
                 solution = solution_tmp;
-#ifdef DEBUG
+#ifdef VERBOSE
                 print_solution(solution_tmp, "Pmax " + std::to_string(Pmax) + " Pmin " + std::to_string(Pmin));
 #endif
             }
@@ -402,9 +406,7 @@ SOLVE(std::vector<task_desc_t>& chain, int R, double& P)
             P = (Pmax + Pmin) / 2;
         }
     }
-#ifdef DEBUG
-    print_solution(solution, "DEBUG mode - solution stages {(n,r)}");
-#endif
+    print_solution(solution, "# Solution stages {(n,r)}");
     auto solution_returned = new std::vector<std::pair<int, int>>(solution);
     return solution_returned;
 }
@@ -465,11 +467,12 @@ Scheduler_OTAC::generate_pipeline()
         puids.push_back(cur_puids);
     }
     // remove the last buffer size and active waiting (no need for the last stage)
-    synchro_buffer_sizes.pop_back();
-    synchro_active_waiting.pop_back();
+    if (solution.size() != 1)
+    {
+        synchro_buffer_sizes.pop_back();
+        synchro_active_waiting.pop_back();
+    }
 
-    runtime::Pipeline pipeline(
+    return new runtime::Pipeline(
       firsts, lasts, sep_stages, n_threads, synchro_buffer_sizes, synchro_active_waiting, thread_pining, puids);
-    auto pipeline_ptr = new runtime::Pipeline(pipeline);
-    return pipeline_ptr;
 }
