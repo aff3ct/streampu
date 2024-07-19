@@ -20,8 +20,6 @@ Scheduler_OTAC::Scheduler_OTAC(runtime::Sequence* sequence, const size_t R)
 {
 }
 
-// Once everything is working, replace at() by [] operator (faster)
-
 // USEFUL FUNCTIONS
 // Weight of a sub-sequence (stage)
 double
@@ -73,30 +71,6 @@ getIndex(std::vector<task_desc_t>& chain, task_desc_t target)
         }
     }
     return index;
-}
-
-// Find direct successor of a sub-sequence in the chain
-runtime::Task*
-successor(std::vector<task_desc_t>& chain, std::vector<runtime::Task*>& s)
-{
-    int chain_size = chain.size();
-    assert(chain_size > 0); // Chain must be non empty
-    task_desc_t last;
-    last.tptr = (s.back());
-    last.exec_duration = last.tptr->get_duration_avg();
-    runtime::Task* successor_res;
-    int index_last = getIndex(chain, last);
-    assert(index_last >= 0);
-    if (index_last + 1 < chain_size)
-    {
-        auto task_tmp = *((chain[index_last + 1]).tptr);
-        //successor_res = new runtime::Task(task_tmp);
-        return new runtime::Task(task_tmp); //successor_res;
-    }
-    else
-    {
-        return NULL;
-    }
 }
 
 // Is the subsequence stateless ?
@@ -291,8 +265,6 @@ PROBE(std::vector<task_desc_t>& chain, double& P, int R, std::vector<std::pair<i
 
         // Add tasks to si while they fit
         main_loop_packing(chain, P, e, s, n);
-        // e, s[list_index], n[list_index] = main_loop_packing(chain, P, e,
-        // s[list_index], n[list_index])
 
         // Resources needed for a packing
         r = std::ceil(weight(s, 1) / P);
@@ -315,7 +287,6 @@ PROBE(std::vector<task_desc_t>& chain, double& P, int R, std::vector<std::pair<i
                 e = extra_tasks_packing(chain, P, f, s, n);
                 if (weight(s, r - 1) <= P)
                 {
-                    // P_current
                     e = improved_packing(chain, P, e, s, n, r);
                 }
                 // No benefit from taking tasks
@@ -362,15 +333,16 @@ PROBE(std::vector<task_desc_t>& chain, double& P, int R, std::vector<std::pair<i
 ////          - P updated if there is a solution
 ////          - a composition solution (n,r)
 //
-std::vector<std::pair<int, int>>*
-SOLVE(std::vector<task_desc_t>& chain, int R, double& P)
+// std::vector<std::pair<int, int>>*
+void
+SOLVE(std::vector<task_desc_t>& chain, int R, double& P, std::vector<std::pair<int, int>>& solution)
 {
     double maxTf = max_stateful_weight(chain);
     double maxWeight = max_weight_t(chain);
     double eps = 1 / (double)R;
     double Pmin = weight_t(chain, R) > maxTf ? weight_t(chain, R) : maxTf;
     double Pmax = Pmin + maxWeight;
-    std::vector<std::pair<int, int>> solution;
+    std::vector<std::pair<int, int>> solution_current;
 #ifdef VERBOSE
     std::cout << "Pmin=" << Pmin << " Pmax=" << Pmax << " maxWeight=" << maxWeight << std::endl;
 #endif
@@ -393,7 +365,7 @@ SOLVE(std::vector<task_desc_t>& chain, int R, double& P)
             if (is_there_a_solution == true)
             {
                 Pmax = P;
-                solution = solution_tmp;
+                solution_current = solution_tmp;
 #ifdef VERBOSE
                 print_solution(solution_tmp, "Pmax " + std::to_string(Pmax) + " Pmin " + std::to_string(Pmin));
 #endif
@@ -404,10 +376,10 @@ SOLVE(std::vector<task_desc_t>& chain, int R, double& P)
             }
             P = (Pmax + Pmin) / 2;
         }
+        solution = solution_current;
     }
     print_solution(solution, "# Solution stages {(n,r)}");
-    //auto solution_returned = new std::vector<std::pair<int, int>>(solution);
-    return new std::vector<std::pair<int, int>>(solution); //solution_returned;
+    /*return new std::vector<std::pair<int, int>>(solution); // solution_returned*/;
 }
 
 runtime::Pipeline*
@@ -415,9 +387,9 @@ Scheduler_OTAC::generate_pipeline()
 {
     this->profile();
     double P; // period
-    std::vector<std::pair<int, int>>* solution_ptr = SOLVE(this->tasks_desc, this->R, P);
-    assert(solution_ptr != nullptr);
-    std::vector<std::pair<int, int>> solution = *solution_ptr;
+
+    std::vector<std::pair<int, int>> solution;
+    SOLVE(this->tasks_desc, this->R, P, solution);
     assert(solution.size() != 0);
 
     std::vector<runtime::Task*> firsts;
@@ -465,6 +437,7 @@ Scheduler_OTAC::generate_pipeline()
         }
         puids.push_back(cur_puids);
     }
+
     // remove the last buffer size and active waiting (no need for the last stage)
     if (solution.size() != 1)
     {
