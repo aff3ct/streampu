@@ -34,16 +34,16 @@ static std::map<std::string, tsk_e> str_2_tsk = {
 };
 
 // clang-format off
-//              task              tsk ids              sck IN ids           sck OUT ids
-static std::map<tsk_e, std::tuple<std::vector<size_t>, std::vector<size_t>, std::vector<size_t>>> tsk_2_ids = {
-    { tsk_e::initialize, {  { 0    }, {      }, { 0    } } },
-    { tsk_e::read,       {  { 0    }, {      }, { 0, 1 } } },
-    { tsk_e::relay,      {  { 0    }, { 0    }, { 1    } } },
-    { tsk_e::relayf,     {  { 1    }, { 0    }, { 0    } } },
-    { tsk_e::increment,  {  { 0    }, { 0    }, { 1    } } },
-    { tsk_e::incrementf, {  { 1    }, { 0    }, { 0    } } },
-    { tsk_e::finalize,   {  { 0    }, { 0    }, {      } } },
-    { tsk_e::write,      {  { 0, 1 }, { 0, 1 }, {      } } },
+//              task              tsk ids              sck IN ids           sck OUT ids          stateful
+static std::map<tsk_e, std::tuple<std::vector<size_t>, std::vector<size_t>, std::vector<size_t>, bool>> tsk_2_ids = {
+    { tsk_e::initialize, {  { 0    }, {      }, { 0    }, false } },
+    { tsk_e::read,       {  { 0    }, {      }, { 0, 1 }, true  } },
+    { tsk_e::relay,      {  { 0    }, { 0    }, { 1    }, false } },
+    { tsk_e::relayf,     {  { 1    }, { 0    }, { 0    }, false } },
+    { tsk_e::increment,  {  { 0    }, { 0    }, { 1    }, false } },
+    { tsk_e::incrementf, {  { 1    }, { 0    }, { 0    }, false } },
+    { tsk_e::finalize,   {  { 0    }, { 0    }, {      }, false } },
+    { tsk_e::write,      {  { 0, 1 }, { 0, 1 }, {      }, true  } },
 };
 // clang-format on
 
@@ -125,7 +125,6 @@ extract_tsk_type(const std::string& label, const bool check_stateful)
             if (str_2_tsk.find(token) != str_2_tsk.end())
             {
                 tsk = str_2_tsk[token];
-                if (tsk == tsk_e::read || tsk == tsk_e::write) stateful = true;
             }
             else if (std::atoi(token.c_str()))
             {
@@ -151,6 +150,8 @@ extract_tsk_type(const std::string& label, const bool check_stateful)
         message << "tokens.size() has to be higher than 0.";
         throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
     }
+
+    if (std::get<3>(tsk_2_ids[tsk])) stateful = true;
 
     return std::make_tuple(tsk, duration, stateful);
 }
@@ -413,7 +414,7 @@ main(int argc, char** argv)
                           << "Description of the tasks chain (to be combined with '-S' param)       "
                           << "[" << (chain_param.empty() ? "empty" : "\"" + chain_param + "\"") << "]" << std::endl;
                 std::cout << "  -S, --sched              "
-                          << "Scheduler algorithm for the pipeline creation ('none' or 'OTAC')      "
+                          << "Scheduler algorithm for the pipeline creation (OTAC')                 "
                           << "[" << (scheduler.empty() ? "empty" : "\"" + scheduler + "\"") << "]" << std::endl;
 #ifdef SPU_HWLOC
                 std::cout << "  -P, --pinning-policy     "
@@ -489,7 +490,7 @@ main(int argc, char** argv)
     }
     else
     {
-        if (n_threads.size() == 0) n_threads = std::vector<size_t>(std::thread::hardware_concurrency(), 1);
+        if (n_threads.size() == 0) n_threads = std::vector<size_t>(1, std::thread::hardware_concurrency());
     }
     n_threads_param = "";
     for (size_t t = 0; t < n_threads.size(); t++)
@@ -658,12 +659,9 @@ main(int argc, char** argv)
                 throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
         };
 
-        if (std::get<2>(tst))
-        {
-            auto tsk_ids = std::get<0>(tsk_2_ids[std::get<0>(tst)]);
-            for (auto tid : tsk_ids)
-                (*modules[tas])[tid].set_stateful(true);
-        }
+        auto tsk_ids = std::get<0>(tsk_2_ids[std::get<0>(tst)]);
+        for (auto tid : tsk_ids)
+            (*modules[tas])[tid].set_stateful(std::get<2>(tst));
 
         tas++;
     }
@@ -693,10 +691,7 @@ main(int argc, char** argv)
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     if (force_sequence)
     {
-        size_t tskid_last =
-          (std::get<0>(tsk_types_1d[n_tsk - 1]) == tsk_e::write && std::get<0>(tsk_types_1d[0]) == tsk_e::read) ? 1 : 0;
-        sequence_chain.reset(
-          new runtime::Sequence((*modules[0].get())[0], (*modules[n_tsk - 1].get())[tskid_last], n_threads[0]));
+        sequence_chain.reset(new runtime::Sequence((*modules[0].get())[0], n_threads[0]));
         sequence_chain->set_n_frames(n_inter_frames);
         sequence_chain->set_no_copy_mode(no_copy_mode);
 
@@ -774,11 +769,17 @@ main(int argc, char** argv)
         // --------------------------------------------------------------------------------------------------------- //
         if (!tsk_chain.empty())
         {
+            sequence_chain.reset(new runtime::Sequence((*modules[0].get())[0], 1));
+
             // size_t R = n_threads[0];
 
             // TODO
 
             // pipeline_chain.reset( /* ? */ );
+
+            // n_threads.resize( /* */ );
+            // for (size_t i = 0; i < n_threads.size(); i++)
+            //      n_threads[i] = /* ? */;
         }
         // --------------------------------------------------------------------------------------------------------- //
         // -------------------------------------------------------------------------------- MANUAL PIPELINE CREATION //
@@ -829,7 +830,7 @@ main(int argc, char** argv)
         if (pipeline_chain == nullptr)
         {
             message << "Allocation of the pipeline failed!";
-            throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
+            throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
         }
 
         pipeline_chain->set_n_frames(n_inter_frames);
@@ -840,7 +841,7 @@ main(int argc, char** argv)
             pipeline_chain->export_dot(file);
         }
 
-        // configuration of the sequence tasks
+        // configuration of the pipeline tasks
         for (auto& mod : pipeline_chain->get_modules<module::Module>(false))
             for (auto& tsk : mod->tasks)
             {
