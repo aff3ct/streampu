@@ -67,7 +67,7 @@ getIndex(std::vector<task_desc_t>& chain, task_desc_t target)
     int index = -1;
     for (int i = 0; i < chain.size(); i++)
     {
-        if (chain.at(i).tptr == target.tptr)
+        if (chain[i].tptr == target.tptr)
         {
             index = i;
         }
@@ -89,15 +89,14 @@ successor(std::vector<task_desc_t>& chain, std::vector<runtime::Task*>& s)
     assert(index_last >= 0);
     if (index_last + 1 < chain_size)
     {
-        auto task_tmp = *((chain.at(index_last + 1)).tptr);
-        successor_res = new runtime::Task(task_tmp);
+        auto task_tmp = *((chain[index_last + 1]).tptr);
+        //successor_res = new runtime::Task(task_tmp);
+        return new runtime::Task(task_tmp); //successor_res;
     }
     else
     {
         return NULL;
     }
-
-    return successor_res;
 }
 
 // Is the subsequence stateless ?
@@ -159,15 +158,15 @@ main_loop_packing(std::vector<task_desc_t>& chain, double P, int& e, std::vector
 {
     int N = chain.size();
 
-    while ((e <= N) && (weight(s, 1) + chain.at(e - 1).exec_duration.count() <= P))
+    while ((e <= N) && (weight(s, 1) + chain[e - 1].exec_duration.count() <= P))
     {
 #ifdef VERBOSE
         std::cout << "main loop packing: weight = " << weight(s, 1);
-        std::cout << " new_task=" << chain.at(e - 1).exec_duration.count();
-        std::cout << " weight+new_task= " << (weight(s, 1) + chain.at(e - 1).exec_duration.count());
+        std::cout << " new_task=" << chain[e - 1].exec_duration.count();
+        std::cout << " weight+new_task= " << (weight(s, 1) + chain[e - 1].exec_duration.count());
         std::cout << " P = " << P << std::endl;
 #endif
-        s.push_back(chain.at(e - 1).tptr);
+        s.push_back(chain[e - 1].tptr);
         n += 1;
         e += 1;
     }
@@ -179,9 +178,9 @@ stateless_packing(std::vector<task_desc_t>& chain, int& e, std::vector<runtime::
 {
     int N = chain.size();
     int f = e;
-    while ((f <= N) && (!chain.at(f - 1).tptr->is_stateful()))
+    while ((f <= N) && (!chain[f - 1].tptr->is_stateful()))
     {
-        s.push_back(chain.at(f - 1).tptr);
+        s.push_back(chain[f - 1].tptr);
         n += 1;
         f += 1;
     }
@@ -193,13 +192,13 @@ int
 extra_tasks_packing(std::vector<task_desc_t>& chain, double P, int& f, std::vector<runtime::Task*>& s, int& n)
 {
     std::vector<runtime::Task*> s_temp;
-    s_temp.push_back(chain.at(f - 1).tptr);
+    s_temp.push_back(chain[f - 1].tptr);
     int e = f;
-    while ((chain.at(e - 2).exec_duration.count() + weight(s_temp, 1)) <= P)
+    while ((chain[e - 2].exec_duration.count() + weight(s_temp, 1)) <= P)
     {
         s.pop_back();
         n -= 1;
-        s_temp.push_back(chain.at(e - 1).tptr);
+        s_temp.push_back(chain[e - 1].tptr);
         e -= 1;
     }
     return e;
@@ -211,13 +210,13 @@ improved_packing(std::vector<task_desc_t>& chain, double P, int& e, std::vector<
 {
     r -= 1;
     int N = chain.size();
-    while ((e <= N) && (weight(s, r) + chain.at(e - 1).exec_duration.count() / r <= P))
+    while ((e <= N) && (weight(s, r) + chain[e - 1].exec_duration.count() / r <= P))
     {
-        s.push_back(chain.at(e - 1).tptr);
+        s.push_back(chain[e - 1].tptr);
         n += 1;
         e += 1;
     }
-    return e; // s, n, r
+    return e;
 }
 
 // Else, go back to the previous configuration
@@ -226,11 +225,11 @@ go_back_packing(std::vector<task_desc_t>& chain, int f, int& e, std::vector<runt
 {
     while (e != f)
     {
-        s.push_back(chain.at(e - 1).tptr);
+        s.push_back(chain[e - 1].tptr);
         n += 1;
         e += 1;
     }
-    return e; // s, n
+    return e;
 }
 
 void
@@ -286,7 +285,7 @@ PROBE(std::vector<task_desc_t>& chain, double& P, int R, std::vector<std::pair<i
 
         // New loop
         std::vector<runtime::Task*> s;
-        s.push_back(chain.at(b - 1).tptr);
+        s.push_back(chain[b - 1].tptr);
         r = 1;
         n = 1;
 
@@ -347,11 +346,11 @@ PROBE(std::vector<task_desc_t>& chain, double& P, int R, std::vector<std::pair<i
     if (sum <= R)
     {
         P = maxWeight;
-        return true; //, P, (n, r);
+        return true;
     }
     else
     {
-        return false; //, P, (n, r);
+        return false;
     }
 }
 
@@ -407,8 +406,8 @@ SOLVE(std::vector<task_desc_t>& chain, int R, double& P)
         }
     }
     print_solution(solution, "# Solution stages {(n,r)}");
-    auto solution_returned = new std::vector<std::pair<int, int>>(solution);
-    return solution_returned;
+    //auto solution_returned = new std::vector<std::pair<int, int>>(solution);
+    return new std::vector<std::pair<int, int>>(solution); //solution_returned;
 }
 
 runtime::Pipeline*
@@ -430,10 +429,10 @@ Scheduler_OTAC::generate_pipeline()
     std::vector<bool> thread_pining;
     std::vector<std::vector<size_t>> puids;
 
-    firsts.push_back((this->tasks_desc.at(0)).tptr);
+    firsts.push_back((this->tasks_desc[0]).tptr);
 
     int N = this->tasks_desc.size();
-    lasts.push_back((this->tasks_desc.at(N - 1)).tptr);
+    lasts.push_back((this->tasks_desc[N - 1]).tptr);
 
     size_t buffer_size = 1000;
     bool active_wait = false;
@@ -445,8 +444,8 @@ Scheduler_OTAC::generate_pipeline()
     {
         end = begin + stage.first - 1;
         std::pair<std::vector<runtime::Task*>, std::vector<runtime::Task*>> cur_stage_desc;
-        cur_stage_desc.first.push_back(this->tasks_desc.at(begin).tptr);
-        cur_stage_desc.second.push_back(this->tasks_desc.at(end).tptr);
+        cur_stage_desc.first.push_back(this->tasks_desc[begin].tptr);
+        cur_stage_desc.second.push_back(this->tasks_desc[end].tptr);
         sep_stages.push_back(cur_stage_desc);
         begin = end + 1;
 
