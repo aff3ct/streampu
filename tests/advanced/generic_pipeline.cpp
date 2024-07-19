@@ -772,10 +772,18 @@ main(int argc, char** argv)
             sequence_chain.reset(new runtime::Sequence((*modules[0].get())[0], 1));
             size_t R = n_threads[0];
 
-            std::unique_ptr<tools::Scheduler_OTAC> sched_otac(new tools::Scheduler_OTAC(sequence_chain.get(), R));
-            sched_otac->profile();
-            sched_otac->print_profiling();
-            pipeline_chain.reset(sched_otac->generate_pipeline());
+            if (scheduler == "OTAC")
+            {
+                std::unique_ptr<tools::Scheduler_OTAC> sched_otac(new tools::Scheduler_OTAC(sequence_chain.get(), R));
+                sched_otac->profile();
+                sched_otac->print_profiling();
+                pipeline_chain.reset(sched_otac->generate_pipeline());
+            }
+            else
+            {
+                message << "Current scheduler is not supported (scheduler = '" << scheduler << "')!";
+                throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
+            }
 
             std::vector<Sequence*> stages_chain = pipeline_chain->get_stages();
             n_threads.resize(0);
