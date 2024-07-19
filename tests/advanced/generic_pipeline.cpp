@@ -414,7 +414,7 @@ main(int argc, char** argv)
                           << "Description of the tasks chain (to be combined with '-S' param)       "
                           << "[" << (chain_param.empty() ? "empty" : "\"" + chain_param + "\"") << "]" << std::endl;
                 std::cout << "  -S, --sched              "
-                          << "Scheduler algorithm for the pipeline creation (OTAC')                 "
+                          << "Scheduler algorithm for the pipeline creation ('OTAC')                "
                           << "[" << (scheduler.empty() ? "empty" : "\"" + scheduler + "\"") << "]" << std::endl;
 #ifdef SPU_HWLOC
                 std::cout << "  -P, --pinning-policy     "

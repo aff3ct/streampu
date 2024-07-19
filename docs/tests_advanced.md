@@ -35,7 +35,7 @@ Here is a summary of the available tasks and their behavior:
 - `finalize` or `fin`: Memorizes (= copies) the input data for further 
   validation (if there is a validation). 
 
-There are two main ways of describing a processing chain:
+There are three main ways of describing a processing chain:
 
 1. **Specification of homogeneous types of task per stage.** This is performed 
    with the combination of the `-R` (or `--tsk-types-sta`) and `-n` 
@@ -52,6 +52,20 @@ There are two main ways of describing a processing chain:
    `-r ((init),(incrf,relay,incr),(fin))` will produce a 3-stage pipeline with 
    the following sequence of tasks: `init` $\rightarrow$ `incrf` $\rightarrow$ 
    `relay` $\rightarrow$ `incr` $\rightarrow$ `fin`.
+
+3. **Use of a scheduler to perform the pipeline decomposition in stages 
+   automatically.** This is achieved with `-C` (or `--chain`) CLI parameter.
+   For instance, `-C "(init,relayf_15,incrementf_S_60,relay_15,fin)"` defines
+   a chain that starts with a stateless `initialize` task, after that, a 
+   stateless `relayf` task of 15 microseconds is executed, then an `incrementf` 
+   task of 60 microsecond is executed (note that the `_S` means that this task 
+   will be considered as "stateful" for the scheduler). Finally, a 15 
+   microseconds stateless `relay` task and a stateless `finalize` task are 
+   executed. By default the scheduler considers that the number of resources $R$ 
+   is the number of CPU hardware threads but you can override this behavior by 
+   using the `-t` (or `--n-threads`) CLI parameter. It is also possible to 
+   choose the scheduler algorithm with the `-S` (or `--sched`) CLI parameter.
+   For now, the only available scheduler is `OTAC`.
 
 The first notation is a compressed way to describe chains of tasks. By default, 
 the chain is split in [pipeline](pipeline.md) stages according to the given 
@@ -144,6 +158,7 @@ usage: ./bin/test-generic-pipeline [options]
   -n, --tsk-per-sta        The number of tasks on each stage of the pipeline                     [empty]
   -r, --tsk-types          The socket type of each task (SFWD or SIO)                            [empty]
   -R, --tsk-types-sta      The socket type of tasks on each stage (SFWD or SIO)                  [empty]
-  -P, --pinning-policy     Pinning policy for pipeline execution                                 [empty]
+  -C, --chain              Description of the tasks chain (to be combined with '-S' param)       [empty]
+  -S, --sched              Scheduler algorithm for the pipeline creation (OTAC')                 ["OTAC"]
   -h, --help               This help                                                             [false]
 ```
