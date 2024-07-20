@@ -63,7 +63,7 @@ int
 getIndex(std::vector<task_desc_t>& chain, task_desc_t target)
 {
     int index = -1;
-    for (int i = 0; i < chain.size(); i++)
+    for (size_t i = 0; i < chain.size(); i++)
     {
         if (chain[i].tptr == target.tptr)
         {
@@ -431,7 +431,7 @@ Scheduler_OTAC::generate_pipeline()
         }
 
         std::vector<size_t> cur_puids;
-        for (size_t c = puid_counter; c < puid_counter + stage.second; c++)
+        for (size_t c = puid_counter; c < (size_t)(puid_counter + stage.second); c++)
         {
             cur_puids.push_back(c + stage.second);
         }
