@@ -9,8 +9,6 @@
 #include "Runtime/Sequence/Sequence.hpp"
 #include "Tools/Interface/Interface_reset.hpp"
 #include <chrono>
-#include <string>
-#include <tuple>
 #include <utility>
 #include <vector>
 
@@ -28,7 +26,6 @@ class Scheduler : public tools::Interface_reset
   public:
     Scheduler(runtime::Sequence& sequence);
     Scheduler(runtime::Sequence* sequence);
-    Scheduler(std::unique_ptr<spu::runtime::Sequence> sequence);
     void profile();
     void print_profiling();
 
@@ -39,7 +36,11 @@ class Scheduler : public tools::Interface_reset
   public:
     virtual ~Scheduler() = default;
     virtual runtime::Pipeline* generate_pipeline() = 0;
+    virtual std::vector<std::pair<int, int>> get_solution() = 0;
     virtual void reset();
+
+  protected:
+    runtime::Pipeline* instantiate_pipeline(const std::vector<std::pair<int, int>>& solution);
 };
 } // namespace sched
 } // namespace spu

@@ -243,6 +243,7 @@ main(int argc, char** argv)
 #ifdef SPU_HWLOC
                           { "pinning-policy", no_argument, NULL, 'P' },
 #endif
+                          { "verbose", no_argument, NULL, 'v' },
                           { 0 } };
 
     std::string n_threads_param;
@@ -261,6 +262,7 @@ main(int argc, char** argv)
     bool debug = false;
     bool force_sequence = false;
     bool active_waiting = false;
+    bool verbose = false;
     std::string tsk_per_sta_param;
     std::vector<size_t> tsk_per_sta;
     std::string tsk_types_param;
@@ -275,7 +277,7 @@ main(int argc, char** argv)
 
     while (1)
     {
-        const int opt = getopt_long(argc, argv, "t:f:s:d:e:u:o:i:j:n:r:R:P:C:S:cpbgqwh", longopts, 0);
+        const int opt = getopt_long(argc, argv, "t:f:s:d:e:u:o:i:j:n:r:R:P:C:S:cpbgqwhv", longopts, 0);
         if (opt == -1) break;
         switch (opt)
         {
@@ -324,6 +326,9 @@ main(int argc, char** argv)
                 break;
             case 'q':
                 force_sequence = true;
+                break;
+            case 'v':
+                verbose = true;
                 break;
             case 'n':
                 tsk_per_sta_param = std::string(optarg);
@@ -422,6 +427,9 @@ main(int argc, char** argv)
                           << "[" << (pinning_policy.empty() ? "empty" : "\"" + pinning_policy + "\"") << "]"
                           << std::endl;
 #endif
+                std::cout << "  -v, --verbose            "
+                          << "Show information about the scheduling choices                         "
+                          << "[false]" << std::endl;
                 std::cout << "  -h, --help               "
                           << "This help                                                             "
                           << "[false]" << std::endl;
@@ -531,6 +539,7 @@ main(int argc, char** argv)
     std::cout << "#   - debug          = " << (debug ? "true" : "false") << std::endl;
     std::cout << "#   - force_sequence = " << (force_sequence ? "true" : "false") << std::endl;
     std::cout << "#   - active_waiting = " << (active_waiting ? "true" : "false") << std::endl;
+    std::cout << "#   - verbose        = " << (verbose ? "true" : "false") << std::endl;
     std::cout << "#" << std::endl;
 
     if (!force_sequence && !no_copy_mode)
@@ -763,7 +772,6 @@ main(int argc, char** argv)
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     else
     {
-
         // --------------------------------------------------------------------------------------------------------- //
         // ----------------------------------------------------------------------------- AUTOMATIC PIPELINE CREATION //
         // --------------------------------------------------------------------------------------------------------- //
@@ -772,17 +780,33 @@ main(int argc, char** argv)
             sequence_chain.reset(new runtime::Sequence((*modules[0].get())[0], 1));
             size_t R = n_threads[0];
 
+            std::unique_ptr<sched::Scheduler> sched;
             if (scheduler == "OTAC")
             {
-                std::unique_ptr<sched::Scheduler_OTAC> sched_otac(new sched::Scheduler_OTAC(sequence_chain.get(), R));
-                sched_otac->profile();
-                sched_otac->print_profiling();
-                pipeline_chain.reset(sched_otac->generate_pipeline());
+                sched.reset(new sched::Scheduler_OTAC(sequence_chain.get(), R));
             }
             else
             {
                 message << "Current scheduler is not supported (scheduler = '" << scheduler << "')!";
                 throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
+            }
+
+            if (verbose)
+            {
+                sched->profile();
+                sched->print_profiling();
+            }
+
+            pipeline_chain.reset(sched->generate_pipeline());
+
+            if (verbose)
+            {
+                std::vector<std::pair<int, int>> solution = sched->get_solution();
+                std::cout << "# Solution stages {(n,r)}"
+                          << ": {";
+                for (auto& pair_s : solution)
+                    std::cout << "(" << pair_s.first << ", " << pair_s.second << ")";
+                std::cout << "}" << std::endl;
             }
 
             std::vector<Sequence*> stages_chain = pipeline_chain->get_stages();
