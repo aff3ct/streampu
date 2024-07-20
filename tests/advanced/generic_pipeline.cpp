@@ -774,7 +774,7 @@ main(int argc, char** argv)
 
             if (scheduler == "OTAC")
             {
-                std::unique_ptr<tools::Scheduler_OTAC> sched_otac(new tools::Scheduler_OTAC(sequence_chain.get(), R));
+                std::unique_ptr<sched::Scheduler_OTAC> sched_otac(new sched::Scheduler_OTAC(sequence_chain.get(), R));
                 sched_otac->profile();
                 sched_otac->print_profiling();
                 pipeline_chain.reset(sched_otac->generate_pipeline());

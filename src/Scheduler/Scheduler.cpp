@@ -1,14 +1,12 @@
-#include "Tools/Scheduler/Scheduler.hpp"
-#include "Tools/Display/Statistics/Statistics.hpp"
+#include "Scheduler/Scheduler.hpp"
 #include <cassert>
 
 using namespace spu;
-using namespace spu::tools;
+using namespace spu::sched;
 
 Scheduler::Scheduler(runtime::Sequence& sequence)
   : sequence(&sequence)
 {
-    // assert(&sequence != nullptr);
     this->sequence = &sequence;
 }
 

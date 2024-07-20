@@ -132,6 +132,12 @@
 #ifndef TASK_HPP_
 #include <Runtime/Task/Task.hpp>
 #endif
+#ifndef SCHEDULER_OTAC_HPP__
+#include <Scheduler/OTAC/Scheduler_OTAC.hpp>
+#endif
+#ifndef SCHEDULER_HPP__
+#include <Scheduler/Scheduler.hpp>
+#endif
 #ifndef BIT_PACKER_HPP_
 #include <Tools/Algo/Bit_packer/Bit_packer.hpp>
 #endif
@@ -236,12 +242,6 @@
 #endif
 #ifndef REPORTER_HPP__
 #include <Tools/Reporter/Reporter.hpp>
-#endif
-#ifndef SCHEDULER_OTAC_HPP__
-#include <Tools/Scheduler/OTAC/Scheduler_OTAC.hpp>
-#endif
-#ifndef SCHEDULER_HPP__
-#include <Tools/Scheduler/Scheduler.hpp>
 #endif
 #ifndef SIGNAL_HANDLER_HPP_
 #include <Tools/Signal_handler/Signal_handler.hpp>

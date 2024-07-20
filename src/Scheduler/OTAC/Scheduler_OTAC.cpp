@@ -1,10 +1,10 @@
-#include "Tools/Scheduler/OTAC/Scheduler_OTAC.hpp"
+#include "Scheduler/OTAC/Scheduler_OTAC.hpp"
 #include <cassert>
 #include <cmath>
 #include <limits>
 
 using namespace spu;
-using namespace spu::tools;
+using namespace spu::sched;
 
 /*#define VERBOSE*/
 

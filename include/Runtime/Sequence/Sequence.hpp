@@ -27,7 +27,7 @@ namespace module
 class Task;
 class Module;
 } // namespace module
-namespace tools
+namespace sched
 {
 class Scheduler;
 }
@@ -74,7 +74,7 @@ class Sequence
   , public tools::Interface_is_done
 {
     friend Pipeline;
-    friend tools::Scheduler;
+    friend sched::Scheduler;
 
   protected:
     size_t n_threads;

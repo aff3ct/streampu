@@ -1,15 +1,15 @@
 /*!
  * \file
- * \brief Class tools::Scheduler_OTAC.
+ * \brief Class sched::Scheduler_OTAC.
  */
 #ifndef SCHEDULER_OTAC_HPP__
 #define SCHEDULER_OTAC_HPP__
 
-#include "Tools/Scheduler/Scheduler.hpp"
+#include "Scheduler/Scheduler.hpp"
 
 namespace spu
 {
-namespace tools
+namespace sched
 {
 
 class Scheduler_OTAC : public Scheduler
@@ -25,7 +25,7 @@ class Scheduler_OTAC : public Scheduler
     ~Scheduler_OTAC() = default;
     runtime::Pipeline* generate_pipeline() override;
 };
-} // namespace tools
+} // namespace sched
 } // namespace spu
 
 #endif // SCHEDULER_OTAC_HPP__

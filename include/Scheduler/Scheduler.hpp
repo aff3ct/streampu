@@ -1,6 +1,6 @@
 /*!
  * \file
- * \brief Class tools::Scheduler.
+ * \brief Class sched::Scheduler.
  */
 #ifndef SCHEDULER_HPP__
 #define SCHEDULER_HPP__
@@ -16,16 +16,15 @@
 
 namespace spu
 {
-namespace tools
+namespace sched
 {
 struct task_desc_t
 {
     runtime::Task* tptr;
     std::chrono::duration<double, std::nano> exec_duration;
 };
-class Scheduler : public Interface_reset
+class Scheduler : public tools::Interface_reset
 {
-    // friend runtime::Sequence;
   public:
     Scheduler(runtime::Sequence& sequence);
     Scheduler(runtime::Sequence* sequence);
@@ -42,7 +41,7 @@ class Scheduler : public Interface_reset
     virtual runtime::Pipeline* generate_pipeline() = 0;
     virtual void reset();
 };
-} // namespace tools
+} // namespace sched
 } // namespace spu
 
 #endif // SCHEDULER_HPP__
