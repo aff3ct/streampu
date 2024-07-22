@@ -2,6 +2,7 @@
 #include <cstdlib>
 #include <getopt.h>
 #include <iostream>
+#include <jluna.hpp>
 #include <memory>
 #include <string>
 #include <vector>
@@ -13,6 +14,11 @@ using namespace spu::runtime;
 int
 main(int argc, char** argv)
 {
+    jluna::initialize();
+    jluna::Base["println"]("hello julia");
+
+    exit(0);
+
     tools::Signal_handler::init();
 
     option longopts[] = { { "n-threads", required_argument, NULL, 't' },
@@ -134,9 +140,9 @@ main(int argc, char** argv)
         }
     }
 
-    std::cout << "#################################" << std::endl;
-    std::cout << "# Micro-benchmark: Simple chain #" << std::endl;
-    std::cout << "#################################" << std::endl;
+    std::cout << "#######################################" << std::endl;
+    std::cout << "# Micro-benchmark: Simple chain Julia #" << std::endl;
+    std::cout << "#######################################" << std::endl;
     std::cout << "#" << std::endl;
 
     std::cout << "# Command line arguments:" << std::endl;
