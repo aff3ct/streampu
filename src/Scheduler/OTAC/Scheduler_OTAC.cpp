@@ -14,14 +14,12 @@ using namespace spu::sched;
 Scheduler_OTAC::Scheduler_OTAC(runtime::Sequence& sequence, const size_t R)
   : Scheduler(&sequence)
   , R(R)
-  , solution(0)
 {
 }
 
 Scheduler_OTAC::Scheduler_OTAC(runtime::Sequence* sequence, const size_t R)
   : Scheduler(sequence)
   , R(R)
-  , solution(0)
 {
 }
 
@@ -219,7 +217,7 @@ go_back_packing(const std::vector<task_desc_t>& chain, const int f, int& e, std:
 }
 
 void
-print_solution(const std::vector<std::pair<int, int>>& solution, const std::string tag)
+print_solution(const std::vector<std::pair<size_t, size_t>>& solution, const std::string tag)
 {
     std::cout << tag << ": {";
     for (auto& pair_s : solution)
@@ -233,7 +231,7 @@ bool
 Scheduler_OTAC::PROBE(const std::vector<task_desc_t>& chain,
                       const size_t R,
                       double& P,
-                      std::vector<std::pair<int, int>>& solution)
+                      std::vector<std::pair<size_t, size_t>>& solution)
 {
     solution.clear();
 #ifdef VERBOSE
@@ -246,7 +244,7 @@ Scheduler_OTAC::PROBE(const std::vector<task_desc_t>& chain,
     int f;
     int n; // nunber of tasks by sub-sequence (in solution)
     int r; // number of resources by sub-sequence (in solution)
-    std::pair<int, int> tmp_nr;
+    std::pair<size_t, size_t> tmp_nr;
     std::vector<double> w;
     for (auto& t : chain)
     {
@@ -336,7 +334,7 @@ void
 Scheduler_OTAC::SOLVE(const std::vector<task_desc_t>& chain,
                       const size_t R,
                       double& P,
-                      std::vector<std::pair<int, int>>& solution)
+                      std::vector<std::pair<size_t, size_t>>& solution)
 {
     if (R == 0)
     {
@@ -352,7 +350,7 @@ Scheduler_OTAC::SOLVE(const std::vector<task_desc_t>& chain,
     double eps = 1 / (double)R;
     double Pmin = weight_t(chain, R) > maxTf ? weight_t(chain, R) : maxTf;
     double Pmax = Pmin + maxWeight;
-    std::vector<std::pair<int, int>> solution_current;
+    std::vector<std::pair<size_t, size_t>> solution_current;
 #ifdef VERBOSE
     std::cout << "Pmin=" << Pmin << " Pmax=" << Pmax << " maxWeight=" << maxWeight << std::endl;
 #endif
@@ -360,7 +358,7 @@ Scheduler_OTAC::SOLVE(const std::vector<task_desc_t>& chain,
     if (R == 1)
     {
         P = Pmax;
-        std::pair<int, int> pair_r1;
+        std::pair<size_t, size_t> pair_r1;
         pair_r1.first = chain.size();
         pair_r1.second = R;
         solution.push_back(pair_r1);
@@ -368,7 +366,7 @@ Scheduler_OTAC::SOLVE(const std::vector<task_desc_t>& chain,
     else
     {
         P = (Pmax + Pmin) / 2;
-        std::vector<std::pair<int, int>> solution_tmp;
+        std::vector<std::pair<size_t, size_t>> solution_tmp;
         while ((Pmax - Pmin) > eps && P > maxTf) //
         {
             bool is_there_a_solution = this->PROBE(chain, R, P, solution_tmp);
@@ -389,22 +387,12 @@ Scheduler_OTAC::SOLVE(const std::vector<task_desc_t>& chain,
         solution = solution_current;
     }
     // print_solution(solution, "# Solution stages {(n,r)}");
-    /*return new std::vector<std::pair<int, int>>(solution); // solution_returned*/;
+    /*return new std::vector<std::pair<size_t, size_t>>(solution); // solution_returned*/;
 }
 
-runtime::Pipeline*
-Scheduler_OTAC::generate_pipeline()
+void
+Scheduler_OTAC::schedule(const std::vector<task_desc_t>& tasks_desc, std::vector<std::pair<size_t, size_t>>& solution)
 {
-    this->profile();
-
     double P; // period
-    this->SOLVE(this->tasks_desc, this->R, P, this->solution);
-
-    return this->instantiate_pipeline(solution);
-}
-
-std::vector<std::pair<int, int>>
-Scheduler_OTAC::get_solution()
-{
-    return this->solution;
+    this->SOLVE(tasks_desc, this->R, P, solution);
 }

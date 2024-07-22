@@ -14,42 +14,45 @@ namespace sched
 
 class Scheduler_OTAC : public Scheduler
 {
+  protected:
+    const size_t R;
+
   public:
     Scheduler_OTAC(runtime::Sequence& sequence, const size_t R);
     Scheduler_OTAC(runtime::Sequence* sequence, const size_t R);
-
-  protected:
-    const size_t R;
-    std::vector<std::pair<int, int>> solution;
-
-  public:
     ~Scheduler_OTAC() = default;
-    runtime::Pipeline* generate_pipeline() override;
-    std::vector<std::pair<int, int>> get_solution() override;
 
   protected:
-    // Find if there is a solution
-    //// Inputs: - chain
-    ////         - R (number of resources)
-    //// Outputs: - P updated if there is a solution
-    ////          - a composition solution (n,r)
-    //            - True/False if there is/is no solution
+    virtual void schedule(const std::vector<task_desc_t>& tasks_desc,
+                          std::vector<std::pair<size_t, size_t>>& solution) override;
+
+  private:
+    /**
+     * Find if there is a solution.
+     * @param chain An input vector of tasks descriptor with profiled time.
+     * @param R The input number of resources available.
+     * @param P The output periodicity (reciprocal of pipeline throughput).
+     * @param solution The output solution in the form of a vector of (n,r) pairs.
+     * @return A boolean depending if there is a solution or not.
+     */
     void SOLVE(const std::vector<task_desc_t>& chain,
                const size_t R,
                double& P,
-               std::vector<std::pair<int, int>>& solution);
+               std::vector<std::pair<size_t, size_t>>& solution);
 
-    // Compute a solution or determine if there is no solution
-    // Inputs: - chain
-    //         - R (number of resources)
-    //         - P period (reciprocal throughput)
-    // Outputs: - P updated if there is a solution
-    //          - a composition solution (n,r) updated
-    //          - True/False if there is/is no solution
+    /**
+     * Compute a solution or determine if there is no solution.
+     * @param chain An input vector of tasks descriptor with profiled time.
+     * @param R The input number of available resources.
+     * @param P The input periodicity (reciprocal of pipeline throughput), this parameter can be updated to a new
+     *          periodicity value.
+     * @param solution The output solution in the form of a vector of (n,r) pairs.
+     * @return A boolean depending if there is a solution or not.
+     */
     bool PROBE(const std::vector<task_desc_t>& chain,
                const size_t R,
                double& P,
-               std::vector<std::pair<int, int>>& solution);
+               std::vector<std::pair<size_t, size_t>>& solution);
 };
 } // namespace sched
 } // namespace spu

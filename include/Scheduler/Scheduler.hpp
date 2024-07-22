@@ -9,6 +9,7 @@
 #include "Runtime/Sequence/Sequence.hpp"
 #include "Tools/Interface/Interface_reset.hpp"
 #include <chrono>
+#include <iostream>
 #include <utility>
 #include <vector>
 
@@ -23,24 +24,28 @@ struct task_desc_t
 };
 class Scheduler : public tools::Interface_reset
 {
-  public:
-    Scheduler(runtime::Sequence& sequence);
-    Scheduler(runtime::Sequence* sequence);
-    void profile();
-    void print_profiling();
-
-  protected:
+  private:
     runtime::Sequence* sequence;
     std::vector<task_desc_t> tasks_desc;
-
-  public:
-    virtual ~Scheduler() = default;
-    virtual runtime::Pipeline* generate_pipeline() = 0;
-    virtual std::vector<std::pair<int, int>> get_solution() = 0;
-    virtual void reset();
+    std::vector<std::pair<size_t, size_t>> solution;
 
   protected:
-    runtime::Pipeline* instantiate_pipeline(const std::vector<std::pair<int, int>>& solution);
+    Scheduler(runtime::Sequence& sequence);
+    Scheduler(runtime::Sequence* sequence);
+
+  public:
+    void profile();
+    void print_profiling(std::ostream& stream = std::cout);
+    const std::vector<task_desc_t>& get_profiling();
+    virtual ~Scheduler() = default;
+    runtime::Pipeline* generate_pipeline();
+    std::vector<std::pair<size_t, size_t>> get_solution();
+    virtual void reset();
+    virtual void schedule(const std::vector<task_desc_t>& tasks_desc,
+                          std::vector<std::pair<size_t, size_t>>& solution) = 0;
+
+  private:
+    runtime::Pipeline* instantiate_pipeline();
 };
 } // namespace sched
 } // namespace spu

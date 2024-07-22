@@ -801,7 +801,7 @@ main(int argc, char** argv)
 
             if (verbose)
             {
-                std::vector<std::pair<int, int>> solution = sched->get_solution();
+                std::vector<std::pair<size_t, size_t>> solution = sched->get_solution();
                 std::cout << "# Solution stages {(n,r)}"
                           << ": {";
                 for (auto& pair_s : solution)

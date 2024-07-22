@@ -54,26 +54,34 @@ Scheduler::profile()
 }
 
 void
-Scheduler::print_profiling()
+Scheduler::print_profiling(std::ostream& stream)
 {
-    std::cout << "# Profiling:" << std::endl;
+    stream << "# Profiling:" << std::endl;
     for (auto& t : this->tasks_desc)
     {
-        std::cout << " - Name: " << t.tptr->get_name();
-        std::cout << " - Execution duration: " << t.exec_duration.count();
-        std::cout << " - Stateful: " << t.tptr->is_stateful() << std::endl;
+        stream << " - Name: " << t.tptr->get_name();
+        stream << " - Execution duration: " << t.exec_duration.count();
+        stream << " - Stateful: " << t.tptr->is_stateful() << std::endl;
     }
+}
+
+const std::vector<task_desc_t>&
+Scheduler::get_profiling()
+{
+    return this->tasks_desc;
 }
 
 void
 Scheduler::reset()
 {
+    this->solution.clear();
+    this->tasks_desc.clear();
 }
 
 runtime::Pipeline*
-Scheduler::instantiate_pipeline(const std::vector<std::pair<int, int>>& solution)
+Scheduler::instantiate_pipeline()
 {
-    if (solution.size() == 0)
+    if (this->solution.size() == 0)
     {
         std::stringstream message;
         message << "The solution has to contain at least one element.";
@@ -100,7 +108,7 @@ Scheduler::instantiate_pipeline(const std::vector<std::pair<int, int>>& solution
     int begin = 0; // begining of the current stage
     int end = 0;   // end of the current stage
     int puid_counter = 0;
-    for (auto& stage : solution)
+    for (auto& stage : this->solution)
     {
         end = begin + stage.first - 1;
         std::pair<std::vector<runtime::Task*>, std::vector<runtime::Task*>> cur_stage_desc;
@@ -112,7 +120,7 @@ Scheduler::instantiate_pipeline(const std::vector<std::pair<int, int>>& solution
         n_threads.push_back(stage.second);
         thread_pining.push_back(thread_pin);
 
-        if (solution.size() != 1)
+        if (this->solution.size() != 1)
         {
             synchro_buffer_sizes.push_back(buffer_size);
             synchro_active_waiting.push_back(active_wait);
@@ -127,7 +135,7 @@ Scheduler::instantiate_pipeline(const std::vector<std::pair<int, int>>& solution
     }
 
     // remove the last buffer size and active waiting (no need for the last stage)
-    if (solution.size() != 1)
+    if (this->solution.size() != 1)
     {
         synchro_buffer_sizes.pop_back();
         synchro_active_waiting.pop_back();
@@ -135,4 +143,20 @@ Scheduler::instantiate_pipeline(const std::vector<std::pair<int, int>>& solution
 
     return new runtime::Pipeline(
       firsts, lasts, sep_stages, n_threads, synchro_buffer_sizes, synchro_active_waiting, thread_pining, puids);
+}
+
+std::vector<std::pair<size_t, size_t>>
+Scheduler::get_solution()
+{
+    return this->solution;
+}
+
+runtime::Pipeline*
+Scheduler::generate_pipeline()
+{
+    if (tasks_desc.empty()) this->profile();
+
+    if (solution.empty()) this->schedule(this->tasks_desc, this->solution);
+
+    return this->instantiate_pipeline();
 }
