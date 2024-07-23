@@ -56,16 +56,16 @@ There are three main ways of describing a processing chain:
 3. **Use of a scheduler to perform the pipeline decomposition in stages 
    automatically.** This is achieved with `-C` (or `--chain`) CLI parameter.
    For instance, `-C "(init,relayf_15,incrementf_S_60,relay_15,fin)"` defines
-   a chain that starts with a stateless `initialize` task, after that, a 
-   stateless `relayf` task of 15 microseconds is executed, then an `incrementf` 
-   task of 60 microsecond is executed (note that the `_S` means that this task 
-   will be considered as "stateful" for the scheduler). Finally, a 15 
-   microseconds stateless `relay` task and a stateless `finalize` task are 
-   executed. By default the scheduler considers that the number of resources $R$ 
-   is the number of CPU hardware threads but you can override this behavior by 
-   using the `-t` (or `--n-threads`) CLI parameter. It is also possible to 
-   choose the scheduler algorithm with the `-S` (or `--sched`) CLI parameter.
-   For now, the only available scheduler is `OTAC`.
+   a chain that starts with an `initialize` task, after that, a `relayf` task of 
+   15 microseconds is executed, then an `incrementf` task of 60 microseconds is 
+   executed (note that the `_S` means that this task will be considered 
+   sequential and "non-replicable" for the scheduler). Finally, a 15 
+   microseconds `relay` task and a `finalize` task are executed. By default the 
+   scheduler considers that the number of resources $R$ is the number of CPU 
+   hardware threads but you can override this behavior by using the `-t` (or 
+   `--n-threads`) CLI parameter. It is also possible to choose the scheduler 
+   algorithm through the `-S` (or `--sched`) CLI parameter. For now, the only 
+   available scheduler is `OTAC`.
 
 The first notation is a compressed way to describe chains of tasks. By default, 
 the chain is split in [pipeline](pipeline.md) stages according to the given 

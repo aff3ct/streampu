@@ -34,16 +34,16 @@ static std::map<std::string, tsk_e> str_2_tsk = {
 };
 
 // clang-format off
-//              task              tsk ids              sck IN ids           sck OUT ids          stateful
+//              task              tsk ids              sck IN ids           sck OUT ids          replicable
 static std::map<tsk_e, std::tuple<std::vector<size_t>, std::vector<size_t>, std::vector<size_t>, bool>> tsk_2_ids = {
-    { tsk_e::initialize, {  { 0    }, {      }, { 0    }, false } },
-    { tsk_e::read,       {  { 0    }, {      }, { 0, 1 }, true  } },
-    { tsk_e::relay,      {  { 0    }, { 0    }, { 1    }, false } },
-    { tsk_e::relayf,     {  { 1    }, { 0    }, { 0    }, false } },
-    { tsk_e::increment,  {  { 0    }, { 0    }, { 1    }, false } },
-    { tsk_e::incrementf, {  { 1    }, { 0    }, { 0    }, false } },
-    { tsk_e::finalize,   {  { 0    }, { 0    }, {      }, false } },
-    { tsk_e::write,      {  { 0, 1 }, { 0, 1 }, {      }, true  } },
+    { tsk_e::initialize, {  { 0    }, {      }, { 0    }, true  } },
+    { tsk_e::read,       {  { 0    }, {      }, { 0, 1 }, false } },
+    { tsk_e::relay,      {  { 0    }, { 0    }, { 1    }, true  } },
+    { tsk_e::relayf,     {  { 1    }, { 0    }, { 0    }, true  } },
+    { tsk_e::increment,  {  { 0    }, { 0    }, { 1    }, true  } },
+    { tsk_e::incrementf, {  { 1    }, { 0    }, { 0    }, true  } },
+    { tsk_e::finalize,   {  { 0    }, { 0    }, {      }, true  } },
+    { tsk_e::write,      {  { 0, 1 }, { 0, 1 }, {      }, false } },
 };
 // clang-format on
 
@@ -107,11 +107,11 @@ parse_int_string(std::string& vector_param, std::vector<size_t>& vector)
 }
 
 std::tuple<tsk_e, int, bool>
-extract_tsk_type(const std::string& label, const bool check_stateful)
+extract_tsk_type(const std::string& label, const bool check_replicability)
 {
     tsk_e tsk = tsk_e::relay;
     int duration = -1;
-    bool stateful = false;
+    bool replicable = true;
 
     std::vector<std::string> tokens = split_string(label);
 
@@ -130,9 +130,9 @@ extract_tsk_type(const std::string& label, const bool check_stateful)
             {
                 duration = std::atoi(token.c_str());
             }
-            else if (check_stateful && token == "S")
+            else if (check_replicability && token == "S")
             {
-                stateful = true;
+                replicable = false;
             }
             else
             {
@@ -151,15 +151,13 @@ extract_tsk_type(const std::string& label, const bool check_stateful)
         throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
     }
 
-    if (std::get<3>(tsk_2_ids[tsk])) stateful = true;
-
-    return std::make_tuple(tsk, duration, stateful);
+    return std::make_tuple(tsk, duration, replicable);
 }
 
 void
 parse_tsk_types(std::string& tsk_types_param,
                 std::vector<std::vector<std::tuple<tsk_e, int, bool>>>& tsk_types,
-                const bool check_stateful)
+                const bool check_replicability)
 {
     size_t i = 0;
     size_t sta = 0;
@@ -173,14 +171,14 @@ parse_tsk_types(std::string& tsk_types_param,
         }
         else if (tsk_types_param[i] == ',' && tsk_types_param[i + 1] != '(')
         {
-            tsk_types[sta].push_back(extract_tsk_type(tmp, check_stateful));
+            tsk_types[sta].push_back(extract_tsk_type(tmp, check_replicability));
             tmp.clear();
         }
         else if (tsk_types_param[i] == ')')
         {
             if (tsk_types_param[i + 1] != ')')
             {
-                tsk_types[sta].push_back(extract_tsk_type(tmp, check_stateful));
+                tsk_types[sta].push_back(extract_tsk_type(tmp, check_replicability));
                 tmp.clear();
                 sta++;
             }
@@ -195,7 +193,7 @@ parse_tsk_types(std::string& tsk_types_param,
 void
 parse_tsk_types_sta(std::string& sck_type_sta_param,
                     std::vector<std::tuple<tsk_e, int, bool>>& tsk_types,
-                    const bool check_stateful)
+                    const bool check_replicability)
 {
     size_t i = 0;
     std::string tmp;
@@ -205,7 +203,7 @@ parse_tsk_types_sta(std::string& sck_type_sta_param,
             tmp.clear();
         else if (sck_type_sta_param[i] == ',' || sck_type_sta_param[i] == ')')
         {
-            tsk_types.push_back(extract_tsk_type(tmp, check_stateful));
+            tsk_types.push_back(extract_tsk_type(tmp, check_replicability));
             tmp.clear();
         }
         else
@@ -679,7 +677,7 @@ main(int argc, char** argv)
 
         auto tsk_ids = std::get<0>(tsk_2_ids[std::get<0>(tst)]);
         for (auto tid : tsk_ids)
-            (*modules[tas])[tid].set_stateful(std::get<2>(tst));
+            (*modules[tas])[tid].set_replicability(std::get<2>(tst));
 
         tas++;
     }

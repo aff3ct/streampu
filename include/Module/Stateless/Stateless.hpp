@@ -22,10 +22,11 @@ class Stateless : public Module
     virtual ~Stateless() = default;
     virtual Stateless* clone() const;
 
-    runtime::Task& create_task(const std::string& name, const int id = -1);
-    runtime::Task& create_tsk(const std::string& name, const int id = -1);
     using module::Module::set_name;
     using module::Module::set_short_name;
+
+    using module::Module::create_task;
+    using module::Module::create_tsk;
 
     using module::Module::create_sck_fwd;
     using module::Module::create_sck_in;

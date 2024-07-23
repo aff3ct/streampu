@@ -7,6 +7,7 @@
 #include <typeinfo>
 
 #include "Module/Module.hpp"
+#include "Module/Stateless/Stateless.hpp"
 #include "Runtime/Socket/Socket.hpp"
 #include "Runtime/Task/Task.hpp"
 #include "Tools/Exception/exception.hpp"
@@ -27,7 +28,7 @@ Task::Task(module::Module& module,
   , fast(fast)
   , debug(debug)
   , debug_hex(false)
-  , stateful(true)
+  , replicable(this->_is_replicable())
   , debug_limit(-1)
   , debug_precision(2)
   , debug_frame_max(-1)
@@ -136,12 +137,6 @@ void
 Task::set_debug_frame_max(const uint32_t limit)
 {
     this->debug_frame_max = limit;
-}
-
-void
-Task::set_stateful(const bool stateful)
-{
-    this->stateful = stateful;
 }
 
 // trick to compile on the GNU compiler version 4 (where 'std::hexfloat' is unavailable)
@@ -1459,6 +1454,49 @@ Task::get_n_static_input_sockets() const
     for (auto& s : this->sockets)
         if (s->get_type() == socket_t::SIN && s->_get_dataptr() != nullptr && s->bound_socket == nullptr) n++;
     return n;
+}
+
+bool
+Task::is_stateless() const
+{
+    return dynamic_cast<const spu::module::Stateless*>(&this->get_module());
+}
+
+bool
+Task::is_stateful() const
+{
+    return !this->is_stateless();
+}
+
+bool
+Task::_is_replicable() const
+{
+    if (this->is_stateless()) return true;
+
+    module::Module& m = this->get_module();
+    try
+    {
+        // if the clone method is implemented, it means that the task can be replicated
+        auto clone = m.clone();
+        delete clone;
+        return true;
+    }
+    catch (tools::unimplemented_error&)
+    {
+        return false;
+    }
+}
+
+bool
+Task::is_replicable() const
+{
+    return this->replicable;
+}
+
+void
+Task::set_replicability(const bool replicable)
+{
+    this->replicable = replicable ? this->_is_replicable() : false;
 }
 
 // ==================================================================================== explicit template instantiation

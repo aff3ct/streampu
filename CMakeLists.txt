@@ -551,10 +551,10 @@ if(SPU_TESTS)
 
     set(INPUT_FILE "../mkdocs.yml")
 
-    add_test(NAME subseq0::spu-test-simple-chain COMMAND spu-test-simple-chain -d 2048 -s 5 -e 15 -f 13 -u)
-    set_tests_properties(subseq0::spu-test-simple-chain PROPERTIES LABELS subseq)
-    add_test(NAME subseq1::spu-test-simple-chain COMMAND spu-test-simple-chain -d 2048 -s 5 -v)
-    set_tests_properties(subseq1::spu-test-simple-chain PROPERTIES LABELS subseq)
+    add_test(NAME set0::spu-test-simple-chain COMMAND spu-test-simple-chain -d 2048 -s 5 -e 15 -f 13 -u)
+    set_tests_properties(set0::spu-test-simple-chain PROPERTIES LABELS set)
+    add_test(NAME set1::spu-test-simple-chain COMMAND spu-test-simple-chain -d 2048 -s 5 -v)
+    set_tests_properties(set1::spu-test-simple-chain PROPERTIES LABELS set)
 
     add_test(NAME path0::spu-test-exclusive-paths COMMAND spu-test-exclusive-paths -d 2048 -s 5 -e 10 -f 13 -a 0)
     set_tests_properties(path0::spu-test-exclusive-paths PROPERTIES LABELS exclusive-paths)

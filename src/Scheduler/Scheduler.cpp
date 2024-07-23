@@ -89,7 +89,7 @@ Scheduler::print_profiling(std::ostream& stream)
     {
         stream << "# - Name: " << t.tptr->get_name();
         stream << " - Execution duration: " << t.exec_duration.count() << " ns";
-        stream << " - Stateful: " << t.tptr->is_stateful() << std::endl;
+        stream << " - Replicable: " << (t.tptr->is_replicable() ? "yes" : "no") << std::endl;
     }
 }
 

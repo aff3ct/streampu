@@ -191,19 +191,26 @@ Set::deep_copy(const Set& m)
 
     auto& lasts = this->get_sequence().get_lasts_tasks()[0];
 
-    auto& p = (*this)[set::tsk::exec];
+    try
+    {
+        auto& p = (*this)("exec");
 
-    size_t sid = 0;
-    for (auto& last : lasts)
-        for (auto& s : last->sockets)
-        {
-            if (s->get_type() == runtime::socket_t::SOUT && s->get_name() != "status")
+        size_t sid = 0;
+        for (auto& last : lasts)
+            for (auto& s : last->sockets)
             {
-                while (p.sockets[sid]->get_type() != runtime::socket_t::SOUT)
-                    sid++;
-                p.sockets[sid++]->_bind(*s); // out to out socket binding = black magic
+                if (s->get_type() == runtime::socket_t::SOUT && s->get_name() != "status")
+                {
+                    while (p.sockets[sid]->get_type() != runtime::socket_t::SOUT)
+                        sid++;
+                    p.sockets[sid++]->_bind(*s); // out to out socket binding = black magic
+                }
             }
-        }
+    }
+    catch (tools::invalid_argument&)
+    {
+        /* this is a hack: do nothing, we went there because of trying to determine if the set is replicable */
+    }
 }
 
 void

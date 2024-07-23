@@ -64,6 +64,7 @@ Adaptor_1_to_n::init()
     this->set_single_wave(true);
 
     auto& p1 = this->create_task("push_1", (int)adp::tsk::push_1);
+    p1.set_replicability(false);
     std::vector<size_t> p1s_in;
     for (size_t s = 0; s < this->n_sockets; s++)
         p1s_in.push_back(this->create_socket_in(p1, "in" + std::to_string(s), this->n_elmts[s], this->datatype[s]));

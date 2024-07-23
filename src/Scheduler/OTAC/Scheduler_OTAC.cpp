@@ -77,13 +77,13 @@ getIndex(const std::vector<task_desc_t>& chain, const task_desc_t target)
     return index;
 }
 
-// Is the subsequence stateless ?
+// Is the subsequence replicable?
 bool
-is_stateless(const std::vector<runtime::Task*>& s)
+is_replicable(const std::vector<runtime::Task*>& s)
 {
     for (auto& t : s)
     {
-        if (t->is_stateful())
+        if (!t->is_replicable())
         {
             return false;
         }
@@ -99,7 +99,7 @@ max_stateful_weight(const std::vector<task_desc_t>& chain)
 
     for (auto& t : chain)
     {
-        if (t.tptr->is_stateful())
+        if (!t.tptr->is_replicable())
         {
             if ((t.tptr->get_duration_avg()).count() > max)
             {
@@ -156,7 +156,7 @@ stateless_packing(const std::vector<task_desc_t>& chain, const int e, std::vecto
 {
     int N = chain.size();
     int f = e;
-    while ((f <= N) && (!chain[f - 1].tptr->is_stateful()))
+    while ((f <= N) && chain[f - 1].tptr->is_replicable())
     {
         s.push_back(chain[f - 1].tptr);
         n += 1;
@@ -278,8 +278,8 @@ Scheduler_OTAC::PROBE(const std::vector<task_desc_t>& chain,
         std::cout << "r=" << r << " weight=" << weight(s, 1) << " P=" << P << std::endl;
 #endif
 
-        // All tasks do not fit with the last packing and si stateless
-        if ((e <= N) && is_stateless(s))
+        // All tasks do not fit with the last packing and if replicable
+        if ((e <= N) && is_replicable(s))
         {
             f = stateless_packing(chain, e, s, n);
             // Processors needed for a packing
