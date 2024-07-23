@@ -15,16 +15,16 @@ namespace sched
 class Scheduler_OTAC : public Scheduler
 {
   protected:
-    const size_t R;
+    const size_t R; /**< The maximum number of resources allowed to perform the scheduling. */
+    double P;       /**< The period or the reciprocal throughput of the pipeline. */
 
   public:
     Scheduler_OTAC(runtime::Sequence& sequence, const size_t R);
     Scheduler_OTAC(runtime::Sequence* sequence, const size_t R);
     ~Scheduler_OTAC() = default;
-
-  protected:
-    virtual void schedule(const std::vector<task_desc_t>& tasks_desc,
-                          std::vector<std::pair<size_t, size_t>>& solution) override;
+    virtual void schedule() override;
+    double get_period() const;
+    virtual void reset() override;
 
   private:
     /**

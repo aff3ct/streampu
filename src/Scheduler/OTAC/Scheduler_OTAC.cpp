@@ -1,6 +1,5 @@
 #include "Scheduler/OTAC/Scheduler_OTAC.hpp"
 #include "Tools/Exception/exception.hpp"
-#include <cassert>
 #include <cmath>
 #include <iostream>
 #include <limits>
@@ -14,12 +13,14 @@ using namespace spu::sched;
 Scheduler_OTAC::Scheduler_OTAC(runtime::Sequence& sequence, const size_t R)
   : Scheduler(&sequence)
   , R(R)
+  , P(std::numeric_limits<double>::infinity())
 {
 }
 
 Scheduler_OTAC::Scheduler_OTAC(runtime::Sequence* sequence, const size_t R)
   : Scheduler(sequence)
   , R(R)
+  , P(std::numeric_limits<double>::infinity())
 {
 }
 
@@ -343,7 +344,12 @@ Scheduler_OTAC::SOLVE(const std::vector<task_desc_t>& chain,
         throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
     }
 
-    solution.clear();
+    if (!solution.empty())
+    {
+        std::stringstream message;
+        message << "'solution' should be empty!";
+        throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
+    }
 
     double maxTf = max_stateful_weight(chain);
     double maxWeight = max_weight_t(chain);
@@ -391,8 +397,35 @@ Scheduler_OTAC::SOLVE(const std::vector<task_desc_t>& chain,
 }
 
 void
-Scheduler_OTAC::schedule(const std::vector<task_desc_t>& tasks_desc, std::vector<std::pair<size_t, size_t>>& solution)
+Scheduler_OTAC::schedule()
 {
-    double P; // period
-    this->SOLVE(tasks_desc, this->R, P, solution);
+    if (this->tasks_desc.empty())
+    {
+        std::stringstream message;
+        message << "'tasks_desc' cannot be empty, you need to execute the 'Scheduler::profile()' method first!";
+        throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
+    }
+
+    if (!this->solution.empty()) this->solution.clear();
+    this->SOLVE(this->tasks_desc, this->R, this->P, this->solution);
+}
+
+double
+Scheduler_OTAC::get_period() const
+{
+    if (this->P == std::numeric_limits<double>::infinity())
+    {
+        std::stringstream message;
+        message << "You cannot get the period before executing the 'Scheduler::schedule()' method!";
+        throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
+    }
+
+    return this->P;
+}
+
+void
+Scheduler_OTAC::reset()
+{
+    Scheduler::reset();
+    this->P = std::numeric_limits<double>::infinity();
 }

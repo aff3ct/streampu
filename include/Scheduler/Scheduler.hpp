@@ -26,23 +26,23 @@ class Scheduler : public tools::Interface_reset
 {
   private:
     runtime::Sequence* sequence;
+
+  protected:
     std::vector<task_desc_t> tasks_desc;
     std::vector<std::pair<size_t, size_t>> solution;
 
-  protected:
     Scheduler(runtime::Sequence& sequence);
     Scheduler(runtime::Sequence* sequence);
 
   public:
-    void profile();
+    void profile(const size_t n_exec = 100);
     void print_profiling(std::ostream& stream = std::cout);
     const std::vector<task_desc_t>& get_profiling();
     virtual ~Scheduler() = default;
     runtime::Pipeline* generate_pipeline();
     std::vector<std::pair<size_t, size_t>> get_solution();
-    virtual void reset();
-    virtual void schedule(const std::vector<task_desc_t>& tasks_desc,
-                          std::vector<std::pair<size_t, size_t>>& solution) = 0;
+    virtual void reset() override;
+    virtual void schedule() = 0;
 
   private:
     runtime::Pipeline* instantiate_pipeline();

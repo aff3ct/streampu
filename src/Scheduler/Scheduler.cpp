@@ -1,7 +1,6 @@
 #include "Scheduler/Scheduler.hpp"
 #include "Tools/Exception/exception.hpp"
 
-#include <cassert>
 #include <iostream>
 #include <sstream>
 
@@ -17,17 +16,47 @@ Scheduler::Scheduler(runtime::Sequence& sequence)
 Scheduler::Scheduler(runtime::Sequence* sequence)
   : sequence(sequence)
 {
-    assert(sequence != nullptr);
+    if (sequence == nullptr)
+    {
+        std::stringstream message;
+        message << "'sequence' can't be nullptr.";
+        throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
+    }
+
     this->sequence = sequence;
 }
 
 void
-Scheduler::profile()
+Scheduler::profile(const size_t n_exec)
 {
-    assert(sequence->get_n_threads() == 1);
-    assert(!this->sequence->is_control_flow());
+    if (n_exec == 0)
+    {
+        std::stringstream message;
+        message << "'n_exec' has to be higher than zero.";
+        throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
+    }
 
-    this->tasks_desc.clear();
+    if (sequence->get_n_threads() > 1)
+    {
+        std::stringstream message;
+        message << "'sequence->get_n_threads()' has to be strictly equal to 1.";
+        throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
+    }
+
+    if (this->sequence->is_control_flow())
+    {
+        std::stringstream message;
+        message << "Control flow in the sequence is not supported yet.";
+        throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
+    }
+
+    if (!this->tasks_desc.empty())
+    {
+        std::stringstream message;
+        message << "'tasks_desc' should be empty, you should call 'Scheduler::reset' first if you want to re-run the "
+                   "profiling'.";
+        throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
+    }
 
     this->sequence->set_auto_stop(false);
     for (auto& mod : this->sequence->get_modules<module::Module>(false))
@@ -39,7 +68,6 @@ Scheduler::profile()
                                   // in the tasks)
         }
     unsigned int counter = 0;
-    unsigned int n_exec = 10;
     this->sequence->exec([&counter, &n_exec]() { return ++counter >= n_exec; });
     this->sequence->set_auto_stop(true);
 
@@ -105,7 +133,7 @@ Scheduler::instantiate_pipeline()
     size_t buffer_size = 1000;
     bool active_wait = false;
     bool thread_pin = true;
-    int begin = 0; // begining of the current stage
+    int begin = 0; // beginning of the current stage
     int end = 0;   // end of the current stage
     int puid_counter = 0;
     for (auto& stage : this->solution)
@@ -156,7 +184,7 @@ Scheduler::generate_pipeline()
 {
     if (tasks_desc.empty()) this->profile();
 
-    if (solution.empty()) this->schedule(this->tasks_desc, this->solution);
+    if (solution.empty()) this->schedule();
 
     return this->instantiate_pipeline();
 }
