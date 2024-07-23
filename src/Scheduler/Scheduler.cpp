@@ -87,8 +87,8 @@ Scheduler::print_profiling(std::ostream& stream)
     stream << "# Profiling:" << std::endl;
     for (auto& t : this->tasks_desc)
     {
-        stream << " - Name: " << t.tptr->get_name();
-        stream << " - Execution duration: " << t.exec_duration.count();
+        stream << "# - Name: " << t.tptr->get_name();
+        stream << " - Execution duration: " << t.exec_duration.count() << " ns";
         stream << " - Stateful: " << t.tptr->is_stateful() << std::endl;
     }
 }

@@ -5,6 +5,7 @@
 #ifndef SCHEDULER_OTAC_HPP__
 #define SCHEDULER_OTAC_HPP__
 
+#include <thread>
 #include "Scheduler/Scheduler.hpp"
 
 namespace spu
@@ -19,8 +20,8 @@ class Scheduler_OTAC : public Scheduler
     double P;       /**< The period or the reciprocal throughput of the pipeline. */
 
   public:
-    Scheduler_OTAC(runtime::Sequence& sequence, const size_t R);
-    Scheduler_OTAC(runtime::Sequence* sequence, const size_t R);
+    Scheduler_OTAC(runtime::Sequence& sequence, const size_t R = std::thread::hardware_concurrency());
+    Scheduler_OTAC(runtime::Sequence* sequence, const size_t R = std::thread::hardware_concurrency());
     ~Scheduler_OTAC() = default;
     virtual void schedule() override;
     double get_period() const;
