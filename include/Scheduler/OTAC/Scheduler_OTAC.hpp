@@ -5,8 +5,8 @@
 #ifndef SCHEDULER_OTAC_HPP__
 #define SCHEDULER_OTAC_HPP__
 
-#include <thread>
 #include "Scheduler/Scheduler.hpp"
+#include <thread>
 
 namespace spu
 {

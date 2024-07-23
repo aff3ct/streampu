@@ -224,6 +224,7 @@ main(int argc, char** argv)
                           { "sleep-time", required_argument, NULL, 's' },
                           { "data-length", required_argument, NULL, 'd' },
                           { "n-exec", required_argument, NULL, 'e' },
+                          { "n-exec-pro", required_argument, NULL, 'l' },
                           { "buffer-size", required_argument, NULL, 'u' },
                           { "dot-filepath", required_argument, NULL, 'o' },
                           { "in-filepath", required_argument, NULL, 'i' },
@@ -253,6 +254,7 @@ main(int argc, char** argv)
     size_t data_length = 2048;
     size_t n_exec = 0;
     size_t buffer_size = 16;
+    size_t n_exec_pro = 100;
     std::string dot_filepath;
     std::string in_filepath;
     std::string out_filepath = "file.out";
@@ -277,7 +279,7 @@ main(int argc, char** argv)
 
     while (1)
     {
-        const int opt = getopt_long(argc, argv, "t:f:s:d:e:u:o:i:j:n:r:R:P:C:S:cpbgqwhv", longopts, 0);
+        const int opt = getopt_long(argc, argv, "t:f:s:d:e:l:u:o:i:j:n:r:R:P:C:S:cpbgqwhv", longopts, 0);
         if (opt == -1) break;
         switch (opt)
         {
@@ -296,6 +298,9 @@ main(int argc, char** argv)
                 break;
             case 'e':
                 n_exec = atoi(optarg);
+                break;
+            case 'l':
+                n_exec_pro = atoi(optarg);
                 break;
             case 'u':
                 buffer_size = atoi(optarg);
@@ -373,9 +378,12 @@ main(int argc, char** argv)
                 std::cout << "  -e, --n-exec             "
                           << "Number of executions (0 means -> never stop because of this counter)  "
                           << "[" << n_exec << "]" << std::endl;
+                std::cout << "  -l, --n-exec-pro         "
+                          << "Number of executions during the scheduler profiling phase             "
+                          << "[" << n_exec_pro << "]" << std::endl;
                 std::cout << "  -u, --buffer-size        "
                           << "Size of the buffer between the different stages of the pipeline       "
-                          << "[" << data_length << "]" << std::endl;
+                          << "[" << buffer_size << "]" << std::endl;
                 std::cout << "  -o, --dot-filepath       "
                           << "Path to dot output file                                               "
                           << "[" << (dot_filepath.empty() ? "empty" : "\"" + dot_filepath + "\"") << "]" << std::endl;
@@ -441,7 +449,7 @@ main(int argc, char** argv)
     }
 
 #ifdef SPU_HWLOC
-    if (!pinning_policy.empty() || !chain_param.empty()) tools::Thread_pinning::init();
+    if ((!pinning_policy.empty() || !chain_param.empty()) && pinning_policy != "none") tools::Thread_pinning::init();
 #endif
 
     // Checking for errors
@@ -529,6 +537,7 @@ main(int argc, char** argv)
     std::cout << "#   - sleep_time_us  = " << sleep_time_us << std::endl;
     std::cout << "#   - data_length    = " << data_length << std::endl;
     std::cout << "#   - n_exec         = " << n_exec << std::endl;
+    std::cout << "#   - n_exec_pro     = " << n_exec_pro << std::endl;
     std::cout << "#   - buffer_size    = " << buffer_size << std::endl;
     std::cout << "#   - dot_filepath   = " << (dot_filepath.empty() ? "[empty]" : dot_filepath.c_str()) << std::endl;
     std::cout << "#   - in_filepath    = " << (in_filepath.empty() ? "[empty]" : in_filepath.c_str()) << std::endl;
@@ -795,7 +804,7 @@ main(int argc, char** argv)
             // pipeline_chain.reset(sched->generate_pipeline());
 
             // step by step method to print intermediate results ------------------------------------------------------
-            sched->profile();
+            sched->profile(n_exec_pro);
             if (verbose) sched->print_profiling();
 
             sched->schedule();
@@ -809,6 +818,7 @@ main(int argc, char** argv)
                 std::cout << "}" << std::endl;
             }
 
+            bool enable_pinning = true;
             if (pinning_policy.empty())
             {
                 pinning_policy = sched->perform_threads_mapping();
@@ -816,8 +826,11 @@ main(int argc, char** argv)
                 if (verbose) std::cout << "# Effective pinning policy: " << pinning_policy << std::endl;
 #endif
             }
+            else if (pinning_policy == "none")
+                enable_pinning = false;
 
-            pipeline_chain.reset(sched->instantiate_pipeline(1, false, true, pinning_policy));
+            pipeline_chain.reset(
+              sched->instantiate_pipeline(buffer_size, active_waiting, enable_pinning, pinning_policy));
             // --------------------------------------------------------------------------------------------------------
 
             // override n_threads to contain the number of threads per stage as it should be
@@ -1038,7 +1051,7 @@ main(int argc, char** argv)
         (*modules[n_tsk - 1].get())[1][1].unbind((*modules[0].get())[0][1]);
 
 #ifdef SPU_HWLOC
-    if (!pinning_policy.empty() || !chain_param.empty()) tools::Thread_pinning::destroy();
+    if ((!pinning_policy.empty() || !chain_param.empty()) && pinning_policy != "none") tools::Thread_pinning::destroy();
 #endif
 
     return test_results;

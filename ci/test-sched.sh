@@ -33,7 +33,7 @@ function check_solution # param 1 => output file name, param 2 => expected solut
 
 echo "# Test: one resource"
 echo "[init/1.5/][relayf/15/][incrf-20-][relay/15/][fin/1.5/]"
-./${bin} -t "1" -C "(init,relayf_15,incrementf_S_20,relay_15,fin)" -S "OTAC" -v -e 1 > $file
+./${bin} -t "1" -C "(init,relayf_15,incrementf_S_20,relay_15,fin)" -S "OTAC" -v -e 1 -P "none" > $file
 rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi # check if the previous execution succeeded
 check_solution $file "{(5, 1)}"
 echo " "
@@ -41,7 +41,7 @@ echo " "
 echo "# Test: stateless chain"
 echo "[init/1.5/][relayf/15/][incrf/20/][relay/15/][fin/1.5/]"
 threads=$(( $RANDOM % 10 + 1 ))
-./${bin} -t "$threads" -C "(init,relayf_15,incrementf_20,relay_15,fin)" -S "OTAC" -v -e 1 > $file
+./${bin} -t "$threads" -C "(init,relayf_15,incrementf_20,relay_15,fin)" -S "OTAC" -v -e 1 -P "none" > $file
 rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi # check if the previous execution succeeded
 check_solution $file "{(5, ${threads})}"
 echo " "
@@ -49,21 +49,21 @@ echo " "
 echo "# Test: stateful chain"
 echo "[init-1.5-][relayf-15-][incrf-20-][relay-15-][fin-1.5-]"
 threads=$(( $RANDOM % 10 + 3 ))
-./${bin} -t "$threads" -C "(init_S,relayf_S_15,incrementf_S_20,relay_S_15,fin_S)" -S "OTAC" -v -e 1 > $file
+./${bin} -t "$threads" -C "(init_S,relayf_S_15,incrementf_S_20,relay_S_15,fin_S)" -S "OTAC" -v -e 1 -P "none" > $file
 rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi # check if the previous execution succeeded
 check_solution $file "{(2, 1)(1, 1)(2, 1)}"
 echo " "
 
 echo "# Test: one stateless task"
 echo "[init-1.5-][relayf-15-][incrf/120/][relay-15-][fin-1.5-]"
-./${bin} -t "6" -C "(init_S,relayf_S_15,incrementf_120,relay_S_15,fin_S)" -S "OTAC" -v -e 1 > $file
+./${bin} -t "6" -C "(init_S,relayf_S_15,incrementf_120,relay_S_15,fin_S)" -S "OTAC" -v -e 1 -P "none" > $file
 rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi # check if the previous execution succeeded
 check_solution $file "{(2, 1)(1, 4)(2, 1)}"
 echo " "
 
 echo "# Test: one stateful task"
 echo "[init/1.5/][relayf/15/][incrf-60-][relay/15/][fin/1.5/]"
-./${bin} -t "3" -C "(init,relayf_15,incrementf_S_60,relay_15,fin)" -S "OTAC" -v -e 1 > $file
+./${bin} -t "3" -C "(init,relayf_15,incrementf_S_60,relay_15,fin)" -S "OTAC" -v -e 1 -P "none" > $file
 rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi # check if the previous execution succeeded
 check_solution $file "{(2, 1)(1, 1)(2, 1)}"
 
