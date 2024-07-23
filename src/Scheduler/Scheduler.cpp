@@ -106,71 +106,86 @@ Scheduler::reset()
     this->tasks_desc.clear();
 }
 
-runtime::Pipeline*
-Scheduler::instantiate_pipeline()
+std::string
+Scheduler::perform_threads_mapping() const
 {
     if (this->solution.size() == 0)
     {
         std::stringstream message;
-        message << "The solution has to contain at least one element.";
+        message
+          << "The solution has to contain at least one element, please run the 'Scheduler::schedule' method first.";
         throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
     }
 
-    std::vector<runtime::Task*> firsts;
-    std::vector<runtime::Task*> lasts;
-    std::vector<std::pair<std::vector<runtime::Task*>, std::vector<runtime::Task*>>> sep_stages;
-    std::vector<size_t> n_threads;
-    std::vector<size_t> synchro_buffer_sizes;
-    std::vector<bool> synchro_active_waiting;
-    std::vector<bool> thread_pining;
-    std::vector<std::vector<size_t>> puids;
-
-    firsts.push_back((this->tasks_desc[0]).tptr);
-
-    int N = this->tasks_desc.size();
-    lasts.push_back((this->tasks_desc[N - 1]).tptr);
-
-    size_t buffer_size = 1000;
-    bool active_wait = false;
-    bool thread_pin = true;
-    int begin = 0; // beginning of the current stage
-    int end = 0;   // end of the current stage
-    int puid_counter = 0;
+    std::string pinning_policy;
+    bool first_stage = true;
+    size_t puid = 0;
     for (auto& stage : this->solution)
     {
-        end = begin + stage.first - 1;
-        std::pair<std::vector<runtime::Task*>, std::vector<runtime::Task*>> cur_stage_desc;
-        cur_stage_desc.first.push_back(this->tasks_desc[begin].tptr);
-        cur_stage_desc.second.push_back(this->tasks_desc[end].tptr);
-        sep_stages.push_back(cur_stage_desc);
-        begin = end + 1;
+        if (!first_stage) pinning_policy += " | ";
 
-        n_threads.push_back(stage.second);
-        thread_pining.push_back(thread_pin);
+        for (size_t st = 0; st < stage.second; st++)
+            pinning_policy += std::string((st == 0) ? "" : "; ") + "PU_" + std::to_string(puid++);
 
-        if (this->solution.size() != 1)
-        {
-            synchro_buffer_sizes.push_back(buffer_size);
-            synchro_active_waiting.push_back(active_wait);
-        }
-
-        std::vector<size_t> cur_puids;
-        for (size_t c = puid_counter; c < (size_t)(puid_counter + stage.second); c++)
-        {
-            cur_puids.push_back(c + stage.second);
-        }
-        puids.push_back(cur_puids);
+        first_stage = false;
     }
 
-    // remove the last buffer size and active waiting (no need for the last stage)
-    if (this->solution.size() != 1)
+    return pinning_policy;
+}
+
+runtime::Pipeline*
+Scheduler::instantiate_pipeline(const size_t buffer_size,
+                                const bool active_waiting,
+                                const bool thread_pining,
+                                const std::string& pinning_policy)
+{
+    if (this->solution.size() == 0)
     {
-        synchro_buffer_sizes.pop_back();
-        synchro_active_waiting.pop_back();
+        std::stringstream message;
+        message
+          << "The solution has to contain at least one element, please run the 'Scheduler::schedule' method first.";
+        throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
     }
 
-    return new runtime::Pipeline(
-      firsts, lasts, sep_stages, n_threads, synchro_buffer_sizes, synchro_active_waiting, thread_pining, puids);
+    std::vector<runtime::Task*> firsts(this->tasks_desc.size());
+    std::vector<runtime::Task*> lasts(this->tasks_desc.size());
+
+    std::vector<std::pair<std::vector<runtime::Task*>, std::vector<runtime::Task*>>> sep_stages(this->solution.size());
+    std::vector<size_t> n_threads(this->solution.size());
+    size_t s = 0;
+    size_t i = 0;
+    for (auto& stage : this->solution)
+    {
+        std::pair<std::vector<runtime::Task*>, std::vector<runtime::Task*>> cur_stage_desc;
+        sep_stages[s].first.resize(stage.first);
+        sep_stages[s].second.resize(stage.first);
+        for (size_t t = 0; t < stage.first; t++)
+        {
+            firsts[i] = this->tasks_desc[i].tptr;
+            lasts[i] = this->tasks_desc[i].tptr;
+
+            sep_stages[s].first[t] = this->tasks_desc[i].tptr;
+            sep_stages[s].second[t] = this->tasks_desc[i].tptr;
+
+            i++;
+        }
+
+        n_threads[s] = stage.second;
+        s++;
+    }
+
+    std::vector<size_t> synchro_buffer_sizes(this->solution.size() - 1, buffer_size);
+    std::vector<bool> synchro_active_waitings(this->solution.size() - 1, active_waiting);
+    std::vector<bool> thread_pinings(this->solution.size(), thread_pining);
+
+    return new runtime::Pipeline(firsts,
+                                 lasts,
+                                 sep_stages,
+                                 n_threads,
+                                 synchro_buffer_sizes,
+                                 synchro_active_waitings,
+                                 thread_pinings,
+                                 pinning_policy);
 }
 
 std::vector<std::pair<size_t, size_t>>
@@ -186,5 +201,5 @@ Scheduler::generate_pipeline()
 
     if (solution.empty()) this->schedule();
 
-    return this->instantiate_pipeline();
+    return this->instantiate_pipeline(1, false, true, this->perform_threads_mapping());
 }

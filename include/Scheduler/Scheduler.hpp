@@ -10,6 +10,7 @@
 #include "Tools/Interface/Interface_reset.hpp"
 #include <chrono>
 #include <iostream>
+#include <string>
 #include <utility>
 #include <vector>
 
@@ -43,9 +44,11 @@ class Scheduler : public tools::Interface_reset
     std::vector<std::pair<size_t, size_t>> get_solution();
     virtual void reset() override;
     virtual void schedule() = 0;
-
-  private:
-    runtime::Pipeline* instantiate_pipeline();
+    runtime::Pipeline* instantiate_pipeline(const size_t buffer_size = 1,
+                                            const bool active_wait = false,
+                                            const bool thread_pining = false,
+                                            const std::string& pinning_policy = "");
+    std::string perform_threads_mapping() const;
 };
 } // namespace sched
 } // namespace spu
