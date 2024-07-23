@@ -441,7 +441,7 @@ main(int argc, char** argv)
     }
 
 #ifdef SPU_HWLOC
-    if (!pinning_policy.empty()) tools::Thread_pinning::init();
+    if (!pinning_policy.empty() || !chain_param.empty()) tools::Thread_pinning::init();
 #endif
 
     // Checking for errors
@@ -791,14 +791,14 @@ main(int argc, char** argv)
                 throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
             }
 
-            if (verbose)
-            {
-                sched->profile();
-                sched->print_profiling();
-            }
+            // all in one method --------------------------------------------------------------------------------------
+            // pipeline_chain.reset(sched->generate_pipeline());
 
-            pipeline_chain.reset(sched->generate_pipeline());
+            // step by step method to print intermediate results ------------------------------------------------------
+            sched->profile();
+            if (verbose) sched->print_profiling();
 
+            sched->schedule();
             if (verbose)
             {
                 std::vector<std::pair<size_t, size_t>> solution = sched->get_solution();
@@ -809,6 +809,18 @@ main(int argc, char** argv)
                 std::cout << "}" << std::endl;
             }
 
+            if (pinning_policy.empty())
+            {
+                pinning_policy = sched->perform_threads_mapping();
+#ifdef SPU_HWLOC
+                if (verbose) std::cout << "# Effective pinning policy: " << pinning_policy << std::endl;
+#endif
+            }
+
+            pipeline_chain.reset(sched->instantiate_pipeline(1, false, true, pinning_policy));
+            // --------------------------------------------------------------------------------------------------------
+
+            // override n_threads to contain the number of threads per stage as it should be
             std::vector<Sequence*> stages_chain = pipeline_chain->get_stages();
             n_threads.resize(0);
             for (auto& s : stages_chain)
@@ -1026,7 +1038,7 @@ main(int argc, char** argv)
         (*modules[n_tsk - 1].get())[1][1].unbind((*modules[0].get())[0][1]);
 
 #ifdef SPU_HWLOC
-    if (!pinning_policy.empty()) tools::Thread_pinning::destroy();
+    if (!pinning_policy.empty() || !chain_param.empty()) tools::Thread_pinning::destroy();
 #endif
 
     return test_results;
