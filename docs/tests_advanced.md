@@ -160,5 +160,6 @@ usage: ./bin/test-generic-pipeline [options]
   -R, --tsk-types-sta      The socket type of tasks on each stage (SFWD or SIO)                  [empty]
   -C, --chain              Description of the tasks chain (to be combined with '-S' param)       [empty]
   -S, --sched              Scheduler algorithm for the pipeline creation (OTAC')                 ["OTAC"]
+  -v, --verbose            Show information about the scheduling choices                         [false]
   -h, --help               This help                                                             [false]
 ```
