@@ -148,7 +148,6 @@ class Task
     inline bool is_last_input_socket(const Socket& s_in) const;
     bool is_stateless() const;
     bool is_stateful() const;
-    bool _is_replicable() const;
     bool is_replicable() const;
     bool can_exec() const;
 

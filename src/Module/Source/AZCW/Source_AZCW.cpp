@@ -10,6 +10,7 @@ Source_AZCW<B>::Source_AZCW(const int max_data_size)
 {
     const std::string name = "Source_AZCW";
     this->set_name(name);
+    this->tasks[0]->set_replicability(true);
 }
 
 template<typename B>

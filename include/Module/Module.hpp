@@ -92,6 +92,10 @@ class Module
 
     void create_reset_task();
 
+    bool is_stateless() const;
+    bool is_stateful() const;
+    bool is_clonable() const;
+
   protected:
     void deep_copy(const Module& m);
 

@@ -1391,7 +1391,7 @@ Sequence::init_recursive(tools::Digraph_node<SS>* cur_subseq,
 
 template<class SS, class MO>
 void
-Sequence::duplicate(const tools::Digraph_node<SS>* sequence)
+Sequence::replicate(const tools::Digraph_node<SS>* sequence)
 {
     std::set<MO*> modules_set;
     std::vector<const runtime::Task*> tsks_vec; // get a vector of tasks included in the tasks graph
@@ -1414,6 +1414,18 @@ Sequence::duplicate(const tools::Digraph_node<SS>* sequence)
     };
     std::vector<const tools::Digraph_node<SS>*> already_parsed_nodes;
     collect_modules_list(sequence, already_parsed_nodes);
+
+    // check if all the tasks of the sequence are replicable before to perform the modules clones
+    if (this->n_threads - (this->tasks_inplace ? 1 : 0))
+        for (auto& t : tsks_vec)
+            if (!t->is_replicable())
+            {
+                std::stringstream message;
+                message << "It is not possible to replicate this sequence because at least one of its tasks is not "
+                        << "replicable (t->get_name() = '" << t->get_name() << "', t->get_module().get_name() = '"
+                        << t->get_module().get_name() << "').";
+                throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
+            }
 
     std::vector<MO*> modules_vec;
     for (auto m : modules_set)
@@ -1442,7 +1454,7 @@ Sequence::duplicate(const tools::Digraph_node<SS>* sequence)
             catch (std::exception& e)
             {
                 std::stringstream message;
-                message << "Module clone failed when trying to duplicate the sequence (module name is '"
+                message << "Module clone failed when trying to replicate the sequence (module name is '"
                         << modules_vec[m]->get_name() << "').";
 
                 throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
@@ -1482,9 +1494,9 @@ Sequence::duplicate(const tools::Digraph_node<SS>* sequence)
                        const size_t,
                        std::vector<const tools::Digraph_node<SS>*>&,
                        std::map<size_t, tools::Digraph_node<Sub_sequence>*>&)>
-      duplicate_sequence;
+      replicate_sequence;
 
-    duplicate_sequence = [&](const tools::Digraph_node<SS>* sequence_ref,
+    replicate_sequence = [&](const tools::Digraph_node<SS>* sequence_ref,
                              tools::Digraph_node<Sub_sequence>* sequence_cpy,
                              const size_t thread_id,
                              std::vector<const tools::Digraph_node<SS>*>& already_parsed_nodes,
@@ -1615,7 +1627,7 @@ Sequence::duplicate(const tools::Digraph_node<SS>* sequence)
             }
 
             for (size_t c = 0; c < sequence_ref->get_children().size(); c++)
-                duplicate_sequence(sequence_ref->get_children()[c],
+                replicate_sequence(sequence_ref->get_children()[c],
                                    sequence_cpy->get_children()[c],
                                    thread_id,
                                    already_parsed_nodes,
@@ -1651,7 +1663,7 @@ Sequence::duplicate(const tools::Digraph_node<SS>* sequence)
         this->sequences[thread_id] = new tools::Digraph_node<Sub_sequence>({}, {}, nullptr, 0);
         already_parsed_nodes.clear();
         std::map<size_t, tools::Digraph_node<Sub_sequence>*> allocated_nodes;
-        duplicate_sequence(sequence, this->sequences[thread_id], thread_id, already_parsed_nodes, allocated_nodes);
+        replicate_sequence(sequence, this->sequences[thread_id], thread_id, already_parsed_nodes, allocated_nodes);
         std::vector<tools::Digraph_node<Sub_sequence>*> already_parsed_nodes_bis;
         set_autoalloc_true(this->sequences[thread_id], already_parsed_nodes_bis);
 
@@ -1660,10 +1672,10 @@ Sequence::duplicate(const tools::Digraph_node<SS>* sequence)
 }
 
 template void
-runtime::Sequence::duplicate<runtime::Sub_sequence_const, const module::Module>(
+runtime::Sequence::replicate<runtime::Sub_sequence_const, const module::Module>(
   const tools::Digraph_node<runtime::Sub_sequence_const>*);
 template void
-runtime::Sequence::duplicate<runtime::Sub_sequence, module::Module>(const tools::Digraph_node<runtime::Sub_sequence>*);
+runtime::Sequence::replicate<runtime::Sub_sequence, module::Module>(const tools::Digraph_node<runtime::Sub_sequence>*);
 
 template<class SS>
 void
@@ -1756,7 +1768,7 @@ Sequence::export_dot_subsequence(const VTA& subseq,
 
         stream << tab << tab << tab << tab << "label=\"" << t->get_name() << " (id = " << tasks_id[exec_order] << ")"
                << "\";" << std::endl;
-        stream << tab << tab << tab << tab << "color=" << color << ";" << std::endl;
+        stream << tab << tab << tab << tab << "color=" << (t->is_replicable() ? color : "red") << ";" << std::endl;
         stream << tab << tab << tab << "}" << std::endl;
         stream << tab << tab << tab << "label=\"" << t->get_module().get_name() << "\n"
                << (t->get_module().get_custom_name().empty() ? "" : t->get_module().get_custom_name() + "\n")

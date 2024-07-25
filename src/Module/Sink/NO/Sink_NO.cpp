@@ -11,6 +11,8 @@ Sink_NO<B>::Sink_NO(const int max_data_size)
 {
     const std::string name = "Sink_NO";
     this->set_name(name);
+    this->tasks[0]->set_replicability(true);
+    this->tasks[1]->set_replicability(true);
 }
 
 template<typename B>

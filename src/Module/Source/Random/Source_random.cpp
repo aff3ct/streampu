@@ -10,6 +10,7 @@ Source_random<B>::Source_random(const int max_data_size, const int seed)
 {
     const std::string name = "Source_random";
     this->set_name(name);
+    this->tasks[0]->set_replicability(true);
 }
 
 template<typename B>

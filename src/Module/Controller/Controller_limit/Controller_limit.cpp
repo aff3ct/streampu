@@ -12,6 +12,7 @@ Controller_limit::Controller_limit(const size_t limit, const size_t init_path)
 {
     const std::string name = "Controller_limit";
     this->set_name(name);
+    this->tasks[0]->set_replicability(true);
 }
 
 Controller_limit*

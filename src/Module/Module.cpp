@@ -2,6 +2,7 @@
 #include <sstream>
 
 #include "Module/Module.hpp"
+#include "Module/Stateless/Stateless.hpp"
 #include "Tools/Exception/exception.hpp"
 #include "Tools/Interface/Interface_reset.hpp"
 
@@ -463,4 +464,32 @@ Module::create_reset_task()
                              iface.reset();
                              return 0;
                          });
+}
+
+bool
+Module::is_stateless() const
+{
+    return dynamic_cast<const spu::module::Stateless*>(this);
+}
+
+bool
+Module::is_stateful() const
+{
+    return !this->is_stateless();
+}
+
+bool
+Module::is_clonable() const
+{
+    if (this->is_stateless()) return true;
+    try
+    {
+        auto clone = this->clone();
+        delete clone;
+        return true;
+    }
+    catch (tools::unimplemented_error&)
+    {
+        return false;
+    }
 }

@@ -11,6 +11,7 @@ Controller_cyclic::Controller_cyclic(const size_t n_paths, const size_t init_pat
 {
     const std::string name = "Controller_cyclic";
     this->set_name(name);
+    this->tasks[0]->set_replicability(true);
 }
 
 Controller_cyclic*

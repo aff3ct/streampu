@@ -10,6 +10,7 @@ Controller_static::Controller_static(const size_t init_path)
 {
     const std::string name = "Controller_static";
     this->set_name(name);
+    this->tasks[0]->set_replicability(true);
 }
 
 Controller_static*

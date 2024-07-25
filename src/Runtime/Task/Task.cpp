@@ -7,7 +7,6 @@
 #include <typeinfo>
 
 #include "Module/Module.hpp"
-#include "Module/Stateless/Stateless.hpp"
 #include "Runtime/Socket/Socket.hpp"
 #include "Runtime/Task/Task.hpp"
 #include "Tools/Exception/exception.hpp"
@@ -28,7 +27,7 @@ Task::Task(module::Module& module,
   , fast(fast)
   , debug(debug)
   , debug_hex(false)
-  , replicable(this->_is_replicable())
+  , replicable(module.is_clonable())
   , debug_limit(-1)
   , debug_precision(2)
   , debug_frame_max(-1)
@@ -1459,32 +1458,13 @@ Task::get_n_static_input_sockets() const
 bool
 Task::is_stateless() const
 {
-    return dynamic_cast<const spu::module::Stateless*>(&this->get_module());
+    return this->get_module().is_stateless();
 }
 
 bool
 Task::is_stateful() const
 {
-    return !this->is_stateless();
-}
-
-bool
-Task::_is_replicable() const
-{
-    if (this->is_stateless()) return true;
-
-    module::Module& m = this->get_module();
-    try
-    {
-        // if the clone method is implemented, it means that the task can be replicated
-        auto clone = m.clone();
-        delete clone;
-        return true;
-    }
-    catch (tools::unimplemented_error&)
-    {
-        return false;
-    }
+    return this->get_module().is_stateful();
 }
 
 bool
@@ -1496,7 +1476,16 @@ Task::is_replicable() const
 void
 Task::set_replicability(const bool replicable)
 {
-    this->replicable = replicable ? this->_is_replicable() : false;
+    if (replicable && !this->module->is_clonable())
+    {
+        std::stringstream message;
+        message << "The replicability of this task cannot be set to true because its corresponding module is not "
+                << "clonable (task.name = '" << this->get_name() << "', module.name = '"
+                << this->get_module().get_name() << "').";
+        throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
+    }
+    this->replicable = replicable;
+    // this->replicable = replicable ? this->module->is_clonable() : false;
 }
 
 // ==================================================================================== explicit template instantiation

@@ -298,7 +298,7 @@ class Sequence
     void export_dot(tools::Digraph_node<SS>* root, std::ostream& stream = std::cout) const;
 
     template<class SS, class MO>
-    void duplicate(const tools::Digraph_node<SS>* sequence);
+    void replicate(const tools::Digraph_node<SS>* sequence);
 
     void _exec(const size_t tid,
                std::function<bool(const std::vector<const int*>&)>& stop_condition,

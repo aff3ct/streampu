@@ -675,9 +675,12 @@ main(int argc, char** argv)
                 throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
         };
 
-        auto tsk_ids = std::get<0>(tsk_2_ids[std::get<0>(tst)]);
-        for (auto tid : tsk_ids)
-            (*modules[tas])[tid].set_replicability(std::get<2>(tst));
+        if (!std::get<2>(tst))
+        {
+            auto tsk_ids = std::get<0>(tsk_2_ids[std::get<0>(tst)]);
+            for (auto tid : tsk_ids)
+                (*modules[tas])[tid].set_replicability(std::get<2>(tst));
+        }
 
         tas++;
     }
@@ -729,7 +732,7 @@ main(int argc, char** argv)
             }
 
         // prepare input data in case of initializer first
-        if (std::get<0>(tsk_types[0][0]) == tsk_e::initialize)
+        if (std::get<0>(tsk_types_1d[0]) == tsk_e::initialize)
         {
             auto tid = 0;
             for (auto cur_initializer : sequence_chain.get()->get_cloned_modules<module::Initializer<uint8_t>>(

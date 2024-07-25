@@ -97,7 +97,7 @@ template<>
 inline void
 Sequence::_init(tools::Digraph_node<runtime::Sub_sequence_const>* root)
 {
-    this->duplicate<runtime::Sub_sequence_const, const module::Module>(root);
+    this->replicate<runtime::Sub_sequence_const, const module::Module>(root);
     std::vector<tools::Digraph_node<Sub_sequence_const>*> already_deleted_nodes;
     this->delete_tree(root, already_deleted_nodes);
 }
@@ -288,7 +288,7 @@ Sequence::_init(tools::Digraph_node<runtime::Sub_sequence>* root)
     for (auto m : modules_set)
         this->all_modules[0].push_back(m);
 
-    this->duplicate<runtime::Sub_sequence, module::Module>(root);
+    this->replicate<runtime::Sub_sequence, module::Module>(root);
 }
 
 size_t

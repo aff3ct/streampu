@@ -687,6 +687,8 @@ if(SPU_TESTS)
     set_tests_properties(pipeline3::spu-test-complex-pipeline-mix-fwd PROPERTIES LABELS complex-pipeline-mix-fwd)
     add_test(NAME pipeline4::spu-test-complex-pipeline-mix-fwd COMMAND spu-test-complex-pipeline-mix-fwd -e 1000 -u 413 -w)
     set_tests_properties(pipeline4::spu-test-complex-pipeline-mix-fwd PROPERTIES LABELS "complex-pipeline-mix-fwd;skip-memcheck") # to exclude this previous test from memchecks, active waiting is too long in Valgrind :-(
+    add_test(NAME pipeline5::spu-test-complex-pipeline-mix-fwd COMMAND spu-test-complex-pipeline-mix-fwd -t 12 -o dot2.dot -S "OTAC" -v)
+    set_tests_properties(pipeline5::spu-test-complex-pipeline-mix-fwd PROPERTIES LABELS complex-pipeline-mix-fwd)
 
     # simple sequence example
     add_test(NAME sequence0::spu-test-generic-pipeline COMMAND spu-test-generic-pipeline -i ${INPUT_FILE} -n "1,3,1" -t "1" -R "(read,relay,write)" -q)

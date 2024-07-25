@@ -90,7 +90,7 @@ Adaptor_n_to_1::init()
                          });
 
     auto& p2 = this->create_task("pull_1", (int)adp::tsk::pull_1);
-    p1.set_replicability(false);
+    p2.set_replicability(false);
     std::vector<size_t> p2s_out;
     for (size_t s = 0; s < this->n_sockets; s++)
         p2s_out.push_back(this->create_socket_out(p2, "out" + std::to_string(s), this->n_elmts[s], this->datatype[s]));
