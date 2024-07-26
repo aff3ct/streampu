@@ -21,6 +21,8 @@ namespace spu
 {
 namespace module
 {
+class Stateful;
+class Stateless;
 /*!
  * \class Module
  *
@@ -30,6 +32,9 @@ class Module
   : public tools::Interface_clone
   , public tools::Interface_get_set_n_frames
 {
+    friend Stateful;
+    friend Stateless;
+
   protected:
     size_t n_frames; /*!< Number of frames to process in this Module */
     size_t n_frames_per_wave;
@@ -44,11 +49,13 @@ class Module
   public:
     std::vector<std::shared_ptr<runtime::Task>> tasks;
 
+  protected:
     /*!
      * \brief Constructor.
      */
     explicit Module();
 
+  public:
     /*!
      * \brief Destructor.
      */
@@ -96,7 +103,7 @@ class Module
     bool is_stateful() const;
     bool is_clonable() const;
 
-  protected:
+  private:
     void deep_copy(const Module& m);
 
     void set_name(const std::string& name);
@@ -261,7 +268,6 @@ class Module
 
     void set_single_wave(const bool enable_single_wave);
 
-  private:
     void _set_n_frames_per_wave(const size_t n_frames_per_wave);
     void _set_n_frames(const size_t n_frames);
 };

@@ -4,9 +4,8 @@
 #include <tuple>
 #include <utility>
 
-#include "Module/Adaptor/Adaptor.hpp"
-#include "Module/Adaptor/Adaptor_1_to_n.hpp"
-#include "Module/Adaptor/Adaptor_n_to_1.hpp"
+#include "Module/Stateful/Adaptor/Adaptor_1_to_n.hpp"
+#include "Module/Stateful/Adaptor/Adaptor_n_to_1.hpp"
 #include "Runtime/Pipeline/Pipeline.hpp"
 #include "Tools/Exception/exception.hpp"
 #include "Tools/Interface/Interface_waiting.hpp"

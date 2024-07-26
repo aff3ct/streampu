@@ -15,7 +15,7 @@ namespace spu
 namespace module
 {
 
-class Stateless : public Module
+class Stateless final : public Module
 {
   public:
     Stateless();

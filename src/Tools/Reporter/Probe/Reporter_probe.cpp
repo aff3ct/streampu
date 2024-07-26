@@ -2,7 +2,7 @@
 #include <sstream>
 #include <utility>
 
-#include "Module/Probe/Probe.hpp"
+#include "Module/Stateful/Probe/Probe.hpp"
 
 #include "Tools/Reporter/Probe/Reporter_probe.hpp"
 

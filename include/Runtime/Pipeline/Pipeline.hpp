@@ -11,7 +11,7 @@
 #include <utility>
 #include <vector>
 
-#include "Module/Adaptor/Adaptor.hpp"
+#include "Module/Stateful/Adaptor/Adaptor.hpp"
 #include "Runtime/Sequence/Sequence.hpp"
 #include "Tools/Interface/Interface_get_set_n_frames.hpp"
 

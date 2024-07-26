@@ -9,116 +9,119 @@
 #ifndef STREAMPU_HPP
 #define STREAMPU_HPP
 
-#ifndef ADAPTOR_1_TO_N_HPP_
-#include <Module/Adaptor/Adaptor_1_to_n.hpp>
-#endif
-#ifndef ADAPTOR_HPP_
-#include <Module/Adaptor/Adaptor.hpp>
-#endif
-#ifndef ADAPTOR_N_TO_1_HPP_
-#include <Module/Adaptor/Adaptor_n_to_1.hpp>
-#endif
-#ifndef BINARYOP_HPP_
-#include <Module/Binaryop/Binaryop.hpp>
-#endif
-#ifndef CONTROLLER_CYCLIC_HPP_
-#include <Module/Controller/Controller_cyclic/Controller_cyclic.hpp>
-#endif
-#ifndef CONTROLLER_HPP_
-#include <Module/Controller/Controller.hpp>
-#endif
-#ifndef CONTROLLER_LIMIT_HPP_
-#include <Module/Controller/Controller_limit/Controller_limit.hpp>
-#endif
-#ifndef CONTROLLER_STATIC_HPP_
-#include <Module/Controller/Controller_static/Controller_static.hpp>
-#endif
-#ifndef DELAYER_HPP_
-#include <Module/Delayer/Delayer.hpp>
-#endif
-#ifndef FINALIZER_HPP_
-#include <Module/Finalizer/Finalizer.hpp>
-#endif
-#ifndef INCREMENTER_HPP_
-#include <Module/Incrementer/Incrementer.hpp>
-#endif
-#ifndef INITIALIZER_HPP_
-#include <Module/Initializer/Initializer.hpp>
-#endif
-#ifndef ITERATOR_HPP_
-#include <Module/Iterator/Iterator.hpp>
-#endif
 #ifndef MODULE_HPP_
 #include <Module/Module.hpp>
 #endif
+#ifndef ADAPTOR_1_TO_N_HPP_
+#include <Module/Stateful/Adaptor/Adaptor_1_to_n.hpp>
+#endif
+#ifndef ADAPTOR_HPP_
+#include <Module/Stateful/Adaptor/Adaptor.hpp>
+#endif
+#ifndef ADAPTOR_N_TO_1_HPP_
+#include <Module/Stateful/Adaptor/Adaptor_n_to_1.hpp>
+#endif
+#ifndef BINARYOP_HPP_
+#include <Module/Stateful/Binaryop/Binaryop.hpp>
+#endif
+#ifndef CONTROLLER_CYCLIC_HPP_
+#include <Module/Stateful/Controller/Controller_cyclic/Controller_cyclic.hpp>
+#endif
+#ifndef CONTROLLER_HPP_
+#include <Module/Stateful/Controller/Controller.hpp>
+#endif
+#ifndef CONTROLLER_LIMIT_HPP_
+#include <Module/Stateful/Controller/Controller_limit/Controller_limit.hpp>
+#endif
+#ifndef CONTROLLER_STATIC_HPP_
+#include <Module/Stateful/Controller/Controller_static/Controller_static.hpp>
+#endif
+#ifndef DELAYER_HPP_
+#include <Module/Stateful/Delayer/Delayer.hpp>
+#endif
+#ifndef FINALIZER_HPP_
+#include <Module/Stateful/Finalizer/Finalizer.hpp>
+#endif
+#ifndef INCREMENTER_HPP_
+#include <Module/Stateful/Incrementer/Incrementer.hpp>
+#endif
+#ifndef INITIALIZER_HPP_
+#include <Module/Stateful/Initializer/Initializer.hpp>
+#endif
+#ifndef ITERATOR_HPP_
+#include <Module/Stateful/Iterator/Iterator.hpp>
+#endif
 #ifndef PROBE_LATENCY_HPP_
-#include <Module/Probe/Latency/Probe_latency.hpp>
+#include <Module/Stateful/Probe/Latency/Probe_latency.hpp>
 #endif
 #ifndef PROBE_OCCURRENCE_HPP_
-#include <Module/Probe/Occurrence/Probe_occurrence.hpp>
+#include <Module/Stateful/Probe/Occurrence/Probe_occurrence.hpp>
 #endif
 #ifndef PROBE_HPP_
-#include <Module/Probe/Probe.hpp>
+#include <Module/Stateful/Probe/Probe.hpp>
 #endif
 #ifndef PROBE_STREAM_HPP_
-#include <Module/Probe/Stream/Probe_stream.hpp>
+#include <Module/Stateful/Probe/Stream/Probe_stream.hpp>
 #endif
 #ifndef PROBE_THROUGHPUT_HPP_
-#include <Module/Probe/Throughput/Probe_throughput.hpp>
+#include <Module/Stateful/Probe/Throughput/Probe_throughput.hpp>
 #endif
 #ifndef PROBE_TIME_HPP_
-#include <Module/Probe/Time/Probe_time.hpp>
+#include <Module/Stateful/Probe/Time/Probe_time.hpp>
 #endif
 #ifndef PROBE_TIMESTAMP_HPP_
-#include <Module/Probe/Timestamp/Probe_timestamp.hpp>
+#include <Module/Stateful/Probe/Timestamp/Probe_timestamp.hpp>
 #endif
 #ifndef PROBE_VALUE_HPP_
-#include <Module/Probe/Value/Probe_value.hpp>
+#include <Module/Stateful/Probe/Value/Probe_value.hpp>
 #endif
 #ifndef REDUCER_HPP_
-#include <Module/Reducer/Reducer.hpp>
+#include <Module/Stateful/Reducer/Reducer.hpp>
 #endif
 #ifndef RELAYER_HPP_
-#include <Module/Relayer/Relayer.hpp>
+#include <Module/Stateful/Relayer/Relayer.hpp>
 #endif
 #ifndef SET_HPP_
-#include <Module/Set/Set.hpp>
+#include <Module/Stateful/Set/Set.hpp>
 #endif
 #ifndef SINK_NO_HPP
-#include <Module/Sink/NO/Sink_NO.hpp>
+#include <Module/Stateful/Sink/NO/Sink_NO.hpp>
 #endif
 #ifndef SINK_HPP
-#include <Module/Sink/Sink.hpp>
+#include <Module/Stateful/Sink/Sink.hpp>
 #endif
 #ifndef SINK_USER_BINARY_HPP
-#include <Module/Sink/User/Sink_user_binary.hpp>
+#include <Module/Stateful/Sink/User/Sink_user_binary.hpp>
 #endif
 #ifndef SLEEPER_HPP_
-#include <Module/Sleeper/Sleeper.hpp>
+#include <Module/Stateful/Sleeper/Sleeper.hpp>
 #endif
 #ifndef SOURCE_AZCW_HPP_
-#include <Module/Source/AZCW/Source_AZCW.hpp>
+#include <Module/Stateful/Source/AZCW/Source_AZCW.hpp>
 #endif
 #ifndef SOURCE_RANDOM_HPP_
-#include <Module/Source/Random/Source_random.hpp>
+#include <Module/Stateful/Source/Random/Source_random.hpp>
 #endif
 #ifndef SOURCE_HPP_
-#include <Module/Source/Source.hpp>
+#include <Module/Stateful/Source/Source.hpp>
 #endif
 #ifndef SOURCE_USER_BINARY_HPP_
-#include <Module/Source/User/Source_user_binary.hpp>
+#include <Module/Stateful/Source/User/Source_user_binary.hpp>
 #endif
 #ifndef SOURCE_USER_HPP_
-#include <Module/Source/User/Source_user.hpp>
+#include <Module/Stateful/Source/User/Source_user.hpp>
+#endif
+#ifndef STATEFUL_HPP_
+#include <Module/Stateful/Stateful.hpp>
+#endif
+#ifndef SWITCHER_HPP_
+#include <Module/Stateful/Switcher/Switcher.hpp>
+#endif
+#ifndef UNARYOP_HPP_
+#include <Module/Stateful/Unaryop/Unaryop.hpp>
 #endif
 #ifndef STATELESS_HPP_
 #include <Module/Stateless/Stateless.hpp>
-#endif
-#ifndef SWITCHER_HPP_
-#include <Module/Switcher/Switcher.hpp>
-#endif
-#ifndef UNARYOP_HPP_
-#include <Module/Unaryop/Unaryop.hpp>
 #endif
 #ifndef PIPELINE_HPP_
 #include <Runtime/Pipeline/Pipeline.hpp>

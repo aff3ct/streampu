@@ -8,10 +8,10 @@
 #include <thread>
 #include <utility>
 
-#include "Module/Adaptor/Adaptor.hpp"
 #include "Module/Module.hpp"
-#include "Module/Probe/Probe.hpp"
-#include "Module/Switcher/Switcher.hpp"
+#include "Module/Stateful/Adaptor/Adaptor.hpp"
+#include "Module/Stateful/Probe/Probe.hpp"
+#include "Module/Stateful/Switcher/Switcher.hpp"
 #include "Runtime/Sequence/Sequence.hpp"
 #include "Runtime/Socket/Socket.hpp"
 #include "Runtime/Task/Task.hpp"
