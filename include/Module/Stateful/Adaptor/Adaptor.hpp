@@ -111,7 +111,6 @@ class Adaptor
     inline Adaptor(const std::vector<size_t>& n_elmts,
                    const std::vector<std::type_index>& datatype,
                    const size_t buffer_size);
-    using Stateful::deep_copy;
     void deep_copy(const Adaptor& m);
     inline bool is_full(const size_t id);
     inline bool is_empty(const size_t id);

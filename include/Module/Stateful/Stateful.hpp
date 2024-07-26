@@ -23,7 +23,6 @@ class Stateful : public Module
 
   protected:
     using Module::deep_copy;
-    void deep_copy(const Stateful& m);
 
     using Module::set_name;
     using Module::set_short_name;
