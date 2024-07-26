@@ -49,7 +49,7 @@ class Set : public Stateful
 
   protected:
     using Stateful::deep_copy;
-    virtual void deep_copy(const Set& m);
+    void deep_copy(const Set& m);
 };
 }
 }
