@@ -48,8 +48,7 @@ class Set : public Stateful
     virtual void set_n_frames(const size_t n_frames);
 
   protected:
-    using Stateful::deep_copy;
-    virtual void deep_copy(const Set& m);
+    void deep_copy(const Set& m);
 };
 }
 }
