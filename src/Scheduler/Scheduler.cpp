@@ -1,5 +1,6 @@
 #include "Scheduler/Scheduler.hpp"
 #include "Tools/Exception/exception.hpp"
+#include "Tools/Thread_pinning/Thread_pinning.hpp"
 
 #include <iostream>
 #include <sstream>
@@ -201,5 +202,5 @@ Scheduler::generate_pipeline()
 
     if (solution.empty()) this->schedule();
 
-    return this->instantiate_pipeline(1, false, true, this->perform_threads_mapping());
+    return this->instantiate_pipeline(1, false, tools::Thread_pinning::is_init(), this->perform_threads_mapping());
 }

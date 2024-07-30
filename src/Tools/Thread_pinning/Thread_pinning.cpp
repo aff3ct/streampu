@@ -25,13 +25,19 @@ static bool g_is_init = false;
 static std::mutex g_mtx;
 static bool g_enable_logs = false;
 
+bool
+Thread_pinning::is_init()
+{
+    return g_is_init;
+}
+
 void
 Thread_pinning::init()
 {
-    if (!g_is_init)
+    if (!Thread_pinning::is_init())
     {
         g_mtx.lock();
-        if (!g_is_init)
+        if (!Thread_pinning::is_init())
         {
             g_is_init = true;
 
@@ -60,10 +66,10 @@ Thread_pinning::init()
 void
 Thread_pinning::destroy()
 {
-    if (g_is_init)
+    if (Thread_pinning::is_init())
     {
         g_mtx.lock();
-        if (g_is_init)
+        if (Thread_pinning::is_init())
         {
 #ifdef SPU_HWLOC
             /* Destroy topology object. */
@@ -95,7 +101,7 @@ Thread_pinning::pin(const size_t puid)
 {
     g_mtx.lock();
 #ifdef SPU_HWLOC
-    if (g_is_init)
+    if (Thread_pinning::is_init())
     {
         int pu_depth = hwloc_get_type_or_below_depth(g_topology, HWLOC_OBJ_PU);
         hwloc_obj_t pu_obj = hwloc_get_obj_by_depth(g_topology, pu_depth, puid);
@@ -162,7 +168,7 @@ Thread_pinning::pin(const std::string hwloc_objects)
     g_mtx.lock();
 
 #ifdef SPU_HWLOC
-    if (g_is_init)
+    if (Thread_pinning::is_init())
     {
         // Objects parsing
         std::vector<std::string> hwloc_objects_vector = Thread_pinning_utils::thread_parser(hwloc_objects);
@@ -242,7 +248,7 @@ Thread_pinning::unpin()
 {
     g_mtx.lock();
 #ifdef SPU_HWLOC
-    if (!g_is_init)
+    if (!Thread_pinning::is_init())
     {
         if (g_enable_logs)
         {
