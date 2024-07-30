@@ -77,6 +77,8 @@ nav:
   - Home: 
     - index.md
   - For Users:
+    - Concepts:
+      - concepts_overview.md
     - Tests:
       - tests_bootstrap.md
       - tests_advanced.md
