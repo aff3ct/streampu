@@ -204,3 +204,25 @@ Scheduler::generate_pipeline()
 
     return this->instantiate_pipeline(1, false, tools::Thread_pinning::is_init(), this->perform_threads_mapping());
 }
+
+size_t
+Scheduler::get_n_alloc_ressources() const
+{
+    if (this->solution.size() == 0)
+    {
+        std::stringstream message;
+        message
+          << "The solution has to contain at least one element, please run the 'Scheduler::schedule' method first.";
+        throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
+    }
+    size_t R = 0;
+    for (auto s : this->solution)
+        R += s.second;
+    return R;
+}
+
+double
+Scheduler::get_throughput_est() const
+{
+    throw tools::unimplemented_error(__FILE__, __LINE__, __func__);
+}

@@ -26,15 +26,15 @@ class Scheduler_OTAC : public Scheduler
     virtual void schedule() override;
     double get_period() const;
     virtual void reset() override;
+    virtual double get_throughput_est() const override;
 
   private:
     /**
-     * Find if there is a solution.
+     * Find a solution.
      * @param chain An input vector of tasks descriptor with profiled time.
      * @param R The input number of resources available.
      * @param P The output periodicity (reciprocal of pipeline throughput).
      * @param solution The output solution in the form of a vector of (n,r) pairs.
-     * @return A boolean depending if there is a solution or not.
      */
     void SOLVE(const std::vector<task_desc_t>& chain,
                const size_t R,

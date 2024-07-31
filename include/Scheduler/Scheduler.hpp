@@ -49,6 +49,8 @@ class Scheduler : public tools::Interface_reset
                                             const bool thread_pining = false,
                                             const std::string& pinning_policy = "");
     std::string perform_threads_mapping() const;
+    size_t get_n_alloc_ressources() const;
+    virtual double get_throughput_est() const; // return the estimated number of streams per second
 };
 } // namespace sched
 } // namespace spu

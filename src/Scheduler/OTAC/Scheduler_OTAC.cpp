@@ -429,3 +429,9 @@ Scheduler_OTAC::reset()
     Scheduler::reset();
     this->P = std::numeric_limits<double>::infinity();
 }
+
+double
+Scheduler_OTAC::get_throughput_est() const
+{
+    return (1.0 / this->get_period()) * 1e9; // n streams per second
+}
