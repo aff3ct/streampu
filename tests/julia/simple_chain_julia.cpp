@@ -17,6 +17,19 @@ main(int argc, char** argv)
     jluna::initialize();
     jluna::Base["println"]("hello julia");
 
+    jluna::Main.safe_eval_file("../tests/julia/hello_world.jl");
+
+    jluna::Main.safe_eval("f(x) = x^x");
+    auto f = jluna::Main.safe_eval("return f");
+    int64_t result = f(2);
+    std::cout << "result = " << result << std::endl;
+
+    auto square = jluna::Main["square"];
+    int64_t result2 = square(3);
+    std::cout << "result2 = " << result2 << std::endl;
+
+    // jluna::Main.safe_eval("sqrt(-1)");
+
     exit(0);
 
     tools::Signal_handler::init();
