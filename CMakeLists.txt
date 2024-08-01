@@ -568,10 +568,10 @@ if(SPU_TESTS)
 
     set(INPUT_FILE "../mkdocs.yml")
 
-    add_test(NAME subseq0::spu-test-simple-chain COMMAND spu-test-simple-chain -d 2048 -s 5 -e 15 -f 13 -u)
-    set_tests_properties(subseq0::spu-test-simple-chain PROPERTIES LABELS subseq)
-    add_test(NAME subseq1::spu-test-simple-chain COMMAND spu-test-simple-chain -d 2048 -s 5 -v)
-    set_tests_properties(subseq1::spu-test-simple-chain PROPERTIES LABELS subseq)
+    add_test(NAME set0::spu-test-simple-chain COMMAND spu-test-simple-chain -d 2048 -s 5 -e 15 -f 13 -u)
+    set_tests_properties(set0::spu-test-simple-chain PROPERTIES LABELS set)
+    add_test(NAME set1::spu-test-simple-chain COMMAND spu-test-simple-chain -d 2048 -s 5 -v)
+    set_tests_properties(set1::spu-test-simple-chain PROPERTIES LABELS set)
 
     add_test(NAME path0::spu-test-exclusive-paths COMMAND spu-test-exclusive-paths -d 2048 -s 5 -e 10 -f 13 -a 0)
     set_tests_properties(path0::spu-test-exclusive-paths PROPERTIES LABELS exclusive-paths)
@@ -704,6 +704,8 @@ if(SPU_TESTS)
     set_tests_properties(pipeline3::spu-test-complex-pipeline-mix-fwd PROPERTIES LABELS complex-pipeline-mix-fwd)
     add_test(NAME pipeline4::spu-test-complex-pipeline-mix-fwd COMMAND spu-test-complex-pipeline-mix-fwd -e 1000 -u 413 -w)
     set_tests_properties(pipeline4::spu-test-complex-pipeline-mix-fwd PROPERTIES LABELS "complex-pipeline-mix-fwd;skip-memcheck") # to exclude this previous test from memchecks, active waiting is too long in Valgrind :-(
+    add_test(NAME pipeline5::spu-test-complex-pipeline-mix-fwd COMMAND spu-test-complex-pipeline-mix-fwd -t 12 -o dot2.dot -S "OTAC" -v)
+    set_tests_properties(pipeline5::spu-test-complex-pipeline-mix-fwd PROPERTIES LABELS complex-pipeline-mix-fwd)
 
     # simple sequence example
     add_test(NAME sequence0::spu-test-generic-pipeline COMMAND spu-test-generic-pipeline -i ${INPUT_FILE} -n "1,3,1" -t "1" -R "(read,relay,write)" -q)
@@ -748,7 +750,7 @@ if(SPU_TESTS)
     add_test(NAME pipeline13::spu-test-generic-pipeline COMMAND spu-test-generic-pipeline -i ${INPUT_FILE} -n "1,4,3,2,1" -t "1,3,1,3,1" -R "(read,relayf,relay,relayf,write)")
     set_tests_properties(pipeline13::spu-test-generic-pipeline PROPERTIES LABELS generic-pipeline)
 
-	############################# same tests with increment instread of relayers ######################################
+	############################# same tests with increment instead of relayers #######################################
 
     # simple sequence example
     add_test(NAME sequence4::spu-test-generic-pipeline COMMAND spu-test-generic-pipeline -e 100 -n "1,3,1" -t "3" -R "(init,incr,fin)" -q)
@@ -793,6 +795,18 @@ if(SPU_TESTS)
     add_test(NAME pipeline27::spu-test-generic-pipeline COMMAND spu-test-generic-pipeline -e 12 -n "1,4,3,2,1" -t "1,3,1,3,1" -R "(init,incrf,incr,relayf,fin)")
     set_tests_properties(pipeline27::spu-test-generic-pipeline PROPERTIES LABELS generic-pipeline)
 
+    # scheduler tests
+    add_test(NAME pipeline28::spu-test-generic-pipeline COMMAND spu-test-generic-pipeline -e 12 -t "1" -S "OTAC" -C "(init,relayf_15,incrementf_S_20,relay_15,fin)" -P "none")
+    set_tests_properties(pipeline28::spu-test-generic-pipeline PROPERTIES LABELS generic-pipeline)
+    add_test(NAME pipeline29::spu-test-generic-pipeline COMMAND spu-test-generic-pipeline -e 13 -t "4" -S "OTAC" -C "(init,relayf_15,incrementf_20,relay_15,fin)" -P "none")
+    set_tests_properties(pipeline29::spu-test-generic-pipeline PROPERTIES LABELS generic-pipeline)
+    add_test(NAME pipeline30::spu-test-generic-pipeline COMMAND spu-test-generic-pipeline -e 50 -t "3" -S "OTAC" -C "(init_S,relayf_S_15,incrementf_S_20,relay_S_15,fin_S)" -P "none")
+    set_tests_properties(pipeline30::spu-test-generic-pipeline PROPERTIES LABELS generic-pipeline)
+    add_test(NAME pipeline31::spu-test-generic-pipeline COMMAND spu-test-generic-pipeline -e 67 -t "6" -S "OTAC" -C "(init_S,relayf_S_15,incrementf_120,relay_S_15,fin_S)" -P "none")
+    set_tests_properties(pipeline31::spu-test-generic-pipeline PROPERTIES LABELS generic-pipeline)
+    add_test(NAME pipeline32::spu-test-generic-pipeline COMMAND spu-test-generic-pipeline -e 21 -t "3" -S "OTAC" -C "(init,relayf_15,incrementf_S_60,relay_15,fin)" -P "none")
+    set_tests_properties(pipeline32::spu-test-generic-pipeline PROPERTIES LABELS generic-pipeline)
+
     add_test(NAME sequence0::spu-test-exclusive-paths-pipeline COMMAND spu-test-exclusive-paths-pipeline -t 1 -q -i ${INPUT_FILE})
     set_tests_properties(sequence0::spu-test-exclusive-paths-pipeline PROPERTIES LABELS exclusive-paths-pipeline)
     add_test(NAME sequence1::spu-test-exclusive-paths-pipeline COMMAND spu-test-exclusive-paths-pipeline -t 1 -u 13 -q -b -i ${INPUT_FILE})
@@ -824,4 +838,11 @@ if(SPU_TESTS)
         add_test(NAME pipeline1::spu-test-thread-pinning COMMAND spu-test-thread-pinning -e 300 -f 5)
         set_tests_properties(pipeline1::spu-test-thread-pinning PROPERTIES LABELS "thread-pinning;skip-memcheck") # to exclude this previous test from memchecks, it looks like there is a liitle memory leak in the hwloc lib but not sure
     endif (SPU_LINK_HWLOC)
+
+    # check if the automatic pipeline scheduling is giving expected results
+    find_program (BASH_PROGRAM bash)
+    if (BASH_PROGRAM)
+        add_test (pipeline::sched ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/ci/test-sched.sh)
+        set_tests_properties(pipeline::sched PROPERTIES LABELS "scheduler;skip-memcheck")
+    endif (BASH_PROGRAM)
 endif(SPU_TESTS)

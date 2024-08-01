@@ -10,6 +10,7 @@ namespace tools
 class Thread_pinning
 {
   public:
+    static bool is_init();
     static void init();
     static void destroy();
     static void pin(const size_t puid);

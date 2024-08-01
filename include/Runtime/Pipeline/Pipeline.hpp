@@ -11,6 +11,7 @@
 #include <utility>
 #include <vector>
 
+#include "Module/Stateful/Adaptor/Adaptor.hpp"
 #include "Runtime/Sequence/Sequence.hpp"
 #include "Tools/Interface/Interface_get_set_n_frames.hpp"
 
@@ -44,16 +45,22 @@ class Pipeline : public tools::Interface_get_set_n_frames
 
   public:
     // Pipeline(const runtime::Task &first,
-    //          const std::vector<std::pair<std::vector<const runtime::Task*>, std::vector<const runtime::Task*>>>
-    //          &sep_stages = {}, const std::vector<size_t> &n_threads = {}, const std::vector<size_t>
-    //          &synchro_buffer_sizes = {}, const std::vector<bool> &synchro_active_waiting = {}, const
-    //          std::vector<bool> &thread_pinning = {}, const std::vector<std::vector<size_t>> &puids = {});
+    //          const std::vector<std::pair<std::vector<const runtime::Task*>,
+    //          std::vector<const runtime::Task*>>> &sep_stages = {}, const
+    //          std::vector<size_t> &n_threads = {}, const std::vector<size_t>
+    //          &synchro_buffer_sizes = {}, const std::vector<bool>
+    //          &synchro_active_waiting = {}, const std::vector<bool>
+    //          &thread_pinning = {}, const std::vector<std::vector<size_t>>
+    //          &puids = {});
     // Pipeline(const runtime::Task &first,
     //          const runtime::Task &last,
-    //          const std::vector<std::pair<std::vector<const runtime::Task*>, std::vector<const runtime::Task*>>>
-    //          &sep_stages = {}, const std::vector<size_t> &n_threads = {}, const std::vector<size_t>
-    //          &synchro_buffer_sizes = {}, const std::vector<bool> &synchro_active_waiting = {}, const
-    //          std::vector<bool> &thread_pinning = {}, const std::vector<std::vector<size_t>> &puids = {});
+    //          const std::vector<std::pair<std::vector<const runtime::Task*>,
+    //          std::vector<const runtime::Task*>>> &sep_stages = {}, const
+    //          std::vector<size_t> &n_threads = {}, const std::vector<size_t>
+    //          &synchro_buffer_sizes = {}, const std::vector<bool>
+    //          &synchro_active_waiting = {}, const std::vector<bool>
+    //          &thread_pinning = {}, const std::vector<std::vector<size_t>>
+    //          &puids = {});
     Pipeline(const std::vector<runtime::Task*> &firsts,
              const std::vector<runtime::Task*> &lasts,
              const std::vector<std::tuple<std::vector<runtime::Task*>, std::vector<runtime::Task*>, std::vector<runtime::Task*>>> &sep_stages = {},
@@ -215,8 +222,8 @@ class Pipeline : public tools::Interface_get_set_n_frames
               const std::string &pipeline_policy_pinning = ""/*,
               const std::vector<bool> &tasks_inplace = {}*/);
 };
-}
-}
+} // namespace runtime
+} // namespace spu
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #include "Runtime/Pipeline/Pipeline.hxx"

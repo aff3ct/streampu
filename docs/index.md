@@ -39,6 +39,8 @@ matches **single-rate SDF streaming applications**.
 
 **For Users**
 
+  - Concepts:
+    1. [Overview](concepts_overview.md)
   - Runtime:
     1. [Thread Pinning](thread_pinning.md)
   - Tests:

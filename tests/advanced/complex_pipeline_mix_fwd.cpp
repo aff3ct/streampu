@@ -29,6 +29,8 @@ main(int argc, char** argv)
                           { "debug", no_argument, NULL, 'g' },
                           { "force-sequence", no_argument, NULL, 'q' },
                           { "active-waiting", no_argument, NULL, 'w' },
+                          { "sched", no_argument, NULL, 'S' },
+                          { "verbose", no_argument, NULL, 'v' },
                           { "help", no_argument, NULL, 'h' },
                           { 0 } };
 
@@ -39,15 +41,17 @@ main(int argc, char** argv)
     size_t n_exec = 100000;
     size_t buffer_size = 16;
     std::string dot_filepath;
+    std::string scheduler = "none";
     bool print_stats = false;
     bool step_by_step = false;
     bool debug = false;
     bool force_sequence = false;
     bool active_waiting = false;
+    bool verbose = false;
 
     while (1)
     {
-        const int opt = getopt_long(argc, argv, "t:f:s:d:e:u:o:pbgqwh", longopts, 0);
+        const int opt = getopt_long(argc, argv, "t:f:s:d:e:u:o:S:pbgqwhv", longopts, 0);
         if (opt == -1) break;
         switch (opt)
         {
@@ -86,6 +90,12 @@ main(int argc, char** argv)
                 break;
             case 'q':
                 force_sequence = true;
+                break;
+            case 'S':
+                scheduler = std::string(optarg);
+                break;
+            case 'v':
+                verbose = true;
                 break;
             case 'h':
                 std::cout << "usage: " << argv[0] << " [options]" << std::endl;
@@ -126,6 +136,12 @@ main(int argc, char** argv)
                 std::cout << "  -w, --active-waiting  "
                           << "Enable active waiting in the pipeline synchronizations                "
                           << "[" << (active_waiting ? "true" : "false") << "]" << std::endl;
+                std::cout << "  -S, --sched           "
+                          << "Scheduler algorithm for the pipeline creation ('none' or 'OTAC')      "
+                          << "[" << (scheduler.empty() ? "empty" : "\"" + scheduler + "\"") << "]" << std::endl;
+                std::cout << "  -v, --verbose         "
+                          << "Show information about the scheduling choices                         "
+                          << "[false]" << std::endl;
                 std::cout << "  -h, --help            "
                           << "This help                                                             "
                           << "[false]" << std::endl;
@@ -154,6 +170,8 @@ main(int argc, char** argv)
     std::cout << "#   - debug          = " << (debug ? "true" : "false") << std::endl;
     std::cout << "#   - force_sequence = " << (force_sequence ? "true" : "false") << std::endl;
     std::cout << "#   - active_waiting = " << (active_waiting ? "true" : "false") << std::endl;
+    std::cout << "#   - scheduler      = " << scheduler << std::endl;
+    std::cout << "#   - verbose        = " << (verbose ? "true" : "false") << std::endl;
     std::cout << "#" << std::endl;
 
     if (!force_sequence && step_by_step)
@@ -226,6 +244,16 @@ main(int argc, char** argv)
     finalizer2(  "finalize"      ) = finalizer1 (  "finalize"      );
     // clang-format on
 
+    if (!force_sequence)
+    {
+        initializer("initialize").set_replicability(false);
+        (*rlys[0])("relayf").set_replicability(false);
+        (*rlys[1])("relayf").set_replicability(false);
+        task_comp.set_replicability(false);
+        finalizer1("finalize").set_replicability(false);
+        finalizer2("finalize").set_replicability(false);
+    }
+
     std::unique_ptr<runtime::Sequence> sequence_chain;
     std::unique_ptr<runtime::Pipeline> pipeline_chain;
     std::vector<module::Finalizer<uint8_t>*> finalizer1_list, finalizer2_list;
@@ -291,60 +319,88 @@ main(int argc, char** argv)
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     else
     {
-        pipeline_chain.reset(new runtime::Pipeline(
-          { &initializer("initialize") }, // first task of the sequence
-          {
-            // pipeline stage 0, first, last & exception tasks
+        if (scheduler == "OTAC")
+        {
+            sequence_chain.reset(new runtime::Sequence(initializer("initialize")));
+            std::unique_ptr<sched::Scheduler> sched;
+            size_t R = n_threads;
+            sched.reset(new sched::Scheduler_OTAC(sequence_chain.get(), R));
+            pipeline_chain.reset(sched->generate_pipeline());
+            if (verbose)
             {
-              { &initializer("initialize") },
+                sched->print_profiling();
+                std::vector<std::pair<size_t, size_t>> solution = sched->get_solution();
+                std::cout << "# Solution stages {(n,r)}"
+                          << ": {";
+                for (auto& pair_s : solution)
+                    std::cout << "(" << pair_s.first << ", " << pair_s.second << ")";
+                std::cout << "}" << std::endl;
+            }
+        }
+        else if (scheduler == "none")
+        {
+            pipeline_chain.reset(new runtime::Pipeline(
+              { &initializer("initialize") }, // first task of the sequence
               {
-                &(*rlys[0])("relayf"),
+                // pipeline stage 0, first, last & exception tasks
+                {
+                  { &initializer("initialize") },
+                  {
+                    &(*rlys[0])("relayf"),
+                  },
+                  { &(*rlys[0])("relay") },
+                },
+                // pipeline stage 1, first & last tasks
+                {
+                  {
+                    &(*incs[0])("incrementf"),
+                    &(*rlys[0])("relay"),
+                  },
+                  { &(*incs[0])("incrementf") },
+                  {},
+                },
+                // pipeline stage 2, first & last tasks
+                {
+                  { &(*rlys[1])("relayf") },
+                  { &(*rlys[1])("relayf") },
+                  {},
+                },
+                // pipeline stage 3, first & last tasks
+                { { &(*incs[1])("incrementf") }, { &(*incs[1])("incrementf") }, {} },
+                // pipeline stage 4, first tasks
+                {
+                  { &comp("compare"), &finalizer2("finalize") },
+                  {},
+                  {},
+                },
               },
-              { &(*rlys[0])("relay") },
-            },
-            // pipeline stage 1, first & last tasks
-            {
               {
-                &(*incs[0])("incrementf"),
-                &(*rlys[0])("relay"),
+                1,                         // number of threads in the stage 0
+                n_threads ? n_threads : 1, // number of threads in the stage 1
+                1,                         // number of threads in the stage 2
+                n_threads ? n_threads : 1, // number of threads in the stage 3
+                1                          // number of threads in the stage 4
               },
-              { &(*incs[0])("incrementf") },
-              {},
-            },
-            // pipeline stage 2, first & last tasks
-            {
-              { &(*rlys[1])("relayf") },
-              { &(*rlys[1])("relayf") },
-              {},
-            },
-            // pipeline stage 3, first & last tasks
-            { { &(*incs[1])("incrementf") }, { &(*incs[1])("incrementf") }, {} },
-            // pipeline stage 4, first tasks
-            {
-              { &comp("compare"), &finalizer2("finalize") },
-              {},
-              {},
-            },
-          },
-          {
-            1,                         // number of threads in the stage 0
-            n_threads ? n_threads : 1, // number of threads in the stage 1
-            1,                         // number of threads in the stage 2
-            n_threads ? n_threads : 1, // number of threads in the stage 3
-            1                          // number of threads in the stage 4
-          },
-          {
-            buffer_size, // synchronization buffer size between stages 0 and 1
-            buffer_size, // synchronization buffer size between stages 1 and 2
-            buffer_size, // synchronization buffer size between stages 2 and 3
-            buffer_size, // synchronization buffer size between stages 4 and 4
-          },
-          {
-            active_waiting, // type of waiting between stages 0 and 1 (true = active, false = passive)
-            active_waiting, // type of waiting between stages 1 and 2 (true = active, false = passive)
-            active_waiting, // type of waiting between stages 2 and 3 (true = active, false = passive)
-            active_waiting, // type of waiting between stages 3 and 4 (true = active, false = passive)
-          }));
+              {
+                buffer_size, // synchronization buffer size between stages 0 and 1
+                buffer_size, // synchronization buffer size between stages 1 and 2
+                buffer_size, // synchronization buffer size between stages 2 and 3
+                buffer_size, // synchronization buffer size between stages 4 and 4
+              },
+              {
+                active_waiting, // type of waiting between stages 0 and 1 (true = active, false = passive)
+                active_waiting, // type of waiting between stages 1 and 2 (true = active, false = passive)
+                active_waiting, // type of waiting between stages 2 and 3 (true = active, false = passive)
+                active_waiting, // type of waiting between stages 3 and 4 (true = active, false = passive)
+              }));
+        }
+        else
+        {
+            std::stringstream message;
+            message << "Current scheduler is not supported (scheduler = '" << scheduler << "')!";
+            throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
+        }
+
         pipeline_chain->set_n_frames(n_inter_frames);
 
         // initialize input data

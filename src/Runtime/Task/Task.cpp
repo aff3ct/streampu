@@ -27,6 +27,7 @@ Task::Task(module::Module& module,
   , fast(fast)
   , debug(debug)
   , debug_hex(false)
+  , replicable(module.is_clonable())
   , debug_limit(-1)
   , debug_precision(2)
   , debug_frame_max(-1)
@@ -701,9 +702,9 @@ Task::exec(const int frame_id, const bool managed_memory)
 
         // if (exec_status < 0)
         // {
-        // 	std::stringstream message;
-        // 	message << "'exec_status' can't be negative ('exec_status' = " << exec_status << ").";
-        // 	throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
+        //  std::stringstream message;
+        //  message << "'exec_status' can't be negative ('exec_status' = " << exec_status << ").";
+        //  throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
         // }
 
         return this->get_status();
@@ -1452,6 +1453,39 @@ Task::get_n_static_input_sockets() const
     for (auto& s : this->sockets)
         if (s->get_type() == socket_t::SIN && s->_get_dataptr() != nullptr && s->bound_socket == nullptr) n++;
     return n;
+}
+
+bool
+Task::is_stateless() const
+{
+    return this->get_module().is_stateless();
+}
+
+bool
+Task::is_stateful() const
+{
+    return this->get_module().is_stateful();
+}
+
+bool
+Task::is_replicable() const
+{
+    return this->replicable;
+}
+
+void
+Task::set_replicability(const bool replicable)
+{
+    if (replicable && !this->module->is_clonable())
+    {
+        std::stringstream message;
+        message << "The replicability of this task cannot be set to true because its corresponding module is not "
+                << "clonable (task.name = '" << this->get_name() << "', module.name = '"
+                << this->get_module().get_name() << "').";
+        throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
+    }
+    this->replicable = replicable;
+    // this->replicable = replicable ? this->module->is_clonable() : false;
 }
 
 // ==================================================================================== explicit template instantiation
