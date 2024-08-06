@@ -15,22 +15,58 @@ int
 main(int argc, char** argv)
 {
     jluna::initialize();
-    jluna::Base["println"]("hello julia");
 
-    jluna::Main.safe_eval_file("../tests/julia/hello_world.jl");
+    // Julia sandbox ============================================================================================ BEGIN
 
-    jluna::Main.safe_eval("f(x) = x^x");
-    auto f = jluna::Main.safe_eval("return f");
-    int64_t result = f(2);
-    std::cout << "result = " << result << std::endl;
+    // jluna::Base["println"]("hello julia");
 
-    auto square = jluna::Main["square"];
-    int64_t result2 = square(3);
-    std::cout << "result2 = " << result2 << std::endl;
+    // jluna::Main.safe_eval_file("../tests/julia/hello_world.jl");
 
-    // jluna::Main.safe_eval("sqrt(-1)");
+    // jluna::Main.safe_eval("f(x) = x^x");
+    // auto f = jluna::Main.safe_eval("return f");
+    // int64_t result = f(2);
+    // std::cout << "result = " << result << std::endl;
 
-    exit(0);
+    // auto square = jluna::Main["square"];
+    // int64_t result2 = square(3);
+    // std::cout << "result2 = " << result2 << std::endl;
+
+    // // jluna::Main.safe_eval("sqrt(-1)");
+
+    // // declare lambda
+    // auto myadd = [](int64_t a, int64_t b) -> int64_t
+    // {
+    //     return a + b;
+    // };
+
+    // // bind to Julia-side variable
+    // jluna::Main.create_or_assign("myadd", jluna::as_julia_function<int64_t(int64_t, int64_t)>(myadd));
+
+    // jluna::Main.safe_eval("println(\"myadd(1, 3): \", myadd(1, 3))");
+
+    // jluna::Main.safe_eval_file("../tests/julia/myadd_call.jl");
+
+    // // allocate C-array
+    // // const int32_t c_array[10] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+
+    // int32_t* c_array = new int32_t[10];
+    // std::iota(c_array, c_array +10, 2);
+
+    // // create thin wrapper around it
+    // auto* jl_array = jluna::unsafe::new_array_from_data(jluna::Int32_t, (void*) c_array, 10);
+
+    // // wrapper can now be used Julia-side
+    // {
+    //     using namespace jluna;
+    //     auto* println = jluna::unsafe::get_function(jluna::Base, "println"_sym);
+    //     jluna::safe_call(println, jl_array);
+    // }
+
+    // delete[] c_array;
+
+    // exit(0);
+
+    // Julia sandbox ============================================================================================== END
 
     tools::Signal_handler::init();
 
@@ -44,7 +80,6 @@ main(int argc, char** argv)
                           { "print-stats", no_argument, NULL, 'p' },
                           { "step-by-step", no_argument, NULL, 'b' },
                           { "debug", no_argument, NULL, 'g' },
-                          { "set", no_argument, NULL, 'u' },
                           { "verbose", no_argument, NULL, 'v' },
                           { "help", no_argument, NULL, 'h' },
                           { 0 } };
@@ -59,12 +94,11 @@ main(int argc, char** argv)
     bool print_stats = false;
     bool step_by_step = false;
     bool debug = false;
-    bool set = false;
     bool verbose = false;
 
     while (1)
     {
-        const int opt = getopt_long(argc, argv, "t:f:s:d:e:o:cpbguvh", longopts, 0);
+        const int opt = getopt_long(argc, argv, "t:f:s:d:e:o:cpbgvh", longopts, 0);
         if (opt == -1) break;
         switch (opt)
         {
@@ -97,9 +131,6 @@ main(int argc, char** argv)
                 break;
             case 'g':
                 debug = true;
-                break;
-            case 'u':
-                set = true;
                 break;
             case 'v':
                 verbose = true;
@@ -137,9 +168,6 @@ main(int argc, char** argv)
                 std::cout << "  -g, --debug           "
                           << "Enable task debug mode (print socket data)                            "
                           << "[" << (debug ? "true" : "false") << "]" << std::endl;
-                std::cout << "  -u, --set             "
-                          << "Enable set in the executed sequence                                   "
-                          << "[" << (set ? "true" : "false") << "]" << std::endl;
                 std::cout << "  -v, --verbose         "
                           << "Enable verbose mode                                                   "
                           << "[" << (verbose ? "true" : "false") << "]" << std::endl;
@@ -169,7 +197,6 @@ main(int argc, char** argv)
     std::cout << "#   - print_stats    = " << (print_stats ? "true" : "false") << std::endl;
     std::cout << "#   - step_by_step   = " << (step_by_step ? "true" : "false") << std::endl;
     std::cout << "#   - debug          = " << (debug ? "true" : "false") << std::endl;
-    std::cout << "#   - set            = " << (set ? "true" : "false") << std::endl;
     std::cout << "#   - verbose        = " << (verbose ? "true" : "false") << std::endl;
     std::cout << "#" << std::endl;
 
@@ -177,38 +204,94 @@ main(int argc, char** argv)
     module::Initializer<uint8_t> initializer(data_length);
     module::Finalizer<uint8_t> finalizer(data_length);
 
-    std::vector<std::shared_ptr<module::Incrementer<uint8_t>>> incs(6);
+    // std::vector<std::shared_ptr<module::Incrementer<uint8_t>>> incs(6);
+    // for (size_t s = 0; s < incs.size(); s++)
+    // {
+    //     incs[s].reset(new module::Incrementer<uint8_t>(data_length));
+    //     incs[s]->set_ns(sleep_time_us * 1000);
+    //     incs[s]->set_custom_name("Inc" + std::to_string(s));
+    // }
+
+    module::Stateless incr;
+    runtime::Task& t = incr.create_task("increment");
+    size_t s_in = incr.create_socket_in<uint8_t>(t, "in", data_length);
+    size_t s_out = incr.create_socket_out<uint8_t>(t, "out", data_length);
+
+    auto* jl_array_in = jluna::unsafe::new_array_from_data(jluna::UInt8_t, t[s_in].get_dptr(), data_length);
+    auto* jl_array_out = jluna::unsafe::new_array_from_data(jluna::UInt8_t, t[s_out].get_dptr(), data_length);
+
+    // std::cout << "t[s_in]@ -> " << std::hex << (uint64_t)t[s_in].get_dptr() << std::endl;
+    // std::cout << "t[s_out]@ -> " << std::hex << (uint64_t)t[s_out].get_dptr() << std::endl;
+
+    jluna::Main.safe_eval_file("../tests/julia/increment.jl");
+    using namespace jluna;
+    jluna::unsafe::Function* jl_increment = jluna::unsafe::get_function(jluna::Main, "increment2"_sym);
+
+    // auto jl_increment = Main.safe_eval("return increment");
+
+    const size_t sleep_time_ns = sleep_time_us * 1000;
+
+    jluna::unsafe::Value* jl_wait_time_ns = jluna::box<uint32_t>(sleep_time_ns);
+
+    incr.create_codelet(t,
+                        [s_in, s_out, sleep_time_ns, jl_increment, jl_array_in, jl_array_out, jl_wait_time_ns](
+                          module::Module& m, runtime::Task& t, const size_t frame_id)
+                        {
+                            const uint8_t* in = t[s_in].get_dataptr<const uint8_t>();
+                            uint8_t* out = t[s_out].get_dataptr<uint8_t>();
+                            const size_t n_elmts = t[s_out].get_n_elmts();
+
+                            // std::chrono::time_point<std::chrono::steady_clock> t_start;
+                            // if (sleep_time_ns) t_start = std::chrono::steady_clock::now();
+
+                            // for (size_t e = 0; e < n_elmts; e++)
+                            //     out[e] = in[e] + 1;
+
+                            // if (sleep_time_ns)
+                            // {
+                            //     std::chrono::nanoseconds duration = std::chrono::steady_clock::now() - t_start;
+                            //     while ((size_t)duration.count() < sleep_time_ns) // active waiting
+                            //         duration = std::chrono::steady_clock::now() - t_start;
+                            // }
+
+                            auto* jl_array_in = jluna::unsafe::new_array_from_data(jluna::UInt8_t, (void*)in, n_elmts);
+                            auto* jl_array_out =
+                              jluna::unsafe::new_array_from_data(jluna::UInt8_t, (void*)out, n_elmts);
+
+                            // std::cout << "cdl t[s_in]@ -> " << std::hex << (uint64_t)t[s_in].get_dptr() << std::endl;
+                            // std::cout << "cdl t[s_out]@ -> " << std::hex << (uint64_t)t[s_out].get_dptr() <<
+                            // std::endl;
+
+                            jluna::unsafe::Value* jl_result =
+                              jluna::unsafe::call(jl_increment, jl_array_in, jl_array_out, jl_wait_time_ns);
+
+                            // int32_t result = jl_increment(jl_array_in, jl_array_out);
+
+                            // std::cout << "jl_result = " <<  jluna::unbox<int32_t>(jl_result) << std::endl;
+
+                            // return jluna::unbox<int32_t>(jl_result); // the unbox call is expensive!!
+                            return *((int32_t*)jl_result); // this is cheap :-)
+                        });
+
+    std::vector<std::shared_ptr<module::Stateless>> incs(6);
     for (size_t s = 0; s < incs.size(); s++)
     {
-        incs[s].reset(new module::Incrementer<uint8_t>(data_length));
-        incs[s]->set_ns(sleep_time_us * 1000);
+        incs[s].reset(incr.clone());
         incs[s]->set_custom_name("Inc" + std::to_string(s));
     }
 
-    std::shared_ptr<runtime::Sequence> partial_sequence;
-    std::shared_ptr<module::Set> aset;
-
     // sockets binding
-    if (!set)
-    {
-        (*incs[0])["increment::in"] = initializer["initialize::out"];
-        for (size_t s = 0; s < incs.size() - 1; s++)
-            (*incs[s + 1])["increment::in"] = (*incs[s])["increment::out"];
-        finalizer["finalize::in"] = (*incs[incs.size() - 1])["increment::out"];
-    }
-    else
-    {
-        for (size_t s = 0; s < incs.size() - 1; s++)
-            (*incs[s + 1])["increment::in"] = (*incs[s])["increment::out"];
-        partial_sequence.reset(new runtime::Sequence((*incs[0])("increment"), (*incs[incs.size() - 1])("increment")));
-        aset.reset(new module::Set(*partial_sequence));
-        (*aset)("exec")[0] = initializer["initialize::out"];
-        finalizer["finalize::in"] = (*aset)("exec")[1];
-    }
+    (*incs[0])["increment::in"] = initializer["initialize::out"];
+    for (size_t s = 0; s < incs.size() - 1; s++)
+        (*incs[s + 1])["increment::in"] = (*incs[s])["increment::out"];
+    finalizer["finalize::in"] = (*incs[incs.size() - 1])["increment::out"];
 
     runtime::Sequence sequence_chain(initializer("initialize"), n_threads);
     sequence_chain.set_n_frames(n_inter_frames);
     sequence_chain.set_no_copy_mode(no_copy_mode);
+
+    // warmup to compile Julia code
+    sequence_chain.exec([]() { return true; });
 
     auto tid = 0;
     for (auto cur_initializer : sequence_chain.get_cloned_modules<module::Initializer<uint8_t>>(initializer))
@@ -270,8 +353,8 @@ main(int argc, char** argv)
     std::cout << "Sequence elapsed time: " << elapsed_time << " ms" << std::endl;
 
     size_t chain_sleep_time = 0;
-    for (auto& inc : incs)
-        chain_sleep_time += inc->get_ns();
+    for (size_t i = 0; i < incs.size(); i++)
+        chain_sleep_time += sleep_time_us * 1000;
 
     auto theoretical_time = (chain_sleep_time * n_exec * n_inter_frames) / 1000.f / 1000.f / n_threads;
     std::cout << "Sequence theoretical time: " << theoretical_time << " ms" << std::endl;
@@ -316,20 +399,11 @@ main(int argc, char** argv)
 
     // sockets unbinding
     sequence_chain.set_n_frames(1);
-    if (!set)
-    {
-        (*incs[0])[module::inc::sck::increment::in].unbind(initializer[module::ini::sck::initialize::out]);
-        for (size_t s = 0; s < incs.size() - 1; s++)
-            (*incs[s + 1])[module::inc::sck::increment::in].unbind((*incs[s])[module::inc::sck::increment::out]);
-        finalizer[module::fin::sck::finalize::in].unbind((*incs[incs.size() - 1])[module::inc::sck::increment::out]);
-    }
-    else
-    {
-        for (size_t s = 0; s < incs.size() - 1; s++)
-            (*incs[s + 1])[module::inc::sck::increment::in].unbind((*incs[s])[module::inc::sck::increment::out]);
-        (*aset)[module::set::tsk::exec][0].unbind(initializer[module::ini::sck::initialize::out]);
-        finalizer[module::fin::sck::finalize::in].unbind((*aset)[module::set::tsk::exec][1]);
-    }
+
+    (*incs[0])["increment::in"].unbind(initializer["initialize::out"]);
+    for (size_t s = 0; s < incs.size() - 1; s++)
+        (*incs[s + 1])["increment::in"].unbind((*incs[s])["increment::out"]);
+    finalizer["finalize::in"].unbind((*incs[incs.size() - 1])["increment::out"]);
 
     return test_results;
 }
