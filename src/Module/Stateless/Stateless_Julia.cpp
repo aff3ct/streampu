@@ -171,7 +171,7 @@ Stateless_Julia::_create_codelet(runtime::Task& task)
                                jluna::unsafe::Value* jl_result = Stateless_Julia::jl_call_func(sjl.jl_func_args[tid]);
 
                                // return jluna::unbox<int32_t>(jl_result); // the unbox call is expensive!!
-                               return *((int32_t*)jl_result); // this is cheap :-)
+                               return jluna::unsafe::unsafe_unbox<int32_t>(jl_result); // this is cheap :-)
                            });
 }
 
