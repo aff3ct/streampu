@@ -309,7 +309,11 @@ main(int argc, char** argv)
     sequence_chain.set_no_copy_mode(no_copy_mode);
 
     // warmup to compile Julia code
+    auto t_start_warmup = std::chrono::steady_clock::now();
     sequence_chain.exec([]() { return true; });
+    std::chrono::nanoseconds duration_warmup = std::chrono::steady_clock::now() - t_start_warmup;
+    auto elapsed_time_warmup = duration_warmup.count() / 1000.f / 1000.f;
+    std::cout << "# Julia warmup (= JIT compilation) time: " << elapsed_time_warmup << " ms" << std::endl;
 
     auto tid = 0;
     for (auto cur_initializer : sequence_chain.get_cloned_modules<module::Initializer<uint8_t>>(initializer))
