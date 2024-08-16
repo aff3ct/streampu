@@ -11,57 +11,6 @@
 using namespace spu;
 using namespace spu::runtime;
 
-jluna::unsafe::Value*
-jl_call_func(std::vector<void*>& args)
-{
-    size_t n_args = args.size();
-    if (n_args == 1)
-    {
-        return jluna::unsafe::call(static_cast<jluna::unsafe::Function*>(args[0]));
-    }
-    else if (n_args == 2)
-    {
-        return jluna::unsafe::call(static_cast<jluna::unsafe::Function*>(args[0]),
-                                   static_cast<jluna::unsafe::Value*>(args[1]));
-    }
-    else if (n_args == 3)
-    {
-        return jluna::unsafe::call(static_cast<jluna::unsafe::Function*>(args[0]),
-                                   static_cast<jluna::unsafe::Value*>(args[1]),
-                                   static_cast<jluna::unsafe::Value*>(args[2]));
-    }
-    else if (n_args == 4)
-    {
-        return jluna::unsafe::call(static_cast<jluna::unsafe::Function*>(args[0]),
-                                   static_cast<jluna::unsafe::Value*>(args[1]),
-                                   static_cast<jluna::unsafe::Value*>(args[2]),
-                                   static_cast<jluna::unsafe::Value*>(args[3]));
-    }
-    else if (n_args == 5)
-    {
-        return jluna::unsafe::call(static_cast<jluna::unsafe::Function*>(args[0]),
-                                   static_cast<jluna::unsafe::Value*>(args[1]),
-                                   static_cast<jluna::unsafe::Value*>(args[2]),
-                                   static_cast<jluna::unsafe::Value*>(args[3]),
-                                   static_cast<jluna::unsafe::Value*>(args[4]));
-    }
-    else if (n_args == 6)
-    {
-        return jluna::unsafe::call(static_cast<jluna::unsafe::Function*>(args[0]),
-                                   static_cast<jluna::unsafe::Value*>(args[1]),
-                                   static_cast<jluna::unsafe::Value*>(args[2]),
-                                   static_cast<jluna::unsafe::Value*>(args[3]),
-                                   static_cast<jluna::unsafe::Value*>(args[4]),
-                                   static_cast<jluna::unsafe::Value*>(args[5]));
-    }
-    else
-    {
-        std::stringstream message;
-        message << "Only n_args <= 6 is supported (n_args = '" << n_args << "').";
-        throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
-    }
-}
-
 int
 main(int argc, char** argv)
 {
@@ -255,43 +204,37 @@ main(int argc, char** argv)
     module::Initializer<uint8_t> initializer(data_length);
     module::Finalizer<uint8_t> finalizer(data_length);
 
-    module::Stateless incr;
+    module::Stateless_Julia incr;
     runtime::Task& t = incr.create_task("increment");
-    size_t s_in = incr.create_socket_in<uint8_t>(t, "in", data_length);
-    size_t s_out = incr.create_socket_out<uint8_t>(t, "out", data_length);
+    incr.create_socket_in<uint8_t>(t, "in", data_length);
+    incr.create_socket_out<uint8_t>(t, "out", data_length);
+    incr.create_constant<uint32_t>(t, sleep_time_us * 1000); // wait time in ns
+    // incr.create_constant<std::string>(t, "Adrien");
+    // incr.create_codelet_file(t, "../tests/julia/increment.jl");
+    incr.create_codelet(t, R""""(
+        function increment(sck_in, sck_out, wait_time_ns)
+            if wait_time_ns > 0
+                start_incr = time_ns()
+            end
 
-    jluna::Main.safe_eval_file("../tests/julia/increment.jl");
-    using namespace jluna;
-    jluna::unsafe::Function* jl_increment = jluna::unsafe::get_function(jluna::Main, "increment"_sym);
+            for n in eachindex(sck_in)
+                sck_out[n] = sck_in[n] + 1
+            end
 
-    // auto jl_increment = Main.safe_eval("return increment");
+            if wait_time_ns != 0
+                stop_incr = time_ns()
+                elapse_incr = stop_incr - start_incr
 
-    const size_t sleep_time_ns = sleep_time_us * 1000;
+                while elapse_incr < wait_time_ns
+                    elapse_incr = time_ns() - start_incr
+                end
+            end
 
-    jluna::unsafe::Value* jl_wait_time_ns = jluna::box<uint32_t>(sleep_time_ns);
+            return 0
+        end
+    )"""");
 
-    // protect from GC
-    size_t jl_wait_time_ns_gcid = jluna::unsafe::gc_preserve(jl_wait_time_ns);
-
-    std::vector<void*> jl_args(t.sockets.size() + 2, nullptr);
-    jl_args[0] = (void*)jl_increment;
-    jl_args[t.sockets.size() + 1] = (void*)jl_wait_time_ns;
-
-    incr.create_codelet(t,
-                        [s_in, s_out, &jl_args](module::Module& m, runtime::Task& t, const size_t frame_id)
-                        {
-                            for (size_t s = 0; s < t.sockets.size() - 1; s++)
-                                // be carefull here, we need to adapt the jluna type to the real socket type!
-                                jl_args[s + 1] = (void*)jluna::unsafe::new_array_from_data(
-                                  jluna::UInt8_t, t.sockets[s]->get_dataptr(), t.sockets[s]->get_n_elmts());
-
-                            jluna::unsafe::Value* jl_result = jl_call_func(jl_args);
-
-                            // return jluna::unbox<int32_t>(jl_result); // the unbox call is expensive!!
-                            return *((int32_t*)jl_result); // this is cheap :-)
-                        });
-
-    std::vector<std::shared_ptr<module::Stateless>> incs(6);
+    std::vector<std::shared_ptr<module::Stateless_Julia>> incs(6);
     for (size_t s = 0; s < incs.size(); s++)
     {
         incs[s].reset(incr.clone());
@@ -368,9 +311,6 @@ main(int argc, char** argv)
                     ;
         while (++counter < (n_exec / n_threads));
     }
-
-    // value is safe from the GC here
-    jluna::unsafe::gc_release(jl_wait_time_ns_gcid);
 
     std::chrono::nanoseconds duration = std::chrono::steady_clock::now() - t_start;
 

@@ -25,7 +25,7 @@ option(SPU_STACKTRACE_SEGFAULT "Try to print the stack trace when a segfault occ
 option(SPU_SHOW_DEPRECATED     "Print message each time a deprecated func. is called"        OFF)
 option(SPU_FAST                "Remove checks to speedup the code"                           OFF)
 option(SPU_OVERRIDE_VERSION    "Compile without .git directory, provided a version and hash" OFF)
-option(SPU_TESTS_JULIA         "Compile tests with Julia"                                    OFF)
+option(SPU_LINK_JULIA          "Link with Julia and compile Julia tests"                     OFF)
 
 if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/.git" AND NOT SPU_OVERRIDE_VERSION)
     message(FATAL_ERROR "The '.git' folder can't be found, StreamPU can't be compiled if it is not cloned "
@@ -251,7 +251,7 @@ if(SPU_TESTS)
         list(APPEND spu_targets_list spu-test-thread-pinning)
     endif (SPU_LINK_HWLOC)
 
-    if(SPU_TESTS_JULIA)
+    if(SPU_LINK_JULIA)
         add_executable(spu-test-simple-chain-julia $<TARGET_OBJECTS:spu-obj> ${CMAKE_CURRENT_SOURCE_DIR}/tests/julia/simple_chain_julia.cpp)
         set_target_properties(spu-test-simple-chain-julia PROPERTIES OUTPUT_NAME test-simple-chain-julia POSITION_INDEPENDENT_CODE ON)
         list(APPEND spu_tests_list spu-test-simple-chain-julia)
@@ -404,12 +404,14 @@ if(SPU_STACKTRACE OR SPU_STACKTRACE_SEGFAULT)
 endif()
 
 # julia & jluna
-if(SPU_TESTS_JULIA)
+if(SPU_LINK_JULIA)
     find_package(Julia 1.7.0 REQUIRED)
-    spu_target_link_libraries("spu-test-simple-chain-julia" PUBLIC "Julia::Julia")
+    spu_target_link_libraries("${spu_targets_list}" PUBLIC "Julia::Julia")
 
     find_package(jluna REQUIRED PATHS ${jluna_DIR})
-    spu_target_link_libraries("spu-test-simple-chain-julia" PUBLIC "jluna::jluna")
+    spu_target_link_libraries("${spu_targets_list}" PUBLIC "jluna::jluna")
+
+    spu_target_compile_definitions("${spu_targets_list}" PUBLIC "SPU_JULIA")
 endif()
 
 # Threads

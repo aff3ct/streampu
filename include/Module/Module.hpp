@@ -23,6 +23,7 @@ namespace module
 {
 class Stateful;
 class Stateless;
+class Stateless_Julia;
 /*!
  * \class Module
  *
@@ -34,6 +35,7 @@ class Module
 {
     friend Stateful;
     friend Stateless;
+    friend Stateless_Julia;
 
   protected:
     size_t n_frames; /*!< Number of frames to process in this Module */

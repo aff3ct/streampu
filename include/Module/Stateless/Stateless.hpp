@@ -8,7 +8,6 @@
 #include <cstdint>
 
 #include "Module/Module.hpp"
-#include "Runtime/Task/Task.hpp"
 
 namespace spu
 {
