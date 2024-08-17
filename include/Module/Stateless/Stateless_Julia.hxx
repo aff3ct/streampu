@@ -18,13 +18,19 @@ Stateless_Julia::create_constant(runtime::Task& task, const T& value)
 
     size_t tid = Stateless_Julia::get_task_id(task);
 
-    jluna::unsafe::Value* jl_constant_ptr = jluna::box<T>(value);
+    this->jl_create_constants->push_back(
+      [tid, value](Stateless_Julia& m)
+      {
+          jluna::unsafe::Value* jl_constant_ptr = jluna::box<T>(value);
 
-    // protect from garbage collector
-    size_t jl_constant_id = jluna::unsafe::gc_preserve(jl_constant_ptr);
+          // protect from garbage collector
+          size_t jl_constant_id = jluna::unsafe::gc_preserve(jl_constant_ptr);
 
-    this->jl_constants_ptr[tid].push_back(jl_constant_ptr);
-    this->jl_constants_id[tid].push_back(jl_constant_id);
+          m.jl_constants_ptr[tid].push_back(jl_constant_ptr);
+          m.jl_constants_id[tid].push_back(jl_constant_id);
+      });
+
+    (*this->jl_create_constants)[(*this->jl_create_constants).size() - 1](*this);
 }
 }
 }

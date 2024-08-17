@@ -8,7 +8,9 @@
 #ifdef SPU_JULIA
 
 #include <cstdint>
+#include <functional>
 #include <jluna.hpp>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -26,10 +28,15 @@ class Stateless_Julia final : public Module
     std::vector<std::vector<size_t>> jl_constants_id;
     std::vector<std::vector<void*>> jl_func_args;
 
+    std::shared_ptr<std::vector<std::function<void(Stateless_Julia& m)>>> jl_create_constants;
+    std::shared_ptr<std::vector<std::function<void()>>> jl_evaluate;
+    std::shared_ptr<std::vector<std::function<void(Stateless_Julia& m)>>> jl_create_codelet;
+
   public:
     Stateless_Julia();
     virtual ~Stateless_Julia();
     virtual Stateless_Julia* clone() const;
+    void deep_copy(const Stateless_Julia& m);
 
     using Module::set_name;
     using Module::set_short_name;
