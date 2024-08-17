@@ -148,19 +148,31 @@ Stateless_Julia::_create_codelet(runtime::Task& task)
         throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
     }
 
-    this->jl_func_args[tid].resize(1 + task.sockets.size() + this->jl_constants_ptr[tid].size());
+    this->jl_func_args[tid].resize(1 + task.sockets.size() + this->jl_constants_ptr[tid].size() + 2);
 
     jluna::unsafe::Function* jl_codelet = jluna::unsafe::get_function(jluna::Main, jluna::Symbol(task.get_name()));
 
     this->jl_func_args[tid][0] = (void*)jl_codelet;
 
     for (size_t i = 0; i < this->jl_constants_ptr[tid].size(); i++)
-        this->jl_func_args[tid][this->jl_func_args[tid].size() - jl_constants_ptr[tid].size() + i] =
+        this->jl_func_args[tid][this->jl_func_args[tid].size() - (jl_constants_ptr[tid].size() + 2) + i] =
           (void*)this->jl_constants_ptr[tid][i];
 
+    jluna::unsafe::Value* jl_frame_id = jluna::box<uint32_t>(0);
+    size_t jl_frame_id_id = jluna::unsafe::gc_preserve(jl_frame_id);
+    this->jl_constants_ptr[tid].push_back(jl_frame_id);
+    this->jl_constants_id[tid].push_back(jl_frame_id_id);
+    this->jl_func_args[tid][this->jl_func_args[tid].size() - 2] = (void*)jl_frame_id;
+
+    jluna::unsafe::Value* jl_n_frames_per_wave = jluna::box<uint32_t>(this->get_n_frames_per_wave());
+    size_t jl_n_frames_per_wave_id = jluna::unsafe::gc_preserve(jl_frame_id);
+    this->jl_constants_ptr[tid].push_back(jl_n_frames_per_wave);
+    this->jl_constants_id[tid].push_back(jl_n_frames_per_wave_id);
+    this->jl_func_args[tid][this->jl_func_args[tid].size() - 1] = (void*)jl_n_frames_per_wave;
+
     Module::create_codelet(task,
-                           [tid](module::Module& m, runtime::Task& t, const size_t frame_id) // TODO: forward 'frame_id'
-                           {                                                                 // to the Julia function
+                           [tid](module::Module& m, runtime::Task& t, const size_t frame_id)
+                           {
                                auto& sjl = static_cast<Stateless_Julia&>(m);
 
                                for (size_t s = 0; s < t.sockets.size() - 1; s++)
@@ -168,9 +180,13 @@ Stateless_Julia::_create_codelet(runtime::Task& task)
                                    sjl.jl_func_args[tid][s + 1] = (void*)jluna::unsafe::new_array_from_data(
                                      jluna::UInt8_t, t.sockets[s]->get_dataptr(), t.sockets[s]->get_n_elmts());
 
+                               *(int32_t*)sjl.jl_func_args[tid][sjl.jl_func_args[tid].size() - 2] = frame_id;
+                               *(int32_t*)sjl.jl_func_args[tid][sjl.jl_func_args[tid].size() - 1] =
+                                 sjl.get_n_frames_per_wave();
+
                                jluna::unsafe::Value* jl_result = Stateless_Julia::jl_call_func(sjl.jl_func_args[tid]);
 
-                               // return jluna::unbox<int32_t>(jl_result); // the unbox call is expensive!!
+                               // return jluna::unbox<int32_t>(jl_result); // the safe unbox call is expensive!!
                                return jluna::unsafe::unsafe_unbox<int32_t>(jl_result); // this is cheap :-)
                            });
 }
