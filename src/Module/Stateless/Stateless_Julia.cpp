@@ -51,10 +51,89 @@ Stateless_Julia::jl_call_func(std::vector<void*>& args)
                                    static_cast<jluna::unsafe::Value*>(args[4]),
                                    static_cast<jluna::unsafe::Value*>(args[5]));
     }
+    else if (n_args == 7)
+    {
+        return jluna::unsafe::call(static_cast<jluna::unsafe::Function*>(args[0]),
+                                   static_cast<jluna::unsafe::Value*>(args[1]),
+                                   static_cast<jluna::unsafe::Value*>(args[2]),
+                                   static_cast<jluna::unsafe::Value*>(args[3]),
+                                   static_cast<jluna::unsafe::Value*>(args[4]),
+                                   static_cast<jluna::unsafe::Value*>(args[5]),
+                                   static_cast<jluna::unsafe::Value*>(args[6]));
+    }
+    else if (n_args == 8)
+    {
+        return jluna::unsafe::call(static_cast<jluna::unsafe::Function*>(args[0]),
+                                   static_cast<jluna::unsafe::Value*>(args[1]),
+                                   static_cast<jluna::unsafe::Value*>(args[2]),
+                                   static_cast<jluna::unsafe::Value*>(args[3]),
+                                   static_cast<jluna::unsafe::Value*>(args[4]),
+                                   static_cast<jluna::unsafe::Value*>(args[5]),
+                                   static_cast<jluna::unsafe::Value*>(args[6]),
+                                   static_cast<jluna::unsafe::Value*>(args[7]));
+    }
+    else if (n_args == 9)
+    {
+        return jluna::unsafe::call(static_cast<jluna::unsafe::Function*>(args[0]),
+                                   static_cast<jluna::unsafe::Value*>(args[1]),
+                                   static_cast<jluna::unsafe::Value*>(args[2]),
+                                   static_cast<jluna::unsafe::Value*>(args[3]),
+                                   static_cast<jluna::unsafe::Value*>(args[4]),
+                                   static_cast<jluna::unsafe::Value*>(args[5]),
+                                   static_cast<jluna::unsafe::Value*>(args[6]),
+                                   static_cast<jluna::unsafe::Value*>(args[7]),
+                                   static_cast<jluna::unsafe::Value*>(args[8]));
+    }
+    else if (n_args == 10)
+    {
+        return jluna::unsafe::call(static_cast<jluna::unsafe::Function*>(args[0]),
+                                   static_cast<jluna::unsafe::Value*>(args[1]),
+                                   static_cast<jluna::unsafe::Value*>(args[2]),
+                                   static_cast<jluna::unsafe::Value*>(args[3]),
+                                   static_cast<jluna::unsafe::Value*>(args[4]),
+                                   static_cast<jluna::unsafe::Value*>(args[5]),
+                                   static_cast<jluna::unsafe::Value*>(args[6]),
+                                   static_cast<jluna::unsafe::Value*>(args[7]),
+                                   static_cast<jluna::unsafe::Value*>(args[8]),
+                                   static_cast<jluna::unsafe::Value*>(args[9]));
+    }
     else
     {
         std::stringstream message;
-        message << "Only n_args <= 6 is supported (n_args = '" << n_args << "').";
+        message << "Only n_args <= 10 is supported ('n_args' = " << n_args << ").";
+        throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
+    }
+}
+
+jluna::unsafe::Array*
+Stateless_Julia::jl_new_array_from_data(const runtime::Socket* sck)
+{
+    void* p = sck->get_dataptr();
+    size_t e = sck->get_n_elmts();
+    if (sck->get_datatype() == typeid(uint8_t))
+        return jluna::unsafe::new_array_from_data(jluna::UInt8_t, p, e);
+    else if (sck->get_datatype() == typeid(int8_t))
+        return jluna::unsafe::new_array_from_data(jluna::Int8_t, p, e);
+    else if (sck->get_datatype() == typeid(uint16_t))
+        return jluna::unsafe::new_array_from_data(jluna::UInt16_t, p, e);
+    else if (sck->get_datatype() == typeid(int16_t))
+        return jluna::unsafe::new_array_from_data(jluna::Int16_t, p, e);
+    else if (sck->get_datatype() == typeid(uint32_t))
+        return jluna::unsafe::new_array_from_data(jluna::UInt32_t, p, e);
+    else if (sck->get_datatype() == typeid(int32_t))
+        return jluna::unsafe::new_array_from_data(jluna::Int32_t, p, e);
+    else if (sck->get_datatype() == typeid(uint64_t))
+        return jluna::unsafe::new_array_from_data(jluna::UInt64_t, p, e);
+    else if (sck->get_datatype() == typeid(int64_t))
+        return jluna::unsafe::new_array_from_data(jluna::Int64_t, p, e);
+    else if (sck->get_datatype() == typeid(float))
+        return jluna::unsafe::new_array_from_data(jluna::Float32_t, p, e);
+    else if (sck->get_datatype() == typeid(double))
+        return jluna::unsafe::new_array_from_data(jluna::Float64_t, p, e);
+    else
+    {
+        std::stringstream message;
+        message << "Unsupported socket datatype ('sck->get_datatype_string()' = " << sck->get_datatype_string() << ").";
         throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
     }
 }
@@ -176,9 +255,10 @@ Stateless_Julia::_create_codelet(runtime::Task& task)
                                auto& sjl = static_cast<Stateless_Julia&>(m);
 
                                for (size_t s = 0; s < t.sockets.size() - 1; s++)
-                                   // TODO: be careful here, we need to adapt the jluna type to the real socket type!
-                                   sjl.jl_func_args[tid][s + 1] = (void*)jluna::unsafe::new_array_from_data(
-                                     jluna::UInt8_t, t.sockets[s]->get_dataptr(), t.sockets[s]->get_n_elmts());
+                               {
+                                   const runtime::Socket* sck = t.sockets[s].get();
+                                   sjl.jl_func_args[tid][s + 1] = (void*)Stateless_Julia::jl_new_array_from_data(sck);
+                               }
 
                                *(int32_t*)sjl.jl_func_args[tid][sjl.jl_func_args[tid].size() - 2] = frame_id;
                                *(int32_t*)sjl.jl_func_args[tid][sjl.jl_func_args[tid].size() - 1] =

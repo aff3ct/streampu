@@ -69,6 +69,7 @@ class Stateless_Julia final : public Module
 
     static size_t get_task_id(runtime::Task& task);
     static jluna::unsafe::Value* jl_call_func(std::vector<void*>& args);
+    static jluna::unsafe::Array* jl_new_array_from_data(const runtime::Socket* sck);
 };
 }
 }
