@@ -210,35 +210,36 @@ main(int argc, char** argv)
     incr.create_socket_out<uint8_t>(t, "out", data_length);
     incr.create_constant<uint32_t>(t, sleep_time_us * 1000); // wait time in ns
     // incr.create_constant<std::string>(t, "Adrien");
-    incr.create_codelet_file(t, "../tests/julia/increment.jl");
-    // incr.create_codelet(t, R""""(
-    //     function increment(sck_in, sck_out, cst_wait_time_ns, rnt_frame_id, rnt_n_frames_per_wave)
-    //         if cst_wait_time_ns > 0
-    //             start_incr = time_ns()
-    //         end
+    // incr.create_codelet_file(t, "../tests/julia/increment.jl");
+    incr.create_codelet(t, R""""(
+        function increment(sck_in, sck_out, cst_wait_time_ns, rnt_frame_id, rnt_n_frames_per_wave)
+            if cst_wait_time_ns > 0
+                start_incr = time_ns()
+            end
 
-    //         for n in eachindex(sck_in)
-    //             sck_out[n] = sck_in[n] + 1
-    //         end
+            for n in eachindex(sck_in)
+                sck_out[n] = sck_in[n] + 1
+            end
 
-    //         if cst_wait_time_ns != 0
-    //             stop_incr = time_ns()
-    //             elapse_incr = stop_incr - start_incr
+            if cst_wait_time_ns != 0
+                stop_incr = time_ns()
+                elapse_incr = stop_incr - start_incr
 
-    //             while elapse_incr < cst_wait_time_ns
-    //                 elapse_incr = time_ns() - start_incr
-    //             end
-    //         end
+                while elapse_incr < cst_wait_time_ns
+                    elapse_incr = time_ns() - start_incr
+                end
+            end
 
-    //         return 0
-    //     end
-    // )"""");
+            return 0
+        end
+    )"""");
 
     std::vector<std::shared_ptr<module::Stateless_Julia>> incs(6);
     for (size_t s = 0; s < incs.size(); s++)
     {
         incs[s].reset(incr.clone());
         incs[s]->set_custom_name("Inc" + std::to_string(s));
+        incs[s]->eval();
     }
 
     // sockets binding

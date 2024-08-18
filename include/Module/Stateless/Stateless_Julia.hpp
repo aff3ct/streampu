@@ -16,17 +16,20 @@
 
 #include "Module/Module.hpp"
 #include "Runtime/Task/Task.hpp"
+#include "Tools/Interface/Interface_clone.hpp"
 
 namespace spu
 {
 namespace module
 {
 class Stateless_Julia final : public Module
+                            , public tools::Interface_reset
 {
   private:
     std::vector<std::vector<jluna::unsafe::Value*>> jl_constants_ptr;
     std::vector<std::vector<size_t>> jl_constants_id;
     std::vector<std::vector<void*>> jl_func_args;
+    bool evaluated;
 
     std::shared_ptr<std::vector<std::function<void(Stateless_Julia& m)>>> jl_create_constants;
     std::shared_ptr<std::vector<std::function<void()>>> jl_evaluate;
@@ -37,6 +40,9 @@ class Stateless_Julia final : public Module
     virtual ~Stateless_Julia();
     virtual Stateless_Julia* clone() const;
     void deep_copy(const Stateless_Julia& m);
+    virtual void reset();
+
+    bool is_eval() const;
 
     using Module::set_name;
     using Module::set_short_name;
@@ -70,6 +76,8 @@ class Stateless_Julia final : public Module
 
     void create_cdl_file(runtime::Task& task, const std::string& julia_filepath);
     void create_codelet_file(runtime::Task& task, const std::string& julia_filepath);
+
+    void eval();
 
   private:
     void _create_codelet(runtime::Task& task);

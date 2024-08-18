@@ -152,6 +152,7 @@ Stateless_Julia::get_task_id(runtime::Task& task)
 
 Stateless_Julia::Stateless_Julia()
   : Module()
+  , evaluated(false)
   , jl_create_constants(new std::vector<std::function<void(Stateless_Julia& m)>>())
   , jl_evaluate(new std::vector<std::function<void()>>())
   , jl_create_codelet(new std::vector<std::function<void(Stateless_Julia& m)>>())
@@ -177,7 +178,12 @@ void
 Stateless_Julia::deep_copy(const Stateless_Julia& m)
 {
     Module::deep_copy(m);
+    this->reset();
+}
 
+void
+Stateless_Julia::reset()
+{
     for (auto& ptrs_list : this->jl_constants_ptr)
         ptrs_list.clear();
     for (auto& ids_list : this->jl_constants_id)
@@ -185,12 +191,40 @@ Stateless_Julia::deep_copy(const Stateless_Julia& m)
     for (auto& funcs_list : this->jl_func_args)
         funcs_list.clear();
 
+    this->evaluated = false;
+}
+
+bool
+Stateless_Julia::is_eval() const
+{
+    return this->evaluated;
+}
+
+void Stateless_Julia::eval()
+{
+    if (this->is_eval())
+    {
+        std::stringstream message;
+        message << "This module has already been evaluated.";
+        throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
+    }
+
+    if ((*this->jl_evaluate).size() == 0)
+    {
+        std::stringstream message;
+        message << "There is no Julia code to evaluate, please call the 'Stateless_Julia::create_codelet()' "
+                   "method first.";
+        throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
+    }
+
     for (auto& create_constant : (*this->jl_create_constants))
         create_constant(*this);
     for (auto& evaluate : (*this->jl_evaluate))
         evaluate();
     for (auto& create_codelet : (*this->jl_create_codelet))
         create_codelet(*this);
+
+    this->evaluated = true;
 }
 
 runtime::Task&
@@ -248,6 +282,13 @@ Stateless_Julia::_create_codelet(runtime::Task& task)
                            [tid](module::Module& m, runtime::Task& t, const size_t frame_id)
                            {
                                auto& sjl = static_cast<Stateless_Julia&>(m);
+
+                               if (!sjl.is_eval())
+                               {
+                                   std::stringstream message;
+                                   message << "The task cannot be executed because the module has not been evaluated.";
+                                   throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
+                               }
 
                                for (size_t s = 0; s < t.sockets.size() - 1; s++)
                                {
