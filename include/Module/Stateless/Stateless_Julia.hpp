@@ -22,27 +22,32 @@ namespace spu
 {
 namespace module
 {
-class Stateless_Julia final : public Module
-                            , public tools::Interface_reset
+class Stateless_Julia final
+  : public Module
+  , public tools::Interface_reset
 {
   private:
     std::vector<std::vector<jluna::unsafe::Value*>> jl_constants_ptr;
     std::vector<std::vector<size_t>> jl_constants_id;
     std::vector<std::vector<void*>> jl_func_args;
     bool evaluated;
+    bool jl_safe;
+    bool cloned;
 
-    std::shared_ptr<std::vector<std::function<void(Stateless_Julia& m)>>> jl_create_constants;
+    std::shared_ptr<std::vector<std::vector<std::function<void(Stateless_Julia& m)>>>> jl_create_constants;
     std::shared_ptr<std::vector<std::function<void()>>> jl_evaluate;
     std::shared_ptr<std::vector<std::function<void(Stateless_Julia& m)>>> jl_create_codelet;
 
   public:
-    Stateless_Julia();
+    Stateless_Julia(bool jl_safe = true);
     virtual ~Stateless_Julia();
     virtual Stateless_Julia* clone() const;
     void deep_copy(const Stateless_Julia& m);
     virtual void reset();
-
     bool is_eval() const;
+
+    void set_jl_safety(const bool jl_safe);
+    bool is_jl_safe();
 
     using Module::set_name;
     using Module::set_short_name;
@@ -83,7 +88,7 @@ class Stateless_Julia final : public Module
     void _create_codelet(runtime::Task& task);
 
     static size_t get_task_id(runtime::Task& task);
-    static jluna::unsafe::Value* jl_call_func(std::vector<void*>& args);
+    static int32_t jl_call_func(const std::vector<void*>& args, const bool jl_safe);
     static jluna::unsafe::Array* jl_new_array_from_data(const runtime::Socket* sck);
 };
 }

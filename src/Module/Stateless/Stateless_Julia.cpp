@@ -8,94 +8,172 @@
 using namespace spu;
 using namespace spu::module;
 
-jluna::unsafe::Value*
-Stateless_Julia::jl_call_func(std::vector<void*>& args)
+int32_t
+Stateless_Julia::jl_call_func(const std::vector<void*>& args, const bool jl_safe)
 {
+    jluna::unsafe::Value* jl_ret;
     size_t n_args = args.size();
     if (n_args == 1)
     {
-        return jluna::unsafe::call(static_cast<jluna::unsafe::Function*>(args[0]));
+        if (jl_safe)
+            jl_ret = jluna::safe_call(static_cast<jluna::unsafe::Function*>(args[0]));
+        else
+            jl_ret = jluna::unsafe::call(static_cast<jluna::unsafe::Function*>(args[0]));
     }
     else if (n_args == 2)
     {
-        return jluna::unsafe::call(static_cast<jluna::unsafe::Function*>(args[0]),
-                                   static_cast<jluna::unsafe::Value*>(args[1]));
+        if (jl_safe)
+            jl_ret = jluna::safe_call(static_cast<jluna::unsafe::Function*>(args[0]),
+                                      static_cast<jluna::unsafe::Value*>(args[1]));
+        else
+            jl_ret = jluna::unsafe::call(static_cast<jluna::unsafe::Function*>(args[0]),
+                                         static_cast<jluna::unsafe::Value*>(args[1]));
     }
     else if (n_args == 3)
     {
-        return jluna::unsafe::call(static_cast<jluna::unsafe::Function*>(args[0]),
-                                   static_cast<jluna::unsafe::Value*>(args[1]),
-                                   static_cast<jluna::unsafe::Value*>(args[2]));
+        if (jl_safe)
+            jl_ret = jluna::safe_call(static_cast<jluna::unsafe::Function*>(args[0]),
+                                      static_cast<jluna::unsafe::Value*>(args[1]),
+                                      static_cast<jluna::unsafe::Value*>(args[2]));
+        else
+            jl_ret = jluna::unsafe::call(static_cast<jluna::unsafe::Function*>(args[0]),
+                                         static_cast<jluna::unsafe::Value*>(args[1]),
+                                         static_cast<jluna::unsafe::Value*>(args[2]));
     }
     else if (n_args == 4)
     {
-        return jluna::unsafe::call(static_cast<jluna::unsafe::Function*>(args[0]),
-                                   static_cast<jluna::unsafe::Value*>(args[1]),
-                                   static_cast<jluna::unsafe::Value*>(args[2]),
-                                   static_cast<jluna::unsafe::Value*>(args[3]));
+        if (jl_safe)
+            jl_ret = jluna::safe_call(static_cast<jluna::unsafe::Function*>(args[0]),
+                                      static_cast<jluna::unsafe::Value*>(args[1]),
+                                      static_cast<jluna::unsafe::Value*>(args[2]),
+                                      static_cast<jluna::unsafe::Value*>(args[3]));
+        else
+            jl_ret = jluna::unsafe::call(static_cast<jluna::unsafe::Function*>(args[0]),
+                                         static_cast<jluna::unsafe::Value*>(args[1]),
+                                         static_cast<jluna::unsafe::Value*>(args[2]),
+                                         static_cast<jluna::unsafe::Value*>(args[3]));
     }
     else if (n_args == 5)
     {
-        return jluna::unsafe::call(static_cast<jluna::unsafe::Function*>(args[0]),
-                                   static_cast<jluna::unsafe::Value*>(args[1]),
-                                   static_cast<jluna::unsafe::Value*>(args[2]),
-                                   static_cast<jluna::unsafe::Value*>(args[3]),
-                                   static_cast<jluna::unsafe::Value*>(args[4]));
+        if (jl_safe)
+            jl_ret = jluna::safe_call(static_cast<jluna::unsafe::Function*>(args[0]),
+                                      static_cast<jluna::unsafe::Value*>(args[1]),
+                                      static_cast<jluna::unsafe::Value*>(args[2]),
+                                      static_cast<jluna::unsafe::Value*>(args[3]),
+                                      static_cast<jluna::unsafe::Value*>(args[4]));
+        else
+            jl_ret = jluna::unsafe::call(static_cast<jluna::unsafe::Function*>(args[0]),
+                                         static_cast<jluna::unsafe::Value*>(args[1]),
+                                         static_cast<jluna::unsafe::Value*>(args[2]),
+                                         static_cast<jluna::unsafe::Value*>(args[3]),
+                                         static_cast<jluna::unsafe::Value*>(args[4]));
     }
     else if (n_args == 6)
     {
-        return jluna::unsafe::call(static_cast<jluna::unsafe::Function*>(args[0]),
-                                   static_cast<jluna::unsafe::Value*>(args[1]),
-                                   static_cast<jluna::unsafe::Value*>(args[2]),
-                                   static_cast<jluna::unsafe::Value*>(args[3]),
-                                   static_cast<jluna::unsafe::Value*>(args[4]),
-                                   static_cast<jluna::unsafe::Value*>(args[5]));
+        if (jl_safe)
+        {
+            jl_ret = jluna::safe_call(static_cast<jluna::unsafe::Function*>(args[0]),
+                                      static_cast<jluna::unsafe::Value*>(args[1]),
+                                      static_cast<jluna::unsafe::Value*>(args[2]),
+                                      static_cast<jluna::unsafe::Value*>(args[3]),
+                                      static_cast<jluna::unsafe::Value*>(args[4]),
+                                      static_cast<jluna::unsafe::Value*>(args[5]));
+        }
+        else
+            jl_ret = jluna::unsafe::call(static_cast<jluna::unsafe::Function*>(args[0]),
+                                         static_cast<jluna::unsafe::Value*>(args[1]),
+                                         static_cast<jluna::unsafe::Value*>(args[2]),
+                                         static_cast<jluna::unsafe::Value*>(args[3]),
+                                         static_cast<jluna::unsafe::Value*>(args[4]),
+                                         static_cast<jluna::unsafe::Value*>(args[5]));
     }
     else if (n_args == 7)
     {
-        return jluna::unsafe::call(static_cast<jluna::unsafe::Function*>(args[0]),
-                                   static_cast<jluna::unsafe::Value*>(args[1]),
-                                   static_cast<jluna::unsafe::Value*>(args[2]),
-                                   static_cast<jluna::unsafe::Value*>(args[3]),
-                                   static_cast<jluna::unsafe::Value*>(args[4]),
-                                   static_cast<jluna::unsafe::Value*>(args[5]),
-                                   static_cast<jluna::unsafe::Value*>(args[6]));
+        if (jl_safe)
+            jl_ret = jluna::safe_call(static_cast<jluna::unsafe::Function*>(args[0]),
+                                      static_cast<jluna::unsafe::Value*>(args[1]),
+                                      static_cast<jluna::unsafe::Value*>(args[2]),
+                                      static_cast<jluna::unsafe::Value*>(args[3]),
+                                      static_cast<jluna::unsafe::Value*>(args[4]),
+                                      static_cast<jluna::unsafe::Value*>(args[5]),
+                                      static_cast<jluna::unsafe::Value*>(args[6]));
+        else
+            jl_ret = jluna::unsafe::call(static_cast<jluna::unsafe::Function*>(args[0]),
+                                         static_cast<jluna::unsafe::Value*>(args[1]),
+                                         static_cast<jluna::unsafe::Value*>(args[2]),
+                                         static_cast<jluna::unsafe::Value*>(args[3]),
+                                         static_cast<jluna::unsafe::Value*>(args[4]),
+                                         static_cast<jluna::unsafe::Value*>(args[5]),
+                                         static_cast<jluna::unsafe::Value*>(args[6]));
     }
     else if (n_args == 8)
     {
-        return jluna::unsafe::call(static_cast<jluna::unsafe::Function*>(args[0]),
-                                   static_cast<jluna::unsafe::Value*>(args[1]),
-                                   static_cast<jluna::unsafe::Value*>(args[2]),
-                                   static_cast<jluna::unsafe::Value*>(args[3]),
-                                   static_cast<jluna::unsafe::Value*>(args[4]),
-                                   static_cast<jluna::unsafe::Value*>(args[5]),
-                                   static_cast<jluna::unsafe::Value*>(args[6]),
-                                   static_cast<jluna::unsafe::Value*>(args[7]));
+        if (jl_safe)
+            jl_ret = jluna::safe_call(static_cast<jluna::unsafe::Function*>(args[0]),
+                                      static_cast<jluna::unsafe::Value*>(args[1]),
+                                      static_cast<jluna::unsafe::Value*>(args[2]),
+                                      static_cast<jluna::unsafe::Value*>(args[3]),
+                                      static_cast<jluna::unsafe::Value*>(args[4]),
+                                      static_cast<jluna::unsafe::Value*>(args[5]),
+                                      static_cast<jluna::unsafe::Value*>(args[6]),
+                                      static_cast<jluna::unsafe::Value*>(args[7]));
+        else
+            jl_ret = jluna::unsafe::call(static_cast<jluna::unsafe::Function*>(args[0]),
+                                         static_cast<jluna::unsafe::Value*>(args[1]),
+                                         static_cast<jluna::unsafe::Value*>(args[2]),
+                                         static_cast<jluna::unsafe::Value*>(args[3]),
+                                         static_cast<jluna::unsafe::Value*>(args[4]),
+                                         static_cast<jluna::unsafe::Value*>(args[5]),
+                                         static_cast<jluna::unsafe::Value*>(args[6]),
+                                         static_cast<jluna::unsafe::Value*>(args[7]));
     }
     else if (n_args == 9)
     {
-        return jluna::unsafe::call(static_cast<jluna::unsafe::Function*>(args[0]),
-                                   static_cast<jluna::unsafe::Value*>(args[1]),
-                                   static_cast<jluna::unsafe::Value*>(args[2]),
-                                   static_cast<jluna::unsafe::Value*>(args[3]),
-                                   static_cast<jluna::unsafe::Value*>(args[4]),
-                                   static_cast<jluna::unsafe::Value*>(args[5]),
-                                   static_cast<jluna::unsafe::Value*>(args[6]),
-                                   static_cast<jluna::unsafe::Value*>(args[7]),
-                                   static_cast<jluna::unsafe::Value*>(args[8]));
+        if (jl_safe)
+            jl_ret = jluna::safe_call(static_cast<jluna::unsafe::Function*>(args[0]),
+                                      static_cast<jluna::unsafe::Value*>(args[1]),
+                                      static_cast<jluna::unsafe::Value*>(args[2]),
+                                      static_cast<jluna::unsafe::Value*>(args[3]),
+                                      static_cast<jluna::unsafe::Value*>(args[4]),
+                                      static_cast<jluna::unsafe::Value*>(args[5]),
+                                      static_cast<jluna::unsafe::Value*>(args[6]),
+                                      static_cast<jluna::unsafe::Value*>(args[7]),
+                                      static_cast<jluna::unsafe::Value*>(args[8]));
+        else
+            jl_ret = jluna::unsafe::call(static_cast<jluna::unsafe::Function*>(args[0]),
+                                         static_cast<jluna::unsafe::Value*>(args[1]),
+                                         static_cast<jluna::unsafe::Value*>(args[2]),
+                                         static_cast<jluna::unsafe::Value*>(args[3]),
+                                         static_cast<jluna::unsafe::Value*>(args[4]),
+                                         static_cast<jluna::unsafe::Value*>(args[5]),
+                                         static_cast<jluna::unsafe::Value*>(args[6]),
+                                         static_cast<jluna::unsafe::Value*>(args[7]),
+                                         static_cast<jluna::unsafe::Value*>(args[8]));
     }
     else if (n_args == 10)
     {
-        return jluna::unsafe::call(static_cast<jluna::unsafe::Function*>(args[0]),
-                                   static_cast<jluna::unsafe::Value*>(args[1]),
-                                   static_cast<jluna::unsafe::Value*>(args[2]),
-                                   static_cast<jluna::unsafe::Value*>(args[3]),
-                                   static_cast<jluna::unsafe::Value*>(args[4]),
-                                   static_cast<jluna::unsafe::Value*>(args[5]),
-                                   static_cast<jluna::unsafe::Value*>(args[6]),
-                                   static_cast<jluna::unsafe::Value*>(args[7]),
-                                   static_cast<jluna::unsafe::Value*>(args[8]),
-                                   static_cast<jluna::unsafe::Value*>(args[9]));
+        if (jl_safe)
+            jl_ret = jluna::safe_call(static_cast<jluna::unsafe::Function*>(args[0]),
+                                      static_cast<jluna::unsafe::Value*>(args[1]),
+                                      static_cast<jluna::unsafe::Value*>(args[2]),
+                                      static_cast<jluna::unsafe::Value*>(args[3]),
+                                      static_cast<jluna::unsafe::Value*>(args[4]),
+                                      static_cast<jluna::unsafe::Value*>(args[5]),
+                                      static_cast<jluna::unsafe::Value*>(args[6]),
+                                      static_cast<jluna::unsafe::Value*>(args[7]),
+                                      static_cast<jluna::unsafe::Value*>(args[8]),
+                                      static_cast<jluna::unsafe::Value*>(args[9]));
+        else
+            jl_ret = jluna::unsafe::call(static_cast<jluna::unsafe::Function*>(args[0]),
+                                         static_cast<jluna::unsafe::Value*>(args[1]),
+                                         static_cast<jluna::unsafe::Value*>(args[2]),
+                                         static_cast<jluna::unsafe::Value*>(args[3]),
+                                         static_cast<jluna::unsafe::Value*>(args[4]),
+                                         static_cast<jluna::unsafe::Value*>(args[5]),
+                                         static_cast<jluna::unsafe::Value*>(args[6]),
+                                         static_cast<jluna::unsafe::Value*>(args[7]),
+                                         static_cast<jluna::unsafe::Value*>(args[8]),
+                                         static_cast<jluna::unsafe::Value*>(args[9]));
     }
     else
     {
@@ -103,6 +181,11 @@ Stateless_Julia::jl_call_func(std::vector<void*>& args)
         message << "Only n_args <= 10 is supported ('n_args' = " << n_args << ").";
         throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
     }
+
+    if (jl_safe)
+        return jluna::unbox<int32_t>(jl_ret);
+    else
+        return jluna::unsafe::unsafe_unbox<int32_t>(jl_ret);
 }
 
 jluna::unsafe::Array*
@@ -150,10 +233,12 @@ Stateless_Julia::get_task_id(runtime::Task& task)
     throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
 }
 
-Stateless_Julia::Stateless_Julia()
+Stateless_Julia::Stateless_Julia(bool jl_safe)
   : Module()
   , evaluated(false)
-  , jl_create_constants(new std::vector<std::function<void(Stateless_Julia& m)>>())
+  , jl_safe(jl_safe)
+  , cloned(false)
+  , jl_create_constants(new std::vector<std::vector<std::function<void(Stateless_Julia& m)>>>())
   , jl_evaluate(new std::vector<std::function<void()>>())
   , jl_create_codelet(new std::vector<std::function<void(Stateless_Julia& m)>>())
 {
@@ -178,6 +263,7 @@ void
 Stateless_Julia::deep_copy(const Stateless_Julia& m)
 {
     Module::deep_copy(m);
+    this->cloned = true;
     this->reset();
 }
 
@@ -200,7 +286,20 @@ Stateless_Julia::is_eval() const
     return this->evaluated;
 }
 
-void Stateless_Julia::eval()
+void
+Stateless_Julia::set_jl_safety(const bool jl_safe)
+{
+    this->jl_safe = jl_safe;
+}
+
+bool
+Stateless_Julia::is_jl_safe()
+{
+    return this->jl_safe;
+}
+
+void
+Stateless_Julia::eval()
 {
     if (this->is_eval())
     {
@@ -217,12 +316,13 @@ void Stateless_Julia::eval()
         throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
     }
 
-    for (auto& create_constant : (*this->jl_create_constants))
-        create_constant(*this);
-    for (auto& evaluate : (*this->jl_evaluate))
-        evaluate();
-    for (auto& create_codelet : (*this->jl_create_codelet))
-        create_codelet(*this);
+    for (size_t tid = 0; tid < this->tasks.size(); tid++)
+    {
+        for (auto& create_constant : (*this->jl_create_constants)[tid])
+            create_constant(*this);
+        (*this->jl_evaluate)[tid]();
+        (*this->jl_create_codelet)[tid](*this);
+    }
 
     this->evaluated = true;
 }
@@ -230,6 +330,14 @@ void Stateless_Julia::eval()
 runtime::Task&
 Stateless_Julia::create_task(const std::string& name)
 {
+    if (this->cloned)
+    {
+        std::stringstream message;
+        message << "It is not possible to create a new task on a clone.";
+        throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
+    }
+
+    this->jl_create_constants->push_back(std::vector<std::function<void(Stateless_Julia & m)>>());
     this->jl_constants_ptr.push_back(std::vector<jluna::unsafe::Value*>());
     this->jl_constants_id.push_back(std::vector<size_t>());
     this->jl_func_args.push_back(std::vector<void*>());
@@ -246,6 +354,13 @@ Stateless_Julia::create_tsk(const std::string& name)
 void
 Stateless_Julia::create_codelet(runtime::Task& task, const std::string& julia_code)
 {
+    if (this->cloned)
+    {
+        std::stringstream message;
+        message << "It is not possible to create a new codelet on a clone.";
+        throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
+    }
+
     this->jl_evaluate->push_back([julia_code]() { jluna::Main.safe_eval(julia_code); });
     size_t tid = Stateless_Julia::get_task_id(task);
     (*this->jl_evaluate)[tid]();
@@ -261,6 +376,13 @@ Stateless_Julia::create_cdl(runtime::Task& task, const std::string& julia_code)
 void
 Stateless_Julia::create_codelet_file(runtime::Task& task, const std::string& julia_filepath)
 {
+    if (this->cloned)
+    {
+        std::stringstream message;
+        message << "It is not possible to create a new codelet on a clone.";
+        throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
+    }
+
     this->jl_evaluate->push_back([julia_filepath]() { jluna::Main.safe_eval_file(julia_filepath); });
     size_t tid = Stateless_Julia::get_task_id(task);
     (*this->jl_evaluate)[tid]();
@@ -300,10 +422,7 @@ Stateless_Julia::_create_codelet(runtime::Task& task)
                                *(int32_t*)sjl.jl_func_args[tid][sjl.jl_func_args[tid].size() - 1] =
                                  sjl.get_n_frames_per_wave();
 
-                               jluna::unsafe::Value* jl_result = Stateless_Julia::jl_call_func(sjl.jl_func_args[tid]);
-
-                               // return jluna::unbox<int32_t>(jl_result); // the safe unbox call is expensive!!
-                               return jluna::unsafe::unsafe_unbox<int32_t>(jl_result); // this is cheap :-)
+                               return Stateless_Julia::jl_call_func(sjl.jl_func_args[tid], sjl.is_jl_safe());
                            });
 
     this->jl_create_codelet->push_back(
