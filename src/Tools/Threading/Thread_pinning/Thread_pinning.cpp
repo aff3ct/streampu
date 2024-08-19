@@ -11,8 +11,8 @@
 #endif
 
 #include "Tools/Exception/exception.hpp"
-#include "Tools/Thread_pinning/Thread_pinning.hpp"
-#include "Tools/Thread_pinning/Thread_pinning_utils.hpp"
+#include "Tools/Threading/Thread_pinning/Thread_pinning.hpp"
+#include "Tools/Threading/Thread_pinning/Thread_pinning_utils.hpp"
 
 using namespace spu;
 using namespace spu::tools;

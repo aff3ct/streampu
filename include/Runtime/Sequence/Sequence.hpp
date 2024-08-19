@@ -6,12 +6,14 @@
 #define SEQUENCE_HPP_
 
 #include <atomic>
+#include <condition_variable>
 #include <functional>
 #include <iostream>
 #include <map>
 #include <memory>
 #include <mutex>
 #include <string>
+#include <thread>
 #include <vector>
 
 #include "Runtime/Socket/Socket.hpp"
@@ -19,6 +21,7 @@
 #include "Tools/Interface/Interface_clone.hpp"
 #include "Tools/Interface/Interface_get_set_n_frames.hpp"
 #include "Tools/Interface/Interface_is_done.hpp"
+#include "Tools/Threading/Barrier/Barrier.hpp"
 
 namespace spu
 {
@@ -26,6 +29,7 @@ namespace module
 {
 class Task;
 class Module;
+class Stateless_Julia;
 } // namespace module
 namespace sched
 {
@@ -78,6 +82,13 @@ class Sequence
 
   protected:
     size_t n_threads;
+    std::shared_ptr<std::vector<std::thread>> threads_pool;
+    std::shared_ptr<std::vector<std::mutex>> threads_mtx;
+    std::shared_ptr<std::vector<std::condition_variable>> threads_cnd;
+    std::function<void(const size_t)> thread_exec_func;
+    tools::Barrier threads_barrier;
+    bool stop_threads;
+
     std::vector<tools::Digraph_node<Sub_sequence>*> sequences;
     std::vector<size_t> firsts_tasks_id;
     std::vector<size_t> lasts_tasks_id;
@@ -85,6 +96,7 @@ class Sequence
     std::vector<std::vector<runtime::Task*>> lasts_tasks;
     std::vector<std::vector<std::shared_ptr<module::Module>>> modules;
     std::vector<std::vector<module::Module*>> all_modules;
+    std::vector<std::vector<module::Stateless_Julia*>> jl_modules;
     std::shared_ptr<std::mutex> mtx_exception;
     std::vector<std::string> prev_exception_messages;
     std::vector<std::string> prev_exception_messages_to_display;
@@ -300,6 +312,8 @@ class Sequence
     template<class SS, class MO>
     void replicate(const tools::Digraph_node<SS>* sequence);
 
+    void _start_thread(const size_t tid);
+
     void _exec(const size_t tid,
                std::function<bool(const std::vector<const int*>&)>& stop_condition,
                tools::Digraph_node<Sub_sequence>* sequence);
@@ -331,6 +345,9 @@ class Sequence
     void init(const std::vector<TA*>& firsts, const std::vector<TA*>& lasts, const std::vector<TA*>& exclusions);
     template<class SS>
     inline void _init(tools::Digraph_node<SS>* root);
+    void init_jl_module(module::Module* m);
+    void eval_jl_modules(const size_t tid);
+    void initialize_threads_pool();
 };
 } // namespace runtime
 } // namespace spu

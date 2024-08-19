@@ -249,7 +249,7 @@ main(int argc, char** argv)
         incs[s].reset(incr.clone());
         incs[s]->set_custom_name("Inc" + std::to_string(s));
         incs[s]->set_jl_safety(jl_safe);
-        incs[s]->eval();
+        // incs[s]->eval();
     }
 
     // sockets binding

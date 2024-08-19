@@ -43,9 +43,15 @@ include(GNUInstallDirs)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules/")
 set(CMAKE_MACOSX_RPATH 1)
 
-# Enable C++11
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+if(SPU_LINK_JULIA)
+    # Enable C++20
+    set(CMAKE_CXX_STANDARD 20) # because Jluna requires C++20 (concepts)
+    set(CMAKE_CXX_STANDARD_REQUIRED ON)
+else()
+    # Enable C++11
+    set(CMAKE_CXX_STANDARD 11)
+    set(CMAKE_CXX_STANDARD_REQUIRED ON)
+endif()
 
 # Specify bin and lib paths
 set(EXECUTABLE_OUTPUT_PATH bin/)
@@ -405,7 +411,7 @@ endif()
 
 # julia & jluna
 if(SPU_LINK_JULIA)
-    find_package(Julia 1.7.0 REQUIRED)
+    find_package(Julia 1.9.0 REQUIRED) # because Julia thread adoption feature is required
     spu_target_link_libraries("${spu_targets_list}" PUBLIC "Julia::Julia")
 
     find_package(jluna REQUIRED PATHS ${jluna_DIR})

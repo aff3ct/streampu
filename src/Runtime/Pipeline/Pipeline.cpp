@@ -9,7 +9,7 @@
 #include "Runtime/Pipeline/Pipeline.hpp"
 #include "Tools/Exception/exception.hpp"
 #include "Tools/Interface/Interface_waiting.hpp"
-#include "Tools/Thread_pinning/Thread_pinning_utils.hpp"
+#include "Tools/Threading/Thread_pinning/Thread_pinning_utils.hpp"
 
 using namespace spu;
 using namespace spu::runtime;

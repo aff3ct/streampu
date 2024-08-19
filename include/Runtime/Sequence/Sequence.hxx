@@ -286,7 +286,10 @@ Sequence::_init(tools::Digraph_node<runtime::Sub_sequence>* root)
     collect_modules_list(root, already_parsed_nodes3);
 
     for (auto m : modules_set)
+    {
         this->all_modules[0].push_back(m);
+        this->init_jl_module(m);
+    }
 
     this->replicate<runtime::Sub_sequence, module::Module>(root);
 }

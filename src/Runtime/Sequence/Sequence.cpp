@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <chrono>
 #include <cstring>
 #include <exception>
 #include <fstream>
@@ -12,14 +13,15 @@
 #include "Module/Stateful/Adaptor/Adaptor.hpp"
 #include "Module/Stateful/Probe/Probe.hpp"
 #include "Module/Stateful/Switcher/Switcher.hpp"
+#include "Module/Stateless/Stateless_Julia.hpp"
 #include "Runtime/Sequence/Sequence.hpp"
 #include "Runtime/Socket/Socket.hpp"
 #include "Runtime/Task/Task.hpp"
 #include "Tools/Display/rang_format/rang_format.h"
 #include "Tools/Exception/exception.hpp"
 #include "Tools/Signal_handler/Signal_handler.hpp"
-#include "Tools/Thread_pinning/Thread_pinning.hpp"
-#include "Tools/Thread_pinning/Thread_pinning_utils.hpp"
+#include "Tools/Threading/Thread_pinning/Thread_pinning.hpp"
+#include "Tools/Threading/Thread_pinning/Thread_pinning_utils.hpp"
 
 using namespace spu;
 using namespace spu::runtime;
@@ -31,9 +33,16 @@ Sequence::Sequence(const std::vector<const runtime::Task*>& firsts,
                    const bool thread_pinning,
                    const std::vector<size_t>& puids)
   : n_threads(n_threads)
+  , threads_pool(new std::vector<std::thread>(n_threads))
+  , threads_mtx(new std::vector<std::mutex>(n_threads))
+  , threads_cnd(new std::vector<std::condition_variable>(n_threads))
+  , thread_exec_func([](const size_t) { throw tools::unimplemented_error(__FILE__, __LINE__, __func__); })
+  , threads_barrier(n_threads - 1)
+  , stop_threads(false)
   , sequences(n_threads, nullptr)
   , modules(n_threads)
   , all_modules(n_threads)
+  , jl_modules(n_threads)
   , mtx_exception(new std::mutex())
   , force_exit_loop(new std::atomic<bool>(false))
   , tasks_inplace(false)
@@ -118,9 +127,16 @@ Sequence::Sequence(const std::vector<runtime::Task*>& firsts,
                    const std::vector<size_t>& puids,
                    const bool tasks_inplace)
   : n_threads(n_threads)
+  , threads_pool(new std::vector<std::thread>(n_threads))
+  , threads_mtx(new std::vector<std::mutex>(n_threads))
+  , threads_cnd(new std::vector<std::condition_variable>(n_threads))
+  , thread_exec_func([](const size_t) { throw tools::unimplemented_error(__FILE__, __LINE__, __func__); })
+  , threads_barrier(n_threads - 1)
+  , stop_threads(false)
   , sequences(n_threads, nullptr)
   , modules(tasks_inplace ? n_threads - 1 : n_threads)
   , all_modules(n_threads)
+  , jl_modules(n_threads)
   , mtx_exception(new std::mutex())
   , force_exit_loop(new std::atomic<bool>(false))
   , tasks_inplace(tasks_inplace)
@@ -205,9 +221,16 @@ Sequence::Sequence(const std::vector<const runtime::Task*>& firsts,
                    const bool thread_pinning,
                    const std::string& sequence_pinning_policy)
   : n_threads(n_threads)
+  , threads_pool(new std::vector<std::thread>(n_threads))
+  , threads_mtx(new std::vector<std::mutex>(n_threads))
+  , threads_cnd(new std::vector<std::condition_variable>(n_threads))
+  , thread_exec_func([](const size_t) { throw tools::unimplemented_error(__FILE__, __LINE__, __func__); })
+  , threads_barrier(n_threads - 1)
+  , stop_threads(false)
   , sequences(n_threads, nullptr)
   , modules(n_threads)
   , all_modules(n_threads)
+  , jl_modules(n_threads)
   , mtx_exception(new std::mutex())
   , force_exit_loop(new std::atomic<bool>(false))
   , tasks_inplace(false)
@@ -286,9 +309,16 @@ Sequence::Sequence(const std::vector<runtime::Task*>& firsts,
                    const std::string& sequence_pinning_policy,
                    const bool tasks_inplace)
   : n_threads(n_threads)
+  , threads_pool(new std::vector<std::thread>(n_threads))
+  , threads_mtx(new std::vector<std::mutex>(n_threads))
+  , threads_cnd(new std::vector<std::condition_variable>(n_threads))
+  , thread_exec_func([](const size_t) { throw tools::unimplemented_error(__FILE__, __LINE__, __func__); })
+  , threads_barrier(n_threads - 1)
+  , stop_threads(false)
   , sequences(n_threads, nullptr)
   , modules(tasks_inplace ? n_threads - 1 : n_threads)
   , all_modules(n_threads)
+  , jl_modules(n_threads)
   , mtx_exception(new std::mutex())
   , force_exit_loop(new std::atomic<bool>(false))
   , tasks_inplace(tasks_inplace)
@@ -375,6 +405,17 @@ Sequence::Sequence(runtime::Task& first,
 
 Sequence::~Sequence()
 {
+    // stop the threads pool
+    this->stop_threads = true;
+    for (size_t tid = 1; tid < this->n_threads; tid++)
+    {
+        std::lock_guard<std::mutex> lock((*this->threads_mtx)[tid]);
+        (*this->threads_cnd)[tid].notify_one();
+    }
+
+    for (size_t tid = 1; tid < this->n_threads; tid++)
+        (*this->threads_pool)[tid].join();
+
     std::vector<tools::Digraph_node<Sub_sequence>*> already_deleted_nodes;
     for (auto s : this->sequences)
         this->delete_tree(s, already_deleted_nodes);
@@ -509,12 +550,42 @@ Sequence::init(const std::vector<TA*>& firsts, const std::vector<TA*>& lasts, co
 
     for (size_t tid = 0; tid < this->sequences.size(); tid++)
         this->cur_ss[tid] = this->sequences[tid];
+
+    this->initialize_threads_pool();
+}
+
+void
+Sequence::initialize_threads_pool()
+{
+    for (size_t tid = 1; tid < n_threads; tid++)
+        (*this->threads_pool)[tid] = std::thread(&Sequence::_start_thread, this, tid);
+    this->eval_jl_modules(0);
+    this->threads_barrier.wait();
+}
+
+void
+Sequence::_start_thread(const size_t tid)
+{
+    this->eval_jl_modules(tid);
+
+    while (!this->stop_threads)
+    {
+        std::unique_lock<std::mutex> lock((*this->threads_mtx)[tid]);
+        this->threads_barrier.arrive();
+        (*this->threads_cnd)[tid].wait(lock);
+
+        if (!this->stop_threads) this->thread_exec_func(tid);
+    }
 }
 
 Sequence*
 Sequence::clone() const
 {
     auto c = new Sequence(*this);
+
+    c->threads_pool.reset(new std::vector<std::thread>(n_threads));
+    c->threads_mtx.reset(new std::vector<std::mutex>(n_threads));
+    c->threads_cnd.reset(new std::vector<std::condition_variable>(n_threads));
 
     c->tasks_inplace = false;
     c->modules.resize(c->get_n_threads());
@@ -846,15 +917,18 @@ Sequence::exec(std::function<bool(const std::vector<const int*>&)> stop_conditio
     else
         real_stop_condition = stop_condition;
 
-    std::vector<std::thread> threads(n_threads);
-    for (size_t tid = 1; tid < n_threads; tid++)
-        threads[tid] =
-          std::thread(&Sequence::_exec, this, tid, std::ref(real_stop_condition), std::ref(this->sequences[tid]));
+    this->thread_exec_func = [this, &real_stop_condition](const size_t tid)
+    { this->Sequence::_exec(tid, real_stop_condition, this->sequences[tid]); };
 
+    for (size_t tid = 1; tid < n_threads; tid++)
+    {
+        std::lock_guard<std::mutex> lock((*this->threads_mtx)[tid]);
+        (*this->threads_cnd)[tid].notify_one();
+    }
     this->_exec(0, real_stop_condition, this->sequences[0]);
+    this->threads_barrier.wait();
 
-    for (size_t tid = 1; tid < n_threads; tid++)
-        threads[tid].join();
+    this->thread_exec_func = [](const size_t) { throw tools::unimplemented_error(__FILE__, __LINE__, __func__); };
 
     if (this->is_no_copy_mode() && !this->is_part_of_pipeline)
     {
@@ -884,17 +958,18 @@ Sequence::exec(std::function<bool()> stop_condition)
     else
         real_stop_condition = stop_condition;
 
-    std::vector<std::thread> threads(n_threads);
+    this->thread_exec_func = [this, &real_stop_condition](const size_t tid)
+    { this->Sequence::_exec_without_statuses(tid, real_stop_condition, this->sequences[tid]); };
+
     for (size_t tid = 1; tid < n_threads; tid++)
     {
-        threads[tid] = std::thread(
-          &Sequence::_exec_without_statuses, this, tid, std::ref(real_stop_condition), std::ref(this->sequences[tid]));
+        std::lock_guard<std::mutex> lock((*this->threads_mtx)[tid]);
+        (*this->threads_cnd)[tid].notify_one();
     }
-
     this->_exec_without_statuses(0, real_stop_condition, this->sequences[0]);
+    this->threads_barrier.wait();
 
-    for (size_t tid = 1; tid < n_threads; tid++)
-        threads[tid].join();
+    this->thread_exec_func = [](const size_t) { throw tools::unimplemented_error(__FILE__, __LINE__, __func__); };
 
     if (this->is_no_copy_mode() && !this->is_part_of_pipeline)
     {
@@ -1428,8 +1503,16 @@ Sequence::replicate(const tools::Digraph_node<SS>* sequence)
             }
 
     std::vector<MO*> modules_vec;
+#ifdef SPU_JULIA
+    size_t jl_modules_count = 0;
+#endif /* SPU_JULIA */
     for (auto m : modules_set)
+    {
         modules_vec.push_back(m);
+#ifdef SPU_JULIA
+        if (dynamic_cast<const module::Stateless_Julia*>(m)) jl_modules_count++;
+#endif /* SPU_JULIA */
+    }
 
     // clone the modules
     for (size_t tid = 0; tid < this->n_threads - (this->tasks_inplace ? 1 : 0); tid++)
@@ -1445,6 +1528,9 @@ Sequence::replicate(const tools::Digraph_node<SS>* sequence)
 
         this->modules[tid].resize(modules_vec.size());
         this->all_modules[tid + (this->tasks_inplace ? 1 : 0)].resize(modules_vec.size());
+#ifdef SPU_JULIA
+        this->jl_modules[tid + (this->tasks_inplace ? 1 : 0)].resize(jl_modules_count);
+#endif /* SPU_JULIA */
         for (size_t m = 0; m < modules_vec.size(); m++)
         {
             try
@@ -1460,6 +1546,11 @@ Sequence::replicate(const tools::Digraph_node<SS>* sequence)
                 throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
             }
             this->all_modules[tid + (this->tasks_inplace ? 1 : 0)][m] = this->modules[tid][m].get();
+#ifdef SPU_JULIA
+            module::Stateless_Julia* jl_m = nullptr;
+            if ((jl_m = dynamic_cast<module::Stateless_Julia*>(this->modules[tid][m].get())))
+                this->jl_modules[tid + (this->tasks_inplace ? 1 : 0)].push_back(jl_m);
+#endif /* SPU_JULIA */
         }
 
         if (this->is_thread_pinning()) tools::Thread_pinning::unpin();
@@ -2618,3 +2709,34 @@ message.str());
         return check_control_flow_parity(root, already_parsed_nodes);
 }
 */
+
+void
+Sequence::init_jl_module(module::Module* m)
+{
+#ifdef SPU_JULIA
+    module::Stateless_Julia* jl_m = nullptr;
+    if ((jl_m = dynamic_cast<module::Stateless_Julia*>(m))) this->jl_modules[0].push_back(jl_m);
+#endif /* SPU_JULIA */
+}
+
+void
+Sequence::eval_jl_modules(const size_t tid)
+{
+#ifdef SPU_JULIA
+    if (this->is_thread_pinning())
+    {
+        if (!puids.empty())
+            tools::Thread_pinning::pin(this->puids[0]);
+        else
+            tools::Thread_pinning::pin(this->pin_objects_per_thread[0]);
+    }
+
+    for (module::Stateless_Julia* jl_m : this->jl_modules[tid])
+    {
+        jl_m->reset();
+        jl_m->eval();
+    }
+
+    if (this->is_thread_pinning()) tools::Thread_pinning::unpin();
+#endif /* SPU_JULIA */
+}
