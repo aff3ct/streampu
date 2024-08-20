@@ -20,9 +20,9 @@ class Thread_pool
   private:
     const size_t n_threads;
     bool initialized;
-    std::shared_ptr<std::vector<std::thread>> pool;
-    std::shared_ptr<std::vector<std::mutex>> mtx;
-    std::shared_ptr<std::vector<std::condition_variable>> cnd;
+    std::vector<std::thread> pool;
+    std::vector<std::mutex> mtx;
+    std::vector<std::condition_variable> cnd;
     std::function<void(const size_t)> func_init;
     std::function<void(const size_t)> func_deinit;
     std::function<void(const size_t)> func_exec;

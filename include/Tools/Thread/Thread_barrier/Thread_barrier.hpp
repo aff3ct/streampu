@@ -14,7 +14,7 @@ class Thread_barrier
 {
   private:
     const uint32_t n_threads;
-    std::shared_ptr<std::atomic<uint32_t>> count;
+    std::atomic<uint32_t> count;
 
   public:
     inline Thread_barrier(const uint32_t n_threads);

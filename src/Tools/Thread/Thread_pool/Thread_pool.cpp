@@ -6,9 +6,9 @@ using namespace spu::tools;
 Thread_pool::Thread_pool(const size_t n_threads, std::function<void(const size_t)>& func_init)
   : n_threads(n_threads)
   , initialized(false)
-  , pool(new std::vector<std::thread>(n_threads))
-  , mtx(new std::vector<std::mutex>(n_threads))
-  , cnd(new std::vector<std::condition_variable>(n_threads))
+  , pool(n_threads)
+  , mtx(n_threads)
+  , cnd(n_threads)
   , func_init(func_init)
   , func_deinit([](const size_t) {})
   , func_exec([](const size_t) { throw tools::unimplemented_error(__FILE__, __LINE__, __func__); })
@@ -21,9 +21,9 @@ Thread_pool::Thread_pool(const size_t n_threads, std::function<void(const size_t
 Thread_pool::Thread_pool(const size_t n_threads)
   : n_threads(n_threads)
   , initialized(false)
-  , pool(new std::vector<std::thread>(n_threads))
-  , mtx(new std::vector<std::mutex>(n_threads))
-  , cnd(new std::vector<std::condition_variable>(n_threads))
+  , pool(n_threads)
+  , mtx(n_threads)
+  , cnd(n_threads)
   , func_init([](const size_t) {})
   , func_deinit([](const size_t) {})
   , func_exec([](const size_t) { throw tools::unimplemented_error(__FILE__, __LINE__, __func__); })
@@ -35,16 +35,15 @@ Thread_pool::Thread_pool(const size_t n_threads)
 Thread_pool::Thread_pool(const Thread_pool& other)
   : n_threads(other.n_threads)
   , initialized(false)
-  , pool(new std::vector<std::thread>(other.n_threads))
-  , mtx(new std::vector<std::mutex>(other.n_threads))
-  , cnd(new std::vector<std::condition_variable>(other.n_threads))
+  , pool(other.n_threads)
+  , mtx(other.n_threads)
+  , cnd(other.n_threads)
   , func_init(other.func_init)
   , func_deinit(other.func_deinit)
   , func_exec(other.func_deinit)
   , barrier(other.barrier)
   , stop_threads(other.stop_threads)
 {
-    // if (other.initialized) this->init();
 }
 
 void
@@ -58,7 +57,7 @@ Thread_pool::init(const bool async)
     }
 
     for (size_t tid = 0; tid < n_threads; tid++)
-        (*this->pool)[tid] = std::thread(&Thread_pool::_start_thread, this, tid);
+        this->pool[tid] = std::thread(&Thread_pool::_start_thread, this, tid);
 
     if (!async)
     {
@@ -74,9 +73,9 @@ Thread_pool::_start_thread(const size_t tid)
 
     while (!this->stop_threads)
     {
-        std::unique_lock<std::mutex> lock((*this->mtx)[tid]);
+        std::unique_lock<std::mutex> lock(this->mtx[tid]);
         this->barrier.arrive();
-        (*this->cnd)[tid].wait(lock);
+        this->cnd[tid].wait(lock);
 
         if (!this->stop_threads) this->func_exec(tid);
     }
@@ -90,11 +89,11 @@ Thread_pool::~Thread_pool()
     this->stop_threads = true;
     for (size_t tid = 0; tid < this->n_threads; tid++)
     {
-        std::lock_guard<std::mutex> lock((*this->mtx)[tid]);
-        (*this->cnd)[tid].notify_one();
+        std::lock_guard<std::mutex> lock(this->mtx[tid]);
+        this->cnd[tid].notify_one();
     }
     for (size_t tid = 0; tid < this->n_threads; tid++)
-        (*this->pool)[tid].join();
+        this->pool[tid].join();
 }
 
 void
@@ -133,8 +132,8 @@ Thread_pool::run(const bool async)
 
     for (size_t tid = 0; tid < n_threads; tid++)
     {
-        std::lock_guard<std::mutex> lock((*this->mtx)[tid]);
-        (*this->cnd)[tid].notify_one();
+        std::lock_guard<std::mutex> lock(this->mtx[tid]);
+        this->cnd[tid].notify_one();
     }
 
     if (!async) this->barrier.wait();

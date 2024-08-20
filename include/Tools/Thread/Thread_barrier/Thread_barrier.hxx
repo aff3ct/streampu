@@ -10,22 +10,22 @@ namespace tools
 
 Thread_barrier::Thread_barrier(const uint32_t n_threads)
   : n_threads(n_threads)
-  , count(new std::atomic<uint32_t>(0))
+  , count(0)
 {
 }
 
 Thread_barrier::Thread_barrier(const Thread_barrier& other)
   : n_threads(other.n_threads)
-  , count(new std::atomic<uint32_t>(0))
+  , count(0)
 {
 }
 
 void
 Thread_barrier::arrive()
 {
-    (*this->count)++;
+    this->count++;
 
-    if ((*this->count) > this->n_threads)
+    if (this->count > this->n_threads)
     {
         std::stringstream message;
         message << "Something went wrong, 'count' cannot be higher than 'n_threads' ('count' = " << this->count
@@ -37,13 +37,13 @@ Thread_barrier::arrive()
 void
 Thread_barrier::reset()
 {
-    (*this->count) = 0;
+    this->count = 0;
 }
 
 void
 Thread_barrier::wait()
 {
-    while ((*this->count) != this->n_threads)
+    while (this->count != this->n_threads)
         std::this_thread::sleep_for(std::chrono::microseconds(1));
     this->reset();
 }
