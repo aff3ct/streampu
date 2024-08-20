@@ -255,14 +255,17 @@
 #ifndef SYSTEM_MEMORY_HPP__
 #include <Tools/System/memory.hpp>
 #endif
-#ifndef BARRIER_HPP_
-#include <Tools/Threading/Barrier/Barrier.hpp>
+#ifndef THREAD_BARRIER_HPP_
+#include <Tools/Thread/Thread_barrier/Thread_barrier.hpp>
 #endif
 #ifndef THREAD_PINNING_HPP
-#include <Tools/Threading/Thread_pinning/Thread_pinning.hpp>
+#include <Tools/Thread/Thread_pinning/Thread_pinning.hpp>
 #endif
 #ifndef THREAD_PINNING_UTILS_HPP
-#include <Tools/Threading/Thread_pinning/Thread_pinning_utils.hpp>
+#include <Tools/Thread/Thread_pinning/Thread_pinning_utils.hpp>
+#endif
+#ifndef THREAD_POOL_HPP_
+#include <Tools/Thread/Thread_pool/Thread_pool.hpp>
 #endif
 
 #endif

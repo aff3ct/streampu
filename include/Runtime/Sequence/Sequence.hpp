@@ -21,7 +21,7 @@
 #include "Tools/Interface/Interface_clone.hpp"
 #include "Tools/Interface/Interface_get_set_n_frames.hpp"
 #include "Tools/Interface/Interface_is_done.hpp"
-#include "Tools/Threading/Barrier/Barrier.hpp"
+#include "Tools/Thread/Thread_pool/Thread_pool.hpp"
 
 namespace spu
 {
@@ -81,13 +81,8 @@ class Sequence
     friend sched::Scheduler;
 
   protected:
-    size_t n_threads;
-    std::shared_ptr<std::vector<std::thread>> threads_pool;
-    std::shared_ptr<std::vector<std::mutex>> threads_mtx;
-    std::shared_ptr<std::vector<std::condition_variable>> threads_cnd;
-    std::function<void(const size_t)> thread_exec_func;
-    tools::Barrier threads_barrier;
-    bool stop_threads;
+    const size_t n_threads;
+    tools::Thread_pool thread_pool;
 
     std::vector<tools::Digraph_node<Sub_sequence>*> sequences;
     std::vector<size_t> firsts_tasks_id;
@@ -312,8 +307,6 @@ class Sequence
     template<class SS, class MO>
     void replicate(const tools::Digraph_node<SS>* sequence);
 
-    void _start_thread(const size_t tid);
-
     void _exec(const size_t tid,
                std::function<bool(const std::vector<const int*>&)>& stop_condition,
                tools::Digraph_node<Sub_sequence>* sequence);
@@ -347,7 +340,6 @@ class Sequence
     inline void _init(tools::Digraph_node<SS>* root);
     void init_jl_module(module::Module* m);
     void eval_jl_modules(const size_t tid);
-    void initialize_threads_pool();
 };
 } // namespace runtime
 } // namespace spu

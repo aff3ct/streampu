@@ -1,6 +1,6 @@
 #include "Scheduler/Scheduler.hpp"
 #include "Tools/Exception/exception.hpp"
-#include "Tools/Threading/Thread_pinning/Thread_pinning.hpp"
+#include "Tools/Thread/Thread_pinning/Thread_pinning.hpp"
 
 #include <iostream>
 #include <sstream>

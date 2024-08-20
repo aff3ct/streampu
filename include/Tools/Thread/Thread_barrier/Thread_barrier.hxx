@@ -1,25 +1,27 @@
+#include <sstream>
+
 #include "Tools/Exception/exception.hpp"
-#include "Tools/Threading/Barrier/Barrier.hpp"
+#include "Tools/Thread/Thread_barrier/Thread_barrier.hpp"
 
 namespace spu
 {
 namespace tools
 {
 
-Barrier::Barrier(const uint32_t n_threads)
+Thread_barrier::Thread_barrier(const uint32_t n_threads)
   : n_threads(n_threads)
   , count(new std::atomic<uint32_t>(0))
 {
 }
 
-Barrier::Barrier(const Barrier& other)
+Thread_barrier::Thread_barrier(const Thread_barrier& other)
   : n_threads(other.n_threads)
   , count(new std::atomic<uint32_t>(0))
 {
 }
 
 void
-Barrier::arrive()
+Thread_barrier::arrive()
 {
     (*this->count)++;
 
@@ -33,13 +35,13 @@ Barrier::arrive()
 }
 
 void
-Barrier::reset()
+Thread_barrier::reset()
 {
     (*this->count) = 0;
 }
 
 void
-Barrier::wait()
+Thread_barrier::wait()
 {
     while ((*this->count) != this->n_threads)
         std::this_thread::sleep_for(std::chrono::microseconds(1));
