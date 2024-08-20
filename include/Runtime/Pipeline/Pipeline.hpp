@@ -14,6 +14,7 @@
 #include "Module/Stateful/Adaptor/Adaptor.hpp"
 #include "Runtime/Sequence/Sequence.hpp"
 #include "Tools/Interface/Interface_get_set_n_frames.hpp"
+#include "Tools/Thread/Thread_pool/Thread_pool.hpp"
 
 namespace spu
 {
@@ -24,6 +25,7 @@ class Pipeline : public tools::Interface_get_set_n_frames
   protected:
     Sequence original_sequence;
     std::vector<std::shared_ptr<Sequence>> stages;
+    tools::Thread_pool thread_pool;
     // clang-format off
     std::vector<std::pair<std::vector<std::shared_ptr<module::Adaptor>>,
                           std::vector<std::shared_ptr<module::Adaptor>>>> adaptors;
