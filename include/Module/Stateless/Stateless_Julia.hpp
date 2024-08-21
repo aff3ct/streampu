@@ -27,22 +27,22 @@ class Stateless_Julia final
   , public tools::Interface_reset
 {
   private:
-    std::vector<std::vector<jluna::unsafe::Value*>> jl_constants_ptr;
-    std::vector<std::vector<size_t>> jl_constants_id;
-    std::vector<std::vector<void*>> jl_func_args;
-    bool evaluated;
-    bool jl_safe;
-    bool cloned;
+    std::shared_ptr<std::vector<std::vector<jluna::unsafe::Value*>>> jl_constants_ptr;
+    std::shared_ptr<std::vector<std::vector<size_t>>> jl_constants_id;
+    std::shared_ptr<std::vector<std::vector<void*>>> jl_func_args;
+    std::shared_ptr<bool> evaluated;
+    std::shared_ptr<size_t> n_clones;
 
     std::shared_ptr<std::vector<std::vector<std::function<void(Stateless_Julia& m)>>>> jl_create_constants;
     std::shared_ptr<std::vector<std::function<void()>>> jl_evaluate;
     std::shared_ptr<std::vector<std::function<void(Stateless_Julia& m)>>> jl_create_codelet;
 
+    bool jl_safe;
+
   public:
-    Stateless_Julia(bool jl_safe = true);
+    Stateless_Julia(const bool jl_safe = true);
     virtual ~Stateless_Julia();
     virtual Stateless_Julia* clone() const;
-    void deep_copy(const Stateless_Julia& m);
     virtual void reset();
     bool is_eval() const;
 

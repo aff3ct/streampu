@@ -8,10 +8,11 @@ template<typename T>
 void
 Stateless_Julia::create_constant(runtime::Task& task, const T& value)
 {
-    if (this->cloned)
+    if ((*this->n_clones) > 0)
     {
         std::stringstream message;
-        message << "It is not possible to create a new constant on a clone.";
+        message << "It is not possible to create a new constant when clones exist ('n_clones' = " << (*this->n_clones)
+                << ").";
         throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
     }
 
@@ -32,11 +33,9 @@ Stateless_Julia::create_constant(runtime::Task& task, const T& value)
           // protect from garbage collector
           size_t jl_constant_id = jluna::unsafe::gc_preserve(jl_constant_ptr);
 
-          m.jl_constants_ptr[tid].push_back(jl_constant_ptr);
-          m.jl_constants_id[tid].push_back(jl_constant_id);
+          (*m.jl_constants_ptr)[tid].push_back(jl_constant_ptr);
+          (*m.jl_constants_id)[tid].push_back(jl_constant_id);
       });
-
-    (*this->jl_create_constants)[tid][(*this->jl_create_constants).size() - 1](*this);
 }
 }
 }

@@ -520,8 +520,8 @@ Sequence::init(const std::vector<TA*>& firsts, const std::vector<TA*>& lasts, co
     for (size_t tid = 0; tid < this->sequences.size(); tid++)
         this->cur_ss[tid] = this->sequences[tid];
 
-    std::function<void(const size_t)> func_init = [this](const size_t tid) { this->eval_jl_modules(tid + 1); };
-    this->thread_pool.set_func_init(func_init);
+    // std::function<void(const size_t)> func_init = [this](const size_t tid) { this->eval_jl_modules(tid + 1); };
+    // this->thread_pool.set_func_init(func_init);
     this->thread_pool.init(true);
     this->eval_jl_modules(0);
     this->thread_pool.wait();
@@ -540,10 +540,7 @@ Sequence::eval_jl_modules(const size_t tid)
     }
 
     for (module::Stateless_Julia* jl_m : this->jl_modules[tid])
-    {
-        jl_m->reset();
-        jl_m->eval();
-    }
+        if (!jl_m->is_eval()) jl_m->eval();
 
     if (this->is_thread_pinning()) tools::Thread_pinning::unpin();
 #endif /* SPU_JULIA */
