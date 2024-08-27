@@ -29,7 +29,7 @@ namespace module
 {
 class Task;
 class Module;
-class Stateless_Julia;
+class Stateless_Jluna;
 } // namespace module
 namespace sched
 {
@@ -82,7 +82,7 @@ class Sequence
 
   protected:
     const size_t n_threads;
-    tools::Thread_pool thread_pool;
+    std::shared_ptr<tools::Thread_pool> thread_pool;
 
     std::vector<tools::Digraph_node<Sub_sequence>*> sequences;
     std::vector<size_t> firsts_tasks_id;
@@ -91,7 +91,7 @@ class Sequence
     std::vector<std::vector<runtime::Task*>> lasts_tasks;
     std::vector<std::vector<std::shared_ptr<module::Module>>> modules;
     std::vector<std::vector<module::Module*>> all_modules;
-    std::vector<std::vector<module::Stateless_Julia*>> jl_modules;
+    std::vector<std::vector<module::Stateless_Jluna*>> jl_modules;
     std::shared_ptr<std::mutex> mtx_exception;
     std::vector<std::string> prev_exception_messages;
     std::vector<std::string> prev_exception_messages_to_display;

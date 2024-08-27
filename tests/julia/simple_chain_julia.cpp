@@ -3,6 +3,8 @@
 #include <getopt.h>
 #include <iostream>
 #include <jluna.hpp>
+// #include <julia.h>
+// JULIA_DEFINE_FAST_TLS // only define this once, in an executable (not in a shared library) if you want fast code.
 #include <memory>
 #include <string>
 #include <vector>
@@ -11,12 +13,74 @@
 using namespace spu;
 using namespace spu::runtime;
 
+// double c_func(int i)
+// {
+//     std::cout << "c_func START" << std::endl;
+//     printf("[C %08x] i = %d\n", pthread_self(), i);
+
+//     // Call the Julia sqrt() function to compute the square root of i, and return it
+//     jl_function_t *sqrt = jl_get_function(jl_base_module, "sqrt");
+//     jl_value_t* arg = jl_box_int32(i);
+//     double ret = jl_unbox_float64(jl_call1(sqrt, arg));
+
+//     return ret;
+// }
+
 int
 main(int argc, char** argv)
 {
-    jluna::initialize();
-
     // Julia sandbox ============================================================================================ BEGIN
+
+    // std::cout << "main -- 0" << std::endl;
+
+    // /* required: setup the Julia context */
+    // jl_init();
+
+    // std::cout << "main -- 1" << std::endl;
+
+    // /* run Julia commands */
+    // jl_eval_string("println(sqrt(2.0))");
+
+    // std::cout << "main -- 2" << std::endl;
+
+    // /* strongly recommended: notify Julia that the
+    //      program is about to terminate. this allows
+    //      Julia time to cleanup pending write requests
+    //      and run all finalizers
+    // */
+
+    // std::cout << "main -- 3" << std::endl;
+
+    // ----
+
+    // // Define a Julia function func() that calls our c_func() defined in C above
+    // jl_eval_string("func(i) = ccall(:c_func, Float64, (Int32,), i)");
+    // jl_eval_string("func(1)");
+    // if (jl_exception_occurred())
+    //     printf("%s \n", jl_typeof_str(jl_exception_occurred()));
+
+    // // jl_eval_string("@ccall c_func(0::Int32)::Float64");
+    // // if (jl_exception_occurred())
+    // //     printf("%s \n", jl_typeof_str(jl_exception_occurred()));
+
+    // // Call func() multiple times, using multiple threads to do so
+    // jl_eval_string("println(Threads.threadpoolsize())");
+
+    // // jl_eval_string("use(i) = println(\"[J $(Threads.threadid())] i = $(i) -> $(func(i))\")");
+    // // jl_eval_string("Threads.@threads for i in 1:5 use(i) end");
+
+    // // ----
+
+    // jl_atexit_hook(0);
+    // return 0;
+
+    // Julia sandbox ============================================================================================== END
+
+    // ----                                                                                                        ----
+
+    // Jluna sandbox ============================================================================================ BEGIN
+
+    jluna::initialize(1);
 
     // jluna::Base["println"]("hello julia");
 
@@ -66,7 +130,53 @@ main(int argc, char** argv)
 
     // exit(0);
 
-    // Julia sandbox ============================================================================================== END
+    // const size_t n_tasks = 120;
+    // std::vector<jluna::Task<void>> tasks;
+    // std::function<void(const size_t)> func_exec = [](const size_t tid)
+    // {
+    //     // jluna::Base["println"]("lambda called with ", tid);
+    //     std::cout << "lambda called with " << tid << std::endl;
+    // };
+
+    // for (size_t tid = 0; tid < n_tasks; tid++)
+    // {
+    //      tasks.push_back(jluna::ThreadPool::create(func_exec, tid));
+    //      tasks.back().schedule();
+    // }
+    // for (size_t tid = 0; tid < n_tasks; tid++)
+    //     tasks[tid].join();
+
+    // std::cout << "main -- 0" << std::endl;
+    // tools::Thread_pool_Jluna_v3 tp(5);
+    // std::cout << "main -- 1" << std::endl;
+    // tp.init();
+    // std::cout << "main -- 2" << std::endl;
+    // std::function<void(const size_t)> func_exec1 = [/*&jl_println, &jl_text1, &jl_get_threadid*/](const size_t tid)
+    // {
+    //     jluna::Proxy jl_println = jluna::safe_eval("return Base.println");
+    //     jluna::Proxy jl_text1 = jluna::safe_eval("return \"COUCOUUUUUUUUUU 1 - jl_threadid = \"");
+    //     jluna::Proxy jl_get_threadid = jluna::safe_eval("return Base.Threads.threadid");
+    //     jl_println(jl_text1, jl_get_threadid());
+    //     // jluna::Base["println"]("lambda called with ", tid);
+    // };
+    // std::cout << "main -- 3" << std::endl;
+    // tp.run(func_exec1);
+    // std::cout << "main -- 4" << std::endl;
+    // std::function<void(const size_t)> func_exec2 = [/*&jl_println, &jl_text2, &jl_get_threadid*/](const size_t tid)
+    // {
+    //     jluna::Proxy jl_println = jluna::safe_eval("return Base.println");
+    //     jluna::Proxy jl_text2 = jluna::safe_eval("return \"COUCOUUUUUUUUUU 2 - jl_threadid = \"");
+    //     jluna::Proxy jl_get_threadid = jluna::safe_eval("return Base.Threads.threadid");
+    //     jl_println(jl_text2, jl_get_threadid());
+    //     // jluna::Base["println"]("lambda called with ", tid);
+    // };
+    // tp.run(func_exec2, true);
+    // std::cout << "main -- 5" << std::endl;
+    // tp.wait();
+    // std::cout << "main -- 6" << std::endl;
+    // std::exit(0);
+
+    // Jluna sandbox ============================================================================================== END
 
     tools::Signal_handler::init();
 
@@ -213,7 +323,7 @@ main(int argc, char** argv)
     module::Initializer<uint8_t> initializer(data_length);
     module::Finalizer<uint8_t> finalizer(data_length);
 
-    module::Stateless_Julia incr;
+    module::Stateless_Jluna incr;
     runtime::Task& t = incr.create_task("increment");
     incr.create_socket_in<uint8_t>(t, "in", data_length);
     incr.create_socket_out<uint8_t>(t, "out", data_length);
@@ -243,7 +353,7 @@ main(int argc, char** argv)
     //     end
     // )"""");
 
-    std::vector<std::shared_ptr<module::Stateless_Julia>> incs(6);
+    std::vector<std::shared_ptr<module::Stateless_Jluna>> incs(6);
     for (size_t s = 0; s < incs.size(); s++)
     {
         incs[s].reset(incr.clone());

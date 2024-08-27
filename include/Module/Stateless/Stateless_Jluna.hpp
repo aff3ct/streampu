@@ -1,11 +1,11 @@
 /*!
  * \file
- * \brief Class module::Stateless_Julia.
+ * \brief Class module::Stateless_Jluna.
  */
-#ifndef STATELESS_JULIA_HPP_
-#define STATELESS_JULIA_HPP_
+#ifndef STATELESS_JLUNA_HPP_
+#define STATELESS_JLUNA_HPP_
 
-#ifdef SPU_JULIA
+#ifdef SPU_JLUNA
 
 #include <cstdint>
 #include <functional>
@@ -22,27 +22,28 @@ namespace spu
 {
 namespace module
 {
-class Stateless_Julia final
+class Stateless_Jluna final
   : public Module
   , public tools::Interface_reset
 {
   private:
-    std::shared_ptr<std::vector<std::vector<jluna::unsafe::Value*>>> jl_constants_ptr;
-    std::shared_ptr<std::vector<std::vector<size_t>>> jl_constants_id;
-    std::shared_ptr<std::vector<std::vector<void*>>> jl_func_args;
-    std::shared_ptr<bool> evaluated;
+    std::vector<std::vector<jluna::unsafe::Value*>> jl_constants_ptr;
+    std::vector<std::vector<size_t>> jl_constants_id;
+    std::vector<std::vector<void*>> jl_func_args;
+    bool evaluated;
     std::shared_ptr<size_t> n_clones;
 
-    std::shared_ptr<std::vector<std::vector<std::function<void(Stateless_Julia& m)>>>> jl_create_constants;
+    std::shared_ptr<std::vector<std::vector<std::function<void(Stateless_Jluna& m)>>>> jl_create_constants;
     std::shared_ptr<std::vector<std::function<void()>>> jl_evaluate;
-    std::shared_ptr<std::vector<std::function<void(Stateless_Julia& m)>>> jl_create_codelet;
+    std::shared_ptr<std::vector<std::function<void(Stateless_Jluna& m)>>> jl_create_codelet;
 
     bool jl_safe;
 
   public:
-    Stateless_Julia(const bool jl_safe = true);
-    virtual ~Stateless_Julia();
-    virtual Stateless_Julia* clone() const;
+    Stateless_Jluna(const bool jl_safe = true);
+    virtual ~Stateless_Jluna();
+    virtual Stateless_Jluna* clone() const;
+    void deep_copy(const Stateless_Jluna& m);
     virtual void reset();
     bool is_eval() const;
 
@@ -95,9 +96,9 @@ class Stateless_Julia final
 }
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
-#include "Module/Stateless/Stateless_Julia.hxx"
+#include "Module/Stateless/Stateless_Jluna.hxx"
 #endif
 
-#endif /* SPU_JULIA */
+#endif /* SPU_JLUNA */
 
-#endif /* STATELESS_JULIA_HPP_ */
+#endif /* STATELESS_JLUNA_HPP_ */

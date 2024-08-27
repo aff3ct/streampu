@@ -1,4 +1,4 @@
-#include "Module/Stateless/Stateless_Julia.hpp"
+#include "Module/Stateless/Stateless_Jluna.hpp"
 
 namespace spu
 {
@@ -6,7 +6,7 @@ namespace module
 {
 template<typename T>
 void
-Stateless_Julia::create_constant(runtime::Task& task, const T& value)
+Stateless_Jluna::create_constant(runtime::Task& task, const T& value)
 {
     if ((*this->n_clones) > 0)
     {
@@ -24,17 +24,17 @@ Stateless_Julia::create_constant(runtime::Task& task, const T& value)
             throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
         }
 
-    size_t tid = Stateless_Julia::get_task_id(task);
+    size_t tid = Stateless_Jluna::get_task_id(task);
     (*this->jl_create_constants)[tid].push_back(
-      [tid, value](Stateless_Julia& m)
+      [tid, value](Stateless_Jluna& m)
       {
           jluna::unsafe::Value* jl_constant_ptr = jluna::box<T>(value);
 
           // protect from garbage collector
           size_t jl_constant_id = jluna::unsafe::gc_preserve(jl_constant_ptr);
 
-          (*m.jl_constants_ptr)[tid].push_back(jl_constant_ptr);
-          (*m.jl_constants_id)[tid].push_back(jl_constant_id);
+          m.jl_constants_ptr[tid].push_back(jl_constant_ptr);
+          m.jl_constants_id[tid].push_back(jl_constant_id);
       });
 }
 }

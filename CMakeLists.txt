@@ -25,7 +25,8 @@ option(SPU_STACKTRACE_SEGFAULT "Try to print the stack trace when a segfault occ
 option(SPU_SHOW_DEPRECATED     "Print message each time a deprecated func. is called"        OFF)
 option(SPU_FAST                "Remove checks to speedup the code"                           OFF)
 option(SPU_OVERRIDE_VERSION    "Compile without .git directory, provided a version and hash" OFF)
-option(SPU_LINK_JULIA          "Link with Julia and compile Julia tests"                     OFF)
+option(SPU_LINK_JULIA          "Link with Julia"                                             OFF)
+option(SPU_LINK_JLUNA          "Link with Jluna (sets SPU_LINK_JULIA to ON automatically"    OFF)
 
 if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/.git" AND NOT SPU_OVERRIDE_VERSION)
     message(FATAL_ERROR "The '.git' folder can't be found, StreamPU can't be compiled if it is not cloned "
@@ -43,7 +44,11 @@ include(GNUInstallDirs)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules/")
 set(CMAKE_MACOSX_RPATH 1)
 
-if(SPU_LINK_JULIA)
+if (SPU_LINK_JLUNA)
+    set(SPU_LINK_JULIA ON)
+endif()
+
+if(SPU_LINK_JLUNA)
     # Enable C++20
     set(CMAKE_CXX_STANDARD 20) # because Jluna requires C++20 (concepts)
     set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -257,7 +262,7 @@ if(SPU_TESTS)
         list(APPEND spu_targets_list spu-test-thread-pinning)
     endif (SPU_LINK_HWLOC)
 
-    if(SPU_LINK_JULIA)
+    if(SPU_LINK_JLUNA)
         add_executable(spu-test-simple-chain-julia $<TARGET_OBJECTS:spu-obj> ${CMAKE_CURRENT_SOURCE_DIR}/tests/julia/simple_chain_julia.cpp)
         set_target_properties(spu-test-simple-chain-julia PROPERTIES OUTPUT_NAME test-simple-chain-julia POSITION_INDEPENDENT_CODE ON)
         list(APPEND spu_tests_list spu-test-simple-chain-julia)
@@ -409,15 +414,18 @@ if(SPU_STACKTRACE OR SPU_STACKTRACE_SEGFAULT)
     endif()
 endif()
 
-# julia & jluna
+# julia
 if(SPU_LINK_JULIA)
     find_package(Julia 1.9.0 REQUIRED) # because Julia thread adoption feature is required
     spu_target_link_libraries("${spu_targets_list}" PUBLIC "Julia::Julia")
+    spu_target_compile_definitions("${spu_targets_list}" PUBLIC "SPU_JULIA")
+endif()
 
+# jluna
+if(SPU_LINK_JLUNA)
     find_package(jluna REQUIRED PATHS ${jluna_DIR})
     spu_target_link_libraries("${spu_targets_list}" PUBLIC "jluna::jluna")
-
-    spu_target_compile_definitions("${spu_targets_list}" PUBLIC "SPU_JULIA")
+    spu_target_compile_definitions("${spu_targets_list}" PUBLIC "SPU_JLUNA")
 endif()
 
 # Threads

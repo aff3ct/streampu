@@ -1,15 +1,15 @@
-#ifdef SPU_JULIA
+#ifdef SPU_JLUNA
 
 #include <sstream>
 
-#include "Module/Stateless/Stateless_Julia.hpp"
+#include "Module/Stateless/Stateless_Jluna.hpp"
 #include "Tools/Exception/exception.hpp"
 
 using namespace spu;
 using namespace spu::module;
 
 int32_t
-Stateless_Julia::jl_call_func(const std::vector<void*>& args, const bool jl_safe)
+Stateless_Jluna::jl_call_func(const std::vector<void*>& args, const bool jl_safe)
 {
     jluna::unsafe::Value* jl_ret;
     size_t n_args = args.size();
@@ -189,7 +189,7 @@ Stateless_Julia::jl_call_func(const std::vector<void*>& args, const bool jl_safe
 }
 
 jluna::unsafe::Array*
-Stateless_Julia::jl_new_array_from_data(const runtime::Socket* sck)
+Stateless_Jluna::jl_new_array_from_data(const runtime::Socket* sck)
 {
     void* p = sck->get_dataptr();
     size_t e = sck->get_n_elmts();
@@ -222,7 +222,7 @@ Stateless_Julia::jl_new_array_from_data(const runtime::Socket* sck)
 }
 
 size_t
-Stateless_Julia::get_task_id(runtime::Task& task)
+Stateless_Jluna::get_task_id(runtime::Task& task)
 {
     auto& module = task.get_module();
     for (size_t tid = 0; tid < module.tasks.size(); tid++)
@@ -233,72 +233,79 @@ Stateless_Julia::get_task_id(runtime::Task& task)
     throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
 }
 
-Stateless_Julia::Stateless_Julia(const bool jl_safe)
+Stateless_Jluna::Stateless_Jluna(const bool jl_safe)
   : Module()
-  , jl_constants_ptr(new std::vector<std::vector<jluna::unsafe::Value*>>())
-  , jl_constants_id(new std::vector<std::vector<size_t>>())
-  , jl_func_args(new std::vector<std::vector<void*>>())
-  , evaluated(new bool(false))
+  , jl_constants_ptr(std::vector<std::vector<jluna::unsafe::Value*>>())
+  , jl_constants_id(std::vector<std::vector<size_t>>())
+  , jl_func_args(std::vector<std::vector<void*>>())
+  , evaluated(bool(false))
   , n_clones(new size_t(0))
-  , jl_create_constants(new std::vector<std::vector<std::function<void(Stateless_Julia& m)>>>())
+  , jl_create_constants(new std::vector<std::vector<std::function<void(Stateless_Jluna& m)>>>())
   , jl_evaluate(new std::vector<std::function<void()>>())
-  , jl_create_codelet(new std::vector<std::function<void(Stateless_Julia& m)>>())
+  , jl_create_codelet(new std::vector<std::function<void(Stateless_Jluna& m)>>())
   , jl_safe(jl_safe)
 {
 }
 
-Stateless_Julia::~Stateless_Julia()
+Stateless_Jluna::~Stateless_Jluna()
 {
-    if ((*this->n_clones) == 0)
-        for (size_t tid = 0; tid < (*this->jl_constants_id).size(); tid++)
-            for (size_t jl_id : (*this->jl_constants_id)[tid])
-                jluna::unsafe::gc_release(jl_id);
-    else
-        (*this->n_clones)--;
+    // if ((*this->n_clones) == 0)
+    for (size_t tid = 0; tid < this->jl_constants_id.size(); tid++)
+        for (size_t jl_id : this->jl_constants_id[tid])
+            jluna::unsafe::gc_release(jl_id);
+    // else
+    (*this->n_clones)--;
 }
 
-Stateless_Julia*
-Stateless_Julia::clone() const
+Stateless_Jluna*
+Stateless_Jluna::clone() const
 {
-    auto m = new Stateless_Julia(*this);
+    auto m = new Stateless_Jluna(*this);
     m->deep_copy(*this);
-    (*this->n_clones)++;
     return m;
 }
 
 void
-Stateless_Julia::reset()
+Stateless_Jluna::deep_copy(const Stateless_Jluna& m)
 {
-    for (auto& ptrs_list : (*this->jl_constants_ptr))
-        ptrs_list.clear();
-    for (auto& ids_list : (*this->jl_constants_id))
-        ids_list.clear();
-    for (auto& funcs_list : (*this->jl_func_args))
-        funcs_list.clear();
-
-    (*this->evaluated) = false;
-}
-
-bool
-Stateless_Julia::is_eval() const
-{
-    return (*this->evaluated);
+    Module::deep_copy(m);
+    (*this->n_clones)++;
+    this->reset();
 }
 
 void
-Stateless_Julia::set_jl_safety(const bool jl_safe)
+Stateless_Jluna::reset()
+{
+    for (auto& ptrs_list : this->jl_constants_ptr)
+        ptrs_list.clear();
+    for (auto& ids_list : this->jl_constants_id)
+        ids_list.clear();
+    for (auto& funcs_list : this->jl_func_args)
+        funcs_list.clear();
+
+    this->evaluated = false;
+}
+
+bool
+Stateless_Jluna::is_eval() const
+{
+    return this->evaluated;
+}
+
+void
+Stateless_Jluna::set_jl_safety(const bool jl_safe)
 {
     this->jl_safe = jl_safe;
 }
 
 bool
-Stateless_Julia::is_jl_safe()
+Stateless_Jluna::is_jl_safe()
 {
     return this->jl_safe;
 }
 
 void
-Stateless_Julia::eval()
+Stateless_Jluna::eval()
 {
     if (this->is_eval())
     {
@@ -310,7 +317,7 @@ Stateless_Julia::eval()
     if ((*this->jl_evaluate).size() == 0)
     {
         std::stringstream message;
-        message << "There is no Julia code to evaluate, please call the 'Stateless_Julia::create_codelet()' "
+        message << "There is no Julia code to evaluate, please call the 'Stateless_Jluna::create_codelet()' "
                    "method first.";
         throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
     }
@@ -323,11 +330,11 @@ Stateless_Julia::eval()
         (*this->jl_create_codelet)[tid](*this);
     }
 
-    (*this->evaluated) = true;
+    this->evaluated = true;
 }
 
 runtime::Task&
-Stateless_Julia::create_task(const std::string& name)
+Stateless_Jluna::create_task(const std::string& name)
 {
     if ((*this->n_clones) > 0)
     {
@@ -337,22 +344,22 @@ Stateless_Julia::create_task(const std::string& name)
         throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
     }
 
-    this->jl_create_constants->push_back(std::vector<std::function<void(Stateless_Julia & m)>>());
-    this->jl_constants_ptr->push_back(std::vector<jluna::unsafe::Value*>());
-    this->jl_constants_id->push_back(std::vector<size_t>());
-    this->jl_func_args->push_back(std::vector<void*>());
+    this->jl_create_constants->push_back(std::vector<std::function<void(Stateless_Jluna & m)>>());
+    this->jl_constants_ptr.push_back(std::vector<jluna::unsafe::Value*>());
+    this->jl_constants_id.push_back(std::vector<size_t>());
+    this->jl_func_args.push_back(std::vector<void*>());
 
     return Module::create_task(name);
 }
 
 runtime::Task&
-Stateless_Julia::create_tsk(const std::string& name)
+Stateless_Jluna::create_tsk(const std::string& name)
 {
     return this->create_task(name);
 }
 
 void
-Stateless_Julia::create_codelet(runtime::Task& task, const std::string& julia_code)
+Stateless_Jluna::create_codelet(runtime::Task& task, const std::string& julia_code)
 {
     if ((*this->n_clones) > 0)
     {
@@ -367,13 +374,13 @@ Stateless_Julia::create_codelet(runtime::Task& task, const std::string& julia_co
 }
 
 void
-Stateless_Julia::create_cdl(runtime::Task& task, const std::string& julia_code)
+Stateless_Jluna::create_cdl(runtime::Task& task, const std::string& julia_code)
 {
     this->create_codelet(task, julia_code);
 }
 
 void
-Stateless_Julia::create_codelet_file(runtime::Task& task, const std::string& julia_filepath)
+Stateless_Jluna::create_codelet_file(runtime::Task& task, const std::string& julia_filepath)
 {
     if ((*this->n_clones) > 0)
     {
@@ -388,20 +395,20 @@ Stateless_Julia::create_codelet_file(runtime::Task& task, const std::string& jul
 }
 
 void
-Stateless_Julia::create_cdl_file(runtime::Task& task, const std::string& julia_filepath)
+Stateless_Jluna::create_cdl_file(runtime::Task& task, const std::string& julia_filepath)
 {
     this->create_codelet_file(task, julia_filepath);
 }
 
 void
-Stateless_Julia::_create_codelet(runtime::Task& task)
+Stateless_Jluna::_create_codelet(runtime::Task& task)
 {
-    size_t tid = Stateless_Julia::get_task_id(task);
+    size_t tid = Stateless_Jluna::get_task_id(task);
 
     Module::create_codelet(task,
                            [tid](module::Module& m, runtime::Task& t, const size_t frame_id)
                            {
-                               auto& sjl = static_cast<Stateless_Julia&>(m);
+                               auto& sjl = static_cast<Stateless_Jluna&>(m);
 
                                if (!sjl.is_eval())
                                {
@@ -413,52 +420,51 @@ Stateless_Julia::_create_codelet(runtime::Task& task)
                                for (size_t s = 0; s < t.sockets.size() - 1; s++)
                                {
                                    const runtime::Socket* sck = t.sockets[s].get();
-                                   (*sjl.jl_func_args)[tid][s + 1] =
-                                     (void*)Stateless_Julia::jl_new_array_from_data(sck);
+                                   sjl.jl_func_args[tid][s + 1] = (void*)Stateless_Jluna::jl_new_array_from_data(sck);
                                }
 
-                               *(int32_t*)(*sjl.jl_func_args)[tid][(*sjl.jl_func_args)[tid].size() - 2] = frame_id;
-                               *(int32_t*)(*sjl.jl_func_args)[tid][(*sjl.jl_func_args)[tid].size() - 1] =
+                               *(int32_t*)sjl.jl_func_args[tid][sjl.jl_func_args[tid].size() - 2] = frame_id;
+                               *(int32_t*)sjl.jl_func_args[tid][sjl.jl_func_args[tid].size() - 1] =
                                  sjl.get_n_frames_per_wave();
 
-                               return Stateless_Julia::jl_call_func((*sjl.jl_func_args)[tid], sjl.is_jl_safe());
+                               return Stateless_Jluna::jl_call_func(sjl.jl_func_args[tid], sjl.is_jl_safe());
                            });
 
     this->jl_create_codelet->push_back(
-      [tid](Stateless_Julia& m)
+      [tid](Stateless_Jluna& m)
       {
           runtime::Task& task = *(m.tasks[tid].get());
-          if ((*m.jl_func_args)[tid].size() > 0)
+          if (m.jl_func_args[tid].size() > 0)
           {
               std::stringstream message;
               message << "jl_func_args[tid] has to be empty ('jl_func_args[tid].size()' = "
-                      << (*m.jl_func_args)[tid].size() << ", 'tid' = " << tid << ").";
+                      << m.jl_func_args[tid].size() << ", 'tid' = " << tid << ").";
               throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
           }
 
-          (*m.jl_func_args)[tid].resize(1 + task.sockets.size() + (*m.jl_constants_ptr)[tid].size() + 1);
+          m.jl_func_args[tid].resize(1 + task.sockets.size() + m.jl_constants_ptr[tid].size() + 1);
 
           jluna::unsafe::Function* jl_codelet =
             jluna::unsafe::get_function(jluna::Main, jluna::Symbol(task.get_name()));
 
-          (*m.jl_func_args)[tid][0] = (void*)jl_codelet;
+          m.jl_func_args[tid][0] = (void*)jl_codelet;
 
-          for (size_t i = 0; i < (*m.jl_constants_ptr)[tid].size(); i++)
-              (*m.jl_func_args)[tid][(*m.jl_func_args)[tid].size() - ((*m.jl_constants_ptr)[tid].size() + 2) + i] =
-                (void*)(*m.jl_constants_ptr)[tid][i];
+          for (size_t i = 0; i < m.jl_constants_ptr[tid].size(); i++)
+              m.jl_func_args[tid][m.jl_func_args[tid].size() - (m.jl_constants_ptr[tid].size() + 2) + i] =
+                (void*)m.jl_constants_ptr[tid][i];
 
           jluna::unsafe::Value* jl_frame_id = jluna::box<uint32_t>(0);
           size_t jl_frame_id_id = jluna::unsafe::gc_preserve(jl_frame_id);
-          (*m.jl_constants_ptr)[tid].push_back(jl_frame_id);
-          (*m.jl_constants_id)[tid].push_back(jl_frame_id_id);
-          (*m.jl_func_args)[tid][(*m.jl_func_args)[tid].size() - 2] = (void*)jl_frame_id;
+          m.jl_constants_ptr[tid].push_back(jl_frame_id);
+          m.jl_constants_id[tid].push_back(jl_frame_id_id);
+          m.jl_func_args[tid][m.jl_func_args[tid].size() - 2] = (void*)jl_frame_id;
 
           jluna::unsafe::Value* jl_n_frames_per_wave = jluna::box<uint32_t>(m.get_n_frames_per_wave());
           size_t jl_n_frames_per_wave_id = jluna::unsafe::gc_preserve(jl_frame_id);
-          (*m.jl_constants_ptr)[tid].push_back(jl_n_frames_per_wave);
-          (*m.jl_constants_id)[tid].push_back(jl_n_frames_per_wave_id);
-          (*m.jl_func_args)[tid][(*m.jl_func_args)[tid].size() - 1] = (void*)jl_n_frames_per_wave;
+          m.jl_constants_ptr[tid].push_back(jl_n_frames_per_wave);
+          m.jl_constants_id[tid].push_back(jl_n_frames_per_wave_id);
+          m.jl_func_args[tid][m.jl_func_args[tid].size() - 1] = (void*)jl_n_frames_per_wave;
       });
 }
 
-#endif /* SPU_JULIA */
+#endif /* SPU_JLUNA */
