@@ -267,6 +267,11 @@ if(SPU_TESTS)
         set_target_properties(spu-test-simple-chain-julia PROPERTIES OUTPUT_NAME test-simple-chain-julia POSITION_INDEPENDENT_CODE ON)
         list(APPEND spu_tests_list spu-test-simple-chain-julia)
         list(APPEND spu_targets_list spu-test-simple-chain-julia)
+
+        add_executable(spu-test-simple-chain-fwd-julia $<TARGET_OBJECTS:spu-obj> ${CMAKE_CURRENT_SOURCE_DIR}/tests/julia/simple_chain_fwd_julia.cpp)
+        set_target_properties(spu-test-simple-chain-fwd-julia PROPERTIES OUTPUT_NAME test-simple-chain-fwd-julia POSITION_INDEPENDENT_CODE ON)
+        list(APPEND spu_tests_list spu-test-simple-chain-fwd-julia)
+        list(APPEND spu_targets_list spu-test-simple-chain-fwd-julia)
     endif()
 endif()
 

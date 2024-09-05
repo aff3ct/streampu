@@ -3,8 +3,6 @@
 #include <getopt.h>
 #include <iostream>
 #include <jluna.hpp>
-// #include <julia.h>
-// JULIA_DEFINE_FAST_TLS // only define this once, in an executable (not in a shared library) if you want fast code.
 #include <memory>
 #include <string>
 #include <vector>
@@ -13,170 +11,10 @@
 using namespace spu;
 using namespace spu::runtime;
 
-// double c_func(int i)
-// {
-//     std::cout << "c_func START" << std::endl;
-//     printf("[C %08x] i = %d\n", pthread_self(), i);
-
-//     // Call the Julia sqrt() function to compute the square root of i, and return it
-//     jl_function_t *sqrt = jl_get_function(jl_base_module, "sqrt");
-//     jl_value_t* arg = jl_box_int32(i);
-//     double ret = jl_unbox_float64(jl_call1(sqrt, arg));
-
-//     return ret;
-// }
-
 int
 main(int argc, char** argv)
 {
-    // Julia sandbox ============================================================================================ BEGIN
-
-    // std::cout << "main -- 0" << std::endl;
-
-    // /* required: setup the Julia context */
-    // jl_init();
-
-    // std::cout << "main -- 1" << std::endl;
-
-    // /* run Julia commands */
-    // jl_eval_string("println(sqrt(2.0))");
-
-    // std::cout << "main -- 2" << std::endl;
-
-    // /* strongly recommended: notify Julia that the
-    //      program is about to terminate. this allows
-    //      Julia time to cleanup pending write requests
-    //      and run all finalizers
-    // */
-
-    // std::cout << "main -- 3" << std::endl;
-
-    // ----
-
-    // // Define a Julia function func() that calls our c_func() defined in C above
-    // jl_eval_string("func(i) = ccall(:c_func, Float64, (Int32,), i)");
-    // jl_eval_string("func(1)");
-    // if (jl_exception_occurred())
-    //     printf("%s \n", jl_typeof_str(jl_exception_occurred()));
-
-    // // jl_eval_string("@ccall c_func(0::Int32)::Float64");
-    // // if (jl_exception_occurred())
-    // //     printf("%s \n", jl_typeof_str(jl_exception_occurred()));
-
-    // // Call func() multiple times, using multiple threads to do so
-    // jl_eval_string("println(Threads.threadpoolsize())");
-
-    // // jl_eval_string("use(i) = println(\"[J $(Threads.threadid())] i = $(i) -> $(func(i))\")");
-    // // jl_eval_string("Threads.@threads for i in 1:5 use(i) end");
-
-    // // ----
-
-    // jl_atexit_hook(0);
-    // return 0;
-
-    // Julia sandbox ============================================================================================== END
-
-    // ----                                                                                                        ----
-
-    // Jluna sandbox ============================================================================================ BEGIN
-
     jluna::initialize(1);
-
-    // jluna::Base["println"]("hello julia");
-
-    // jluna::Main.safe_eval_file("../tests/julia/hello_world.jl");
-
-    // jluna::Main.safe_eval("f(x) = x^x");
-    // auto f = jluna::Main.safe_eval("return f");
-    // int64_t result = f(2);
-    // std::cout << "result = " << result << std::endl;
-
-    // auto square = jluna::Main["square"];
-    // int64_t result2 = square(3);
-    // std::cout << "result2 = " << result2 << std::endl;
-
-    // // jluna::Main.safe_eval("sqrt(-1)");
-
-    // // declare lambda
-    // auto myadd = [](int64_t a, int64_t b) -> int64_t
-    // {
-    //     return a + b;
-    // };
-
-    // // bind to Julia-side variable
-    // jluna::Main.create_or_assign("myadd", jluna::as_julia_function<int64_t(int64_t, int64_t)>(myadd));
-
-    // jluna::Main.safe_eval("println(\"myadd(1, 3): \", myadd(1, 3))");
-
-    // jluna::Main.safe_eval_file("../tests/julia/myadd_call.jl");
-
-    // // allocate C-array
-    // // const int32_t c_array[10] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
-
-    // int32_t* c_array = new int32_t[10];
-    // std::iota(c_array, c_array +10, 2);
-
-    // // create thin wrapper around it
-    // auto* jl_array = jluna::unsafe::new_array_from_data(jluna::Int32_t, (void*) c_array, 10);
-
-    // // wrapper can now be used Julia-side
-    // {
-    //     using namespace jluna;
-    //     auto* println = jluna::unsafe::get_function(jluna::Base, "println"_sym);
-    //     jluna::safe_call(println, jl_array);
-    // }
-
-    // delete[] c_array;
-
-    // exit(0);
-
-    // const size_t n_tasks = 120;
-    // std::vector<jluna::Task<void>> tasks;
-    // std::function<void(const size_t)> func_exec = [](const size_t tid)
-    // {
-    //     // jluna::Base["println"]("lambda called with ", tid);
-    //     std::cout << "lambda called with " << tid << std::endl;
-    // };
-
-    // for (size_t tid = 0; tid < n_tasks; tid++)
-    // {
-    //      tasks.push_back(jluna::ThreadPool::create(func_exec, tid));
-    //      tasks.back().schedule();
-    // }
-    // for (size_t tid = 0; tid < n_tasks; tid++)
-    //     tasks[tid].join();
-
-    // std::cout << "main -- 0" << std::endl;
-    // tools::Thread_pool_Jluna_v3 tp(5);
-    // std::cout << "main -- 1" << std::endl;
-    // tp.init();
-    // std::cout << "main -- 2" << std::endl;
-    // std::function<void(const size_t)> func_exec1 = [/*&jl_println, &jl_text1, &jl_get_threadid*/](const size_t tid)
-    // {
-    //     jluna::Proxy jl_println = jluna::safe_eval("return Base.println");
-    //     jluna::Proxy jl_text1 = jluna::safe_eval("return \"COUCOUUUUUUUUUU 1 - jl_threadid = \"");
-    //     jluna::Proxy jl_get_threadid = jluna::safe_eval("return Base.Threads.threadid");
-    //     jl_println(jl_text1, jl_get_threadid());
-    //     // jluna::Base["println"]("lambda called with ", tid);
-    // };
-    // std::cout << "main -- 3" << std::endl;
-    // tp.run(func_exec1);
-    // std::cout << "main -- 4" << std::endl;
-    // std::function<void(const size_t)> func_exec2 = [/*&jl_println, &jl_text2, &jl_get_threadid*/](const size_t tid)
-    // {
-    //     jluna::Proxy jl_println = jluna::safe_eval("return Base.println");
-    //     jluna::Proxy jl_text2 = jluna::safe_eval("return \"COUCOUUUUUUUUUU 2 - jl_threadid = \"");
-    //     jluna::Proxy jl_get_threadid = jluna::safe_eval("return Base.Threads.threadid");
-    //     jl_println(jl_text2, jl_get_threadid());
-    //     // jluna::Base["println"]("lambda called with ", tid);
-    // };
-    // tp.run(func_exec2, true);
-    // std::cout << "main -- 5" << std::endl;
-    // tp.wait();
-    // std::cout << "main -- 6" << std::endl;
-    // std::exit(0);
-
-    // Jluna sandbox ============================================================================================== END
 
     tools::Signal_handler::init();
 
@@ -299,9 +137,9 @@ main(int argc, char** argv)
         }
     }
 
-    std::cout << "#######################################" << std::endl;
-    std::cout << "# Micro-benchmark: Simple chain Julia #" << std::endl;
-    std::cout << "#######################################" << std::endl;
+    std::cout << "###############################################" << std::endl;
+    std::cout << "# Micro-benchmark: Simple chain forward Julia #" << std::endl;
+    std::cout << "###############################################" << std::endl;
     std::cout << "#" << std::endl;
 
     std::cout << "# Command line arguments:" << std::endl;
@@ -324,20 +162,17 @@ main(int argc, char** argv)
     module::Finalizer<uint8_t> finalizer(data_length);
 
     module::Stateless_Jluna incr;
-    runtime::Task& t = incr.create_task("increment");
-    incr.create_socket_in<uint8_t>(t, "in", data_length);
-    incr.create_socket_out<uint8_t>(t, "out", data_length);
+    runtime::Task& t = incr.create_task("incrementf");
+    incr.create_socket_fwd<uint8_t>(t, "fwd", data_length);
     incr.create_constant<uint32_t>(t, sleep_time_us * 1000); // wait time in ns
-    // incr.create_constant<std::string>(t, "Adrien");
-    // incr.create_codelet_file(t, "../tests/julia/increment.jl");
     incr.create_codelet(t, R""""(
-        function increment(sck_in, sck_out, cst_wait_time_ns, rnt_frame_id, rnt_n_frames_per_wave)
+        function incrementf(sck_fwd, cst_wait_time_ns, rnt_frame_id, rnt_n_frames_per_wave)
             if cst_wait_time_ns > 0
                 start_incr = time_ns()
             end
 
-            for n in eachindex(sck_in)
-                sck_out[n] = sck_in[n] + 1
+            for n in eachindex(sck_fwd)
+                sck_fwd[n] = sck_fwd[n] + 1
             end
 
             if cst_wait_time_ns != 0
@@ -359,14 +194,13 @@ main(int argc, char** argv)
         incs[s].reset(incr.clone());
         incs[s]->set_custom_name("Inc" + std::to_string(s));
         incs[s]->set_jl_safety(jl_safe);
-        // incs[s]->eval();
     }
 
     // sockets binding
-    (*incs[0])["increment::in"] = initializer["initialize::out"];
+    (*incs[0])["incrementf::fwd"] = initializer["initialize::out"];
     for (size_t s = 0; s < incs.size() - 1; s++)
-        (*incs[s + 1])["increment::in"] = (*incs[s])["increment::out"];
-    finalizer["finalize::in"] = (*incs[incs.size() - 1])["increment::out"];
+        (*incs[s + 1])["incrementf::fwd"] = (*incs[s])["incrementf::fwd"];
+    finalizer["finalize::in"] = (*incs[incs.size() - 1])["incrementf::fwd"];
 
     runtime::Sequence sequence_chain(initializer("initialize"), n_threads);
     sequence_chain.set_n_frames(n_inter_frames);
@@ -486,10 +320,10 @@ main(int argc, char** argv)
     // sockets unbinding
     sequence_chain.set_n_frames(1);
 
-    (*incs[0])["increment::in"].unbind(initializer["initialize::out"]);
+    (*incs[0])["incrementf::fwd"].unbind(initializer["initialize::out"]);
     for (size_t s = 0; s < incs.size() - 1; s++)
-        (*incs[s + 1])["increment::in"].unbind((*incs[s])["increment::out"]);
-    finalizer["finalize::in"].unbind((*incs[incs.size() - 1])["increment::out"]);
+        (*incs[s + 1])["incrementf::fwd"].unbind((*incs[s])["incrementf::fwd"]);
+    finalizer["finalize::in"].unbind((*incs[incs.size() - 1])["incrementf::fwd"]);
 
     return test_results;
 }
