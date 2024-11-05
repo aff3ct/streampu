@@ -167,7 +167,7 @@ cmake .. -DStreamPU_DIR=/opt/streampu/lib/cmake/streampu -Dcpptrace_DIR=/opt/str
 
 ## Documentation
 
-- [User documentation](https://largo.lip6.fr/~cassagnea/docs/UFR/MU5IN160/CM/CM5_AFF3CT_for_Streaming_Apps.pdf)
+- User documentation - [[Slides with animations](https://largo.lip6.fr/~cassagnea/docs/spu/StreamPU_slides_anim.pdf)] / [[Slides without animation](https://largo.lip6.fr/~cassagnea/docs/spu/StreamPU_slides_no_anim.pdf)]
   * Slides used to teach `StreamPU` to Master students in Computer Science at 
   [Sorbonne University](https://www.sorbonne-universite.fr/)
   * Contains many illustrative and simple use cases: **a good document to start 
