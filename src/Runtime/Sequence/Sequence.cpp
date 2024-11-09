@@ -18,8 +18,8 @@
 #include "Tools/Display/rang_format/rang_format.h"
 #include "Tools/Exception/exception.hpp"
 #include "Tools/Signal_handler/Signal_handler.hpp"
-#include "Tools/Thread_pinning/Thread_pinning.hpp"
-#include "Tools/Thread_pinning/Thread_pinning_utils.hpp"
+#include "Tools/Thread/Thread_pinning/Thread_pinning.hpp"
+#include "Tools/Thread/Thread_pinning/Thread_pinning_utils.hpp"
 
 using namespace spu;
 using namespace spu::runtime;

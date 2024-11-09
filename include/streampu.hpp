@@ -253,10 +253,10 @@
 #include <Tools/System/memory.hpp>
 #endif
 #ifndef THREAD_PINNING_HPP
-#include <Tools/Thread_pinning/Thread_pinning.hpp>
+#include <Tools/Thread/Thread_pinning/Thread_pinning.hpp>
 #endif
 #ifndef THREAD_PINNING_UTILS_HPP
-#include <Tools/Thread_pinning/Thread_pinning_utils.hpp>
+#include <Tools/Thread/Thread_pinning/Thread_pinning_utils.hpp>
 #endif
 
 #endif
