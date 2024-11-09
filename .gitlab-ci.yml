@@ -94,6 +94,7 @@ build-linux-gcc-coverage-regression:
     - docker
   artifacts:
     name: regression-code-coverage-files
+    when: always
     paths:
       - build/
       - code_coverage_files/

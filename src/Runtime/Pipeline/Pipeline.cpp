@@ -10,6 +10,7 @@
 #include "Tools/Exception/exception.hpp"
 #include "Tools/Interface/Interface_waiting.hpp"
 #include "Tools/Thread/Thread_pinning/Thread_pinning_utils.hpp"
+#include "Tools/Thread/Thread_pool/Standard/Thread_pool_standard.hpp"
 
 using namespace spu;
 using namespace spu::runtime;
@@ -23,7 +24,6 @@ using namespace spu::runtime;
 //            std::vector<std::vector<size_t>> &puids)
 // : original_sequence(first, last, 1),
 //   stages(sep_stages.size()),
-//   thread_pool(stages.size() -1),
 //   adaptors(sep_stages.size() -1),
 //   saved_firsts_tasks_id(sep_stages.size()),
 //   saved_lasts_tasks_id(sep_stages.size()),
@@ -47,7 +47,6 @@ using namespace spu::runtime;
 //            std::vector<std::vector<size_t>> &puids)
 // : original_sequence(first, 1),
 //   stages(sep_stages.size()),
-//   thread_pool(stages.size() -1),
 //   adaptors(sep_stages.size() -1),
 //   saved_firsts_tasks_id(sep_stages.size()),
 //   saved_lasts_tasks_id(sep_stages.size()),
@@ -76,7 +75,6 @@ Pipeline
            const std::vector<bool> &tasks_inplace*/)
 : original_sequence(firsts, lasts, 1),
   stages(sep_stages.size()),
-  thread_pool(stages.size() -1),
   adaptors(sep_stages.size() -1),
   saved_firsts_tasks_id(sep_stages.size()),
   saved_lasts_tasks_id(sep_stages.size()),
@@ -100,7 +98,6 @@ Pipeline
            const std::vector<bool> &tasks_inplace*/)
 : original_sequence(firsts, lasts, 1),
   stages(sep_stages.size()),
-  thread_pool(stages.size() -1),
   adaptors(sep_stages.size() -1),
   saved_firsts_tasks_id(sep_stages.size()),
   saved_lasts_tasks_id(sep_stages.size()),
@@ -215,7 +212,6 @@ Pipeline
            const std::vector<bool> &tasks_inplace*/)
 : original_sequence(firsts, lasts, 1),
   stages(sep_stages.size()),
-  thread_pool(stages.size() -1),
   adaptors(sep_stages.size() -1),
   saved_firsts_tasks_id(sep_stages.size()),
   saved_lasts_tasks_id(sep_stages.size()),
@@ -244,7 +240,6 @@ Pipeline
            const std::vector<bool> &tasks_inplace*/)
 : original_sequence(firsts, lasts, 1),
   stages(sep_stages.size()),
-  thread_pool(stages.size() -1),
   adaptors(sep_stages.size() -1),
   saved_firsts_tasks_id(sep_stages.size()),
   saved_lasts_tasks_id(sep_stages.size()),
@@ -608,7 +603,9 @@ void Pipeline
 
     this->create_adaptors(synchro_buffer_sizes, synchro_active_waiting);
     this->bind_adaptors();
-    this->thread_pool.init();
+
+    this->thread_pool.reset(new tools::Thread_pool_standard(this->stages.size() - 1));
+    this->thread_pool->init(); // threads are spawned here
 }
 
 void
@@ -1275,7 +1272,7 @@ Pipeline::exec(const std::vector<std::function<bool(const std::vector<const int*
             }
     };
 
-    this->thread_pool.run(func_exec, true);
+    this->thread_pool->run(func_exec, true);
     stages[stages.size() - 1]->exec(stop_conditions[stop_conditions.size() - 1]);
 
     // stop all the stages before
@@ -1283,8 +1280,8 @@ Pipeline::exec(const std::vector<std::function<bool(const std::vector<const int*
         for (auto& m : stages[notify_s]->get_modules<tools::Interface_waiting>())
             m->cancel_waiting();
 
-    this->thread_pool.wait();
-    this->thread_pool.unset_func_exec();
+    this->thread_pool->wait();
+    this->thread_pool->unset_func_exec();
     // ----------------------------------------------------------------------------------------------------------------
 
     // this is NOT made in the tools::Sequence::exec() to correctly flush the pipeline before restoring buffers
@@ -1350,7 +1347,7 @@ Pipeline::exec(const std::vector<std::function<bool()>>& stop_conditions)
             }
     };
 
-    this->thread_pool.run(func_exec, true);
+    this->thread_pool->run(func_exec, true);
     stages[stages.size() - 1]->exec(stop_conditions[stop_conditions.size() - 1]);
 
     // stop all the stages before
@@ -1358,8 +1355,8 @@ Pipeline::exec(const std::vector<std::function<bool()>>& stop_conditions)
         for (auto& m : stages[notify_s]->get_modules<tools::Interface_waiting>())
             m->cancel_waiting();
 
-    this->thread_pool.wait();
-    this->thread_pool.unset_func_exec();
+    this->thread_pool->wait();
+    this->thread_pool->unset_func_exec();
     // ----------------------------------------------------------------------------------------------------------------
 
     // this is NOT made in the tools::Sequence::exec() to correctly flush the pipeline before restoring buffers
