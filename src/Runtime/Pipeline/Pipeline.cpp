@@ -10,6 +10,7 @@
 #include "Tools/Exception/exception.hpp"
 #include "Tools/Interface/Interface_waiting.hpp"
 #include "Tools/Thread/Thread_pinning/Thread_pinning_utils.hpp"
+#include "Tools/Thread/Thread_pool/Standard/Thread_pool_standard.hpp"
 
 using namespace spu;
 using namespace spu::runtime;
@@ -602,6 +603,9 @@ void Pipeline
 
     this->create_adaptors(synchro_buffer_sizes, synchro_active_waiting);
     this->bind_adaptors();
+
+    this->thread_pool.reset(new tools::Thread_pool_standard(this->stages.size() - 1));
+    this->thread_pool->init(); // threads are spawned here
 }
 
 void
@@ -1240,41 +1244,46 @@ Pipeline::exec(const std::vector<std::function<bool(const std::vector<const int*
         throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
     }
 
+    // ----------------------------------------------------------------------------------------------------------------
     auto& stages = this->stages;
-    std::vector<std::thread> threads;
-    for (size_t s = 0; s < stages.size() - 1; s++)
+    std::vector<const std::function<bool(const std::vector<const int*>&)>*> stop_condition_vec(stages.size() - 1,
+                                                                                               nullptr);
+    if (stop_conditions.size() == stages.size())
+        for (size_t s = 0; s < stages.size() - 1; s++)
+            stop_condition_vec[s] = &stop_conditions[s];
+
+    std::function<void(const size_t)> func_exec = [&stages, &stop_condition_vec](const size_t tid)
     {
-        const std::function<bool(const std::vector<const int*>&)>* stop_condition = nullptr;
-        if (stop_conditions.size() == this->stages.size()) stop_condition = &stop_conditions[s];
+        size_t s = tid;
+        if (stop_condition_vec[s])
+            stages[s]->exec(*(stop_condition_vec[s]));
+        else
+            stages[s]->exec();
 
-        threads.push_back(std::thread(
-          [&stages, s, stop_condition]()
-          {
-              if (stop_condition)
-                  stages[s]->exec(*stop_condition);
-              else
-                  stages[s]->exec();
+        // send the signal to stop the next stage
+        const auto& tasks = stages[s + 1]->get_tasks_per_threads();
+        for (size_t th = 0; th < tasks.size(); th++)
+            for (size_t ta = 0; ta < tasks[th].size(); ta++)
+            {
+                auto m = dynamic_cast<module::Adaptor*>(&tasks[th][ta]->get_module());
+                if (m != nullptr)
+                    if (tasks[th][ta]->get_name() == "pull_n" || tasks[th][ta]->get_name() == "pull_1")
+                        m->cancel_waiting();
+            }
+    };
 
-              // send the signal to stop the next stage
-              const auto& tasks = stages[s + 1]->get_tasks_per_threads();
-              for (size_t th = 0; th < tasks.size(); th++)
-                  for (size_t ta = 0; ta < tasks[th].size(); ta++)
-                  {
-                      auto m = dynamic_cast<module::Adaptor*>(&tasks[th][ta]->get_module());
-                      if (m != nullptr)
-                          if (tasks[th][ta]->get_name() == "pull_n" || tasks[th][ta]->get_name() == "pull_1")
-                              m->cancel_waiting();
-                  }
-          }));
-    }
+    this->thread_pool->run(func_exec, true);
+
     stages[stages.size() - 1]->exec(stop_conditions[stop_conditions.size() - 1]);
+
     // stop all the stages before
     for (size_t notify_s = 0; notify_s < stages.size() - 1; notify_s++)
         for (auto& m : stages[notify_s]->get_modules<tools::Interface_waiting>())
             m->cancel_waiting();
 
-    for (auto& t : threads)
-        t.join();
+    this->thread_pool->wait();
+    this->thread_pool->unset_func_exec();
+    // ----------------------------------------------------------------------------------------------------------------
 
     // this is NOT made in the tools::Sequence::exec() to correctly flush the pipeline before restoring buffers
     // initial configuration
@@ -1312,41 +1321,44 @@ Pipeline::exec(const std::vector<std::function<bool()>>& stop_conditions)
         throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
     }
 
+    // ----------------------------------------------------------------------------------------------------------------
     auto& stages = this->stages;
-    std::vector<std::thread> threads;
-    for (size_t s = 0; s < stages.size() - 1; s++)
+    std::vector<const std::function<bool()>*> stop_condition_vec(stages.size() - 1, nullptr);
+    if (stop_conditions.size() == stages.size())
+        for (size_t s = 0; s < stages.size() - 1; s++)
+            stop_condition_vec[s] = &stop_conditions[s];
+
+    std::function<void(const size_t)> func_exec = [&stages, &stop_condition_vec](const size_t tid)
     {
-        const std::function<bool()>* stop_condition = nullptr;
-        if (stop_conditions.size() == this->stages.size()) stop_condition = &stop_conditions[s];
+        size_t s = tid;
+        if (stop_condition_vec[s])
+            stages[s]->exec(*(stop_condition_vec[s]));
+        else
+            stages[s]->exec();
 
-        threads.push_back(std::thread(
-          [&stages, s, stop_condition]()
-          {
-              if (stop_condition)
-                  stages[s]->exec(*stop_condition);
-              else
-                  stages[s]->exec();
+        // send the signal to stop the next stage
+        const auto& tasks = stages[s + 1]->get_tasks_per_threads();
+        for (size_t th = 0; th < tasks.size(); th++)
+            for (size_t ta = 0; ta < tasks[th].size(); ta++)
+            {
+                auto m = dynamic_cast<module::Adaptor*>(&tasks[th][ta]->get_module());
+                if (m != nullptr)
+                    if (tasks[th][ta]->get_name() == "pull_n" || tasks[th][ta]->get_name() == "pull_1")
+                        m->cancel_waiting();
+            }
+    };
 
-              // send the signal to stop the next stage
-              const auto& tasks = stages[s + 1]->get_tasks_per_threads();
-              for (size_t th = 0; th < tasks.size(); th++)
-                  for (size_t ta = 0; ta < tasks[th].size(); ta++)
-                  {
-                      auto m = dynamic_cast<module::Adaptor*>(&tasks[th][ta]->get_module());
-                      if (m != nullptr)
-                          if (tasks[th][ta]->get_name() == "pull_n" || tasks[th][ta]->get_name() == "pull_1")
-                              m->cancel_waiting();
-                  }
-          }));
-    }
+    this->thread_pool->run(func_exec, true);
     stages[stages.size() - 1]->exec(stop_conditions[stop_conditions.size() - 1]);
+
     // stop all the stages before
     for (size_t notify_s = 0; notify_s < stages.size() - 1; notify_s++)
         for (auto& m : stages[notify_s]->get_modules<tools::Interface_waiting>())
             m->cancel_waiting();
 
-    for (auto& t : threads)
-        t.join();
+    this->thread_pool->wait();
+    this->thread_pool->unset_func_exec();
+    // ----------------------------------------------------------------------------------------------------------------
 
     // this is NOT made in the tools::Sequence::exec() to correctly flush the pipeline before restoring buffers
     // initial configuration

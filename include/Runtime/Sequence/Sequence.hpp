@@ -19,6 +19,7 @@
 #include "Tools/Interface/Interface_clone.hpp"
 #include "Tools/Interface/Interface_get_set_n_frames.hpp"
 #include "Tools/Interface/Interface_is_done.hpp"
+#include "Tools/Thread/Thread_pool/Thread_pool.hpp"
 
 namespace spu
 {
@@ -77,7 +78,9 @@ class Sequence
     friend sched::Scheduler;
 
   protected:
-    size_t n_threads;
+    const size_t n_threads;
+    std::shared_ptr<tools::Thread_pool> thread_pool;
+
     std::vector<tools::Digraph_node<Sub_sequence>*> sequences;
     std::vector<size_t> firsts_tasks_id;
     std::vector<size_t> lasts_tasks_id;

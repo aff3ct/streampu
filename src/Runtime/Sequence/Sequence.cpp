@@ -20,6 +20,7 @@
 #include "Tools/Signal_handler/Signal_handler.hpp"
 #include "Tools/Thread/Thread_pinning/Thread_pinning.hpp"
 #include "Tools/Thread/Thread_pinning/Thread_pinning_utils.hpp"
+#include "Tools/Thread/Thread_pool/Standard/Thread_pool_standard.hpp"
 
 using namespace spu;
 using namespace spu::runtime;
@@ -509,6 +510,9 @@ Sequence::init(const std::vector<TA*>& firsts, const std::vector<TA*>& lasts, co
 
     for (size_t tid = 0; tid < this->sequences.size(); tid++)
         this->cur_ss[tid] = this->sequences[tid];
+
+    this->thread_pool.reset(new tools::Thread_pool_standard(this->n_threads - 1));
+    this->thread_pool->init(); // threads are spawned here
 }
 
 Sequence*
@@ -846,15 +850,14 @@ Sequence::exec(std::function<bool(const std::vector<const int*>&)> stop_conditio
     else
         real_stop_condition = stop_condition;
 
-    std::vector<std::thread> threads(n_threads);
-    for (size_t tid = 1; tid < n_threads; tid++)
-        threads[tid] =
-          std::thread(&Sequence::_exec, this, tid, std::ref(real_stop_condition), std::ref(this->sequences[tid]));
+    std::function<void(const size_t)> func_exec = [this, &real_stop_condition](const size_t tid)
+    { this->Sequence::_exec(tid + 1, real_stop_condition, this->sequences[tid + 1]); };
 
+    this->thread_pool->run(func_exec, true);
     this->_exec(0, real_stop_condition, this->sequences[0]);
+    this->thread_pool->wait();
 
-    for (size_t tid = 1; tid < n_threads; tid++)
-        threads[tid].join();
+    this->thread_pool->unset_func_exec();
 
     if (this->is_no_copy_mode() && !this->is_part_of_pipeline)
     {
@@ -884,17 +887,14 @@ Sequence::exec(std::function<bool()> stop_condition)
     else
         real_stop_condition = stop_condition;
 
-    std::vector<std::thread> threads(n_threads);
-    for (size_t tid = 1; tid < n_threads; tid++)
-    {
-        threads[tid] = std::thread(
-          &Sequence::_exec_without_statuses, this, tid, std::ref(real_stop_condition), std::ref(this->sequences[tid]));
-    }
+    std::function<void(const size_t)> func_exec = [this, &real_stop_condition](const size_t tid)
+    { this->Sequence::_exec_without_statuses(tid + 1, real_stop_condition, this->sequences[tid + 1]); };
 
+    this->thread_pool->run(func_exec, true);
     this->_exec_without_statuses(0, real_stop_condition, this->sequences[0]);
+    this->thread_pool->wait();
 
-    for (size_t tid = 1; tid < n_threads; tid++)
-        threads[tid].join();
+    this->thread_pool->unset_func_exec();
 
     if (this->is_no_copy_mode() && !this->is_part_of_pipeline)
     {
