@@ -252,11 +252,20 @@
 #ifndef SYSTEM_MEMORY_HPP__
 #include <Tools/System/memory.hpp>
 #endif
+#ifndef THREAD_BARRIER_STANDARD_HPP_
+#include <Tools/Thread/Thread_barrier/Standard/Thread_barrier_standard.hpp>
+#endif
 #ifndef THREAD_PINNING_HPP
 #include <Tools/Thread/Thread_pinning/Thread_pinning.hpp>
 #endif
 #ifndef THREAD_PINNING_UTILS_HPP
 #include <Tools/Thread/Thread_pinning/Thread_pinning_utils.hpp>
+#endif
+#ifndef THREAD_POOL_STANDARD_HPP_
+#include <Tools/Thread/Thread_pool/Standard/Thread_pool_standard.hpp>
+#endif
+#ifndef THREAD_POOL_HPP_
+#include <Tools/Thread/Thread_pool/Thread_pool.hpp>
 #endif
 
 #endif
