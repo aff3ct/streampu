@@ -1,5 +1,7 @@
-#include "Tools/System/memory.hpp"
+#include <cstdint>
 #include <cstdlib>
+
+#include "Tools/System/memory.hpp"
 
 namespace spu
 {
