@@ -113,7 +113,7 @@ Binaryop<TI, TO, BOP>::Binaryop(const size_t n_in0, const size_t n_in1)
     auto p2_in = this->template create_socket_in<TI>(p2, "in", n_in0);
     auto p2_fwd = this->template create_socket_fwd<TI>(p2, "fwd", n_in1);
 
-    if (n_in1 == 1)
+    if (n_in0 == 1)
     {
         this->create_codelet(
           p2,
