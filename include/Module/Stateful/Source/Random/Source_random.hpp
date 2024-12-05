@@ -9,6 +9,8 @@
 
 #include "Module/Stateful/Source/Source.hpp"
 
+#include <iostream>
+
 namespace spu
 {
 namespace module
@@ -20,9 +22,11 @@ class Source_random : public Source<B>
     std::mt19937 rd_engine; // Mersenne Twister 19937
     // std::minstd_rand rd_engine; // LCG
     std::uniform_int_distribution<short> uniform_dist;
+    
+    int dec_granularity;
 
   public:
-    Source_random(const int max_data_size, const int seed = 0);
+    Source_random(const int max_data_size, const int dec_granularity, const int seed = 0);
 
     virtual ~Source_random() = default;
 

@@ -3,8 +3,9 @@
 using namespace spu::module;
 
 template<typename B>
-Source_random<B>::Source_random(const int max_data_size, const int seed)
+Source_random<B>::Source_random(const int max_data_size, const int dec_granularity ,const int seed)
   : Source<B>(max_data_size)
+  , dec_granularity(dec_granularity)
   , rd_engine(seed)
   , uniform_dist(0, 1)
 {
@@ -27,8 +28,10 @@ void
 Source_random<B>::_generate(B* out_data, const size_t frame_id)
 {
     // generate a random k bits vector out_data
-    for (auto i = 0; i < this->max_data_size; i++)
+    for (auto i = 0; i < this->dec_granularity; i++)
         out_data[i] = (B)this->uniform_dist(this->rd_engine);
+    for (auto i = dec_granularity; i < this->max_data_size; i++)
+        out_data[i] = (B)0;
 }
 
 template<typename B>
