@@ -9,8 +9,6 @@
 
 #include "Module/Stateful/Source/Source.hpp"
 
-#include <iostream>
-
 namespace spu
 {
 namespace module

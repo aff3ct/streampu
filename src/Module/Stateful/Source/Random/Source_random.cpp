@@ -30,6 +30,8 @@ Source_random<B>::_generate(B* out_data, const size_t frame_id)
     // generate a random k bits vector out_data
     for (auto i = 0; i < this->dec_granularity; i++)
         out_data[i] = (B)this->uniform_dist(this->rd_engine);
+    
+    // generate zero-padding out_data
     for (auto i = dec_granularity; i < this->max_data_size; i++)
         out_data[i] = (B)0;
 }
