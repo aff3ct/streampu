@@ -185,6 +185,6 @@ The project is licensed under the MIT license.
 The main contributions of this work are described in the following journal 
 article:  
 - A. Cassagne, R. Tajan, O. Aumage, D. Barthou, C. Leroux and C. Jégo,  
-  “**A DSEL for High Throughput and Low Latency Software-Defined Radio on Multicore CPUs**,“  
+  “**StreamPU: A DSEL for High Throughput and Low Latency Software-Defined Radio on Multicore CPUs**,“  
   *Wiley Concurrency and Computation: Practice and Experience (CCPE)*, 2023.  
-  [[Open access article](https://doi.org/10.1002/cpe.7820)] [[Bibtex entry](https://aff3ct.github.io/resources/bibtex/Cassagne2023%20-%20A%20DSEL%20for%20High%20Throughput%20and%20Low%20Latency%20Software-Defined%20Radio%20on%20Multicore%20CPUs.bib)]
+  [[Open access article](https://doi.org/10.1002/cpe.7820)] [[Bibtex entry](https://aff3ct.github.io/resources/bibtex/Cassagne2023%20-%20StreamPU%20A%20DSEL%20for%20High%20Throughput%20and%20Low%20Latency%20Software-Defined%20Radio%20on%20Multicore%20CPUs.bib)]
