@@ -239,6 +239,7 @@ main(int argc, char** argv)
                           { "tsk-types-sta", no_argument, NULL, 'R' },
                           { "chain", no_argument, NULL, 'C' },
                           { "sched", no_argument, NULL, 'S' },
+                          { "sched-file", no_argument, NULL, 'F' },
 #ifdef SPU_HWLOC
                           { "pinning-policy", no_argument, NULL, 'P' },
 #endif
@@ -272,12 +273,13 @@ main(int argc, char** argv)
     std::string pinning_policy;
     std::string check_task;
     std::string chain_param;
-    std::string scheduler = "OTAC";
+    std::string sched = "OTAC";
+    std::string sched_file = "sched.json";
     std::vector<std::tuple<tsk_e, int, bool>> tsk_chain;
 
     while (1)
     {
-        const int opt = getopt_long(argc, argv, "t:f:s:d:e:l:u:o:i:j:n:r:R:P:C:S:cpbgqwhv", longopts, 0);
+        const int opt = getopt_long(argc, argv, "t:f:s:d:e:l:u:o:i:j:n:r:R:P:C:S:F:cpbgqwhv", longopts, 0);
         if (opt == -1) break;
         switch (opt)
         {
@@ -350,7 +352,10 @@ main(int argc, char** argv)
                 parse_tsk_types_sta(chain_param, tsk_chain, true);
                 break;
             case 'S':
-                scheduler = std::string(optarg);
+                sched = std::string(optarg);
+                break;
+            case 'F':
+                sched_file = std::string(optarg);
                 break;
 #ifdef SPU_HWLOC
             case 'P':
@@ -425,8 +430,11 @@ main(int argc, char** argv)
                           << "Description of the tasks chain (to be combined with '-S' param)       "
                           << "[" << (chain_param.empty() ? "empty" : "\"" + chain_param + "\"") << "]" << std::endl;
                 std::cout << "  -S, --sched              "
-                          << "Scheduler algorithm for the pipeline creation ('OTAC')                "
-                          << "[" << (scheduler.empty() ? "empty" : "\"" + scheduler + "\"") << "]" << std::endl;
+                          << "Scheduler algorithm for the pipeline creation ('OTAC', 'FILE')        "
+                          << "[" << (sched.empty() ? "empty" : "\"" + sched + "\"") << "]" << std::endl;
+                std::cout << "  -F, --sched-file         "
+                          << "File that contains the scheduling, to combine with 'FILE' scheduler   "
+                          << "[" << (sched_file.empty() ? "empty" : "\"" + sched_file + "\"") << "]" << std::endl;
 #ifdef SPU_HWLOC
                 std::cout << "  -P, --pinning-policy     "
                           << "Pinning policy for pipeline execution                                 "
@@ -526,7 +534,10 @@ main(int argc, char** argv)
               << std::endl;
     std::cout << "#   - chain          = " << (chain_param.empty() ? "[empty]" : chain_param.c_str()) << std::endl;
     if (!chain_param.empty())
-        std::cout << "#   - scheduler      = " << (scheduler.empty() ? "[empty]" : scheduler.c_str()) << std::endl;
+    {
+        std::cout << "#   - sched          = " << (sched.empty() ? "[empty]" : sched.c_str()) << std::endl;
+        std::cout << "#   - sched_file     = " << (sched_file.empty() ? "[empty]" : sched_file.c_str()) << std::endl;
+    }
 #ifdef SPU_HWLOC
     std::cout << "#   - pinning_policy = " << (pinning_policy.empty() ? "[empty]" : pinning_policy.c_str())
               << std::endl;
@@ -784,14 +795,18 @@ main(int argc, char** argv)
             sequence_chain.reset(new runtime::Sequence((*modules[0].get())[0], 1));
             size_t R = n_threads[0];
 
-            std::unique_ptr<sched::Scheduler> sched;
-            if (scheduler == "OTAC")
+            std::unique_ptr<sched::Scheduler> sched_ptr;
+            if (sched == "OTAC")
             {
-                sched.reset(new sched::Scheduler_OTAC(sequence_chain.get(), R));
+                sched_ptr.reset(new sched::Scheduler_OTAC(sequence_chain.get(), R));
+            }
+            else if (sched == "FILE")
+            {
+                sched_ptr.reset(new sched::Scheduler_from_file(sequence_chain.get(), sched_file));
             }
             else
             {
-                message << "Current scheduler is not supported (scheduler = '" << scheduler << "')!";
+                message << "Current scheduler is not supported (sched = '" << sched << "')!";
                 throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
             }
 
@@ -799,13 +814,13 @@ main(int argc, char** argv)
             // pipeline_chain.reset(sched->generate_pipeline());
 
             // step by step method to print intermediate results ------------------------------------------------------
-            sched->profile(n_exec_pro);
-            if (verbose) sched->print_profiling();
+            sched_ptr->profile(n_exec_pro);
+            if (verbose) sched_ptr->print_profiling();
 
-            sched->schedule();
+            sched_ptr->schedule();
             if (verbose)
             {
-                std::vector<std::pair<size_t, size_t>> solution = sched->get_solution();
+                std::vector<std::pair<size_t, size_t>> solution = sched_ptr->get_solution();
                 std::cout << "# Solution stages {(n,r)}"
                           << ": {";
                 for (auto& pair_s : solution)
@@ -813,19 +828,24 @@ main(int argc, char** argv)
                 std::cout << "}" << std::endl;
             }
 
-            bool enable_pinning = true;
+            std::vector<bool> enable_pinning(sched_ptr->get_solution().size(), true);
             if (pinning_policy.empty())
             {
-                pinning_policy = sched->perform_threads_mapping();
+                enable_pinning = sched_ptr->get_threads_pinning();
+                pinning_policy = sched_ptr->perform_threads_mapping();
 #ifdef SPU_HWLOC
                 if (verbose) std::cout << "# Effective pinning policy: " << pinning_policy << std::endl;
 #endif
             }
             else if (pinning_policy == "none")
-                enable_pinning = false;
+                for (size_t i = 0; i < enable_pinning.size(); i++)
+                    enable_pinning[i] = false;
 
             pipeline_chain.reset(
-              sched->instantiate_pipeline(buffer_size, active_waiting, enable_pinning, pinning_policy));
+              sched_ptr->instantiate_pipeline(std::vector<size_t>(sched_ptr->get_solution().size() - 1, buffer_size),
+                                              std::vector<bool>(sched_ptr->get_solution().size() - 1, active_waiting),
+                                              enable_pinning,
+                                              pinning_policy));
             // --------------------------------------------------------------------------------------------------------
 
             // override n_threads to contain the number of threads per stage as it should be

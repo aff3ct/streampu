@@ -44,11 +44,16 @@ class Scheduler : public tools::Interface_reset
     std::vector<std::pair<size_t, size_t>> get_solution();
     virtual void reset() override;
     virtual void schedule() = 0;
+    runtime::Pipeline* instantiate_pipeline(const std::vector<size_t> synchro_buffer_sizes,
+                                            const std::vector<bool> synchro_active_waitings,
+                                            const std::vector<bool> thread_pinings,
+                                            const std::string& pinning_policy);
     runtime::Pipeline* instantiate_pipeline(const size_t buffer_size = 1,
                                             const bool active_wait = false,
                                             const bool thread_pining = false,
                                             const std::string& pinning_policy = "");
-    std::string perform_threads_mapping() const;
+    virtual std::string perform_threads_mapping() const;
+    virtual std::vector<bool> get_threads_pinning() const;
     size_t get_n_alloc_ressources() const;
     virtual double get_throughput_est() const; // return the estimated number of streams per second
 };

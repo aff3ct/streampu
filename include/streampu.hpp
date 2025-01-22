@@ -135,6 +135,9 @@
 #ifndef TASK_HPP_
 #include <Runtime/Task/Task.hpp>
 #endif
+#ifndef SCHEDULER_FROM_FILE_HPP__
+#include <Scheduler/From_file/Scheduler_from_file.hpp>
+#endif
 #ifndef SCHEDULER_OTAC_HPP__
 #include <Scheduler/OTAC/Scheduler_OTAC.hpp>
 #endif

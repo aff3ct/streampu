@@ -134,10 +134,16 @@ Scheduler::perform_threads_mapping() const
     return pinning_policy;
 }
 
+std::vector<bool>
+Scheduler::get_threads_pinning() const
+{
+    return std::vector<bool>(this->solution.size(), tools::Thread_pinning::is_init());
+}
+
 runtime::Pipeline*
-Scheduler::instantiate_pipeline(const size_t buffer_size,
-                                const bool active_waiting,
-                                const bool thread_pining,
+Scheduler::instantiate_pipeline(const std::vector<size_t> synchro_buffer_sizes,
+                                const std::vector<bool> synchro_active_waitings,
+                                const std::vector<bool> thread_pinings,
                                 const std::string& pinning_policy)
 {
     if (this->solution.size() == 0)
@@ -175,10 +181,6 @@ Scheduler::instantiate_pipeline(const size_t buffer_size,
         s++;
     }
 
-    std::vector<size_t> synchro_buffer_sizes(this->solution.size() - 1, buffer_size);
-    std::vector<bool> synchro_active_waitings(this->solution.size() - 1, active_waiting);
-    std::vector<bool> thread_pinings(this->solution.size(), thread_pining);
-
     return new runtime::Pipeline(firsts,
                                  lasts,
                                  sep_stages,
@@ -187,6 +189,19 @@ Scheduler::instantiate_pipeline(const size_t buffer_size,
                                  synchro_active_waitings,
                                  thread_pinings,
                                  pinning_policy);
+}
+
+runtime::Pipeline*
+Scheduler::instantiate_pipeline(const size_t buffer_size,
+                                const bool active_waiting,
+                                const bool thread_pining,
+                                const std::string& pinning_policy)
+{
+    std::vector<size_t> synchro_buffer_sizes(this->solution.size() - 1, buffer_size);
+    std::vector<bool> synchro_active_waitings(this->solution.size() - 1, active_waiting);
+    std::vector<bool> thread_pinings(this->solution.size(), thread_pining);
+
+    return instantiate_pipeline(synchro_buffer_sizes, synchro_active_waitings, thread_pinings, pinning_policy);
 }
 
 std::vector<std::pair<size_t, size_t>>
@@ -202,7 +217,10 @@ Scheduler::generate_pipeline()
 
     if (solution.empty()) this->schedule();
 
-    return this->instantiate_pipeline(1, false, tools::Thread_pinning::is_init(), this->perform_threads_mapping());
+    return this->instantiate_pipeline(std::vector<size_t>(this->solution.size() - 1, 1),
+                                      std::vector<bool>(this->solution.size() - 1, false),
+                                      this->get_threads_pinning(),
+                                      this->perform_threads_mapping());
 }
 
 size_t
