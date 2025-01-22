@@ -85,11 +85,11 @@ thread.
     the `-P` or `--pinning-policy` CLI argument.
 
 !!! tip
-    For the `increment`, `incrementf`, `relay` and `relayf` tasks it is possible
-    to specify the duration. For instance, `relay_12` means that the `relay` 
-    task will spend 12 microseconds in active waiting. This is different from
-    using the `-s` CLI parameter. The `-s` parameter will set the same duration 
-    for all the previously mentioned tasks.
+    For the `initialize`, `increment`, `incrementf`, `relay`, `relayf` and 
+    `finalize` tasks it is possible to specify the duration. For instance, 
+    `relay_12` means that the `relay` task will spend 12 microseconds in active 
+    waiting. This is different from using the `-s` CLI parameter. The `-s` 
+    parameter will set the same duration for all the previously mentioned tasks.
 
 Moreover, for each stage it is possible to specify the number of replications 
 (= number of threads that will execute the stage) with the `-t` 

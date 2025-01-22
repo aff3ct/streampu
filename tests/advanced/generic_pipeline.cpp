@@ -569,12 +569,9 @@ main(int argc, char** argv)
                     message << "An 'Initializer' can only be at the begining of the chain (tas = '" << tas << "').";
                     throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
                 }
-                if (std::get<1>(tst) != -1)
-                {
-                    message << "An 'Initializer' can't have a duration (tas = '" << tas << "').";
-                    throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
-                }
                 auto initializer = new module::Initializer<uint8_t>(data_length);
+                size_t sleep_duration_us = (std::get<1>(tst) == -1) ? sleep_time_us : std::get<1>(tst);
+                initializer->set_ns(sleep_duration_us * 1000);
                 modules[tas].reset(initializer);
                 initializer->set_custom_name("Init" + std::to_string(tas));
                 break;
@@ -643,12 +640,9 @@ main(int argc, char** argv)
                     message << "A 'Finalizer' can only be at the end of the chain (tas = '" << tas << "').";
                     throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
                 }
-                if (std::get<1>(tst) != -1)
-                {
-                    message << "A 'Finalizer' can't have a duration (tas = '" << tas << "').";
-                    throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
-                }
                 auto finalizer = new module::Finalizer<uint8_t>(data_length);
+                size_t sleep_duration_us = (std::get<1>(tst) == -1) ? sleep_time_us : std::get<1>(tst);
+                finalizer->set_ns(sleep_duration_us * 1000);
                 modules[tas].reset(finalizer);
                 finalizer->set_custom_name("Fin" + std::to_string(tas));
                 break;
