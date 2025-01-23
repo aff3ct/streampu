@@ -105,7 +105,7 @@ option(SPU_TESTS "" OFF) # do NOT compile the tests
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/lib/streampu/)
 
 # `my-exe` links with `StreamPU` static lib -----------------------------------
-target_link_libraries(my-exe PUBLIC spu::spu-static-lib)
+target_link_libraries(my-exe PUBLIC spu-static-lib)
 
 # `my-exe` finds and links with thread library --------------------------------
 set(CMAKE_THREAD_PREFER_PTHREAD ON)
