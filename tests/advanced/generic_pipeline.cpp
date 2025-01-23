@@ -828,24 +828,31 @@ main(int argc, char** argv)
                 std::cout << "}" << std::endl;
             }
 
-            std::vector<bool> enable_pinning(sched_ptr->get_solution().size(), true);
+            std::vector<bool> thread_pinnings(sched_ptr->get_solution().size(), true);
             if (pinning_policy.empty())
             {
-                enable_pinning = sched_ptr->get_threads_pinning();
-                pinning_policy = sched_ptr->perform_threads_mapping();
+                thread_pinnings = sched_ptr->get_thread_pinnings();
+                pinning_policy = sched_ptr->get_threads_mapping();
 #ifdef SPU_HWLOC
                 if (verbose) std::cout << "# Effective pinning policy: " << pinning_policy << std::endl;
 #endif
             }
-            else if (pinning_policy == "none")
-                for (size_t i = 0; i < enable_pinning.size(); i++)
-                    enable_pinning[i] = false;
+
+            std::vector<size_t> sync_buff_sizes;
+            std::vector<bool> sync_active_waitings;
+            if (sched == "FILE")
+            {
+                sync_buff_sizes = sched_ptr->get_sync_buff_sizes();
+                sync_active_waitings = sched_ptr->get_sync_active_waitings();
+            }
+            else
+            {
+                sync_buff_sizes = std::vector<size_t>(sched_ptr->get_solution().size() - 1, buffer_size);
+                sync_active_waitings = std::vector<bool>(sched_ptr->get_solution().size() - 1, active_waiting);
+            }
 
             pipeline_chain.reset(
-              sched_ptr->instantiate_pipeline(std::vector<size_t>(sched_ptr->get_solution().size() - 1, buffer_size),
-                                              std::vector<bool>(sched_ptr->get_solution().size() - 1, active_waiting),
-                                              enable_pinning,
-                                              pinning_policy));
+              sched_ptr->instantiate_pipeline(sync_buff_sizes, sync_active_waitings, thread_pinnings, pinning_policy));
             // --------------------------------------------------------------------------------------------------------
 
             // override n_threads to contain the number of threads per stage as it should be

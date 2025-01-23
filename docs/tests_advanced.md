@@ -64,8 +64,9 @@ There are three main ways of describing a processing chain:
    scheduler considers that the number of resources $R$ is the number of CPU 
    hardware threads but you can override this behavior by using the `-t` (or 
    `--n-threads`) CLI parameter. It is also possible to choose the scheduler 
-   algorithm through the `-S` (or `--sched`) CLI parameter. For now, the only 
-   available scheduler is `OTAC`.
+   algorithm through the `-S` (or `--sched`) CLI parameter. For now, the 
+   available schedulers are `OTAC` and `FILE` (please see the note below about 
+   the latest).
 
 The first notation is a compressed way to describe chains of tasks. By default, 
 the chain is split in [pipeline](pipeline.md) stages according to the given 
@@ -90,6 +91,32 @@ thread.
     `relay_12` means that the `relay` task will spend 12 microseconds in active 
     waiting. This is different from using the `-s` CLI parameter. The `-s` 
     parameter will set the same duration for all the previously mentioned tasks.
+
+!!! note
+    The scheduler `FILE` reads the scheduling from a JSON file, to set the path
+    to this file there is the `-F` parameter (or `--sched-file`).
+    The expected JSON file looks like the following:
+    ```json
+    [
+      { "tasks": 4, "cores": [                   0], "sync_buff_size": 1, "sync_waiting_type": "passive" },
+      { "tasks": 1, "cores": [                   1],                                                     },
+      { "tasks": 1, "cores": [                  10], "sync_buff_size": 4, "sync_waiting_type": "passive" },
+      { "tasks": 1, "cores": [                   2], "sync_buff_size": 1, "sync_waiting_type": "active"  },
+      { "tasks": 9, "cores": [                   3], "sync_buff_size": 1, "sync_waiting_type": "active"  },
+      { "tasks": 4, "cores": [4, 5, 6, 7, 8, 9, 12], "sync_buff_size": 1,                                },
+      { "tasks": 1, "cores": 1                     ,                      "sync_waiting_type": "passive" },
+      { "tasks": 2, "cores": 1                                                                           }
+    ]
+    ```
+    Each line corresponds to one pipeline stage, the field `tasks` counts the
+    number of consecutive tasks of the current stage while the field `cores` 
+    gives either the number of threads to use for the current stage or an array 
+    of PU ids to specify the mapping of the threads over the PUs. Finally, 
+    `sync_buff_size` and `sync_waiting_type` are optional and may help to fine 
+    tune the synchronizations between the pipeline stages. The last stage should 
+    not contain `sync_buff_size` or `sync_waiting_type` fields. Using the `FILE` 
+    scheduler will override the following parameters: `-u` (or `--buffer-size`) 
+    and `-w` (or `--active-waiting`).
 
 Moreover, for each stage it is possible to specify the number of replications 
 (= number of threads that will execute the stage) with the `-t` 

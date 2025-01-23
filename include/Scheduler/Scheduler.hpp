@@ -52,8 +52,10 @@ class Scheduler : public tools::Interface_reset
                                             const bool active_wait = false,
                                             const bool thread_pining = false,
                                             const std::string& pinning_policy = "");
-    virtual std::string perform_threads_mapping() const;
-    virtual std::vector<bool> get_threads_pinning() const;
+    virtual std::vector<bool> get_thread_pinnings() const;
+    virtual std::vector<size_t> get_sync_buff_sizes() const;
+    virtual std::vector<bool> get_sync_active_waitings() const;
+    virtual std::string get_threads_mapping() const;
     size_t get_n_alloc_ressources() const;
     virtual double get_throughput_est() const; // return the estimated number of streams per second
 };

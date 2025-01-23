@@ -107,8 +107,26 @@ Scheduler::reset()
     this->tasks_desc.clear();
 }
 
+std::vector<bool>
+Scheduler::get_thread_pinnings() const
+{
+    return std::vector<bool>(this->solution.size(), tools::Thread_pinning::is_init());
+}
+
+std::vector<size_t>
+Scheduler::get_sync_buff_sizes() const
+{
+    return std::vector<size_t>(this->solution.size() - 1, 1);
+}
+
+std::vector<bool>
+Scheduler::get_sync_active_waitings() const
+{
+    return std::vector<bool>(this->solution.size() - 1, false);
+}
+
 std::string
-Scheduler::perform_threads_mapping() const
+Scheduler::get_threads_mapping() const
 {
     if (this->solution.size() == 0)
     {
@@ -134,12 +152,6 @@ Scheduler::perform_threads_mapping() const
     return pinning_policy;
 }
 
-std::vector<bool>
-Scheduler::get_threads_pinning() const
-{
-    return std::vector<bool>(this->solution.size(), tools::Thread_pinning::is_init());
-}
-
 runtime::Pipeline*
 Scheduler::instantiate_pipeline(const std::vector<size_t> synchro_buffer_sizes,
                                 const std::vector<bool> synchro_active_waitings,
@@ -153,6 +165,20 @@ Scheduler::instantiate_pipeline(const std::vector<size_t> synchro_buffer_sizes,
           << "The solution has to contain at least one element, please run the 'Scheduler::schedule' method first.";
         throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
     }
+
+    // std::cout << "synchro_buffer_sizes = {";
+    // for (size_t i = 0; i < synchro_buffer_sizes.size(); i++)
+    //     std::cout << synchro_buffer_sizes[i] << ", ";
+    // std::cout << "}" << std::endl;
+    // std::cout << "synchro_active_waitings = {";
+    // for (size_t i = 0; i < synchro_active_waitings.size(); i++)
+    //     std::cout << synchro_active_waitings[i] << ", ";
+    // std::cout << "}" << std::endl;
+    // std::cout << "thread_pinings = {";
+    // for (size_t i = 0; i < thread_pinings.size(); i++)
+    //     std::cout << thread_pinings[i] << ", ";
+    // std::cout << "}" << std::endl;
+    // std::cout << "pinning_policy = " << pinning_policy << std::endl;
 
     std::vector<runtime::Task*> firsts(this->tasks_desc.size());
     std::vector<runtime::Task*> lasts(this->tasks_desc.size());
@@ -217,10 +243,10 @@ Scheduler::generate_pipeline()
 
     if (solution.empty()) this->schedule();
 
-    return this->instantiate_pipeline(std::vector<size_t>(this->solution.size() - 1, 1),
-                                      std::vector<bool>(this->solution.size() - 1, false),
-                                      this->get_threads_pinning(),
-                                      this->perform_threads_mapping());
+    return this->instantiate_pipeline(this->get_sync_buff_sizes(),
+                                      this->get_sync_active_waitings(),
+                                      this->get_thread_pinnings(),
+                                      this->get_threads_mapping());
 }
 
 size_t
