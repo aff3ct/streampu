@@ -1,4 +1,5 @@
 #include "Scheduler/Scheduler.hpp"
+#include "Tools/Display/Statistics/Statistics.hpp"
 #include "Tools/Exception/exception.hpp"
 #include "Tools/Thread/Thread_pinning/Thread_pinning.hpp"
 
@@ -28,7 +29,7 @@ Scheduler::Scheduler(runtime::Sequence* sequence)
 }
 
 void
-Scheduler::profile(const size_t n_exec)
+Scheduler::_profile(const int puid, const size_t n_exec)
 {
     if (n_exec == 0)
     {
@@ -51,14 +52,6 @@ Scheduler::profile(const size_t n_exec)
         throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
     }
 
-    if (!this->tasks_desc.empty())
-    {
-        std::stringstream message;
-        message << "'tasks_desc' should be empty, you should call 'Scheduler::reset' first if you want to re-run the "
-                   "profiling'.";
-        throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
-    }
-
     this->sequence->set_auto_stop(false);
     for (auto& mod : this->sequence->get_modules<module::Module>(false))
         for (auto& tsk : mod->tasks)
@@ -68,30 +61,119 @@ Scheduler::profile(const size_t n_exec)
             tsk->set_fast(true);  // enable the fast mode (= disable the useless verifs
                                   // in the tasks)
         }
+
+    bool prev_thread_pinning;
+    std::vector<std::string> prev_pin_objects_per_thread;
+    std::vector<size_t> prev_puids;
+    if (puid >= 0)
+    {
+        prev_thread_pinning = this->sequence->thread_pinning;
+        prev_pin_objects_per_thread = this->sequence->pin_objects_per_thread;
+        prev_puids = this->sequence->puids;
+
+        this->sequence->set_thread_pinning(true, std::vector<size_t>(1, puid));
+    }
+
     unsigned int counter = 0;
     this->sequence->exec([&counter, &n_exec]() { return ++counter >= n_exec; });
     this->sequence->set_auto_stop(true);
 
-    std::vector<runtime::Task*>& tasks = this->sequence->sequences[0]->get_contents()->tasks;
-    for (auto& t : tasks)
+    if (puid >= 0)
     {
-        task_desc_t new_t;
-        new_t.tptr = t;
-        new_t.exec_duration = t->get_duration_avg();
-        this->tasks_desc.push_back(new_t);
+        this->sequence->thread_pinning = prev_thread_pinning;
+        this->sequence->pin_objects_per_thread = prev_pin_objects_per_thread;
+        this->sequence->puids = prev_puids;
     }
+
+    if (this->tasks_desc.empty())
+    {
+        std::vector<runtime::Task*>& tasks = this->sequence->sequences[0]->get_contents()->tasks;
+        for (auto& t : tasks)
+        {
+            task_desc_t new_t;
+            new_t.tptr = t;
+            new_t.exec_duration.push_back(t->get_duration_avg());
+            this->tasks_desc.push_back(new_t);
+        }
+    }
+    else
+    {
+        std::vector<runtime::Task*>& tasks = this->sequence->sequences[0]->get_contents()->tasks;
+        size_t i = 0;
+        for (auto& t : tasks)
+        {
+            task_desc_t& cur_t = this->tasks_desc[i];
+            if (t != cur_t.tptr)
+            {
+                std::stringstream message;
+                message << "'t' should be equal to 'cur_t.tptr' ('t' = " << std::hex << (uint64_t)t
+                        << ", 'cur_t.tptr' = " << (uint64_t)cur_t.tptr << ", 'i' = " << i << ").";
+                throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
+            }
+            cur_t.exec_duration.push_back(t->get_duration_avg());
+            i++;
+        }
+    }
+
+    // TODO: Restore stats and fast mode of tasks as before!
+}
+
+void
+Scheduler::profile(const size_t n_exec)
+{
+    if (!this->tasks_desc.empty())
+    {
+        std::stringstream message;
+        message << "'tasks_desc' should be empty, you should call 'Scheduler::reset' first if you want to re-run the "
+                   "profiling'.";
+        throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
+    }
+
+    this->_profile(-1, n_exec);
+
+    this->profiling_summary.resize(1);
+
+    std::stringstream ss;
+    tools::Stats::show(this->sequence->get_tasks_per_threads()[0], false, false, ss);
+    this->profiling_summary[0] = ss.str();
+}
+
+void
+Scheduler::profile(const std::vector<size_t>& puids, const size_t n_exec)
+{
+    if (!this->tasks_desc.empty())
+    {
+        std::stringstream message;
+        message << "'tasks_desc' should be empty, you should call 'Scheduler::reset' first if you want to re-run the "
+                   "profiling'.";
+        throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
+    }
+
+    this->profiling_summary.resize(puids.size());
+    for (size_t i = 0; i < puids.size(); i++)
+    {
+        this->_profile(puids[i], n_exec);
+        std::stringstream ss;
+        tools::Stats::show(this->sequence->get_tasks_per_threads()[0], false, false, ss);
+        this->profiling_summary[i] = ss.str();
+    }
+
+    this->profiled_puids = puids;
 }
 
 void
 Scheduler::print_profiling(std::ostream& stream)
 {
     stream << "# Profiling:" << std::endl;
-    for (auto& t : this->tasks_desc)
-    {
-        stream << "# - Name: " << t.tptr->get_name();
-        stream << " - Execution duration: " << t.exec_duration.count() << " ns";
-        stream << " - Replicable: " << (t.tptr->is_replicable() ? "yes" : "no") << std::endl;
-    }
+    if (this->profiled_puids.size())
+        for (size_t p = 0; p < this->profiled_puids.size(); p++)
+        {
+            stream << "# On PUID n°" << this->profiled_puids[p] << std::endl;
+            std::cout << this->profiling_summary[p];
+            if (p < this->profiled_puids.size() - 1) stream << "# ----------- " << std::endl;
+        }
+    else
+        stream << this->profiling_summary[0];
 }
 
 const std::vector<task_desc_t>&

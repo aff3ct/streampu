@@ -136,12 +136,12 @@ main_loop_packing(const std::vector<task_desc_t>& chain, const double P, int& e,
 {
     int N = chain.size();
 
-    while ((e <= N) && (weight(s, 1) + chain[e - 1].exec_duration.count() <= P))
+    while ((e <= N) && (weight(s, 1) + chain[e - 1].exec_duration[0].count() <= P))
     {
 #ifdef VERBOSE
         std::cout << "main loop packing: weight = " << weight(s, 1);
-        std::cout << " new_task=" << chain[e - 1].exec_duration.count();
-        std::cout << " weight+new_task= " << (weight(s, 1) + chain[e - 1].exec_duration.count());
+        std::cout << " new_task=" << chain[e - 1].exec_duration[0].count();
+        std::cout << " weight+new_task= " << (weight(s, 1) + chain[e - 1].exec_duration[0].count());
         std::cout << " P = " << P << std::endl;
 #endif
         s.push_back(chain[e - 1].tptr);
@@ -176,7 +176,7 @@ extra_tasks_packing(const std::vector<task_desc_t>& chain,
     std::vector<runtime::Task*> s_temp;
     s_temp.push_back(chain[f - 1].tptr);
     int e = f;
-    while ((chain[e - 2].exec_duration.count() + weight(s_temp, 1)) <= P)
+    while ((chain[e - 2].exec_duration[0].count() + weight(s_temp, 1)) <= P)
     {
         s.pop_back();
         n -= 1;
@@ -197,7 +197,7 @@ improved_packing(const std::vector<task_desc_t>& chain,
 {
     r -= 1;
     int N = chain.size();
-    while ((e <= N) && (weight(s, r) + chain[e - 1].exec_duration.count() / r <= P))
+    while ((e <= N) && (weight(s, r) + chain[e - 1].exec_duration[0].count() / r <= P))
     {
         s.push_back(chain[e - 1].tptr);
         n += 1;
@@ -249,7 +249,7 @@ Scheduler_OTAC::PROBE(const std::vector<task_desc_t>& chain,
     std::vector<double> w;
     for (auto& t : chain)
     {
-        w.push_back(t.exec_duration.count());
+        w.push_back(t.exec_duration[0].count());
     }
     int N = w.size(); // number of tasks in the chain
     float maxWeight = 0;

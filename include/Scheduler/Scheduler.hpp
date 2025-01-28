@@ -21,7 +21,7 @@ namespace sched
 struct task_desc_t
 {
     runtime::Task* tptr;
-    std::chrono::duration<double, std::nano> exec_duration;
+    std::vector<std::chrono::duration<double, std::nano>> exec_duration;
 };
 class Scheduler : public tools::Interface_reset
 {
@@ -30,13 +30,18 @@ class Scheduler : public tools::Interface_reset
 
   protected:
     std::vector<task_desc_t> tasks_desc;
+    std::vector<size_t> profiled_puids;
+    std::vector<std::string> profiling_summary;
     std::vector<std::pair<size_t, size_t>> solution;
 
     Scheduler(runtime::Sequence& sequence);
     Scheduler(runtime::Sequence* sequence);
 
+    void _profile(const int puid, const size_t n_exec);
+
   public:
     void profile(const size_t n_exec = 100);
+    void profile(const std::vector<size_t>& puids, const size_t n_exec = 100);
     void print_profiling(std::ostream& stream = std::cout);
     const std::vector<task_desc_t>& get_profiling();
     virtual ~Scheduler() = default;

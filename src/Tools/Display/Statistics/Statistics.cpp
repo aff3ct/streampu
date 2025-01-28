@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <iomanip>
 #include <ios>
+#include <map>
 #include <sstream>
 #include <type_traits>
 
@@ -16,9 +17,9 @@ Statistics::separation1(const bool display_thr, std::ostream& stream)
 {
     // clang-format off
     if (display_thr)
-        stream << "# " << rang::style::bold << "-------------------------------------------||------------------------------||--------------------------------||--------------------------------" << rang::style::reset << std::endl;
+        stream << "# " << rang::style::bold << "---------------------------------------------------------------||------------------------------||--------------------------------||--------------------------------" << rang::style::reset << std::endl;
     else
-        stream << "# " << rang::style::bold << "-------------------------------------------||------------------------------||--------------------------------" << rang::style::reset << std::endl;
+        stream << "# " << rang::style::bold << "---------------------------------------------------------------||------------------------------||--------------------------------" << rang::style::reset << std::endl;
     // clang-format on
 }
 
@@ -27,9 +28,9 @@ Statistics::separation2(const bool display_thr, std::ostream& stream)
 {
     // clang-format off
     if (display_thr)
-        stream << "# " << rang::style::bold << "-------------|-------------------|---------||----------|----------|--------||----------|----------|----------||----------|----------|----------" << rang::style::reset << std::endl;
+        stream << "# " << rang::style::bold << "-------------------|-------------------|-----|-------|---------||----------|----------|--------||----------|----------|----------||----------|----------|----------" << rang::style::reset << std::endl;
     else
-        stream << "# " << rang::style::bold << "-------------|-------------------|---------||----------|----------|--------||----------|----------|----------" << rang::style::reset << std::endl;
+        stream << "# " << rang::style::bold << "-------------------|-------------------|-----|-------|---------||----------|----------|--------||----------|----------|----------" << rang::style::reset << std::endl;
     // clang-format on
 }
 
@@ -40,33 +41,33 @@ Statistics::show_header(const bool display_thr, std::ostream& stream)
     Statistics::separation1(display_thr, stream);
     if (display_thr)
     {
-//      stream << "# " << rang::style::bold << "-------------------------------------------||------------------------------||--------------------------------||--------------------------------" << rang::style::reset << std::endl;
-        stream << "# " << rang::style::bold << "       Statistics for the given task       ||       Basic statistics       ||       Measured throughput      ||        Measured latency        " << rang::style::reset << std::endl;
-        stream << "# " << rang::style::bold << "    ('*' = any, '-' = same as previous)    ||          on the task         ||   considering the last socket  ||                                " << rang::style::reset << std::endl;
-//      stream << "# " << rang::style::bold << "-------------------------------------------||------------------------------||--------------------------------||--------------------------------" << rang::style::reset << std::endl;
+//      stream << "# " << rang::style::bold << "---------------------------------------------------------------||------------------------------||--------------------------------||--------------------------------" << rang::style::reset << std::endl;
+        stream << "# " << rang::style::bold << "                 Statistics for the given task                 ||       Basic statistics       ||       Measured throughput      ||        Measured latency        " << rang::style::reset << std::endl;
+        stream << "# " << rang::style::bold << "              ('*' = any, '-' = same as previous)              ||          on the task         ||   considering the last socket  ||                                " << rang::style::reset << std::endl;
+//      stream << "# " << rang::style::bold << "---------------------------------------------------------------||------------------------------||--------------------------------||--------------------------------" << rang::style::reset << std::endl;
     }
     else
     {
-//      stream << "# " << rang::style::bold << "-------------------------------------------||------------------------------||--------------------------------" << rang::style::reset << std::endl;
-        stream << "# " << rang::style::bold << "       Statistics for the given task       ||       Basic statistics       ||        Measured latency        " << rang::style::reset << std::endl;
-        stream << "# " << rang::style::bold << "    ('*' = any, '-' = same as previous)    ||          on the task         ||                                " << rang::style::reset << std::endl;
-//      stream << "# " << rang::style::bold << "-------------------------------------------||------------------------------||--------------------------------" << rang::style::reset << std::endl;
+//      stream << "# " << rang::style::bold << "---------------------------------------------------------------||------------------------------||--------------------------------" << rang::style::reset << std::endl;
+        stream << "# " << rang::style::bold << "                 Statistics for the given task                 ||       Basic statistics       ||        Measured latency        " << rang::style::reset << std::endl;
+        stream << "# " << rang::style::bold << "              ('*' = any, '-' = same as previous)              ||          on the task         ||                                " << rang::style::reset << std::endl;
+//      stream << "# " << rang::style::bold << "---------------------------------------------------------------||------------------------------||--------------------------------" << rang::style::reset << std::endl;
     }
     Statistics::separation1(display_thr, stream);
     Statistics::separation2(display_thr, stream);
     if (display_thr)
     {
-//      stream << "# " << rang::style::bold << "-------------|-------------------|---------||----------|----------|--------||----------|----------|----------||----------|----------|----------" << rang::style::reset << std::endl;
-        stream << "# " << rang::style::bold << "      MODULE |              TASK |   TIMER ||    CALLS |     TIME |   PERC ||  AVERAGE |  MINIMUM |  MAXIMUM ||  AVERAGE |  MINIMUM |  MAXIMUM " << rang::style::reset << std::endl;
-        stream << "# " << rang::style::bold << "             |                   |         ||          |      (s) |    (%) ||   (Mb/s) |   (Mb/s) |   (Mb/s) ||     (us) |     (us) |     (us) " << rang::style::reset << std::endl;
-//      stream << "# " << rang::style::bold << "-------------|-------------------|---------||----------|----------|--------||----------|----------|----------||----------|----------|----------" << rang::style::reset << std::endl;
+//      stream << "# " << rang::style::bold << "-------------------|-------------------|-----|-------|---------||----------|----------|--------||----------|----------|----------||----------|----------|----------" << rang::style::reset << std::endl;
+        stream << "# " << rang::style::bold << "       MODULE NAME |         TASK NAME | REP | ORDER |   TIMER ||    CALLS |     TIME |   PERC ||  AVERAGE |  MINIMUM |  MAXIMUM ||  AVERAGE |  MINIMUM |  MAXIMUM " << rang::style::reset << std::endl;
+        stream << "# " << rang::style::bold << "                   |                   |     |       |         ||          |      (s) |    (%) ||   (Mb/s) |   (Mb/s) |   (Mb/s) ||     (us) |     (us) |     (us) " << rang::style::reset << std::endl;
+//      stream << "# " << rang::style::bold << "-------------------|-------------------|-----|-------|---------||----------|----------|--------||----------|----------|----------||----------|----------|----------" << rang::style::reset << std::endl;
     }
     else
     {
-//      stream << "# " << rang::style::bold << "-------------|-------------------|---------||----------|----------|--------||----------|----------|----------" << rang::style::reset << std::endl;
-        stream << "# " << rang::style::bold << "      MODULE |              TASK |   TIMER ||    CALLS |     TIME |   PERC ||  AVERAGE |  MINIMUM |  MAXIMUM " << rang::style::reset << std::endl;
-        stream << "# " << rang::style::bold << "             |                   |         ||          |      (s) |    (%) ||     (us) |     (us) |     (us) " << rang::style::reset << std::endl;
-//      stream << "# " << rang::style::bold << "-------------|-------------------|---------||----------|----------|--------||----------|----------|----------" << rang::style::reset << std::endl;
+//      stream << "# " << rang::style::bold << "-------------------|-------------------|-----|-------|---------||----------|----------|--------||----------|----------|----------" << rang::style::reset << std::endl;
+        stream << "# " << rang::style::bold << "       MODULE NAME |         TASK NAME | REP | ORDER |   TIMER ||    CALLS |     TIME |   PERC ||  AVERAGE |  MINIMUM |  MAXIMUM " << rang::style::reset << std::endl;
+        stream << "# " << rang::style::bold << "                   |                   |     |       |         ||          |      (s) |    (%) ||     (us) |     (us) |     (us) " << rang::style::reset << std::endl;
+//      stream << "# " << rang::style::bold << "-------------------|-------------------|-----|-------|---------||----------|----------|--------||----------|----------|----------" << rang::style::reset << std::endl;
     }
     Statistics::separation2(display_thr, stream);
     // clang-format on
@@ -76,6 +77,8 @@ void
 Statistics::show_task(const float total_sec,
                       const std::string& module_name,
                       const std::string& task_name,
+                      const bool task_replicability,
+                      const int task_order,
                       const size_t task_n_elmts,
                       const uint32_t task_n_calls,
                       const std::chrono::nanoseconds task_tot_duration,
@@ -106,12 +109,17 @@ Statistics::show_task(const float total_sec,
     unsigned l1 = 99999999;
     float    l2 = 99999.99f;
 
-    std::stringstream ssmodule, ssprocess, sssp, ssn_calls, sstot_dur, sspercent;
+    std::stringstream ssmodule, ssprocess, ssrep, ssorder, sssp, ssn_calls, sstot_dur, sspercent;
     std::stringstream ssavg_thr, ssmin_thr, ssmax_thr;
     std::stringstream ssavg_lat, ssmin_lat, ssmax_lat;
 
-    ssmodule  << std::setprecision(                        2) <<                                        std::fixed  << std::setw(12) << module_name;
+    ssmodule  << std::setprecision(                        2) <<                                        std::fixed  << std::setw(18) << module_name;
     ssprocess << std::setprecision(                        2) <<                                        std::fixed  << std::setw(17) << task_name;
+    ssrep     << std::setprecision(                        2) <<                                        std::fixed  << std::setw( 3) << (task_replicability ? "yes" : "no");
+    if (task_order >= 0)
+        ssorder << std::setprecision(                      2) <<                                        std::fixed  << std::setw( 5) << task_order;
+    else
+        ssorder << std::setprecision(                      2) <<                                        std::fixed  << std::setw( 5) << "*";
     sssp      << std::setprecision(                        2) <<                                        std::fixed  << std::setw( 7) << "*";
     ssn_calls << std::setprecision(task_n_calls > l1 ? P : 2) << (task_n_calls > l1 ? std::scientific : std::fixed) << std::setw( 8) << task_n_calls;
     sstot_dur << std::setprecision(tot_dur      > l1 ? P : 2) << (tot_dur      > l1 ? std::scientific : std::fixed) << std::setw( 8) << tot_dur;
@@ -126,6 +134,8 @@ Statistics::show_task(const float total_sec,
     stream << "# ";
     stream << ssmodule .str() << rang::style::bold << " | "  << rang::style::reset
            << ssprocess.str() << rang::style::bold << " | "  << rang::style::reset
+           << ssrep    .str() << rang::style::bold << " | "  << rang::style::reset
+           << ssorder  .str() << rang::style::bold << " | "  << rang::style::reset
            << sssp     .str() << rang::style::bold << " || " << rang::style::reset
            << ssn_calls.str() << rang::style::bold << " | "  << rang::style::reset
            << sstot_dur.str() << rang::style::bold << " | "  << rang::style::reset;
@@ -188,12 +198,14 @@ Statistics::show_timer(const float total_sec,
     unsigned l1 = 99999999;
     float    l2 = 99999.99f;
 
-    std::stringstream spaces, ssprocess, sssp, ssrn_calls, ssrtot_dur, ssrpercent;
+    std::stringstream spaces, ssprocess, ssrep, ssorder, sssp, ssrn_calls, ssrtot_dur, ssrpercent;
     std::stringstream ssravg_thr, ssrmin_thr, ssrmax_thr;
     std::stringstream ssravg_lat, ssrmin_lat, ssrmax_lat;
 
-    spaces     <<                                                                                          std::fixed  << std::setw(12) << "-";
+    spaces     <<                                                                                          std::fixed  << std::setw(18) << "-";
     ssprocess  << std::setprecision(                         2) <<                                         std::fixed  << std::setw(17) << "-";
+    ssrep      << std::setprecision(                         2) <<                                         std::fixed  << std::setw( 3) << "-";
+    ssorder    << std::setprecision(                         2) <<                                         std::fixed  << std::setw( 5) << "-";
     sssp       << std::setprecision(                         2) <<                                         std::fixed  << std::setw( 7) << timer_name;
     ssrn_calls << std::setprecision(timer_n_calls > l1 ? P : 2) << (timer_n_calls > l1 ? std::scientific : std::fixed) << std::setw( 8) << timer_n_calls;
     ssrtot_dur << std::setprecision(rtot_dur      > l1 ? P : 2) << (rtot_dur      > l1 ? std::scientific : std::fixed) << std::setw( 8) << rtot_dur;
@@ -208,6 +220,8 @@ Statistics::show_timer(const float total_sec,
     stream << "# ";
     stream << spaces.str()                                                  << rang::style::bold << " | "  << rang::style::reset
            << rang::style::italic << ssprocess .str() << rang::style::reset << rang::style::bold << " | "  << rang::style::reset
+           << rang::style::italic << ssrep     .str() << rang::style::reset << rang::style::bold << " | "  << rang::style::reset
+           << rang::style::italic << ssorder   .str() << rang::style::reset << rang::style::bold << " | "  << rang::style::reset
            << rang::style::italic << sssp      .str() << rang::style::reset << rang::style::bold << " || " << rang::style::reset
            << rang::style::italic << ssrn_calls.str() << rang::style::reset << rang::style::bold << " | "  << rang::style::reset
            << rang::style::italic << ssrtot_dur.str() << rang::style::reset << rang::style::bold << " | "  << rang::style::reset
@@ -302,6 +316,10 @@ Statistics::show_tasks(std::vector<TASK*> tasks, const bool ordered, const bool 
     for (size_t t = 0; t < tasks.size(); t++)
         if (tasks[t] == nullptr) tasks.erase(tasks.begin() + t);
 
+    std::map<const spu::runtime::Task*, size_t> tasks_order;
+    for (size_t t = 0; t < tasks.size(); t++)
+        tasks_order[(const spu::runtime::Task*)tasks[t]] = t;
+
     if (ordered)
     {
         std::sort(tasks.begin(),
@@ -347,12 +365,15 @@ Statistics::show_tasks(std::vector<TASK*> tasks, const bool ordered, const bool 
             }
         }
 
+        bool all_replicable = true;
         for (auto* t : tasks)
         {
             auto module_name = t->get_module().get_custom_name().empty() ? t->get_module().get_short_name()
                                                                          : t->get_module().get_custom_name();
             auto task_n_elmts = t->sockets.end()[-2]->get_n_elmts();
             auto task_name = t->get_name();
+            bool task_replicability = t->is_replicable();
+            if (!task_replicability) all_replicable = false;
             auto task_n_calls = t->get_n_calls();
             auto task_tot_duration = t->get_duration_total();
             auto task_min_duration = t->get_duration_min();
@@ -364,6 +385,8 @@ Statistics::show_tasks(std::vector<TASK*> tasks, const bool ordered, const bool 
             Statistics::show_task(total_sec,
                                   module_name,
                                   task_name,
+                                  task_replicability,
+                                  tasks_order[t],
                                   task_n_elmts,
                                   task_n_calls,
                                   task_tot_duration,
@@ -399,6 +422,8 @@ Statistics::show_tasks(std::vector<TASK*> tasks, const bool ordered, const bool 
         Statistics::show_task(total_sec,
                               "TOTAL",
                               "*",
+                              all_replicable,
+                              -1,
                               ttask_n_elmts,
                               ttask_n_calls,
                               ttask_tot_duration,
@@ -514,6 +539,11 @@ Statistics::show_tasks(std::vector<std::vector<TASK*>> tasks,
                 for (size_t i = 0; i < tasks.size(); i++)
                     tasks[i].erase(tasks[i].begin() + t);
 
+    std::map<const spu::runtime::Task*, size_t> tasks_order;
+    if (tasks.size())
+        for (size_t t = 0; t < tasks.size(); t++)
+            tasks_order[(const spu::runtime::Task*)tasks[t][0]] = t;
+
     if (ordered)
     {
         std::sort(tasks.begin(),
@@ -571,12 +601,15 @@ Statistics::show_tasks(std::vector<std::vector<TASK*>> tasks,
             }
         }
 
+        bool all_replicable = true;
         for (auto& vt : tasks)
         {
             auto module_name = vt[0]->get_module().get_custom_name().empty() ? vt[0]->get_module().get_short_name()
                                                                              : vt[0]->get_module().get_custom_name();
             auto task_n_elmts = vt[0]->sockets.size() >= 2 ? vt[0]->sockets.end()[-2]->get_n_elmts() : 0;
             auto task_name = vt[0]->get_name();
+            bool task_replicability = vt[0]->is_replicable();
+            if (!task_replicability) all_replicable = false;
             auto task_n_calls = 0;
             auto task_tot_duration = nanoseconds(0);
             auto task_min_duration = ttask_tot_duration;
@@ -596,6 +629,8 @@ Statistics::show_tasks(std::vector<std::vector<TASK*>> tasks,
             Statistics::show_task(total_sec,
                                   module_name,
                                   task_name,
+                                  task_replicability,
+                                  tasks_order[vt[0]],
                                   task_n_elmts,
                                   task_n_calls,
                                   task_tot_duration,
@@ -639,6 +674,8 @@ Statistics::show_tasks(std::vector<std::vector<TASK*>> tasks,
         Statistics::show_task(total_sec,
                               "TOTAL",
                               "*",
+                              all_replicable,
+                              -1,
                               ttask_n_elmts,
                               ttask_n_calls,
                               ttask_tot_duration,
