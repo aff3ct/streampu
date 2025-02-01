@@ -243,6 +243,16 @@ if(SPU_TESTS)
     set_target_properties(spu-test-nest-loops-pipeline PROPERTIES OUTPUT_NAME test-nested-loops-pipeline POSITION_INDEPENDENT_CODE ON)
     list(APPEND spu_targets_list spu-test-nest-loops-pipeline)
 
+    add_executable(spu-test-pipeline-builder-simple $<TARGET_OBJECTS:spu-obj>
+                   ${CMAKE_CURRENT_SOURCE_DIR}/tests/builder/pipeline_builder_simple.cpp)
+    set_target_properties(spu-test-pipeline-builder-simple PROPERTIES OUTPUT_NAME test-pipeline-builder-simple POSITION_INDEPENDENT_CODE ON)
+    list(APPEND spu_targets_list spu-test-pipeline-builder-simple)
+
+    add_executable(spu-test-pipeline-builder-conditional $<TARGET_OBJECTS:spu-obj>
+                   ${CMAKE_CURRENT_SOURCE_DIR}/tests/builder/pipeline_builder_conditional.cpp)
+    set_target_properties(spu-test-pipeline-builder-conditional PROPERTIES OUTPUT_NAME test-pipeline-builder-conditional POSITION_INDEPENDENT_CODE ON)
+    list(APPEND spu_targets_list spu-test-pipeline-builder-conditional)
+
     if (SPU_LINK_HWLOC)
         # pin test addition
         add_executable(spu-test-thread-pinning $<TARGET_OBJECTS:spu-obj> ${CMAKE_CURRENT_SOURCE_DIR}/tests/advanced/thread_pinning.cpp)
@@ -823,6 +833,28 @@ if(SPU_TESTS)
     add_test(NAME pipeline3::spu-test-nest-loops-pipeline COMMAND spu-test-nest-loops-pipeline -e 200 -f 13)
     set_tests_properties(pipeline3::spu-test-nest-loops-pipeline PROPERTIES LABELS nest-loops-pipeline)
 
+    # builder tests
+    add_test(NAME pipeline0::spu-test-pipeline-builder-simple COMMAND spu-test-pipeline-builder-simple -i ${INPUT_FILE})
+    set_tests_properties(pipeline0::spu-test-pipeline-builder-simple PROPERTIES LABELS simple-pipeline)
+    add_test(NAME pipeline1::spu-test-pipeline-builder-simple COMMAND spu-test-pipeline-builder-simple -i ${INPUT_FILE} -p)
+    set_tests_properties(pipeline1::spu-test-pipeline-builder-simple PROPERTIES LABELS simple-pipeline)
+    add_test(NAME pipeline2::spu-test-pipeline-builder-simple COMMAND spu-test-pipeline-builder-simple -i ${INPUT_FILE} -w)
+    set_tests_properties(pipeline2::spu-test-pipeline-builder-simple PROPERTIES LABELS "simple-pipeline;skip-memcheck") # to exclude this previous test from memchecks, active waiting is too long in Valgrind :-(
+    add_test(NAME pipeline3::spu-test-pipeline-builder-simple COMMAND spu-test-pipeline-builder-simple -i ${INPUT_FILE} -u 1)
+    set_tests_properties(pipeline3::spu-test-pipeline-builder-simple PROPERTIES LABELS simple-pipeline)
+    add_test(NAME pipeline4::spu-test-pipeline-builder-simple COMMAND spu-test-pipeline-builder-simple -i ${INPUT_FILE} -u 1024)
+    set_tests_properties(pipeline4::spu-test-pipeline-builder-simple PROPERTIES LABELS simple-pipeline)
+    add_test(NAME pipeline5::spu-test-pipeline-builder-simple COMMAND spu-test-pipeline-builder-simple -i ${INPUT_FILE} -u 128 -o graph.dot)
+    set_tests_properties(pipeline5::spu-test-pipeline-builder-simple PROPERTIES LABELS simple-pipeline)
+    add_test(NAME pipeline6::spu-test-pipeline-builder-simple COMMAND spu-test-pipeline-builder-simple -i ${INPUT_FILE} -u 8 -f 2)
+    set_tests_properties(pipeline6::spu-test-pipeline-builder-simple PROPERTIES LABELS simple-pipeline)
+    add_test(NAME pipeline7::spu-test-pipeline-builder-simple COMMAND spu-test-pipeline-builder-simple -i ${INPUT_FILE} -u 17 -f 5)
+    set_tests_properties(pipeline7::spu-test-pipeline-builder-simple PROPERTIES LABELS simple-pipeline)
+
+    add_test(NAME pipeline8::spu-test-pipeline-builder-conditional COMMAND spu-test-pipeline-builder-conditional)
+    set_tests_properties(pipeline8::spu-test-pipeline-builder-conditional PROPERTIES LABELS simple-conditional)
+
+    # hwloc tests
     if (SPU_LINK_HWLOC)
         # Static test to verify pinning (for CPUs with at least 4 hardware threads)
         add_test(NAME pipeline0::spu-test-thread-pinning COMMAND spu-test-thread-pinning -e 30)

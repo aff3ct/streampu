@@ -150,6 +150,9 @@
 #ifndef DIGRAPH_NODE_HPP_
 #include <Tools/Algo/Digraph/Digraph_node.hpp>
 #endif
+#ifndef PIPELINE_BUILDER_HPP_
+#include <Tools/Builder/Pipeline_builder.hpp>
+#endif
 #ifndef COMPUTE_BYTES_H_
 #include <Tools/compute_bytes.h>
 #endif
