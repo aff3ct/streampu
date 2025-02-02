@@ -265,5 +265,19 @@ bool inline signbit(long double arg)
 }
 #endif
 
+size_t
+find_smallest_common_multiple(const size_t a, const size_t b)
+{
+    size_t a2 = a, b2 = b;
+    while (a2 != b2)
+    {
+        if (a2 > b2)
+            b2 += b;
+        else if (a2 < b2)
+            a2 += a;
+    }
+    return a2;
+}
+
 }
 }

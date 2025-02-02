@@ -9,7 +9,7 @@
 #include <utility>
 
 #include "Module/Module.hpp"
-#include "Module/Stateful/Adaptor/Adaptor.hpp"
+#include "Module/Stateful/Adaptor/Adaptor_m_to_n.hpp"
 #include "Module/Stateful/Probe/Probe.hpp"
 #include "Module/Stateful/Switcher/Switcher.hpp"
 #include "Runtime/Sequence/Sequence.hpp"
@@ -1050,10 +1050,10 @@ Sequence::init_recursive(tools::Digraph_node<SS>* cur_subseq,
         throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
     }
 
-    if (dynamic_cast<const module::Adaptor*>(&current_task.get_module()) && !this->tasks_inplace)
+    if (dynamic_cast<const module::Adaptor_m_to_n*>(&current_task.get_module()) && !this->tasks_inplace)
     {
         std::stringstream message;
-        message << "'module::Adaptor' objects are not supported if 'tasks_inplace' is set to false.";
+        message << "'module::Adaptor_m_to_n' objects are not supported if 'tasks_inplace' is set to false.";
         throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
     }
 
@@ -1719,7 +1719,7 @@ Sequence::export_dot_subsequence(const VTA& subseq,
     size_t exec_order = 0;
     for (auto& t : subseq)
     {
-        std::string color = dynamic_cast<module::Adaptor*>(&t->get_module()) ? "green" : "blue";
+        std::string color = dynamic_cast<module::Adaptor_m_to_n*>(&t->get_module()) ? "green" : "blue";
         color = dynamic_cast<module::AProbe*>(&t->get_module()) ? "pink" : color;
         stream << tab << tab << "subgraph \"cluster_" << +&t->get_module() << "_" << +t << "\" {" << std::endl;
         stream << tab << tab << tab << "node [style=filled];" << std::endl;
@@ -2044,11 +2044,11 @@ Sequence::gen_processes(const bool no_copy_mode)
                     };
                 }
 
-                if (dynamic_cast<module::Adaptor*>(&task->get_module()) &&
+                if (dynamic_cast<module::Adaptor_m_to_n*>(&task->get_module()) &&
                     task->get_name().find("pull") != std::string::npos && no_copy_mode)
                 {
                     auto pull_task = task;
-                    auto adp_pull = dynamic_cast<module::Adaptor*>(&pull_task->get_module());
+                    auto adp_pull = dynamic_cast<module::Adaptor_m_to_n*>(&pull_task->get_module());
                     adp_pull->set_no_copy_pull(true);
                     const auto rebind_id = contents->rebind_sockets.size();
                     contents->rebind_sockets.resize(rebind_id + 1);
@@ -2102,11 +2102,11 @@ Sequence::gen_processes(const bool no_copy_mode)
                     };
                 }
 
-                if (dynamic_cast<module::Adaptor*>(&task->get_module()) &&
+                if (dynamic_cast<module::Adaptor_m_to_n*>(&task->get_module()) &&
                     task->get_name().find("push") != std::string::npos && no_copy_mode)
                 {
                     auto push_task = task;
-                    auto adp_push = dynamic_cast<module::Adaptor*>(&push_task->get_module());
+                    auto adp_push = dynamic_cast<module::Adaptor_m_to_n*>(&push_task->get_module());
                     adp_push->set_no_copy_push(true);
                     const auto rebind_id = contents->rebind_sockets.size();
                     contents->rebind_sockets.resize(rebind_id + 1);
@@ -2225,20 +2225,20 @@ Sequence::reset_no_copy_mode()
                     switcher->set_no_copy_commute(false);
                 }
 
-                if (dynamic_cast<module::Adaptor*>(&task->get_module()) &&
+                if (dynamic_cast<module::Adaptor_m_to_n*>(&task->get_module()) &&
                     task->get_name().find("pull") != std::string::npos)
                 {
                     auto pull_task = task;
-                    auto adp_pull = dynamic_cast<module::Adaptor*>(&pull_task->get_module());
+                    auto adp_pull = dynamic_cast<module::Adaptor_m_to_n*>(&pull_task->get_module());
                     adp_pull->set_no_copy_pull(false);
                     adp_pull->reset_buffer();
                 }
 
-                if (dynamic_cast<module::Adaptor*>(&task->get_module()) &&
+                if (dynamic_cast<module::Adaptor_m_to_n*>(&task->get_module()) &&
                     task->get_name().find("push") != std::string::npos)
                 {
                     auto push_task = task;
-                    auto adp_push = dynamic_cast<module::Adaptor*>(&push_task->get_module());
+                    auto adp_push = dynamic_cast<module::Adaptor_m_to_n*>(&push_task->get_module());
                     adp_push->set_no_copy_push(false);
                     adp_push->reset_buffer();
                 }

@@ -99,6 +99,9 @@ least_common_multiple(T a, T b);
 template<typename T>
 inline bool
 signbit(T arg);
+
+inline size_t
+find_smallest_common_multiple(const size_t a, const size_t b);
 }
 }
 

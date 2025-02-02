@@ -360,14 +360,14 @@ main(int argc, char** argv)
     else
     {
         pipeline_chain.reset(new runtime::Pipeline(
-          source("generate"), // first task of the sequence
+          { &source("generate") }, // first task of the sequence
           {
             // pipeline stage 0, first & last tasks
-            { { &source("generate") }, { &relayer_com("relay"), &alternator("alternate") } },
+            { { &source("generate") }, { &alternator("alternate") }, { &relayer_com("relay") } },
             // pipeline stage 1 first & last tasks
-            { { &switcher("commute") }, { &relayer_sel("relay") } },
+            { { &relayer_com("relay"), &switcher("commute") }, { &relayer_sel("relay") }, {} },
             // pipeline stage 2 first task
-            { { &sink("send_count") }, {} },
+            { { &sink("send_count") }, {}, {} },
           },
           {
             1,                         // number of threads in the stage 0
