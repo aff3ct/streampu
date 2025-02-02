@@ -809,6 +809,18 @@ if(SPU_TESTS)
     add_test(NAME pipeline32::spu-test-generic-pipeline COMMAND spu-test-generic-pipeline -e 21 -t "3" -S "OTAC" -C "(init,relayf_15,incrementf_S_60,relay_15,fin)" -P "none")
     set_tests_properties(pipeline32::spu-test-generic-pipeline PROPERTIES LABELS generic-pipeline)
 
+    # m to n stages
+    add_test(NAME pipeline33::spu-test-generic-pipeline COMMAND spu-test-generic-pipeline -e 10 -n "1,3,4,1" -t "1,3,4,1" -R "(init,incrf,incrf,fin)")
+    set_tests_properties(pipeline33::spu-test-generic-pipeline PROPERTIES LABELS generic-pipeline)
+    add_test(NAME pipeline34::spu-test-generic-pipeline COMMAND spu-test-generic-pipeline -e 13 -n "1,4,3,1" -t "1,4,3,1" -R "(init,incr,incr,fin)" -p -f 13)
+    set_tests_properties(pipeline34::spu-test-generic-pipeline PROPERTIES LABELS generic-pipeline)
+    add_test(NAME pipeline35::spu-test-generic-pipeline COMMAND spu-test-generic-pipeline -e 120 -t "1,3,4,5,1" -r "((init),(relayf,incr,incrf,incr),(relayf),(incr,relay),(fin))" -u 1)
+    set_tests_properties(pipeline35::spu-test-generic-pipeline PROPERTIES LABELS generic-pipeline)
+    add_test(NAME pipeline36::spu-test-generic-pipeline COMMAND spu-test-generic-pipeline -e 120 -t "1,3,4,5,1" -r "((init),(relayf,incr,incrf,incr),(relayf),(incr,relay),(fin))" -u 1 -w)
+    set_tests_properties(pipeline36::spu-test-generic-pipeline PROPERTIES LABELS "generic-pipeline;skip-memcheck") # to exclude this previous test from memchecks, active waiting is too long in Valgrind :-(
+    add_test(NAME pipeline37::spu-test-generic-pipeline COMMAND spu-test-generic-pipeline -e 10 -n "1,3,3,3,3,3,3,1" -t "1,3,1,4,7,32,1,1" -R "(init,incrf,incrf,incr,incr,incr,incrf,fin)")
+    set_tests_properties(pipeline37::spu-test-generic-pipeline PROPERTIES LABELS generic-pipeline)
+
     add_test(NAME sequence0::spu-test-exclusive-paths-pipeline COMMAND spu-test-exclusive-paths-pipeline -t 1 -q -i ${INPUT_FILE})
     set_tests_properties(sequence0::spu-test-exclusive-paths-pipeline PROPERTIES LABELS exclusive-paths-pipeline)
     add_test(NAME sequence1::spu-test-exclusive-paths-pipeline COMMAND spu-test-exclusive-paths-pipeline -t 1 -u 13 -q -b -i ${INPUT_FILE})

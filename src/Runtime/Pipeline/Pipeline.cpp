@@ -507,18 +507,6 @@ void Pipeline
     // 	throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
     // }
 
-    bool prev_is_parallel = false;
-    for (auto t : n_threads)
-    {
-        if (t > 1 && prev_is_parallel)
-        {
-            std::stringstream message;
-            message << "Consecutive parallel stages are not supported.";
-            throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
-        }
-        prev_is_parallel = t > 1;
-    }
-
     // Creating a vector of pinning policies for each sequence
     std::vector<std::string> sequences_pinning_policies;
     if (!pipeline_pinning_policy.empty())
