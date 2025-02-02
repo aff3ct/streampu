@@ -818,7 +818,6 @@ Pipeline::create_adaptors(const std::vector<size_t>& synchro_buffer_sizes,
                                   std::tuple<runtime::Socket*, size_t, size_t, size_t, runtime::Task*>>>
               sck_orphan_binds_new;
 
-            auto n_threads_prev_sta = this->stages[sta - 1]->get_n_threads();
             for (size_t t = 0; t < n_threads; t++)
             {
                 module::Adaptor_m_to_n* cur_adp = (t == 0) ? adp : adp->clone();
@@ -962,7 +961,6 @@ Pipeline::create_adaptors(const std::vector<size_t>& synchro_buffer_sizes,
                             }
                             else // if (tsk_out_sta < sta) // bind prev. adaptor to last adaptor
                             {
-                                auto n_threads_prev_sta = this->stages[sta - 1]->get_n_threads();
                                 auto tsk_out_id = 1;
                                 auto sck_out_id = sck_to_adp_sck_id[sck_out_ptr];
                                 sck_to_adp_sck_id_new[sck_out_ptr] = adp_sck_id;
@@ -1011,7 +1009,6 @@ Pipeline::_bind_adaptors(const bool bind_adaptors)
             // --------------------------------------------------------------------------------------------------------
             if (sta > 0)
             {
-                auto n_threads_prev_sta = this->stages[sta - 1]->get_n_threads();
                 for (size_t t = 0; t < n_threads; t++)
                 {
                     module::Adaptor_m_to_n* cur_adp =
