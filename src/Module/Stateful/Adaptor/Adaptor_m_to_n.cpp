@@ -61,6 +61,13 @@ Adaptor_m_to_n::alloc_buffers()
 
     size_t ppcm = tools::find_smallest_common_multiple(*this->n_pushers, *this->n_pullers);
 
+    if (ppcm > 1000)
+    {
+        std::stringstream message;
+        message << "'ppcm' cannot exceed 1000 ('ppcm' = " << ppcm << ").";
+        throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
+    }
+
     this->buffer->resize(ppcm,
                          std::vector<std::vector<int8_t*>>(this->n_sockets, std::vector<int8_t*>(this->buffer_size)));
 
@@ -82,6 +89,7 @@ Adaptor_m_to_n::alloc_buffers()
             }
         (*this->first)[d] = 0;
         (*this->last)[d] = 0;
+        (*this->counter)[d] = this->buffer_size;
     }
 
     *this->buffers_allocated = true;
@@ -131,10 +139,12 @@ Adaptor_m_to_n::reset()
     if (!this->cloned)
     {
         *this->waiting_canceled = false;
-        for (auto& a : *this->first.get())
-            a = 0;
-        for (auto& a : *this->last.get())
-            a = 0;
+        for (size_t d = 0; d < this->buffer->size(); d++)
+        {
+            (*this->first)[d] = 0;
+            (*this->last)[d] = 0;
+            (*this->counter)[d] = this->buffer_size;
+        }
     }
     this->cur_push_id = (size_t)this->tid_push;
     this->cur_pull_id = (size_t)this->tid_pull;
@@ -324,7 +334,7 @@ Adaptor_m_to_n::get_empty_buffer(const size_t sid)
         throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
     }
 #endif
-    return (void*)(*this->buffer)[this->cur_push_id][sid][(*this->last)[this->cur_push_id] % this->buffer_size];
+    return (void*)(*this->buffer)[this->cur_push_id][sid][(*this->last)[this->cur_push_id]];
 }
 
 void*
@@ -338,7 +348,7 @@ Adaptor_m_to_n::get_filled_buffer(const size_t sid)
         throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
     }
 #endif
-    return (void*)(*this->buffer)[this->cur_pull_id][sid][(*this->first)[this->cur_pull_id] % this->buffer_size];
+    return (void*)(*this->buffer)[this->cur_pull_id][sid][(*this->first)[this->cur_pull_id]];
 }
 
 void*
@@ -352,10 +362,8 @@ Adaptor_m_to_n::get_empty_buffer(const size_t sid, void* swap_buffer)
         throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
     }
 #endif
-    void* empty_buffer =
-      (void*)(*this->buffer)[this->cur_push_id][sid][(*this->last)[this->cur_push_id] % this->buffer_size];
-    (*this->buffer)[this->cur_push_id][sid][(*this->last)[this->cur_push_id] % this->buffer_size] =
-      (int8_t*)swap_buffer;
+    void* empty_buffer = (void*)(*this->buffer)[this->cur_push_id][sid][(*this->last)[this->cur_push_id]];
+    (*this->buffer)[this->cur_push_id][sid][(*this->last)[this->cur_push_id]] = (int8_t*)swap_buffer;
     return empty_buffer;
 }
 
@@ -370,19 +378,16 @@ Adaptor_m_to_n::get_filled_buffer(const size_t sid, void* swap_buffer)
         throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
     }
 #endif
-    void* filled_buffer =
-      (void*)(*this->buffer)[this->cur_pull_id][sid][(*this->first)[this->cur_pull_id] % this->buffer_size];
-    (*this->buffer)[this->cur_pull_id][sid][(*this->first)[this->cur_pull_id] % this->buffer_size] =
-      (int8_t*)swap_buffer;
+    void* filled_buffer = (void*)(*this->buffer)[this->cur_pull_id][sid][(*this->first)[this->cur_pull_id]];
+    (*this->buffer)[this->cur_pull_id][sid][(*this->first)[this->cur_pull_id]] = (int8_t*)swap_buffer;
     return filled_buffer;
 }
 
 void
 Adaptor_m_to_n::wake_up_puller()
 {
-    // ----------------------------------------------------------------------------------------------------------------
-    (*this->last)[this->cur_push_id]++; // no modulo here?! /!\ ------------------------------------ SUPER DANGEROUS!!!
-    // ----------------------------------------------------------------------------------------------------------------
+    (*this->last)[this->cur_push_id] = ((*this->last)[this->cur_push_id] + 1) % this->buffer_size;
+    (*this->counter)[this->cur_push_id]--; // atomic fetch sub
 
     if (!this->active_waiting) // passive waiting
     {
@@ -399,9 +404,8 @@ Adaptor_m_to_n::wake_up_puller()
 void
 Adaptor_m_to_n::wake_up_pusher()
 {
-    // ----------------------------------------------------------------------------------------------------------------
-    (*this->first)[this->cur_pull_id]++; // no modulo here?! --------------------------------------- SUPER DANGEROUS!!!
-    // ----------------------------------------------------------------------------------------------------------------
+    (*this->first)[this->cur_pull_id] = ((*this->first)[this->cur_pull_id] + 1) % this->buffer_size;
+    (*this->counter)[this->cur_pull_id]++; // atomic fetch add
 
     if (!this->active_waiting) // passive waiting
     {

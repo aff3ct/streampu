@@ -24,8 +24,9 @@ Adaptor_m_to_n::Adaptor_m_to_n(const std::vector<size_t>& n_elmts,
   , buffer(new std::vector<std::vector<std::vector<int8_t*>>>(
       1,
       std::vector<std::vector<int8_t*>>(n_sockets, std::vector<int8_t*>(buffer_size))))
-  , first(new std::vector<std::atomic<uint64_t>>(1000))
-  , last(new std::vector<std::atomic<uint64_t>>(1000))
+  , first(new std::vector<uint32_t>(1000))
+  , last(new std::vector<uint32_t>(1000))
+  , counter(new std::vector<std::atomic<uint32_t>>(1000))
   , waiting_canceled(new std::atomic<bool>(false))
   , no_copy_pull(false)
   , no_copy_push(false)
@@ -72,11 +73,6 @@ Adaptor_m_to_n::Adaptor_m_to_n(const std::vector<size_t>& n_elmts,
             throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
         }
     }
-
-    for (auto& a : *this->first.get())
-        a = 0;
-    for (auto& a : *this->last.get())
-        a = 0;
 
     this->init();
 }
@@ -174,26 +170,25 @@ Adaptor_m_to_n::get_datatype(const size_t sid) const
 bool
 Adaptor_m_to_n::is_empty(const size_t id)
 {
-    return (*this->first)[id] == (*this->last)[id];
+    return (*this->counter)[id] == this->buffer_size;
 }
 
 bool
 Adaptor_m_to_n::is_full(const size_t id)
 {
-    // return (size_t)std::abs((int)(*this->last)[id] - (int)(*this->first)[id]) == this->buffer_size;
-    return !this->n_free_slots(id);
+    return (*this->counter)[id] == 0;
 }
 
 size_t
 Adaptor_m_to_n::n_fill_slots(const size_t id)
 {
-    return (*this->last)[id] - (*this->first)[id];
+    return this->buffer_size - (*this->counter)[id];
 }
 
 size_t
 Adaptor_m_to_n::n_free_slots(const size_t id)
 {
-    return this->buffer_size - this->n_fill_slots(id);
+    return (*this->counter)[id];
 }
 
 }

@@ -41,8 +41,9 @@ class Adaptor_m_to_n
     std::shared_ptr<std::vector<std::vector<std::vector<int8_t*>>>> buffer;
     std::vector<int8_t*> buffer_to_free;
 
-    std::shared_ptr<std::vector<std::atomic<uint64_t>>> first;
-    std::shared_ptr<std::vector<std::atomic<uint64_t>>> last;
+    std::shared_ptr<std::vector<uint32_t>> first;
+    std::shared_ptr<std::vector<uint32_t>> last;
+    std::shared_ptr<std::vector<std::atomic<uint32_t>>> counter;
 
     std::shared_ptr<std::atomic<bool>> waiting_canceled;
 
