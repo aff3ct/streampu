@@ -18,8 +18,6 @@ namespace spu
 {
 namespace module
 {
-class Adaptor_1_to_n;
-class Adaptor_n_to_1;
 class Adaptor_m_to_n;
 class Set;
 }
@@ -32,8 +30,6 @@ class Socket : public tools::Interface_reset
 {
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
     friend Task;
-    friend module::Adaptor_1_to_n;
-    friend module::Adaptor_n_to_1;
     friend module::Adaptor_m_to_n;
     friend module::Set;
     friend Sequence;

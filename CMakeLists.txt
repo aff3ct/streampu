@@ -818,7 +818,7 @@ if(SPU_TESTS)
     set_tests_properties(pipeline35::spu-test-generic-pipeline PROPERTIES LABELS generic-pipeline)
     add_test(NAME pipeline36::spu-test-generic-pipeline COMMAND spu-test-generic-pipeline -e 120 -t "1,3,4,5,1" -r "((init),(relayf,incr,incrf,incr),(relayf),(incr,relay),(fin))" -u 1 -w)
     set_tests_properties(pipeline36::spu-test-generic-pipeline PROPERTIES LABELS "generic-pipeline;skip-memcheck") # to exclude this previous test from memchecks, active waiting is too long in Valgrind :-(
-    add_test(NAME pipeline37::spu-test-generic-pipeline COMMAND spu-test-generic-pipeline -e 10 -n "1,3,3,3,3,3,3,1" -t "1,3,1,4,7,32,1,1" -R "(init,incrf,incrf,incr,incr,incr,incrf,fin)")
+    add_test(NAME pipeline37::spu-test-generic-pipeline COMMAND spu-test-generic-pipeline -i ${INPUT_FILE} -n "1,3,3,3,3,3,3,1" -t "1,3,1,4,7,32,1,1" -R "(read,relay,relayf,relay,relay,relay,relayf,write)")
     set_tests_properties(pipeline37::spu-test-generic-pipeline PROPERTIES LABELS generic-pipeline)
 
     add_test(NAME sequence0::spu-test-exclusive-paths-pipeline COMMAND spu-test-exclusive-paths-pipeline -t 1 -q -i ${INPUT_FILE})

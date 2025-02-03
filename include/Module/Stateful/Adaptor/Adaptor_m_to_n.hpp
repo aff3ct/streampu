@@ -106,17 +106,17 @@ class Adaptor_m_to_n
     bool is_no_copy_pull();
     void reset_buffer();
 
-    virtual void push(const std::vector<const int8_t*>& in, const size_t frame_id);
-    virtual void pull(const std::vector<int8_t*>& out, const size_t frame_id);
+    void push(const std::vector<const int8_t*>& in, const size_t frame_id);
+    void pull(const std::vector<int8_t*>& out, const size_t frame_id);
 
     void wait_push();
     void wait_pull();
-    virtual void* get_empty_buffer(const size_t sid);
-    virtual void* get_filled_buffer(const size_t sid);
-    virtual void* get_empty_buffer(const size_t sid, void* swap_buffer);
-    virtual void* get_filled_buffer(const size_t sid, void* swap_buffer);
-    virtual void wake_up_pusher();
-    virtual void wake_up_puller();
+    void* get_empty_buffer(const size_t sid);
+    void* get_filled_buffer(const size_t sid);
+    void* get_empty_buffer(const size_t sid, void* swap_buffer);
+    void* get_filled_buffer(const size_t sid, void* swap_buffer);
+    void wake_up_pusher();
+    void wake_up_puller();
 };
 }
 }

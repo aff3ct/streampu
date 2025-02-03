@@ -12,17 +12,8 @@
 #ifndef MODULE_HPP_
 #include <Module/Module.hpp>
 #endif
-#ifndef ADAPTOR_1_TO_N_HPP_
-#include <Module/Stateful/Adaptor/Adaptor_1_to_n.hpp>
-#endif
-#ifndef ADAPTOR_HPP_
-#include <Module/Stateful/Adaptor/Adaptor.hpp>
-#endif
 #ifndef ADAPTOR_M_TO_N_HPP_
 #include <Module/Stateful/Adaptor/Adaptor_m_to_n.hpp>
-#endif
-#ifndef ADAPTOR_N_TO_1_HPP_
-#include <Module/Stateful/Adaptor/Adaptor_n_to_1.hpp>
 #endif
 #ifndef BINARYOP_HPP_
 #include <Module/Stateful/Binaryop/Binaryop.hpp>
