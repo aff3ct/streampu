@@ -16,7 +16,30 @@ Scheduler_from_file::Scheduler_from_file(runtime::Sequence& sequence, const std:
   : Scheduler(sequence)
 {
     std::ifstream f(filename);
-    json sched_data = json::parse(f);
+    if (!f.good())
+    {
+        std::stringstream message;
+        message << "The current file cannot be opened ('filename' = " << filename << ").";
+        throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
+    }
+
+    json data = json::parse(f);
+
+    if (!data.contains("scheduling"))
+    {
+        std::stringstream message;
+        message << "The current json file does not contain the required 'scheduling' field.";
+        throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
+    }
+
+    auto sched_data = data["scheduling"];
+
+    if (!sched_data.is_array())
+    {
+        std::stringstream message;
+        message << "Unexpected type for the 'scheduling' field (should be an array).";
+        throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
+    }
 
     this->sync_buff_sizes_from_file.resize(sched_data.size() - 1, 1);
     this->sync_active_waitings_from_file.resize(sched_data.size() - 1, false);
