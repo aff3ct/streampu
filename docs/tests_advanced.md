@@ -97,16 +97,23 @@ thread.
     to this file there is the `-F` parameter (or `--sched-file`).
     The expected JSON file looks like the following:
     ```json
-    [
-      { "tasks": 4, "cores": [                   0], "sync_buff_size": 1, "sync_waiting_type": "passive" },
-      { "tasks": 1, "cores": [                   1],                                                     },
-      { "tasks": 1, "cores": [                  10], "sync_buff_size": 4, "sync_waiting_type": "passive" },
-      { "tasks": 1, "cores": [                   2], "sync_buff_size": 1, "sync_waiting_type": "active"  },
-      { "tasks": 9, "cores": [                   3], "sync_buff_size": 1, "sync_waiting_type": "active"  },
-      { "tasks": 4, "cores": [4, 5, 6, 7, 8, 9, 12], "sync_buff_size": 1,                                },
-      { "tasks": 1, "cores": 1                     ,                      "sync_waiting_type": "passive" },
-      { "tasks": 2, "cores": 1                                                                           }
-    ]
+    {
+    "platform": "x7ti",
+    "ressources": {
+      "e-core": 8,
+      "p-core": 6
+    },
+    "scheduler_name": "HeRAD",
+    "date": "2025-02-03",
+    "scheduling": [
+        { "tasks": 5, "cores": [0],                          "core-type": "p-core", "sync_buff_size": 1, "sync_waiting_type": "active"  },
+        { "tasks": 1, "cores": [2],                          "core-type": "p-core", "sync_buff_size": 8, "sync_waiting_type": "passive" },
+        { "tasks": 6, "cores": [4],                          "core-type": "p-core",                                                     },
+        { "tasks": 4, "cores": [6, 8],                       "core-type": "p-core", "sync_buff_size": 1,                                },
+        { "tasks": 3, "cores": [12, 13, 14, 15, 16, 17, 18], "core-type": "e-core",                      "sync_waiting_type": "active"  },
+        { "tasks": 4, "cores": [19],                         "core-type": "e-core"                                                      }
+      ]
+    }
     ```
     Each line corresponds to one pipeline stage, the field `tasks` counts the
     number of consecutive tasks of the current stage while the field `cores` 
