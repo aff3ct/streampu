@@ -100,7 +100,7 @@ template<typename T>
 inline bool
 signbit(T arg);
 
-inline size_t
+size_t
 find_smallest_common_multiple(const size_t a, const size_t b);
 }
 }
