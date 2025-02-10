@@ -32,7 +32,7 @@ Task::Task(module::Module& module,
   , debug_precision(2)
   , debug_frame_max(-1)
   , codelet(
-      [](module::Module& m, Task& t, const size_t frame_id) -> int
+      [](module::Module& /*m*/, Task& /*t*/, const size_t /*frame_id*/) -> int
       {
           throw tools::unimplemented_error(__FILE__, __LINE__, __func__);
           return 0;
@@ -1111,7 +1111,7 @@ Task::update_n_frames(const size_t old_n_frames, const size_t new_n_frames)
 }
 
 void
-Task::update_n_frames_per_wave(const size_t old_n_frames_per_wave, const size_t new_n_frames_per_wave)
+Task::update_n_frames_per_wave(const size_t /*old_n_frames_per_wave*/, const size_t new_n_frames_per_wave)
 {
     size_t s_id = 0;
     for (auto& s : this->sockets)

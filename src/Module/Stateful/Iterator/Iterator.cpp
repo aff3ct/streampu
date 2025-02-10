@@ -30,7 +30,7 @@ Iterator::Iterator(const size_t limit)
 
     auto& p2 = this->create_task("reset");
     this->create_codelet(p2,
-                         [](Module& m, runtime::Task& t, const size_t frame_id) -> int
+                         [](Module& m, runtime::Task& /*t*/, const size_t /*frame_id*/) -> int
                          {
                              auto& ite = static_cast<Iterator&>(m);
                              ite.reset();
@@ -73,7 +73,7 @@ Iterator::iterate(int8_t* out, const int frame_id, const bool managed_memory)
 }
 
 void
-Iterator::_iterate(int8_t* out, const size_t frame_id)
+Iterator::_iterate(int8_t* out, const size_t /*frame_id*/)
 {
     size_t is_over_path = this->counter < this->limit ? 0 : 1;
     this->counter++;

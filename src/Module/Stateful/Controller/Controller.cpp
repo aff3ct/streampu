@@ -26,7 +26,7 @@ Controller::Controller(const size_t init_path)
 
     auto& p2 = this->create_task("reset");
     this->create_codelet(p2,
-                         [](Module& m, runtime::Task& t, const size_t frame_id) -> int
+                         [](Module& m, runtime::Task& /*t*/, const size_t /*frame_id*/) -> int
                          {
                              auto& ctr = static_cast<Controller&>(m);
                              ctr.reset();

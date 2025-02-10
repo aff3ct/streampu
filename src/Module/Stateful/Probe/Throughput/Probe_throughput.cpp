@@ -49,7 +49,7 @@ Probe_throughput::register_reporter(tools::Reporter_probe* reporter)
 }
 
 void
-Probe_throughput::_probe(const uint8_t* in, const size_t frame_id)
+Probe_throughput::_probe(const uint8_t* /*in*/, const size_t frame_id)
 {
     auto t_stop = std::chrono::steady_clock::now();
     auto time_duration = (double)std::chrono::duration_cast<std::chrono::microseconds>(t_stop - this->t_start).count();

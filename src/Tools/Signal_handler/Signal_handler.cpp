@@ -141,10 +141,10 @@ warmup_cpptrace()
 bool g_is_interrupt = false;
 #if defined(_WIN64) || defined(_WIN32)
 void
-signal_sigint_handler(int signo)
+signal_sigint_handler(int /*signo*/)
 #else /* Unix-like */
 void
-signal_sigint_handler(int signo, siginfo_t* info, void* context)
+signal_sigint_handler(int /*signo*/, siginfo_t* /*info*/, void* /*context*/)
 #endif
 {
     if (g_is_interrupt)

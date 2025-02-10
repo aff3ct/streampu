@@ -40,7 +40,7 @@ Probe_timestamp::register_reporter(tools::Reporter_probe* reporter)
 }
 
 void
-Probe_timestamp::_probe(const uint8_t* in, const size_t frame_id)
+Probe_timestamp::_probe(const uint8_t* /*in*/, const size_t frame_id)
 {
     std::chrono::microseconds us = std::chrono::duration_cast<std::chrono::microseconds>(
       // std::chrono::system_clock::now().time_since_epoch()

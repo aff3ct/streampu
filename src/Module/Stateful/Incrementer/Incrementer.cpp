@@ -88,7 +88,7 @@ Incrementer<T>::increment(const T* in, T* out, const int frame_id, const bool ma
 
 template<typename T>
 void
-Incrementer<T>::_increment(const T* in, T* out, const size_t frame_id)
+Incrementer<T>::_increment(const T* in, T* out, const size_t /*frame_id*/)
 {
     std::chrono::time_point<std::chrono::steady_clock> t_start;
     if (this->ns) t_start = std::chrono::steady_clock::now();

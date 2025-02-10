@@ -32,7 +32,7 @@ Probe_occurrence::register_reporter(tools::Reporter_probe* reporter)
 }
 
 void
-Probe_occurrence::_probe(const uint8_t* in, const size_t frame_id)
+Probe_occurrence::_probe(const uint8_t* /*in*/, const size_t frame_id)
 {
     this->proxy_probe((void*)&occurrences, frame_id);
     this->occurrences++;

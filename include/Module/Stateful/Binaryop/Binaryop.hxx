@@ -186,7 +186,7 @@ Binaryop<TI, TO, BOP>::perform(const TI* in0, const TI* in1, TO* out, const int 
 
 template<typename TI, typename TO, tools::proto_bop<TI, TO> BOP>
 void
-Binaryop<TI, TO, BOP>::_perform(const TI* in0, const TI* in1, TO* out, const size_t frame_id)
+Binaryop<TI, TO, BOP>::_perform(const TI* in0, const TI* in1, TO* out, const size_t /*frame_id*/)
 {
     for (size_t e = 0; e < this->n_elmts; e++)
         out[e] = BOP(in0[e], in1[e]);
@@ -194,7 +194,7 @@ Binaryop<TI, TO, BOP>::_perform(const TI* in0, const TI* in1, TO* out, const siz
 
 template<typename TI, typename TO, tools::proto_bop<TI, TO> BOP>
 void
-Binaryop<TI, TO, BOP>::_perform(const TI* in, TI* fwd, const size_t frame_id)
+Binaryop<TI, TO, BOP>::_perform(const TI* in, TI* fwd, const size_t /*frame_id*/)
 {
     for (size_t e = 0; e < this->n_elmts; e++)
         fwd[e] = BOP(fwd[e], in[e]);
@@ -202,7 +202,7 @@ Binaryop<TI, TO, BOP>::_perform(const TI* in, TI* fwd, const size_t frame_id)
 
 template<typename TI, typename TO, tools::proto_bop<TI, TO> BOP>
 void
-Binaryop<TI, TO, BOP>::_perform(const TI in0, const TI* in1, TO* out, const size_t frame_id)
+Binaryop<TI, TO, BOP>::_perform(const TI in0, const TI* in1, TO* out, const size_t /*frame_id*/)
 {
     for (size_t e = 0; e < this->n_elmts; e++)
         out[e] = BOP(in0, in1[e]);
@@ -210,7 +210,7 @@ Binaryop<TI, TO, BOP>::_perform(const TI in0, const TI* in1, TO* out, const size
 
 template<typename TI, typename TO, tools::proto_bop<TI, TO> BOP>
 void
-Binaryop<TI, TO, BOP>::_perform(const TI* in0, const TI in1, TO* out, const size_t frame_id)
+Binaryop<TI, TO, BOP>::_perform(const TI* in0, const TI in1, TO* out, const size_t /*frame_id*/)
 {
     for (size_t e = 0; e < this->n_elmts; e++)
         out[e] = BOP(in0[e], in1);
@@ -218,7 +218,7 @@ Binaryop<TI, TO, BOP>::_perform(const TI* in0, const TI in1, TO* out, const size
 
 template<typename TI, typename TO, tools::proto_bop<TI, TO> BOP>
 void
-Binaryop<TI, TO, BOP>::_perform(const TI in, TI* fwd, const size_t frame_id)
+Binaryop<TI, TO, BOP>::_perform(const TI in, TI* fwd, const size_t /*frame_id*/)
 {
     for (size_t e = 0; e < this->n_elmts; e++)
         fwd[e] = BOP(fwd[e], in);

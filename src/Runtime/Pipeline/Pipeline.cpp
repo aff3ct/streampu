@@ -383,7 +383,7 @@ create_sequence<const runtime::Task>(const std::vector<const runtime::Task*>& fi
                                      const size_t& n_threads,
                                      const bool& thread_pinning,
                                      const std::vector<size_t>& puids,
-                                     const bool& tasks_inplace)
+                                     const bool& /*tasks_inplace*/)
 {
     return new runtime::Sequence(firsts, lasts, exclusions, n_threads, thread_pinning, puids);
 }
@@ -423,7 +423,7 @@ create_sequence<const runtime::Task>(const std::vector<const runtime::Task*>& fi
                                      const size_t& n_threads,
                                      const bool& thread_pinning,
                                      const std::string& pipeline_pinning_policy,
-                                     const bool& tasks_inplace)
+                                     const bool& /*tasks_inplace*/)
 {
     return new runtime::Sequence(firsts, lasts, exclusions, n_threads, thread_pinning, pipeline_pinning_policy);
 }
@@ -444,8 +444,8 @@ create_sequence<runtime::Task>(const std::vector<runtime::Task*>& firsts,
 
 template <class TA>
 void Pipeline
-::init(const std::vector<TA*> &firsts,
-       const std::vector<TA*> &lasts,
+::init(const std::vector<TA*> &/*firsts*/,
+       const std::vector<TA*> &/*lasts*/,
        const std::vector<std::tuple<std::vector<TA*>,std::vector<TA*>,std::vector<TA*>>> &sep_stages,
        const std::vector<size_t> &n_threads,
        const std::vector<size_t> &synchro_buffer_sizes,

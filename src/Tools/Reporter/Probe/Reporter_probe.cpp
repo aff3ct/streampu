@@ -32,7 +32,7 @@ Reporter_probe::Reporter_probe(const std::string& group_name)
 }
 
 void
-Reporter_probe::probe(const module::AProbe& probe, const void* data, const size_t frame_id)
+Reporter_probe::probe(const module::AProbe& probe, const void* data, const size_t /*frame_id*/)
 {
     std::string col_name = probe.get_col_name();
     const int col = this->name_to_col[col_name];

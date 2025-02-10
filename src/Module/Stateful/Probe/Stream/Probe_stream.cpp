@@ -33,7 +33,7 @@ Probe_stream::register_reporter(tools::Reporter_probe* reporter)
 }
 
 void
-Probe_stream::_probe(const uint8_t* in, const size_t frame_id)
+Probe_stream::_probe(const uint8_t* /*in*/, const size_t frame_id)
 {
     for (size_t f = 0; f < this->get_n_frames(); f++)
         this->proxy_probe((void*)&occurrences, frame_id);

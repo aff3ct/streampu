@@ -136,7 +136,7 @@ Set::init()
         }
 
     this->create_codelet(p,
-                         [](Module& m, runtime::Task& t, const size_t frame_id) -> int
+                         [](Module& m, runtime::Task& t, const size_t /*frame_id*/) -> int
                          {
                              auto& ss = static_cast<Set&>(m);
 

@@ -31,7 +31,7 @@ Controller_limit::reset()
 }
 
 void
-Controller_limit::_control(int8_t* out, const size_t frame_id)
+Controller_limit::_control(int8_t* out, const size_t /*frame_id*/)
 {
     if (this->counter >= this->limit) this->path = !init_path;
     out[0] = this->path;

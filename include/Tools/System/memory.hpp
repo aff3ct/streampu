@@ -42,7 +42,7 @@ struct aligned_allocator
     {
     }
     T* allocate(std::size_t n) { return buffer_alloc<T>(n); }
-    void deallocate(T* p, std::size_t n) { buffer_free<T>(p); }
+    void deallocate(T* p, std::size_t /*n*/) { buffer_free<T>(p); }
 };
 
 // Returns true if and only if storage allocated from ma1 can be

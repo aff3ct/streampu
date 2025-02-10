@@ -235,6 +235,7 @@ Thread_pinning::pin(const std::string hwloc_objects)
         }
     }
 #else
+    (void)hwloc_objects;
     if (g_enable_logs)
     {
         std::clog << "'pin' method do nothing as StreamPU has not been linked with the 'hwloc' library." << std::endl;

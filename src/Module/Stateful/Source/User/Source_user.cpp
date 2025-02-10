@@ -108,7 +108,7 @@ Source_user<B>::is_done() const
 
 template<typename B>
 void
-Source_user<B>::_generate(B* out_data, const size_t frame_id)
+Source_user<B>::_generate(B* out_data, const size_t /*frame_id*/)
 {
     std::copy(this->source[this->next_frame_idx].begin(), this->source[this->next_frame_idx].end(), out_data);
 
