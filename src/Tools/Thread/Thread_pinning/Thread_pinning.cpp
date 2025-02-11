@@ -153,6 +153,7 @@ Thread_pinning::pin(const size_t puid)
         }
     }
 #else
+    (void)puid;
     if (g_enable_logs)
     {
         std::clog << "'pin' method do nothing as StreamPU has not been linked with the 'hwloc' library." << std::endl;
