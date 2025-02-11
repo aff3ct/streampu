@@ -117,7 +117,7 @@ class Probe : public AProbe
     virtual void set_col_size(const size_t col_size);
 
     const std::string& get_col_name() const;
-    const size_t get_socket_size() const;
+    size_t get_socket_size() const;
 
   protected:
     virtual void _probe(const T* in, const size_t frame_id);

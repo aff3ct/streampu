@@ -207,7 +207,7 @@ Probe<T>::get_col_name() const
 }
 
 template<typename T>
-const size_t
+size_t
 Probe<T>::get_socket_size() const
 {
     return this->socket_size;
