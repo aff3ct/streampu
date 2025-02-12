@@ -30,7 +30,7 @@
     GIT_SUBMODULE_STRATEGY: recursive
     CMAKE_PREFIX_PATH : "C:/Users/ci/vcpkg/installed/x64-windows"
 
-build-windows-msvc-avx_JSON_TEST:
+build-windows-msvc-avx_TEST:
   extends: .build-win-msvc
   allow_failure: true
   parallel:
@@ -78,7 +78,7 @@ build-windows-msvc-avx_JSON_TEST:
     CMAKE_INCLUDE_PATH: C:/msys64/mingw64/include/
 
 
-build-windows-gcc_JSON :
+build-windows-gcc :
   extends: .build-win-msys2
   parallel:
     matrix:
