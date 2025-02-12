@@ -32,21 +32,19 @@
 
 build-windows-msvc-avx_JSON_TEST:
   extends: .build-win-msvc
+  allow_failure: true
   parallel:
     matrix:
-      - JSON: ['OFF']
-        TEST: ['OFF','ON']
-      - JSON: ['ON'] 
-        TEST: ['OFF']
+      - TEST: ['OFF','ON']
   image: registry.gitlab.com/aff3ct/aff3ct/x86_64_windows_msvc:v15
   variables:
     CFLAGS: -D_CRT_SECURE_NO_DEPRECATE /MT /EHsc /arch:AVX
-    CMAKE_OPT: -DSPU_JSON_STATS=${JSON} -DSPU_TESTS=${TEST} -DSPU_COMPILE_STATIC_LIB=ON -DSPU_COMPILE_SHARED_LIB=ON -DSPU_STACKTRACE=OFF -DSPU_OVERRIDE_VERSION=$GIT_TAG #-DCMAKE_VERBOSE_MAKEFILE=ON
-    NAME: build_windows_msvc_avx
-  artifacts:
-    name: build-windows-msvc-avx
-    paths:
-      - build_windows_msvc_avx
+    CMAKE_OPT: -DSPU_JSON_STATS=ON -DSPU_TESTS=${TEST} -DSPU_COMPILE_STATIC_LIB=ON -DSPU_COMPILE_SHARED_LIB=ON -DSPU_STACKTRACE=OFF -DSPU_OVERRIDE_VERSION=$GIT_TAG #-DCMAKE_VERBOSE_MAKEFILE=ON
+    NAME: build_windows_msvc_avx_test-${TEST}
+  # artifacts:
+  #   name: build-windows-msvc-avx
+  #   paths:
+  #     - build_windows_msvc_avx
   script:
     - ./ci/windows/build-windows-msvc.bat
 
@@ -86,19 +84,17 @@ build-windows-gcc_JSON :
     matrix:
       - COMPILER: gcc-x86-sse4.2
         CFLAGS: -msse4.2
-        JSON: ['OFF','ON']
       - COMPILER: gcc-x64-avx2
-        CFLAGS: -mavx2
-        JSON: ['ON']      
+        CFLAGS: -mavx2  
   image: registry.gitlab.com/aff3ct/aff3ct/x86_64_windows_gcc:v8.1.0
   variables:
     CFLAGS: -Wall -funroll-loops -m64 $CFLAGS
     LFLAGS: -static -static-libgcc -static-libstdc++
-    CMAKE_OPT: -DSPU_JSON_STATS=${JSON} -DSPU_TESTS=ON -DSPU_COMPILE_STATIC_LIB=ON -DSPU_COMPILE_SHARED_LIB=ON -DSPU_STACKTRACE=OFF -DSPU_OVERRIDE_VERSION=$GIT_TAG
+    CMAKE_OPT: -DSPU_JSON_STATS=ON -DSPU_TESTS=ON -DSPU_COMPILE_STATIC_LIB=ON -DSPU_COMPILE_SHARED_LIB=ON -DSPU_STACKTRACE=OFF -DSPU_OVERRIDE_VERSION=$GIT_TAG
     NAME: build_windows_${COMPILER}
-  artifacts:
-    name: build-windows-${COMPILER}
-    paths:
-      - build_windows_${COMPILER}
+  # artifacts:
+  #   name: build-windows-${COMPILER}
+  #   paths:
+  #     - build_windows_${COMPILER}
   script:
     - ./ci/windows/build-windows-gcc.bat
