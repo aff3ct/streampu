@@ -115,15 +115,15 @@ build-linux-gcc-x64-avx2:
   except:
     - schedules
   image: registry.gitlab.com/aff3ct/aff3ct/x86_64_ubuntu_gcc:v9.3.0
-  artifacts:
-    name: build-linux-gcc-x64-avx2
-    paths:
-      - build_linux_gcc_x64_avx2
   variables:
     CFLAGS: -Wall -funroll-loops -m64 -mavx2 -mfma
     LFLAGS: -static -static-libgcc -static-libstdc++ -Wl,--whole-archive -lrt -lpthread -Wl,--no-whole-archive
     CMAKE_OPT: -DSPU_JSON_STATS=ON -DSPU_TESTS=ON -DSPU_COMPILE_STATIC_LIB=ON -DSPU_COMPILE_SHARED_LIB=ON -DSPU_STACKTRACE=OFF -DSPU_OVERRIDE_VERSION=$GIT_TAG
     NAME: build_linux_gcc_x64_avx2
+  artifacts:
+    name: build-linux-gcc-x64-avx2
+    paths:
+      - ${NAME}
 
 build-linux-gcc-coverage-regression:
   extends: .build-linux-gcc
@@ -158,7 +158,7 @@ build-linux-clang:
   artifacts:
     name: build-linux-clang
     paths:
-      - build_linux_clang
+      - ${NAME}
 
 build-linux-icpc:
   extends: .build-linux
@@ -173,7 +173,7 @@ build-linux-icpc:
   artifacts:
     name: build-linux-icpc
     paths:
-      - build_linux_icpc
+      - ${NAME}
 
 ## test jobs
 

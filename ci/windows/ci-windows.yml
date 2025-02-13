@@ -39,7 +39,7 @@ build-windows-msvc-avx:
   artifacts:
     name: build-windows-msvc-avx
     paths:
-      - build_windows_msvc_avx
+      - ${NAME}
   script:
     - ./ci/windows/build-windows-msvc.bat
 
@@ -86,6 +86,6 @@ build-windows-gcc :
   artifacts:
     name: build-windows-${COMPILER}
     paths:
-      - build_windows_${COMPILER}
+      - ${NAME}
   script:
     - ./ci/windows/build-windows-gcc.bat
