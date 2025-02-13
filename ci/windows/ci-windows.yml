@@ -25,7 +25,7 @@
     GIT_SUBMODULE_STRATEGY: recursive
     CMAKE_PREFIX_PATH : "C:/Users/ci/vcpkg/installed/x64-windows"
 
-build-windows-msvc-avx_TEST:
+build-windows-msvc-avx:
   extends: .build-win-msvc
   allow_failure: true
   parallel:
