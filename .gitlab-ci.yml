@@ -75,7 +75,8 @@ analysis-clang-format:
   stage: analysis
   image: ubuntu:22.04
   script:
-    - apt-get -y install clang-format
+    - apt update
+    - apt -y install clang-format
     - mkdir original_code
     - cp -r include original_code
     - cp -r src original_code
