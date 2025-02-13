@@ -1,12 +1,11 @@
-
-###### CI environment
+# CI environment
 
 workflow:
   auto_cancel:
     on_new_commit: interruptible
 
   rules:
-    - if: $CI_COMMIT_TITLE =~ /-draft$/ # add '-draft' to 1st commit message line end  to ignore pipline
+    - if: $CI_COMMIT_TITLE =~ /-draft$/ # add '-draft' to 1st commit message line end to ignore pipline
       when: never
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       when: never
@@ -25,7 +24,7 @@ stages:
   - coverage
   - deploy
 
-################################# Valeur par défaut  ####################################################################################################################################################################################
+## default values
 
 default:
   artifacts:
@@ -40,9 +39,9 @@ before_script:
   - hostname
   - whoami
 
-################################# conf générique  ####################################################################################################################################################################################
+## generic configuraion
 
-### Linux
+### for Linux
 
 .config-linux-tags:
   tags:
@@ -55,10 +54,8 @@ before_script:
   before_script:
     - hostname
     - whoami
-    - apt-get update
-    - apt-get install -y nlohmann-json3-dev
 
-################################# Analysis ####################################################################################################################################################################################
+## analysis jobs
 
 analysis-headers:
   extends: .config-linux-tags
@@ -92,7 +89,7 @@ analysis-clang-format:
     - cp -r signal_tracer new_code
     - diff -r new_code original_code
 
-################################# Build #####################################################################################################################################################################################
+## build jobs
 
 .build-linux:
   extends: .config-common-linux
@@ -106,30 +103,26 @@ analysis-clang-format:
     - source ./ci/tools/threads.sh
     - ./ci/build-linux-macos.sh
 
-### LINUX gcc
-
 .build-linux-gcc:
   extends: .build-linux
   variables:
     CC: 'gcc'
     CXX: 'g++'
 
-
 build-linux-gcc-x64-avx2:
   extends: .build-linux-gcc
   except:
     - schedules
   image: registry.gitlab.com/aff3ct/aff3ct/x86_64_ubuntu_gcc:v9.3.0
-  # artifacts:
-  #   name: build-linux-gcc-x64-avx2
-  #   paths:
-  #     - build_linux_gcc_x64_avx2
+  artifacts:
+    name: build-linux-gcc-x64-avx2
+    paths:
+      - build_linux_gcc_x64_avx2
   variables:
     CFLAGS: -Wall -funroll-loops -m64 -mavx2 -mfma
     LFLAGS: -static -static-libgcc -static-libstdc++ -Wl,--whole-archive -lrt -lpthread -Wl,--no-whole-archive
     CMAKE_OPT: -DSPU_JSON_STATS=ON -DSPU_TESTS=ON -DSPU_COMPILE_STATIC_LIB=ON -DSPU_COMPILE_SHARED_LIB=ON -DSPU_STACKTRACE=OFF -DSPU_OVERRIDE_VERSION=$GIT_TAG
     NAME: build_linux_gcc_x64_avx2
-
 
 build-linux-gcc-coverage-regression:
   extends: .build-linux-gcc
@@ -151,8 +144,6 @@ build-linux-gcc-coverage-regression:
     - rm -rf build/bin
     - rm -rf build/lib
 
-### LINUX Autres
-
 build-linux-clang:
   extends: .build-linux
   except:
@@ -163,10 +154,10 @@ build-linux-clang:
     CFLAGS: -Wall -Wno-overloaded-virtual -funroll-loops
     CMAKE_OPT: -DSPU_JSON_STATS=ON -DSPU_TESTS=ON -DSPU_COMPILE_STATIC_LIB=ON -DSPU_COMPILE_SHARED_LIB=ON -DSPU_OVERRIDE_VERSION=$GIT_TAG
     NAME: build_linux_clang 
-  # artifacts:
-  #   name: build-linux-clang
-  #   paths:
-  #     - build_linux_clang
+  artifacts:
+    name: build-linux-clang
+    paths:
+      - build_linux_clang
 
 build-linux-icpc:
   extends: .build-linux
@@ -178,51 +169,12 @@ build-linux-icpc:
     CFLAGS: -Wall -funroll-loops -march=native -std=c++11
     CMAKE_OPT: -DSPU_JSON_STATS=ON -DSPU_TESTS=ON -DSPU_COMPILE_STATIC_LIB=ON -DSPU_COMPILE_SHARED_LIB=ON -DSPU_OVERRIDE_VERSION=$GIT_TAG
     NAME: build_linux_icpc
-  # artifacts:
-  #   name: build-linux-icpc
-  #   paths:
-  #     - build_linux_icpc
-  before_script:
-  - hostname
-  - whoami
-  - wget -qO - https://repositories.intel.com/gpu/intel-graphics.key | gpg --yes --dearmor --output /usr/share/keyrings/intel-graphics-archive-keyring.gpg
-  - apt-get update
-  - apt-get install -y nlohmann-json3-dev
+  artifacts:
+    name: build-linux-icpc
+    paths:
+      - build_linux_icpc
 
-
-################################# Check ####################################################################################################################################################################################
-
-# TODO Migration Streampu ref KO pour Aff3ct fait sens dans streampu
-
-# check-debug-parser:
-# excepts: schedules
-#   image: registry.gitlab.com/aff3ct/aff3ct/x86_64_ubuntu_python:v3.8.5
-#   stage: check
-#   variables:
-#     GIT_SUBMODULE_STRATEGY: recursive
-#   needs:
-#     - job: build-linux-gcc
-#       artifacts: true
-#   allow_failure: true
-#   tags:
-#     - x86_64
-#     - sse4.2
-#     - linux
-#     - docker
-#   artifacts:
-#     name: debug-parser-output
-#     when: always
-#     paths:
-#       - scripts/debug_parser/test/data
-    # extends: .config-common-linux
-#   script:
-#     - source ./ci/tools/git-version.sh
-#     - cd ./scripts/debug_parser/
-#     - pip3 install -r requirements.txt
-#     - export AFF3CT_PATH="../../../build_linux_gcc-x64-sse4.2/bin/aff3ct-$GIT_VERSION"
-#     - ./test/test.sh
-
-################################# Test ####################################################################################################################################################################################
+## test jobs
 
 test-memcheck-regression:
   extends: .config-common-linux
@@ -253,9 +205,9 @@ test-memcheck-regression:
     - ./ci/build-linux-macos.sh
     - ./ci/test-memcheck-regression.sh
 
-################################# Coverage ####################################################################################################################################################################################
+## coverage jobs
 
-# Compute coverage indicator
+### compute coverage indicator
 coverage-linux:
   extends: .config-common-linux
   stage: coverage
@@ -274,7 +226,7 @@ coverage-linux:
   script:
     - ./ci/coverage-linux.sh
 
-################################# Deploy ####################################################################################################################################################################################
+## deploy jobs
 
 pages:
   stage: deploy
@@ -296,31 +248,9 @@ pages:
       - public
     expire_in: 30 days
 
-
+## additionnal windows jobs (if win runner(s) available)
 
 include:
-  # Tests needing specific Runner
   - local: 'ci/windows/ci-windows.yml'
     rules: 
       - if : $CI_SPU_RUNNERS_WINDOWS == "ON"
-  # - local: 'ci/macos/ci-macos.yml'
-  #   rules: 
-  #     - if : $CI_SPU_RUNNERS_MACOS == "ON"
-
-  # # Alternative runner for main pipline
-  # # 1 Plafrim
-  # - local: 'ci/ci-plafrim.yml'
-  #   rules:
-  #     - if : $CI_SPU_RUNNER_PLAFRIM == "ON"
-  # # 2 Standard Linux runner
-  # - local: 'ci/ci-no-plafrim.yml'
-  #   rules:
-  #     - if : $CI_SPU_RUNNER_PLAFRIM == "OFF"
-  
-  # Deploy
-  # - local: 'ci/deploy/deploy_gitlab_com.yml'
-  #   rules: 
-  #     - if : $CI_SERVER_HOST == "gitlab.com"
-  # - local: 'ci/deploy/deploy_github_com.yml'
-  #   rules: 
-  #     - if : $CI_SERVER_HOST == "github.com"

@@ -1,22 +1,17 @@
-### Windows
-
-### Windows
+# Windows
 
 .tags-windows:
   tags:
     - x86_64
     - windows
-    - nlohmann
 
-
-  ### WIN msvc
+## MSVC
 
 .config-msvc:
   extends: .tags-windows
   before_script:
     - hostname
     - whoami
-
 
 .build-win-msvc:
   extends: .config-msvc
@@ -41,29 +36,26 @@ build-windows-msvc-avx_TEST:
     CFLAGS: -D_CRT_SECURE_NO_DEPRECATE /MT /EHsc /arch:AVX
     CMAKE_OPT: -DSPU_JSON_STATS=ON -DSPU_TESTS=${TEST} -DSPU_COMPILE_STATIC_LIB=ON -DSPU_COMPILE_SHARED_LIB=ON -DSPU_STACKTRACE=OFF -DSPU_OVERRIDE_VERSION=$GIT_TAG #-DCMAKE_VERBOSE_MAKEFILE=ON
     NAME: build_windows_msvc_avx_test-${TEST}
-  # artifacts:
-  #   name: build-windows-msvc-avx
-  #   paths:
-  #     - build_windows_msvc_avx
+  artifacts:
+    name: build-windows-msvc-avx
+    paths:
+      - build_windows_msvc_avx
   script:
     - ./ci/windows/build-windows-msvc.bat
 
-  ### WIN Msys2
-
-
+# MSYS2 (GCC)
 
 .config-msys2:
   extends: .tags-windows
   variables:
     MSYSTEM: "MINGW64"
-    CHERE_INVOKING: "yes"   
+    CHERE_INVOKING: "yes"
   before_script:
     - hostname
     - whoami
     - $env:CMAKE_PREFIX_PATH +=";$Env:SystemDrive\msys64\mingw64"
     - $Env:CMAKE_INSTALL_PREFIX +=";$Env:SystemDrive\msys64\mingw64"
     - $Env:path += ";$Env:SystemDrive\msys64\usr\bin;$Env:SystemDrive\msys64\mingw64\bin"
-
 
 .build-win-msys2:
   extends: .config-msys2
@@ -76,7 +68,6 @@ build-windows-msvc-avx_TEST:
   variables:
     GIT_SUBMODULE_STRATEGY: recursive
     CMAKE_INCLUDE_PATH: C:/msys64/mingw64/include/
-
 
 build-windows-gcc :
   extends: .build-win-msys2
@@ -92,9 +83,9 @@ build-windows-gcc :
     LFLAGS: -static -static-libgcc -static-libstdc++
     CMAKE_OPT: -DSPU_JSON_STATS=ON -DSPU_TESTS=ON -DSPU_COMPILE_STATIC_LIB=ON -DSPU_COMPILE_SHARED_LIB=ON -DSPU_STACKTRACE=OFF -DSPU_OVERRIDE_VERSION=$GIT_TAG
     NAME: build_windows_${COMPILER}
-  # artifacts:
-  #   name: build-windows-${COMPILER}
-  #   paths:
-  #     - build_windows_${COMPILER}
+  artifacts:
+    name: build-windows-${COMPILER}
+    paths:
+      - build_windows_${COMPILER}
   script:
     - ./ci/windows/build-windows-gcc.bat
