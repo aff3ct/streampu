@@ -13,7 +13,7 @@ workflow:
     - if: $CI_SPU_ON_JOB_FAILURE == "none"
       auto_cancel:
         on_job_failure: none
-    - if: $CI_SPU_ON_JOB_FAILURE != "none"
+    - if: $CI_SPU_ON_JOB_FAILURE == "all"
       auto_cancel:
         on_job_failure: all
 
