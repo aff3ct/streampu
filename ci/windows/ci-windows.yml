@@ -5,7 +5,11 @@
     - x86_64
     - windows
 
-## MSVC
+## build jobs ##
+################
+
+
+#### MSVC 
 
 .config-msvc:
   extends: .tags-windows
@@ -16,8 +20,6 @@
 .build-win-msvc:
   extends: .config-msvc
   stage: build
-  except:
-    - schedules
   needs:
     - job: analysis-headers
       artifacts: false
@@ -25,7 +27,7 @@
     GIT_SUBMODULE_STRATEGY: recursive
     CMAKE_PREFIX_PATH : "C:/Users/ci/vcpkg/installed/x64-windows"
 
-build-windows-msvc-avx:
+.build-windows-msvc-avx:
   extends: .build-win-msvc
   allow_failure: true
   parallel:
@@ -36,14 +38,30 @@ build-windows-msvc-avx:
     CFLAGS: -D_CRT_SECURE_NO_DEPRECATE /MT /EHsc /arch:AVX
     CMAKE_OPT: -DSPU_JSON_STATS=ON -DSPU_TESTS=${TEST} -DSPU_COMPILE_STATIC_LIB=ON -DSPU_COMPILE_SHARED_LIB=ON -DSPU_STACKTRACE=OFF -DSPU_OVERRIDE_VERSION=$GIT_TAG #-DCMAKE_VERBOSE_MAKEFILE=ON
     NAME: build_windows_msvc_avx_test-${TEST}
+  script:
+    - ./ci/windows/build-windows-msvc.bat
+
+# with artifacts
+
+build-windows-msvc-avx-art:
+  extends: .build-windows-msvc-avx
+  rules :
+    - if : $FULL_ARTEFACTS == "ON"
   artifacts:
     name: build-windows-msvc-avx
     paths:
       - ${NAME}
-  script:
-    - ./ci/windows/build-windows-msvc.bat
 
-# MSYS2 (GCC)
+# without artifacts
+
+build-windows-msvc-avx:
+  extends: .build-windows-msvc-avx
+  rules :
+    - if : $FULL_ARTEFACTS == "OFF"
+
+
+
+#### MSYS2 (GCC)
 
 .config-msys2:
   extends: .tags-windows
@@ -60,8 +78,6 @@ build-windows-msvc-avx:
 .build-win-msys2:
   extends: .config-msys2
   stage: build
-  except:
-    - schedules
   needs:
     - job: analysis-headers
       artifacts: false
@@ -69,7 +85,7 @@ build-windows-msvc-avx:
     GIT_SUBMODULE_STRATEGY: recursive
     CMAKE_INCLUDE_PATH: C:/msys64/mingw64/include/
 
-build-windows-gcc :
+.build-windows-gcc :
   extends: .build-win-msys2
   parallel:
     matrix:
@@ -83,9 +99,25 @@ build-windows-gcc :
     LFLAGS: -static -static-libgcc -static-libstdc++
     CMAKE_OPT: -DSPU_JSON_STATS=ON -DSPU_TESTS=ON -DSPU_COMPILE_STATIC_LIB=ON -DSPU_COMPILE_SHARED_LIB=ON -DSPU_STACKTRACE=OFF -DSPU_OVERRIDE_VERSION=$GIT_TAG
     NAME: build_windows_${COMPILER}
+
+  script:
+    - ./ci/windows/build-windows-gcc.bat
+
+
+# with artifacts
+
+build-windows-gcc-art:
+  extends: .build-windows-gcc
+  rules :
+    - if : $FULL_ARTEFACTS == "ON"
   artifacts:
     name: build-windows-${COMPILER}
     paths:
       - ${NAME}
-  script:
-    - ./ci/windows/build-windows-gcc.bat
+
+# without artifacts
+
+build-windows-gcc:
+  extends: .build-windows-gcc
+  rules :
+    - if : $FULL_ARTEFACTS == "OFF"
