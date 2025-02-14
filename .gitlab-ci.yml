@@ -1,5 +1,4 @@
-# CI environment ##
-###################
+# CI environment
 
 workflow:
   auto_cancel:
@@ -25,7 +24,7 @@ stages:
   - coverage
   - deploy
 
-## default values
+# default values
 
 default:
   artifacts:
@@ -41,9 +40,7 @@ before_script:
   - hostname
   - whoami
 
-## generic configuraion
-
-### for Linux
+# generic configuraion for Linux
 
 .config-linux-tags:
   tags:
@@ -57,6 +54,7 @@ before_script:
     - hostname
     - whoami
 
+###################
 ## analysis jobs ##
 ###################
 
@@ -93,7 +91,7 @@ analysis-clang-format:
     - cp -r signal_tracer new_code
     - diff -r new_code original_code
 
-
+################
 ## build jobs ##
 ################
 
@@ -109,8 +107,8 @@ analysis-clang-format:
     - source ./ci/tools/threads.sh
     - ./ci/build-linux-macos.sh
 
-
-# gcc
+# GCC
+# ---
 
 .build-linux-gcc:
   extends: .build-linux
@@ -118,15 +116,14 @@ analysis-clang-format:
     CC: 'gcc'
     CXX: 'g++'
 
-## input of jobs
-
+# require to generate coverage after
 build-linux-gcc-coverage-regression:
   extends: .build-linux-gcc
   image: registry.gitlab.com/aff3ct/aff3ct/x86_64_ubuntu_coverage
   variables:
     CFLAGS: -Wall -funroll-loops -msse4.2 --coverage
     LFLAGS: --coverage
-    CMAKE_OPT: -DSPU_JSON_STATS=ON -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS_DEBUG=-O0 -DSPU_TESTS=ON -DSPU_COMPILE_STATIC_LIB=ON -DSPU_COMPILE_SHARED_LIB=ON -DSPU_LINK_HWLOC=ON -DSPU_OVERRIDE_VERSION=$GIT_TAG
+    CMAKE_OPT: -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS_DEBUG=-O0 -DSPU_TESTS=ON -DSPU_COMPILE_STATIC_LIB=ON -DSPU_COMPILE_SHARED_LIB=ON -DSPU_LINK_HWLOC=ON -DSPU_OVERRIDE_VERSION=$GIT_TAG
   artifacts:
     name: regression-code-coverage-files
     when: always
@@ -140,23 +137,37 @@ build-linux-gcc-coverage-regression:
     - rm -rf build/bin
     - rm -rf build/lib
 
-## no input of jobs
-
 .build-linux-gcc-x64-avx2:
   extends: .build-linux-gcc
   image: registry.gitlab.com/aff3ct/aff3ct/x86_64_ubuntu_gcc:v9.3.0
   variables:
     CFLAGS: -Wall -funroll-loops -m64 -mavx2 -mfma
     LFLAGS: -static -static-libgcc -static-libstdc++ -Wl,--whole-archive -lrt -lpthread -Wl,--no-whole-archive
-    CMAKE_OPT: -DSPU_JSON_STATS=ON -DSPU_TESTS=ON -DSPU_COMPILE_STATIC_LIB=ON -DSPU_COMPILE_SHARED_LIB=ON -DSPU_STACKTRACE=OFF -DSPU_OVERRIDE_VERSION=$GIT_TAG
+    CMAKE_OPT: -DSPU_TESTS=ON -DSPU_COMPILE_STATIC_LIB=ON -DSPU_COMPILE_SHARED_LIB=ON -DSPU_STACKTRACE=OFF -DSPU_OVERRIDE_VERSION=$GIT_TAG
     NAME: build_linux_gcc_x64_avx2
   artifacts:
     name: build-linux-gcc-x64-avx2
     paths:
       - ${NAME}
 
+# with artifacts
+build-linux-gcc-x64-avx2-artifacts:
+  extends: .build-linux-gcc-x64-avx2
+  rules :
+    - if : $CI_PIPELINE_SOURCE != "schedule" && ($CI_SPU_BUILD_ARTIFACTS == null || $CI_SPU_BUILD_ARTIFACTS == "ON")
+  artifacts:
+    name: build-linux-gcc-x64-avx2
+    paths:
+      - ${NAME}
 
-# clang
+# without artifacts
+build-linux-gcc-x64-avx2:
+  extends: .build-linux-gcc-x64-avx2
+  rules :
+    - if : $CI_PIPELINE_SOURCE != "schedule" && $CI_SPU_BUILD_ARTIFACTS == "OFF"
+
+# CLANG
+# -----
 
 .build-linux-clang:
   extends: .build-linux
@@ -164,10 +175,27 @@ build-linux-gcc-coverage-regression:
   variables:
     CXX: clang++
     CFLAGS: -Wall -Wno-overloaded-virtual -funroll-loops
-    CMAKE_OPT: -DSPU_JSON_STATS=ON -DSPU_TESTS=ON -DSPU_COMPILE_STATIC_LIB=ON -DSPU_COMPILE_SHARED_LIB=ON -DSPU_OVERRIDE_VERSION=$GIT_TAG
+    CMAKE_OPT: -DSPU_TESTS=ON -DSPU_COMPILE_STATIC_LIB=ON -DSPU_COMPILE_SHARED_LIB=ON -DSPU_OVERRIDE_VERSION=$GIT_TAG
     NAME: build_linux_clang 
 
-# Icpc
+# with artifacts
+build-linux-clang-artifacts:
+  extends: .build-linux-clang
+  rules :
+    - if : $CI_PIPELINE_SOURCE != "schedule" && ($CI_SPU_BUILD_ARTIFACTS == null || $CI_SPU_BUILD_ARTIFACTS == "ON")
+  artifacts:
+    name: build-linux-clang
+    paths:
+      - ${NAME}
+
+# without artifacts
+build-linux-clang:
+  extends: .build-linux-clang
+  rules :
+    - if : $CI_PIPELINE_SOURCE != "schedule" && $CI_SPU_BUILD_ARTIFACTS == "OFF"
+
+# ICPC
+# ----
 
 .build-linux-icpc:
   extends: .build-linux
@@ -175,57 +203,26 @@ build-linux-gcc-coverage-regression:
   variables:
     CXX: icpc
     CFLAGS: -Wall -funroll-loops -march=native -std=c++11
-    CMAKE_OPT: -DSPU_JSON_STATS=ON -DSPU_TESTS=ON -DSPU_COMPILE_STATIC_LIB=ON -DSPU_COMPILE_SHARED_LIB=ON -DSPU_OVERRIDE_VERSION=$GIT_TAG
+    CMAKE_OPT: -DSPU_TESTS=ON -DSPU_COMPILE_STATIC_LIB=ON -DSPU_COMPILE_SHARED_LIB=ON -DSPU_OVERRIDE_VERSION=$GIT_TAG
     NAME: build_linux_icpc
 
-
 # with artifacts
-
-build-linux-gcc-x64-avx2-art:
-  extends: .build-linux-gcc-x64-avx2
-  rules :
-    - if : $CI_PIPELINE_SOURCE != "schedule" && $FULL_ARTEFACTS == "ON"
-  artifacts:
-    name: build-linux-gcc-x64-avx2
-    paths:
-      - ${NAME}
-
-build-linux-clang-art:
-  extends: .build-linux-clang
-  rules :
-    - if : $CI_PIPELINE_SOURCE != "schedule" && $FULL_ARTEFACTS == "ON"
-  artifacts:
-    name: build-linux-clang
-    paths:
-      - ${NAME}
-
-build-linux-icpc-art:
+build-linux-icpc-artifacts:
   extends: .build-linux-icpc
   rules :
-    - if : $CI_PIPELINE_SOURCE != "schedule" && $FULL_ARTEFACTS == "ON"
+    - if : $CI_PIPELINE_SOURCE != "schedule" && ($CI_SPU_BUILD_ARTIFACTS == null || $CI_SPU_BUILD_ARTIFACTS == "ON")
   artifacts:
     name: build-linux-icpc
     paths:
       - ${NAME}
 
 # without artifacts
-
-build-linux-gcc-x64-avx2:
-  extends: .build-linux-gcc-x64-avx2
-  rules :
-    - if : $CI_PIPELINE_SOURCE != "schedule" && $FULL_ARTEFACTS == "OFF"
-
-build-linux-clang:
-  extends: .build-linux-clang
-  rules :
-    - if : $CI_PIPELINE_SOURCE != "schedule" && $FULL_ARTEFACTS == "OFF"
-
 build-linux-icpc:
   extends: .build-linux-icpc
   rules :
-    - if : $CI_PIPELINE_SOURCE != "schedule" && $FULL_ARTEFACTS == "OFF"
+    - if : $CI_PIPELINE_SOURCE != "schedule" && $CI_SPU_BUILD_ARTIFACTS == "OFF"
 
-
+###############
 ## test jobs ##
 ###############
 
@@ -239,7 +236,7 @@ test-memcheck-regression:
     GIT_SUBMODULE_STRATEGY: recursive
     CXX: g++
     CFLAGS: -Wall -funroll-loops -m64 -mavx2 -mfma
-    CMAKE_OPT: -DSPU_JSON_STATS=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo -DSPU_TESTS=ON -DSPU_COMPILE_STATIC_LIB=ON -DSPU_COMPILE_SHARED_LIB=ON -DSPU_LINK_HWLOC=ON -DSPU_OVERRIDE_VERSION=$GIT_TAG
+    CMAKE_OPT: -DCMAKE_BUILD_TYPE=RelWithDebInfo -DSPU_TESTS=ON -DSPU_COMPILE_STATIC_LIB=ON -DSPU_COMPILE_SHARED_LIB=ON -DSPU_LINK_HWLOC=ON -DSPU_OVERRIDE_VERSION=$GIT_TAG
   needs:
     - job: analysis-headers
       artifacts: false
@@ -258,10 +255,11 @@ test-memcheck-regression:
     - ./ci/build-linux-macos.sh
     - ./ci/test-memcheck-regression.sh
 
+###################
 ## coverage jobs ##
 ###################
 
-### compute coverage indicator
+# compute coverage indicator
 coverage-linux:
   extends: .config-common-linux
   stage: coverage
@@ -280,6 +278,7 @@ coverage-linux:
   script:
     - ./ci/coverage-linux.sh
 
+#################
 ## deploy jobs ##
 #################
 
@@ -288,7 +287,7 @@ pages:
   rules:
     - if: $CI_PIPELINE_SOURCE == "schedule"
       when: never
-    - if: $CI_SERVER_HOST == "github.com" && $CI_COMMIT_BRANCH == "develop" 
+    - if: $CI_COMMIT_BRANCH == "develop"
       when: always
     - when: never
   tags:
@@ -303,6 +302,7 @@ pages:
       - public
     expire_in: 30 days
 
+###########################################################
 ## additionnal windows jobs (if win runner(s) available) ##
 ###########################################################
 
@@ -310,5 +310,3 @@ include:
   - local: 'ci/windows/ci-windows.yml'
     rules: 
       - if : $CI_SPU_RUNNERS_WINDOWS == "ON" && $CI_PIPELINE_SOURCE != "schedule"
-
-
