@@ -46,7 +46,7 @@
 build-windows-msvc-avx-artifacts:
   extends: .build-windows-msvc-avx
   rules :
-    - if : $CI_SPU_BUILD_ARTIFACTS == null || $CI_SPU_BUILD_ARTIFACTS == "ON"
+    - if : $CI_SPU_BUILD_OPT_ARTIFACTS == null || $CI_SPU_BUILD_OPT_ARTIFACTS == "ON"
   artifacts:
     name: build-windows-msvc-avx
     paths:
@@ -56,7 +56,7 @@ build-windows-msvc-avx-artifacts:
 build-windows-msvc-avx:
   extends: .build-windows-msvc-avx
   rules :
-    - if : $CI_SPU_BUILD_ARTIFACTS == "OFF"
+    - if : $CI_SPU_BUILD_OPT_ARTIFACTS == "OFF"
 
 # GCC (MSYS2)
 # -----------
@@ -104,7 +104,7 @@ build-windows-msvc-avx:
 build-windows-gcc-artifacts:
   extends: .build-windows-gcc
   rules :
-    - if : $CI_SPU_BUILD_ARTIFACTS == null || $CI_SPU_BUILD_ARTIFACTS == "ON"
+    - if : $CI_SPU_BUILD_OPT_ARTIFACTS == null || $CI_SPU_BUILD_OPT_ARTIFACTS == "ON"
   artifacts:
     name: build-windows-${COMPILER}
     paths:
@@ -114,4 +114,4 @@ build-windows-gcc-artifacts:
 build-windows-gcc:
   extends: .build-windows-gcc
   rules :
-    - if : $CI_SPU_BUILD_ARTIFACTS == "OFF"
+    - if : $CI_SPU_BUILD_OPT_ARTIFACTS == "OFF"

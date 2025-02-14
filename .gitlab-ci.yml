@@ -34,7 +34,7 @@ default:
 variables:
   GIT_SUBMODULE_STRATEGY: none
   GIT_TAG: "v0.0.0"
-  FULL_ARTIFACTS: 'OFF'
+  CI_SPU_BUILD_OPT_ARTIFACTS: 'OFF'
 
 before_script:
   - hostname
@@ -154,7 +154,7 @@ build-linux-gcc-coverage-regression:
 build-linux-gcc-x64-avx2-artifacts:
   extends: .build-linux-gcc-x64-avx2
   rules :
-    - if : $CI_SPU_BUILD_ARTIFACTS == null || $CI_SPU_BUILD_ARTIFACTS == "ON"
+    - if : $CI_SPU_BUILD_OPT_ARTIFACTS == null || $CI_SPU_BUILD_OPT_ARTIFACTS == "ON"
   artifacts:
     name: build-linux-gcc-x64-avx2
     paths:
@@ -164,7 +164,7 @@ build-linux-gcc-x64-avx2-artifacts:
 build-linux-gcc-x64-avx2:
   extends: .build-linux-gcc-x64-avx2
   rules :
-    - if : $CI_SPU_BUILD_ARTIFACTS == "OFF"
+    - if : $CI_SPU_BUILD_OPT_ARTIFACTS == "OFF"
 
 # CLANG
 # -----
@@ -182,7 +182,7 @@ build-linux-gcc-x64-avx2:
 build-linux-clang-artifacts:
   extends: .build-linux-clang
   rules :
-    - if : $CI_SPU_BUILD_ARTIFACTS == null || $CI_SPU_BUILD_ARTIFACTS == "ON"
+    - if : $CI_SPU_BUILD_OPT_ARTIFACTS == null || $CI_SPU_BUILD_OPT_ARTIFACTS == "ON"
   artifacts:
     name: build-linux-clang
     paths:
@@ -192,7 +192,7 @@ build-linux-clang-artifacts:
 build-linux-clang:
   extends: .build-linux-clang
   rules :
-    - if : $CI_SPU_BUILD_ARTIFACTS == "OFF"
+    - if : $CI_SPU_BUILD_OPT_ARTIFACTS == "OFF"
 
 # ICPC
 # ----
@@ -210,7 +210,7 @@ build-linux-clang:
 build-linux-icpc-artifacts:
   extends: .build-linux-icpc
   rules :
-    - if : $CI_SPU_BUILD_ARTIFACTS == null || $CI_SPU_BUILD_ARTIFACTS == "ON"
+    - if : $CI_SPU_BUILD_OPT_ARTIFACTS == null || $CI_SPU_BUILD_OPT_ARTIFACTS == "ON"
   artifacts:
     name: build-linux-icpc
     paths:
@@ -220,7 +220,7 @@ build-linux-icpc-artifacts:
 build-linux-icpc:
   extends: .build-linux-icpc
   rules :
-    - if : $CI_SPU_BUILD_ARTIFACTS == "OFF"
+    - if : $CI_SPU_BUILD_OPT_ARTIFACTS == "OFF"
 
 ###############
 ## test jobs ##
