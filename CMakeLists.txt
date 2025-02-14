@@ -502,6 +502,10 @@ if (SPU_COMPILE_SHARED_LIB OR SPU_COMPILE_STATIC_LIB)
             DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/rang
             COMPONENT headers
             FILES_MATCHING PATTERN "*.hpp")
+    install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/lib/json/single_include/"
+            DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/json
+            COMPONENT headers
+            FILES_MATCHING PATTERN "*.hpp")
 endif()
 
 # ---------------------------------------------------------------------------------------------------------------------
