@@ -34,7 +34,6 @@ default:
 variables:
   GIT_SUBMODULE_STRATEGY: none
   GIT_TAG: "v0.0.0"
-  CI_SPU_BUILD_OPT_ARTIFACTS: 'OFF'
 
 before_script:
   - hostname

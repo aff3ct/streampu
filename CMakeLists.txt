@@ -380,8 +380,8 @@ if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/lib/json/include/nlohmann/json.hpp")
     spu_target_include_directories("${spu_targets_list}" PUBLIC "lib/json/include/" "json")
     message(STATUS "StreamPU - Header found: nlohmann_json")
 else()
-    message(FATAL_ERROR "AFF3CT - MIPP can't be found, try to init the submodule with the following cmd:\n"
-                        "$ git submodule update --init -- ../lib/MIPP/")
+    message(FATAL_ERROR "StreamPU - nlohmann_json can't be found, try to init the submodule with the following cmd:\n"
+                        "$ git submodule update --init -- ../lib/json/")
 endif()
 
 # ---------------------------------------------------------------------------------------------------------------------
