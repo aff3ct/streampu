@@ -154,7 +154,7 @@ build-linux-gcc-coverage-regression:
 build-linux-gcc-x64-avx2-artifacts:
   extends: .build-linux-gcc-x64-avx2
   rules :
-    - if : $CI_PIPELINE_SOURCE != "schedule" && ($CI_SPU_BUILD_ARTIFACTS == null || $CI_SPU_BUILD_ARTIFACTS == "ON")
+    - if : $CI_SPU_BUILD_ARTIFACTS == null || $CI_SPU_BUILD_ARTIFACTS == "ON"
   artifacts:
     name: build-linux-gcc-x64-avx2
     paths:
@@ -164,7 +164,7 @@ build-linux-gcc-x64-avx2-artifacts:
 build-linux-gcc-x64-avx2:
   extends: .build-linux-gcc-x64-avx2
   rules :
-    - if : $CI_PIPELINE_SOURCE != "schedule" && $CI_SPU_BUILD_ARTIFACTS == "OFF"
+    - if : $CI_SPU_BUILD_ARTIFACTS == "OFF"
 
 # CLANG
 # -----
@@ -182,7 +182,7 @@ build-linux-gcc-x64-avx2:
 build-linux-clang-artifacts:
   extends: .build-linux-clang
   rules :
-    - if : $CI_PIPELINE_SOURCE != "schedule" && ($CI_SPU_BUILD_ARTIFACTS == null || $CI_SPU_BUILD_ARTIFACTS == "ON")
+    - if : $CI_SPU_BUILD_ARTIFACTS == null || $CI_SPU_BUILD_ARTIFACTS == "ON"
   artifacts:
     name: build-linux-clang
     paths:
@@ -192,7 +192,7 @@ build-linux-clang-artifacts:
 build-linux-clang:
   extends: .build-linux-clang
   rules :
-    - if : $CI_PIPELINE_SOURCE != "schedule" && $CI_SPU_BUILD_ARTIFACTS == "OFF"
+    - if : $CI_SPU_BUILD_ARTIFACTS == "OFF"
 
 # ICPC
 # ----
@@ -210,7 +210,7 @@ build-linux-clang:
 build-linux-icpc-artifacts:
   extends: .build-linux-icpc
   rules :
-    - if : $CI_PIPELINE_SOURCE != "schedule" && ($CI_SPU_BUILD_ARTIFACTS == null || $CI_SPU_BUILD_ARTIFACTS == "ON")
+    - if : $CI_SPU_BUILD_ARTIFACTS == null || $CI_SPU_BUILD_ARTIFACTS == "ON"
   artifacts:
     name: build-linux-icpc
     paths:
@@ -220,7 +220,7 @@ build-linux-icpc-artifacts:
 build-linux-icpc:
   extends: .build-linux-icpc
   rules :
-    - if : $CI_PIPELINE_SOURCE != "schedule" && $CI_SPU_BUILD_ARTIFACTS == "OFF"
+    - if : $CI_SPU_BUILD_ARTIFACTS == "OFF"
 
 ###############
 ## test jobs ##
@@ -229,8 +229,6 @@ build-linux-icpc:
 test-memcheck-regression:
   extends: .config-common-linux
   stage: test
-  except:
-    - schedules
   image: registry.gitlab.com/aff3ct/aff3ct/x86_64_ubuntu_valgrind
   variables:
     GIT_SUBMODULE_STRATEGY: recursive
@@ -263,8 +261,6 @@ test-memcheck-regression:
 coverage-linux:
   extends: .config-common-linux
   stage: coverage
-  except:
-    - schedules
   image: registry.gitlab.com/aff3ct/aff3ct/x86_64_ubuntu_coverage
   needs:
     - job: build-linux-gcc-coverage-regression
@@ -285,8 +281,6 @@ coverage-linux:
 pages:
   stage: deploy
   rules:
-    - if: $CI_PIPELINE_SOURCE == "schedule"
-      when: never
     - if: $CI_COMMIT_BRANCH == "develop"
       when: always
     - when: never
@@ -309,4 +303,4 @@ pages:
 include:
   - local: 'ci/windows/ci-windows.yml'
     rules: 
-      - if : $CI_SPU_RUNNERS_WINDOWS == "ON" && $CI_PIPELINE_SOURCE != "schedule"
+      - if : $CI_SPU_RUNNERS_WINDOWS == "ON"
