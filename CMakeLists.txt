@@ -277,6 +277,19 @@ if (SPU_STACKTRACE OR SPU_STACKTRACE_SEGFAULT)
     endif()
 endif()
 
+# getopt-for-windows
+if (MSVC AND SPU_TESTS)
+    if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/lib/getopt-for-windows/include/getopt.h")
+        add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/lib/getopt-for-windows)
+        include_directories(${CMAKE_CURRENT_SOURCE_DIR}/lib/getopt-for-windows/include)
+        message(STATUS "getopt-for-windows - INCLUDE STREAMPU")
+    else()
+        message(FATAL_ERROR "'getopt-for-windows' can't be found, try to init the submodule from https://github.com/Chunde/getopt-for-windows")
+    endif()
+endif()
+
+
+
 # ---------------------------------------------------------------------------------------------------------------------
 # ------------------------------------------------------------------------------------------------ COMPILER DEFINITIONS
 # ---------------------------------------------------------------------------------------------------------------------
@@ -384,6 +397,12 @@ else()
                         "$ git submodule update --init -- ../lib/json/")
 endif()
 
+# getopt-for-windows
+if (MSVC AND SPU_TESTS)
+    spu_target_include_directories("${spu_targets_list}" PUBLIC "lib/getopt-for-windows/include/" "getopt")
+endif()
+
+
 # ---------------------------------------------------------------------------------------------------------------------
 # -------------------------------------------------------------------------------------------------- COMPILED LIBRARIES
 # ---------------------------------------------------------------------------------------------------------------------
@@ -419,6 +438,18 @@ set(CMAKE_THREAD_PREFER_PTHREAD ON)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 spu_target_link_libraries("${spu_targets_list}" PUBLIC Threads::Threads)
+
+# Include getopt-for-windows for MSVC
+if (MSVC AND SPU_TESTS)
+    link_directories("${CMAKE_BINARY_DIR}/lib/getopt-for-windows")
+    spu_target_link_libraries("${spu_targets_list}" PUBLIC getopt-for-windows)
+    # if (SPU_COMPILE_SHARED_LIB)
+    #     target_link_libraries(spu-shared-lib PUBLIC getopt-for-windows-shared-lib)
+    # endif()
+    # if (SPU_COMPILE_STATIC_LIB )   
+    #     target_link_libraries(spu-static-lib PUBLIC getopt-for-windows-static-lib)
+    # endif()
+endif()
 
 # ---------------------------------------------------------------------------------------------------------------------
 # -------------------------------------------------------------------------------------------------------------- EXPORT
@@ -506,6 +537,12 @@ if (SPU_COMPILE_SHARED_LIB OR SPU_COMPILE_STATIC_LIB)
             DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/json
             COMPONENT headers
             FILES_MATCHING PATTERN "*.hpp")
+    if (MSVC AND SPU_TESTS)
+        install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/lib/getopt-for-windows/include/"
+                DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/getopt-for-windows
+                COMPONENT headers
+                FILES_MATCHING PATTERN "*.hpp")
+    endif()
 endif()
 
 # ---------------------------------------------------------------------------------------------------------------------

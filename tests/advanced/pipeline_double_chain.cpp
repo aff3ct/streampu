@@ -2,7 +2,11 @@
 #include <atomic>
 #include <cstdlib>
 #include <fstream>
+#ifdef MSVC
+#include <Tools/System/getopt.h>
+#else
 #include <getopt.h>
+#endif
 #include <iostream>
 #include <memory>
 #include <string>
