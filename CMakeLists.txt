@@ -399,7 +399,7 @@ endif()
 
 # getopt-for-windows
 if (MSVC AND SPU_TESTS)
-    spu_target_include_directories("${spu_targets_list}" PUBLIC "lib/getopt-for-windows/include/" "getopt")
+    spu_target_include_directories("${spu_targets_list}" PUBLIC "lib/getopt-for-windows/include/" "getopt-for-windows")
 endif()
 
 
@@ -441,8 +441,9 @@ spu_target_link_libraries("${spu_targets_list}" PUBLIC Threads::Threads)
 
 # Include getopt-for-windows for MSVC
 if (MSVC AND SPU_TESTS)
-    link_directories("${CMAKE_BINARY_DIR}/lib/getopt-for-windows")
-    spu_target_link_libraries("${spu_targets_list}" PUBLIC getopt-for-windows)
+    #target_link_directories(${spu_targets_list} PUBLIC "${CMAKE_BINARY_DIR}/lib/getopt-for-windows")
+    # link_directories("${CMAKE_BINARY_DIR}/lib/getopt-for-windows")
+    spu_target_link_libraries("${spu_targets_list}" PUBLIC "${CMAKE_BINARY_DIR}/lib/getopt-for-windows")
     # if (SPU_COMPILE_SHARED_LIB)
     #     target_link_libraries(spu-shared-lib PUBLIC getopt-for-windows-shared-lib)
     # endif()
@@ -541,7 +542,7 @@ if (SPU_COMPILE_SHARED_LIB OR SPU_COMPILE_STATIC_LIB)
         install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/lib/getopt-for-windows/include/"
                 DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/getopt-for-windows
                 COMPONENT headers
-                FILES_MATCHING PATTERN "*.hpp")
+                FILES_MATCHING PATTERN "*.h")
     endif()
 endif()
 
