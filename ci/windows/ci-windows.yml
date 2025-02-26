@@ -31,14 +31,11 @@
 .build-windows-msvc-avx:
   extends: .build-windows-msvc
   allow_failure: true
-  parallel:
-    matrix:
-      - TEST: ['OFF','ON']
   image: registry.gitlab.com/aff3ct/aff3ct/x86_64_windows_msvc:v15
   variables:
     CFLAGS: -D_CRT_SECURE_NO_DEPRECATE /MT /EHsc /arch:AVX
-    CMAKE_OPT: -DSPU_TESTS=${TEST} -DSPU_COMPILE_STATIC_LIB=ON -DSPU_COMPILE_SHARED_LIB=ON -DSPU_STACKTRACE=OFF -DSPU_OVERRIDE_VERSION=$GIT_TAG #-DCMAKE_VERBOSE_MAKEFILE=ON
-    NAME: build_windows_msvc_avx_test-${TEST}
+    CMAKE_OPT: -DSPU_TESTS=ON -DSPU_COMPILE_STATIC_LIB=ON -DSPU_COMPILE_SHARED_LIB=ON -DSPU_STACKTRACE=OFF -DSPU_OVERRIDE_VERSION=$GIT_TAG #-DCMAKE_VERBOSE_MAKEFILE=ON
+    NAME: build_windows_msvc_avx
   script:
     - ./ci/windows/build-windows-msvc.bat
 
