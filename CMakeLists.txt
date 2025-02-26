@@ -513,12 +513,6 @@ if (SPU_COMPILE_SHARED_LIB OR SPU_COMPILE_STATIC_LIB)
             DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/json
             COMPONENT headers
             FILES_MATCHING PATTERN "*.hpp")
-    if (MSVC AND SPU_TESTS)
-        install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/lib/getopt-for-windows/include/"
-                DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/getopt-for-windows
-                COMPONENT headers
-                FILES_MATCHING PATTERN "*.h")
-    endif()
 endif()
 
 # ---------------------------------------------------------------------------------------------------------------------
