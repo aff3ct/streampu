@@ -30,7 +30,6 @@
 
 .build-windows-msvc-avx:
   extends: .build-windows-msvc
-  allow_failure: true
   image: registry.gitlab.com/aff3ct/aff3ct/x86_64_windows_msvc:v15
   variables:
     CFLAGS: -D_CRT_SECURE_NO_DEPRECATE /MT /EHsc /arch:AVX
