@@ -1,10 +1,6 @@
 #include <atomic>
 #include <cstdlib>
-#ifdef MSVC
-#include <Tools/System/getopt.h>
-#else
 #include <getopt.h>
-#endif
 #include <iostream>
 #include <memory>
 #include <string>
