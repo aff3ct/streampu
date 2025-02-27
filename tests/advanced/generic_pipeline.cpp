@@ -247,7 +247,7 @@ main(int argc, char** argv)
                           { "pinning-policy", no_argument, NULL, 'P' },
 #endif
                           { "verbose", no_argument, NULL, 'v' },
-                          { 0 } };
+                          { NULL, 0, NULL, 0 } };
 
     std::string n_threads_param;
     std::vector<size_t> n_threads;

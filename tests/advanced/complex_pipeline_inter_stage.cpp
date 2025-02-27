@@ -28,7 +28,7 @@ main(int argc, char** argv)
                           { "debug", no_argument, NULL, 'g' },
                           { "active-waiting", no_argument, NULL, 'w' },
                           { "help", no_argument, NULL, 'h' },
-                          { 0 } };
+                          { NULL, 0, NULL, 0 } };
 
     size_t n_threads = std::thread::hardware_concurrency();
     size_t n_inter_frames = 1;
@@ -155,7 +155,7 @@ main(int argc, char** argv)
 
     multi_comp.create_codelet(
       task_multi_comp,
-      [sock_0, sock_1, data_length, incs](module::Module& m, runtime::Task& t, const size_t frame_id) -> int
+      [sock_0, sock_1, data_length, incs](module::Module& /*m*/, runtime::Task& t, const size_t /*frame_id*/) -> int
       {
           auto tab_0 = t[sock_0].get_dataptr<uint8_t>();
           auto tab_1 = t[sock_1].get_dataptr<const uint8_t>();

@@ -58,7 +58,7 @@ main(int argc, char** argv)
                           { "force-sequence", no_argument, NULL, 'q' },
                           { "active-waiting", no_argument, NULL, 'w' },
                           { "help", no_argument, NULL, 'h' },
-                          { 0 } };
+                          { NULL, 0, NULL, 0 } };
 
     size_t n_threads = std::thread::hardware_concurrency();
     size_t n_inter_frames = 1;

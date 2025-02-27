@@ -32,7 +32,7 @@ main(int argc, char** argv)
                           { "sched", no_argument, NULL, 'S' },
                           { "verbose", no_argument, NULL, 'v' },
                           { "help", no_argument, NULL, 'h' },
-                          { 0 } };
+                          { NULL, 0, NULL, 0 } };
 
     size_t n_threads = std::thread::hardware_concurrency();
     size_t n_inter_frames = 1;
@@ -207,26 +207,26 @@ main(int argc, char** argv)
     auto sock_1 = comp.create_socket_fwd<uint8_t>(task_comp, "fwd1", data_length);
     auto sock_2 = comp.create_socket_fwd<uint8_t>(task_comp, "fwd2", data_length);
 
-    comp.create_codelet(
-      task_comp,
-      [sock_0, sock_1, sock_2, data_length, incs](module::Module& m, runtime::Task& t, const size_t frame_id) -> int
-      {
-          auto tab_0 = t[sock_0].get_dataptr<const uint8_t>();
-          auto tab_1 = t[sock_1].get_dataptr<const uint8_t>();
-          auto tab_2 = t[sock_2].get_dataptr<const uint8_t>();
-          for (size_t i = 0; i < data_length; i++)
-          {
-              if (tab_0[i] != tab_1[i] || tab_0[i] != tab_2[i])
-              {
-                  std::stringstream message;
-                  message << "Found different values => "
-                          << " Tab_0 : " << +tab_0[i] << ", Tab_1 : " << +tab_1[i] << ", Tab_2 : " << +tab_2[i]
-                          << std::endl;
-                  throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
-              }
-          }
-          return runtime::status_t::SUCCESS;
-      });
+    comp.create_codelet(task_comp,
+                        [sock_0, sock_1, sock_2, data_length, incs](
+                          module::Module& /*m*/, runtime::Task& t, const size_t /*frame_id*/) -> int
+                        {
+                            auto tab_0 = t[sock_0].get_dataptr<const uint8_t>();
+                            auto tab_1 = t[sock_1].get_dataptr<const uint8_t>();
+                            auto tab_2 = t[sock_2].get_dataptr<const uint8_t>();
+                            for (size_t i = 0; i < data_length; i++)
+                            {
+                                if (tab_0[i] != tab_1[i] || tab_0[i] != tab_2[i])
+                                {
+                                    std::stringstream message;
+                                    message << "Found different values => "
+                                            << " Tab_0 : " << +tab_0[i] << ", Tab_1 : " << +tab_1[i]
+                                            << ", Tab_2 : " << +tab_2[i] << std::endl;
+                                    throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
+                                }
+                            }
+                            return runtime::status_t::SUCCESS;
+                        });
 
     // sockets binding
     // clang-format off
