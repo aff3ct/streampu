@@ -189,7 +189,7 @@ main(int argc, char** argv)
 
     comp.create_codelet(
       task_comp,
-      [sock_0, sock_1, data_length, incs](module::Module& m, runtime::Task& t, const size_t frame_id) -> int
+      [sock_0, sock_1, data_length, incs](module::Module& /*m*/, runtime::Task& t, const size_t /*frame_id*/) -> int
       {
           auto tab_0 = t[sock_0].get_dataptr<const uint8_t>();
           auto tab_1 = t[sock_1].get_dataptr<const uint8_t>();

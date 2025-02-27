@@ -173,7 +173,7 @@ Pipeline_builder::Stage_builder::set_n_threads(const size_t n)
     return *this;
 }
 
-const size_t
+size_t
 Pipeline_builder::Stage_builder::get_n_threads()
 {
     return this->n_threads;
@@ -199,7 +199,7 @@ Pipeline_builder::Stage_builder::set_threads_pinning(bool pinning)
     return (pinning) ? this->enable_threads_pinning() : this->disable_threads_pinning();
 }
 
-const bool
+bool
 Pipeline_builder::Stage_builder::is_pinning()
 {
     return this->pinning;
@@ -375,7 +375,7 @@ Pipeline_builder::Synchro_builder::set_active_waiting(bool waiting)
     return (waiting) ? this->enable_active_waiting() : this->disable_active_waiting();
 }
 
-const bool
+bool
 Pipeline_builder::Synchro_builder::is_active_waiting()
 {
     return this->active_waiting;
@@ -388,7 +388,7 @@ Pipeline_builder::Synchro_builder::set_buffer_size(size_t buffer_size)
     return *this;
 }
 
-const size_t
+size_t
 Pipeline_builder::Synchro_builder::get_buffer_size()
 {
     return this->buffer_size;

@@ -37,7 +37,7 @@ remove_and_unbound_stage(tools::Pipeline_builder& builder, const size_t unwanted
 }
 
 int
-main(int argc, char** argv)
+main(int /*argc*/, char** /*argv*/)
 {
     std::cout << "######################################################################" << std::endl;
     std::cout << "# Micro-benchmark: Pipeline width builder - conditional construction #" << std::endl;

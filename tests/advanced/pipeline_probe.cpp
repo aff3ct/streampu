@@ -277,7 +277,7 @@ main(int argc, char** argv)
     auto& tsk = ts_s2b->create_task("exec");
     auto ts_out_val = ts_s2b->create_socket_out<uint64_t>(tsk, "out", 1);
     ts_s2b->create_codelet(tsk,
-                           [ts_out_val, mod](module::Module& m, runtime::Task& t, const size_t frame_id) -> int
+                           [ts_out_val, mod](module::Module& /*m*/, runtime::Task& t, const size_t /*frame_id*/) -> int
                            {
                                std::chrono::microseconds us = std::chrono::duration_cast<std::chrono::microseconds>(
                                  std::chrono::steady_clock::now().time_since_epoch());

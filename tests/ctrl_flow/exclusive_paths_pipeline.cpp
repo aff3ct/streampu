@@ -246,7 +246,7 @@ main(int argc, char** argv)
     auto s_in_alt = alternator.create_socket_in<uint8_t>(alternator("alternate"), "in", data_length);
     auto s_path = alternator.create_socket_out<int8_t>(alternator("alternate"), "path", 1);
     alternator.create_codelet(alternator("alternate"),
-                              [s_in_alt, s_path, &pack](module::Module& m, runtime::Task& t, const size_t frame_id)
+                              [s_in_alt, s_path, &pack](module::Module& /*m*/, runtime::Task& t, const size_t /*frame_id*/)
                               {
                                   uint8_t packed = pack(t[s_in_alt].get_dataptr<const uint8_t>());
                                   if (packed >= 97 && packed <= 122)
@@ -261,7 +261,7 @@ main(int argc, char** argv)
     auto s_out_up = uppercaser.create_socket_out<uint8_t>(uppercaser("upcase"), "out", data_length);
     uppercaser.create_codelet(
       uppercaser("upcase"),
-      [s_in_up, s_out_up, &pack, &unpack](module::Module& m, runtime::Task& t, const size_t frame_id)
+      [s_in_up, s_out_up, &pack, &unpack](module::Module& /*m*/, runtime::Task& t, const size_t /*frame_id*/)
       {
           uint8_t packed = pack(t[s_in_up].get_dataptr<const uint8_t>());
           if (packed >= 97 && packed <= 122)
@@ -279,7 +279,7 @@ main(int argc, char** argv)
     auto s_out_low = lowercaser.create_socket_out<uint8_t>(lowercaser("lowcase"), "out", data_length);
     lowercaser.create_codelet(
       lowercaser("lowcase"),
-      [s_in_low, s_out_low, &pack, &unpack](module::Module& m, runtime::Task& t, const size_t frame_id)
+      [s_in_low, s_out_low, &pack, &unpack](module::Module& /*m*/, runtime::Task& t, const size_t /*frame_id*/)
       {
           uint8_t packed = pack(t[s_in_low].get_dataptr<const uint8_t>());
           if (packed >= 65 && packed <= 90)
