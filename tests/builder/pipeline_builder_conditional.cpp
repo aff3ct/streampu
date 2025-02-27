@@ -51,12 +51,12 @@ main(int /*argc*/, char** /*argv*/)
     module::Initializer<int> init(1);
 
     std::vector<std::vector<std::unique_ptr<module::Incrementer<int>>>> incrs_pips;
-    for (int i = 0; i < n_incrs_pips.size(); i++)
+    for (size_t i = 0; i < n_incrs_pips.size(); i++)
         incrs_pips.push_back({});
 
-    for (int i = 0; i < n_incrs_pips.size(); i++)
+    for (size_t i = 0; i < n_incrs_pips.size(); i++)
     {
-        for (int j = 0; j < n_incrs_pips[i]; j++)
+        for (size_t j = 0; j < n_incrs_pips[i]; j++)
         {
             incrs_pips[i].emplace_back(new module::Incrementer<int>(1));
         }
