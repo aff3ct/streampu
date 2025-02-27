@@ -235,7 +235,7 @@ Adaptor_m_to_n::set_n_frames(const size_t n_frames)
 // --------------------------------------------------------------------------------------------------------------------
 
 void
-Adaptor_m_to_n::push(const std::vector<const int8_t*>& in, const size_t frame_id)
+Adaptor_m_to_n::push(const std::vector<const int8_t*>& in, const size_t /*frame_id*/)
 {
     this->wait_push();
 
@@ -251,7 +251,7 @@ Adaptor_m_to_n::push(const std::vector<const int8_t*>& in, const size_t frame_id
 }
 
 void
-Adaptor_m_to_n::pull(const std::vector<int8_t*>& out, const size_t frame_id)
+Adaptor_m_to_n::pull(const std::vector<int8_t*>& out, const size_t /*frame_id*/)
 {
     this->wait_pull();
 
