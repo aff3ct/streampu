@@ -281,6 +281,7 @@ Reporter_probe::register_probe(module::AProbe& probe,
     this->cols_groups[0].second.push_back(std::make_tuple(probe.get_col_name(), unit, 0));
     this->name_to_col[probe.get_col_name()] = this->buffer.size() - 1;
     this->col_to_name[this->buffer.size() - 1] = probe.get_col_name();
+    probe.set_col_size(probe.get_col_name().length()+2);
 }
 
 void
