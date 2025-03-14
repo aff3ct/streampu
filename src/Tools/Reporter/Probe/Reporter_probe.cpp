@@ -80,20 +80,22 @@ Reporter_probe::format_values(const int col, std::stringstream& temp_stream)
 {
     std::vector<T> buff(this->data_sizes[col]);
     const auto can_pull = this->pull<T>(col, buff.data());
-    if(this->display_as_str[col])
+    if (this->display_as_str[col])
     {
-        for (const auto& v : buff) {
+        for (const auto& v : buff)
+        {
             temp_stream.write(reinterpret_cast<const char*>(&v), sizeof(T));
         }
     }
-    else{
-    if (this->data_sizes[col] > 1 && can_pull) temp_stream << "[";
-    for (size_t v = 0; v < this->data_sizes[col] && can_pull; v++)
+    else
     {
-        const std::string s = std::string((v != 0) ? ", " : "") + std::string((buff[v] >= 0) ? " " : "");
-        temp_stream << std::setprecision(this->precisions[col]) << s << +buff[v];
-    }
-    if (this->data_sizes[col] > 1 && can_pull) temp_stream << "]";
+        if (this->data_sizes[col] > 1 && can_pull) temp_stream << "[";
+        for (size_t v = 0; v < this->data_sizes[col] && can_pull; v++)
+        {
+            const std::string s = std::string((v != 0) ? ", " : "") + std::string((buff[v] >= 0) ? " " : "");
+            temp_stream << std::setprecision(this->precisions[col]) << s << +buff[v];
+        }
+        if (this->data_sizes[col] > 1 && can_pull) temp_stream << "]";
     }
     return can_pull;
 }
@@ -290,7 +292,7 @@ Reporter_probe::register_probe(module::AProbe& probe,
     this->name_to_col[probe.get_col_name()] = this->buffer.size() - 1;
     this->col_to_name[this->buffer.size() - 1] = probe.get_col_name();
     this->display_as_str.push_back(probe.get_str_display());
-    probe.set_col_size(probe.get_col_name().length()+2);
+    probe.set_col_size(probe.get_col_name().length() + 2);
 }
 
 void

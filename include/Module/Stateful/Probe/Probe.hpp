@@ -75,7 +75,6 @@ class AProbe
     inline runtime::Socket& operator[](const prb::sck::probe_noin s);
     inline runtime::Socket& operator[](const std::string& tsk_sck);
 
-
   protected:
     void check_reporter();
     void proxy_register_probe(const size_t data_size,
@@ -101,7 +100,7 @@ class Probe : public AProbe
     const std::string col_name;
     Probe(const size_t socket_size, const std::string& col_name);
 
-    public:
+  public:
     virtual ~Probe() = default;
 
     template<class AT = std::allocator<T>>
