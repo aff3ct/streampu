@@ -50,11 +50,15 @@ class AProbe
 {
   protected:
     tools::Reporter_probe* reporter;
+    bool str_display;
 
   public:
     AProbe();
     virtual ~AProbe() = default;
     virtual void reset() = 0;
+
+    bool get_str_display() const;
+    void set_str_display(bool str_display);
 
     virtual void set_col_unit(const std::string& unit) = 0;
     virtual void set_col_buff_size(const size_t buffer_size) = 0;
@@ -70,6 +74,7 @@ class AProbe
     inline runtime::Socket& operator[](const prb::sck::probe s);
     inline runtime::Socket& operator[](const prb::sck::probe_noin s);
     inline runtime::Socket& operator[](const std::string& tsk_sck);
+
 
   protected:
     void check_reporter();
@@ -96,7 +101,7 @@ class Probe : public AProbe
     const std::string col_name;
     Probe(const size_t socket_size, const std::string& col_name);
 
-  public:
+    public:
     virtual ~Probe() = default;
 
     template<class AT = std::allocator<T>>

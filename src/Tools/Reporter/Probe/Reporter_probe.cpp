@@ -80,6 +80,13 @@ Reporter_probe::format_values(const int col, std::stringstream& temp_stream)
 {
     std::vector<T> buff(this->data_sizes[col]);
     const auto can_pull = this->pull<T>(col, buff.data());
+    if(this->display_as_str[col])
+    {
+        for (const auto& v : buff) {
+            temp_stream.write(reinterpret_cast<const char*>(&v), sizeof(T));
+        }
+    }
+    else{
     if (this->data_sizes[col] > 1 && can_pull) temp_stream << "[";
     for (size_t v = 0; v < this->data_sizes[col] && can_pull; v++)
     {
@@ -87,6 +94,7 @@ Reporter_probe::format_values(const int col, std::stringstream& temp_stream)
         temp_stream << std::setprecision(this->precisions[col]) << s << +buff[v];
     }
     if (this->data_sizes[col] > 1 && can_pull) temp_stream << "]";
+    }
     return can_pull;
 }
 
@@ -281,6 +289,7 @@ Reporter_probe::register_probe(module::AProbe& probe,
     this->cols_groups[0].second.push_back(std::make_tuple(probe.get_col_name(), unit, 0));
     this->name_to_col[probe.get_col_name()] = this->buffer.size() - 1;
     this->col_to_name[this->buffer.size() - 1] = probe.get_col_name();
+    this->display_as_str.push_back(probe.get_str_display());
     probe.set_col_size(probe.get_col_name().length()+2);
 }
 
