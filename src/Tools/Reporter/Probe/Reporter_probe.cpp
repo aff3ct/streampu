@@ -83,9 +83,7 @@ Reporter_probe::format_values(const int col, std::stringstream& temp_stream)
     if (this->display_as_str[col])
     {
         for (const auto& v : buff)
-        {
             temp_stream.write(reinterpret_cast<const char*>(&v), sizeof(T));
-        }
     }
     else
     {
@@ -292,7 +290,9 @@ Reporter_probe::register_probe(module::AProbe& probe,
     this->name_to_col[probe.get_col_name()] = this->buffer.size() - 1;
     this->col_to_name[this->buffer.size() - 1] = probe.get_col_name();
     this->display_as_str.push_back(probe.get_str_display());
-    probe.set_col_size(probe.get_col_name().length() + 2);
+    size_t col_size = probe.get_col_name().length() + 2; // Column header
+    if (probe.get_str_display()) col_size = std::max(col_size, data_size + 2);
+    probe.set_col_size(col_size);
 }
 
 void
