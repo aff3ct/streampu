@@ -52,10 +52,10 @@ Source_user<B>::Source_user(const int max_data_size,
             for (auto i = 0; i < n_src; i++)
                 for (auto j = 0; j < src_size; j++)
                 {
-                    int bit;
+                    B bit;
                     file >> bit;
 
-                    this->source[i][j] = bit != 0;
+                    this->source[i][j] = bit;
                 }
         }
         else
