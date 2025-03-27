@@ -21,7 +21,7 @@ Thread_pool::Thread_pool(const Thread_pool& other)
   , initialized(false)
   , func_init(other.func_init)
   , func_deinit(other.func_deinit)
-  , func_exec(other.func_deinit)
+  , func_exec(other.func_exec)
   , stop_threads(other.stop_threads)
 {
 }
