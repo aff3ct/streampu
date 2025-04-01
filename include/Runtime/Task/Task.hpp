@@ -25,6 +25,12 @@ namespace module
 {
 class Module;
 }
+
+namespace tools
+{
+class Buffer_allocator;
+};
+
 namespace runtime
 {
 class Socket;
@@ -73,15 +79,16 @@ class Task
     friend Socket;
     friend Pipeline;
     friend module::Module;
+    friend tools::Buffer_allocator;
 #endif
 
   protected:
     module::Module* module;
     const std::string name;
-    bool autoalloc;
     bool stats;
     bool fast;
     bool debug;
+    bool outbuffers_allocated;
     bool debug_hex;
     bool replicable;
     int32_t debug_limit;
@@ -92,9 +99,8 @@ class Task
     size_t n_output_sockets;
     size_t n_fwd_sockets;
 
-    typedef std::vector<uint8_t, tools::aligned_allocator<uint8_t>> buffer;
+    // Letting status socket in task for now
     std::vector<int> status;
-    std::vector<buffer> out_buffers;
 
     // stats
     uint32_t n_calls;
@@ -121,16 +127,15 @@ class Task
 
     Task(module::Module& module,
          const std::string& name,
-         const bool autoalloc = true,
          const bool stats = false,
          const bool fast = false,
-         const bool debug = false);
+         const bool debug = false,
+         const bool outbuffers_allocated = false);
 
     virtual ~Task() = default;
 
     void reset();
 
-    void set_autoalloc(const bool autoalloc);
     void set_stats(const bool stats);
     void set_fast(const bool fast);
     void set_debug(const bool debug);
@@ -139,13 +144,14 @@ class Task
     void set_debug_precision(const uint8_t prec);
     void set_debug_frame_max(const uint32_t limit);
     void set_replicability(const bool replicable);
+    void set_outbuffers_allocated(const bool outbuffers_allocated);
 
-    inline bool is_autoalloc() const;
     inline bool is_stats() const;
     inline bool is_fast() const;
     inline bool is_debug() const;
     inline bool is_debug_hex() const;
     inline bool is_last_input_socket(const Socket& s_in) const;
+    inline bool is_outbuffers_allocated() const;
     bool is_stateless() const;
     bool is_stateful() const;
     bool is_replicable() const;
@@ -241,6 +247,9 @@ class Task
     void update_n_frames(const size_t old_n_frames, const size_t new_n_frames);
 
     void update_n_frames_per_wave(const size_t old_n_frames_per_wave, const size_t new_n_frames_per_wave);
+
+    // Function to allocate task's out sockets
+    void allocate_outbuffers();
 
   private:
     template<typename T>

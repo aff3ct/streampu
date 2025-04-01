@@ -13,6 +13,7 @@
 
 #include "Runtime/Task/Task.hpp"
 #include "Tools/Interface/Interface_reset.hpp"
+#include "Tools/System/memory.hpp"
 
 namespace spu
 {
@@ -20,6 +21,11 @@ namespace module
 {
 class Adaptor_m_to_n;
 class Set;
+}
+
+namespace buffer
+{
+class Buffer_allocator;
 }
 namespace runtime
 {
@@ -34,6 +40,7 @@ class Socket : public tools::Interface_reset
     friend module::Set;
     friend Sequence;
     friend Pipeline;
+    friend buffer::Buffer_allocator;
 #endif
   protected:
     Task& task;
@@ -49,6 +56,9 @@ class Socket : public tools::Interface_reset
     std::vector<Socket*> bound_sockets;
     Socket* bound_socket;
     socket_t type;
+    // Data management in socket for CPU case
+    typedef std::vector<uint8_t, tools::aligned_allocator<uint8_t>> buffer;
+    buffer out_buffer;
 
   public:
     inline Socket(Task& task,
@@ -84,6 +94,7 @@ class Socket : public tools::Interface_reset
     inline const Socket& get_bound_socket() const;
     inline Socket& get_bound_socket();
     inline socket_t get_type() const;
+    inline buffer& get_out_buffer();
 
     template<typename T>
     inline T* get_dataptr(const size_t start_col = 0) const;
@@ -151,6 +162,10 @@ class Socket : public tools::Interface_reset
 
     inline size_t unbind(Socket& s_out);
 
+    inline void allocate_buffer();
+
+    inline void free_buffer();
+
   protected:
     inline void* _get_dataptr(const size_t start_col = 0) const;
     inline void* _get_dptr(const size_t start_col = 0) const;
@@ -173,6 +188,8 @@ class Socket : public tools::Interface_reset
 
     inline void _bind(void* dataptr);
 
+    inline void _allocate_buffer();
+
     inline void set_name(const std::string& name);
 
     inline void set_datatype(const std::type_index datatype);
@@ -182,6 +199,8 @@ class Socket : public tools::Interface_reset
     inline void set_dataptr(void* dataptr);
 
     inline void set_n_rows(const size_t n_rows);
+
+    inline void set_out_buffer(size_t new_data_bytes);
 
   private:
     inline void check_bound_socket();

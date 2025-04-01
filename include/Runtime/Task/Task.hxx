@@ -8,11 +8,6 @@ namespace spu
 {
 namespace runtime
 {
-bool
-Task::is_autoalloc() const
-{
-    return this->autoalloc;
-}
 
 bool
 Task::is_stats() const
@@ -46,6 +41,12 @@ bool
 Task::is_last_input_socket(const Socket& s_in) const
 {
     return last_input_socket == &s_in;
+}
+
+bool
+Task::is_outbuffers_allocated() const
+{
+    return this->outbuffers_allocated;
 }
 
 module::Module&

@@ -385,7 +385,7 @@ create_sequence<const runtime::Task>(const std::vector<const runtime::Task*>& fi
                                      const std::vector<size_t>& puids,
                                      const bool& /*tasks_inplace*/)
 {
-    return new runtime::Sequence(firsts, lasts, exclusions, n_threads, thread_pinning, puids);
+    return new runtime::Sequence(firsts, lasts, exclusions, n_threads, thread_pinning, puids, false);
 }
 
 template<>
@@ -398,7 +398,7 @@ create_sequence<runtime::Task>(const std::vector<runtime::Task*>& firsts,
                                const std::vector<size_t>& puids,
                                const bool& tasks_inplace)
 {
-    return new runtime::Sequence(firsts, lasts, exclusions, n_threads, thread_pinning, puids, tasks_inplace);
+    return new runtime::Sequence(firsts, lasts, exclusions, n_threads, thread_pinning, puids, tasks_inplace, false);
 }
 
 // Init and sequence creation for second pinning version
@@ -425,7 +425,7 @@ create_sequence<const runtime::Task>(const std::vector<const runtime::Task*>& fi
                                      const std::string& pipeline_pinning_policy,
                                      const bool& /*tasks_inplace*/)
 {
-    return new runtime::Sequence(firsts, lasts, exclusions, n_threads, thread_pinning, pipeline_pinning_policy);
+    return new runtime::Sequence(firsts, lasts, exclusions, n_threads, thread_pinning, pipeline_pinning_policy, false);
 }
 
 template<>
@@ -439,7 +439,7 @@ create_sequence<runtime::Task>(const std::vector<runtime::Task*>& firsts,
                                const bool& tasks_inplace)
 {
     return new runtime::Sequence(
-      firsts, lasts, exclusions, n_threads, thread_pinning, pipeline_pinning_policy, tasks_inplace);
+      firsts, lasts, exclusions, n_threads, thread_pinning, pipeline_pinning_policy, tasks_inplace, false);
 }
 
 template <class TA>
@@ -590,6 +590,12 @@ void Pipeline
 
     this->create_adaptors(synchro_buffer_sizes, synchro_active_waiting);
     this->bind_adaptors();
+
+    // Allocating memory for Pipeline stages
+    for (auto stage : this->stages)
+    {
+        stage->allocate_sequence_memory();
+    }
 
     this->thread_pool.reset(new tools::Thread_pool_standard(this->stages.size() - 1));
     this->thread_pool->init(); // threads are spawned here

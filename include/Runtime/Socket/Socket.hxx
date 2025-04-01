@@ -288,6 +288,12 @@ Socket::get_2d_dptr(const size_t start_row, const size_t start_col)
     return this->template get_2d_dataptr<T>(start_row, start_col);
 }
 
+Socket::buffer&
+Socket::get_out_buffer()
+{
+    return this->out_buffer;
+}
+
 bool
 Socket::is_fast() const
 {
@@ -379,10 +385,14 @@ Socket::_bind(Socket& s_out, const int priority)
             throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
         }
 
-        if (s_out.dataptr == nullptr)
+        if (s_out.get_task().is_outbuffers_allocated() && s_out.dataptr == nullptr)
         {
             std::stringstream message;
             message << "'s_out.dataptr' can't be NULL.";
+            message << "'s_out.dataptr' can't be NULL." << "'s_out.name' = " << s_out.get_name() << ", "
+                    << "'s_out.task.name' = " << s_out.task.get_name() << ","
+                    << "Flag value : " << s_out.get_task().is_outbuffers_allocated() << "," << "'name' = " << get_name()
+                    << ", " << "'task.name' = " << task.get_name() << ").";
             throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
         }
     }
@@ -995,6 +1005,74 @@ Socket::unbind(Socket& s_out)
 }
 
 void
+Socket::_allocate_buffer()
+{
+    out_buffer.resize(this->databytes);
+    this->dataptr = out_buffer.data();
+}
+
+void
+Socket::allocate_buffer()
+{
+    if (this->dataptr != nullptr)
+    {
+        std::stringstream message;
+        message << "The current socket is already allocated (" << "'name' = " << get_name() << ", "
+                << "'task.name' = " << task.get_name() << ").";
+        throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
+    }
+
+    if (this->get_type() == socket_t::SIN)
+    {
+        std::stringstream message;
+        message << "The current socket is an input socket and can't be allocated (" << "'name' = " << get_name() << ", "
+                << "'task.name' = " << task.get_name() << ").";
+        throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
+    }
+
+    if (this->get_type() == socket_t::SFWD)
+    {
+        std::stringstream message;
+        message << "The current socket is a forward socket and can't be allocated (" << "'name' = " << get_name()
+                << ", " << "'task.name' = " << task.get_name() << ").";
+        throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
+    }
+
+    _allocate_buffer();
+}
+
+void
+Socket::free_buffer()
+{
+    if (this->dataptr == nullptr)
+    {
+        std::stringstream message;
+        message << "The current socket is already deallocated (" << "'name' = " << get_name() << ", "
+                << "'task.name' = " << task.get_name() << ").";
+        throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
+    }
+
+    if (this->get_type() == socket_t::SIN)
+    {
+        std::stringstream message;
+        message << "The current socket is an input socket and can't be deallocated (" << "'name' = " << get_name()
+                << ", " << "'task.name' = " << task.get_name() << ").";
+        throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
+    }
+
+    if (this->get_type() == socket_t::SFWD)
+    {
+        std::stringstream message;
+        message << "The current socket is a forward socket and can't be deallocated (" << "'name' = " << get_name()
+                << ", " << "'task.name' = " << task.get_name() << ").";
+        throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
+    }
+
+    out_buffer.clear();
+    this->dataptr = nullptr;
+}
+
+void
 Socket::set_name(const std::string& name)
 {
     if (name != this->get_name())
@@ -1029,7 +1107,6 @@ Socket::set_dataptr(void* dataptr)
 {
     if (dataptr != this->_get_dataptr())
     {
-        this->check_bound_socket();
         this->dataptr = dataptr;
     }
 }
@@ -1087,6 +1164,13 @@ Socket::check_bound_socket()
                 << "'task.name' = " << task.get_name() << bound_sockets_str.str() << ").";
         throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
     }
+}
+
+void
+Socket::set_out_buffer(size_t new_data_bytes)
+{
+    out_buffer.resize(new_data_bytes);
+    this->dataptr = ((void*)out_buffer.data());
 }
 
 }
