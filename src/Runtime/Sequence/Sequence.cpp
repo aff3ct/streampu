@@ -718,7 +718,7 @@ Sequence::is_done() const
 }
 
 void
-Sequence::allocate_sequence_memory()
+Sequence::allocate_this_sequence_memory()
 {
     if (!this->sequence_memory_allocate)
     {
@@ -729,6 +729,22 @@ Sequence::allocate_sequence_memory()
     {
         std::stringstream message;
         message << "The memory is already allocated for this sequence";
+        throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
+    }
+}
+
+void
+Sequence::deallocate_this_sequence_memory()
+{
+    if (this->sequence_memory_allocate)
+    {
+        this->allocation_function.deallocate_sequence_memory(this);
+        this->sequence_memory_allocate = false;
+    }
+    else
+    {
+        std::stringstream message;
+        message << "Sequence memory is not allocated";
         throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
     }
 }

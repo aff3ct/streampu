@@ -59,6 +59,7 @@ class Socket : public tools::Interface_reset
     // Data management in socket for CPU case
     typedef std::vector<uint8_t, tools::aligned_allocator<uint8_t>> buffer;
     buffer out_buffer;
+    bool sck_out_buffer_allocated;
 
   public:
     inline Socket(Task& task,
@@ -164,7 +165,7 @@ class Socket : public tools::Interface_reset
 
     inline void allocate_buffer();
 
-    inline void free_buffer();
+    inline void deallocate_buffer();
 
   protected:
     inline void* _get_dataptr(const size_t start_col = 0) const;

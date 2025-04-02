@@ -9,14 +9,24 @@ using namespace spu;
 using namespace spu::tools;
 
 void
-Buffer_allocator::one_buffer_per_outsocket(runtime::Sequence* sequence)
+Buffer_allocator::allocate_one_buffer_per_outsocket(runtime::Sequence* sequence)
 {
     for (auto thread_tasks : sequence->get_tasks_per_threads())
     {
         for (auto task : thread_tasks)
         {
-            // Try to remove condition
-            if (!task->is_outbuffers_allocated()) task->allocate_outbuffers();
+            task->allocate_outbuffers();
+        }
+    }
+}
+void
+Buffer_allocator::deallocate_one_buffer_per_outsocket(runtime::Sequence* sequence)
+{
+    for (auto thread_tasks : sequence->get_tasks_per_threads())
+    {
+        for (auto task : thread_tasks)
+        {
+            task->deallocate_outbuffers();
         }
     }
 }
@@ -32,6 +42,21 @@ Buffer_allocator::allocate_sequence_memory(runtime::Sequence* sequence)
     }
     else
     {
-        one_buffer_per_outsocket(sequence);
+        allocate_one_buffer_per_outsocket(sequence);
+    }
+}
+
+void
+Buffer_allocator::deallocate_sequence_memory(runtime::Sequence* sequence)
+{
+    if (sequence == nullptr)
+    {
+        std::stringstream message;
+        message << "The sequence pointer is null ," << "Call set_sequence before allocating memory";
+        throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
+    }
+    else
+    {
+        deallocate_one_buffer_per_outsocket(sequence);
     }
 }

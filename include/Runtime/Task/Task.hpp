@@ -250,6 +250,8 @@ class Task
 
     // Function to allocate task's out sockets
     void allocate_outbuffers();
+    // Function to deallocate all tasks out buffers
+    void deallocate_outbuffers();
 
   private:
     template<typename T>

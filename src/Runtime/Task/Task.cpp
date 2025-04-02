@@ -1102,25 +1102,65 @@ Task::update_n_frames_per_wave(const size_t /*old_n_frames_per_wave*/, const siz
 void
 Task::allocate_outbuffers()
 {
-    if (this->is_outbuffers_allocated())
+    if (!this->is_outbuffers_allocated())
+    {
+        std::function<void(Socket * socket, void* data_ptr)> spread_dataptr =
+          [&spread_dataptr](Socket* socket, void* data_ptr)
+        {
+            for (auto bound_socket : socket->get_bound_sockets())
+            {
+                if (bound_socket->get_type() == socket_t::SIN)
+                {
+                    bound_socket->set_dataptr(data_ptr);
+                }
+                else if (bound_socket->get_type() == socket_t::SFWD)
+                {
+                    bound_socket->set_dataptr(data_ptr);
+                    spread_dataptr(bound_socket, data_ptr);
+                }
+                else
+                {
+                    std::stringstream message;
+                    message << "bound socket is of type SOUT, but should be SIN or SFWD";
+                    throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
+                }
+            }
+        };
+        for (auto s : this->sockets)
+        {
+            if (s->get_type() == socket_t::SOUT && s->get_name() != "status")
+            {
+                if (s->get_dataptr() == nullptr)
+                {
+                    s->allocate_buffer();
+                    spread_dataptr(s.get(), s->get_dataptr());
+                }
+            }
+        }
+        this->set_outbuffers_allocated(true);
+    }
+}
+void
+Task::deallocate_outbuffers()
+{
+    if (!this->is_outbuffers_allocated())
     {
         std::stringstream message;
-        message << "Task out sockets buffers are already allocated" << ", task name : " << this->get_name();
+        message << "Task out sockets buffers are not allocated" << ", task name : " << this->get_name();
         throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
     }
-    std::function<void(Socket * socket, void* data_ptr)> spread_dataptr =
-      [&spread_dataptr](Socket* socket, void* data_ptr)
+    std::function<void(Socket * socket)> spread_nullptr = [&spread_nullptr](Socket* socket)
     {
         for (auto bound_socket : socket->get_bound_sockets())
         {
             if (bound_socket->get_type() == socket_t::SIN)
             {
-                bound_socket->set_dataptr(data_ptr);
+                bound_socket->set_dataptr(nullptr);
             }
             else if (bound_socket->get_type() == socket_t::SFWD)
             {
-                bound_socket->set_dataptr(data_ptr);
-                spread_dataptr(bound_socket, data_ptr);
+                bound_socket->set_dataptr(nullptr);
+                spread_nullptr(bound_socket);
             }
             else
             {
@@ -1134,14 +1174,14 @@ Task::allocate_outbuffers()
     {
         if (s->get_type() == socket_t::SOUT && s->get_name() != "status")
         {
-            if (s->get_dataptr() == nullptr)
+            if (s->get_dataptr() != nullptr)
             {
-                s->allocate_buffer();
-                spread_dataptr(s.get(), s->get_dataptr());
+                s->deallocate_buffer();
+                spread_nullptr(s.get());
             }
         }
     }
-    this->set_outbuffers_allocated(true);
+    this->set_outbuffers_allocated(false);
 }
 
 bool

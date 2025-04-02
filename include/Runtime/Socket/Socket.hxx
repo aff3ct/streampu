@@ -48,6 +48,7 @@ Socket::Socket(Task& task,
   , start_row(0)
   , bound_socket(nullptr)
   , type(type)
+  , sck_out_buffer_allocated(false)
 {
     if (databytes % type_to_size[datatype] != 0)
     {
@@ -1042,7 +1043,7 @@ Socket::allocate_buffer()
 }
 
 void
-Socket::free_buffer()
+Socket::deallocate_buffer()
 {
     if (this->dataptr == nullptr)
     {

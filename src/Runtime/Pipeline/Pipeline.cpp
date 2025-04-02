@@ -588,13 +588,14 @@ void Pipeline
         }
     }
 
+    // Adding adaptors to pipeline stages
     this->create_adaptors(synchro_buffer_sizes, synchro_active_waiting);
     this->bind_adaptors();
 
-    // Allocating memory for Pipeline stages
+    // Allocating memory for stages
     for (auto stage : this->stages)
     {
-        stage->allocate_sequence_memory();
+        stage->allocate_this_sequence_memory();
     }
 
     this->thread_pool.reset(new tools::Thread_pool_standard(this->stages.size() - 1));

@@ -256,7 +256,9 @@ class Sequence
     bool is_thread_pinning();
 
     // Allocate sequence memory
-    void allocate_sequence_memory();
+    void allocate_this_sequence_memory();
+    // Deallocate sequence memory
+    void deallocate_this_sequence_memory();
 
     void exec(std::function<bool(const std::vector<const int*>&)> stop_condition);
     void exec(std::function<bool()> stop_condition);
