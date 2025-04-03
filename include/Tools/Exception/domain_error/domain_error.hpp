@@ -13,7 +13,7 @@ namespace spu
 {
 namespace tools
 {
-class domain_error : public exception
+class SPU_EXPORT_EXCEPTION domain_error : public exception
 {
   public:
     domain_error() noexcept;

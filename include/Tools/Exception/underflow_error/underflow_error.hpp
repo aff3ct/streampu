@@ -13,7 +13,7 @@ namespace spu
 {
 namespace tools
 {
-class underflow_error : public exception
+class SPU_EXPORT_EXCEPTION underflow_error : public exception
 {
   public:
     underflow_error() noexcept;

@@ -13,7 +13,7 @@ namespace spu
 {
 namespace tools
 {
-class cannot_allocate : public exception
+class SPU_EXPORT_EXCEPTION cannot_allocate : public exception
 {
   public:
     cannot_allocate() noexcept;
