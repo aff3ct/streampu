@@ -382,18 +382,17 @@ Socket::_bind(Socket& s_out, const int priority)
                     << "'databytes' = " << this->databytes << ", "
                     << "'name' = " << get_name() << ", "
                     << "'task.name' = " << task.get_name() << ").";
-
             throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
         }
 
         if (s_out.get_task().is_outbuffers_allocated() && s_out.dataptr == nullptr)
         {
             std::stringstream message;
-            message << "'s_out.dataptr' can't be NULL.";
-            message << "'s_out.dataptr' can't be NULL." << "'s_out.name' = " << s_out.get_name() << ", "
+            message << "'s_out.dataptr' can't be NULL ("
+					<< "'s_out.name' = " << s_out.get_name() << ", "
                     << "'s_out.task.name' = " << s_out.task.get_name() << ","
-                    << "Flag value : " << s_out.get_task().is_outbuffers_allocated() << "," << "'name' = " << get_name()
-                    << ", " << "'task.name' = " << task.get_name() << ").";
+					<< "'name' = " << get_name()<< ", "
+					<< "'task.name' = " << task.get_name() << ").";
             throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
         }
     }
@@ -1018,7 +1017,8 @@ Socket::allocate_buffer()
     if (this->dataptr != nullptr)
     {
         std::stringstream message;
-        message << "The current socket is already allocated (" << "'name' = " << get_name() << ", "
+        message << "The current socket is already allocated (" << ", "
+				<<"'name' = " << get_name() << ", "
                 << "'task.name' = " << task.get_name() << ").";
         throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
     }
@@ -1026,7 +1026,8 @@ Socket::allocate_buffer()
     if (this->get_type() == socket_t::SIN)
     {
         std::stringstream message;
-        message << "The current socket is an input socket and can't be allocated (" << "'name' = " << get_name() << ", "
+        message << "The current socket is an input socket and can't be allocated ("
+				<< "'name' = " << get_name() << ", "
                 << "'task.name' = " << task.get_name() << ").";
         throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
     }
@@ -1034,11 +1035,11 @@ Socket::allocate_buffer()
     if (this->get_type() == socket_t::SFWD)
     {
         std::stringstream message;
-        message << "The current socket is a forward socket and can't be allocated (" << "'name' = " << get_name()
-                << ", " << "'task.name' = " << task.get_name() << ").";
+        message << "The current socket is a forward socket and can't be allocated ("
+				<< "'name' = " << get_name() << ", "
+                << "'task.name' = " << task.get_name() << ").";
         throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
     }
-
     _allocate_buffer();
 }
 
@@ -1048,7 +1049,8 @@ Socket::deallocate_buffer()
     if (this->dataptr == nullptr)
     {
         std::stringstream message;
-        message << "The current socket is already deallocated (" << "'name' = " << get_name() << ", "
+        message << "The current socket is already deallocated ("
+				<< "'name' = " << get_name() << ", "
                 << "'task.name' = " << task.get_name() << ").";
         throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
     }
@@ -1056,16 +1058,18 @@ Socket::deallocate_buffer()
     if (this->get_type() == socket_t::SIN)
     {
         std::stringstream message;
-        message << "The current socket is an input socket and can't be deallocated (" << "'name' = " << get_name()
-                << ", " << "'task.name' = " << task.get_name() << ").";
+        message << "The current socket is an input socket and can't be deallocated ("
+				<< "'name' = " << get_name() << ", "
+                << "'task.name' = " << task.get_name() << ").";
         throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
     }
 
     if (this->get_type() == socket_t::SFWD)
     {
         std::stringstream message;
-        message << "The current socket is a forward socket and can't be deallocated (" << "'name' = " << get_name()
-                << ", " << "'task.name' = " << task.get_name() << ").";
+        message << "The current socket is a forward socket and can't be deallocated ("
+				<< "'name' = " << get_name() << ", "
+                << "'task.name' = " << task.get_name() << ").";
         throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
     }
 
