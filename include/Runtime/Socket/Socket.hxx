@@ -1017,9 +1017,8 @@ Socket::allocate_buffer()
     if (this->dataptr != nullptr)
     {
         std::stringstream message;
-        message << "The current socket is already allocated (" << ", "
-                << "'name' = " << get_name() << ", "
-                << "'task.name' = " << task.get_name() << ").";
+        message << "The current socket is already allocated ("
+                << ", 'name' = " << get_name() << ", 'task.name' = " << task.get_name() << ").";
         throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
     }
 

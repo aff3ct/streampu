@@ -1146,7 +1146,8 @@ Task::deallocate_outbuffers()
     if (!this->is_outbuffers_allocated())
     {
         std::stringstream message;
-        message << "Task out sockets buffers are not allocated" << ", task name : " << this->get_name();
+        message << "Task out sockets buffers are not allocated"
+                << ", task name : " << this->get_name();
         throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
     }
     std::function<void(Socket * socket)> spread_nullptr = [&spread_nullptr](Socket* socket)

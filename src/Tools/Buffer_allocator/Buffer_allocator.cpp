@@ -37,8 +37,8 @@ Buffer_allocator::allocate_sequence_memory(runtime::Sequence* sequence)
     if (sequence == nullptr)
     {
         std::stringstream message;
-        message << "The sequence pointer is null" << ", "
-                << "Call set_sequence before allocating memory";
+        message << "The sequence pointer is null"
+                << ", Call set_sequence before allocating memory";
         throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
     }
     else
