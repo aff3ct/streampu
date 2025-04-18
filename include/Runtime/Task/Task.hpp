@@ -99,7 +99,6 @@ class Task
     size_t n_output_sockets;
     size_t n_fwd_sockets;
 
-    // Letting status socket in task for now
     std::vector<int> status;
 
     // stats
