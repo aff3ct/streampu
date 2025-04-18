@@ -132,7 +132,7 @@ class Pipeline_builder
          * Get the number of threads for this stage.
          * @return The number of threads.
          */
-        const size_t get_n_threads();
+        size_t get_n_threads();
 
         /**
          * Enable thread pinning on this stage.
@@ -157,7 +157,7 @@ class Pipeline_builder
          * Check if thread pinning is enabled on this stage.
          * @return True if thread pinning is enabled, false otherwise.
          */
-        const bool is_pinning();
+        bool is_pinning();
 
         /**
          * Set the thread pinning policy of this stage.
@@ -325,7 +325,7 @@ class Pipeline_builder
          * Check if active waiting is enabled.
          * @return True if active waiting is enabled, false otherwise.
          */
-        const bool is_active_waiting();
+        bool is_active_waiting();
 
         /**
          * Set the buffer size for synchronization between the two stages.
@@ -338,7 +338,7 @@ class Pipeline_builder
          * Get the buffer size for synchronization between the two stages.
          * @return The size of the buffer between the two stages.
          */
-        const size_t get_buffer_size();
+        size_t get_buffer_size();
 
       protected:
         bool active_waiting = false;

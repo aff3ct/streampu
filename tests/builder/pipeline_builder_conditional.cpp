@@ -37,7 +37,7 @@ remove_and_unbound_stage(tools::Pipeline_builder& builder, const size_t unwanted
 }
 
 int
-main(int argc, char** argv)
+main(int /*argc*/, char** /*argv*/)
 {
     std::cout << "######################################################################" << std::endl;
     std::cout << "# Micro-benchmark: Pipeline width builder - conditional construction #" << std::endl;
@@ -51,12 +51,12 @@ main(int argc, char** argv)
     module::Initializer<int> init(1);
 
     std::vector<std::vector<std::unique_ptr<module::Incrementer<int>>>> incrs_pips;
-    for (int i = 0; i < n_incrs_pips.size(); i++)
+    for (size_t i = 0; i < n_incrs_pips.size(); i++)
         incrs_pips.push_back({});
 
-    for (int i = 0; i < n_incrs_pips.size(); i++)
+    for (size_t i = 0; i < n_incrs_pips.size(); i++)
     {
-        for (int j = 0; j < n_incrs_pips[i]; j++)
+        for (size_t j = 0; j < n_incrs_pips[i]; j++)
         {
             incrs_pips[i].emplace_back(new module::Incrementer<int>(1));
         }
@@ -64,14 +64,14 @@ main(int argc, char** argv)
     module::Finalizer<int> fini(1);
 
     // Binding
-    for (int i = 0; i < n_incrs_pips.size(); i++)
+    for (size_t i = 0; i < n_incrs_pips.size(); i++)
     {
         if (i == 0)
             (*incrs_pips[0][0].get())["increment::in"] = init["initialize::out"];
         else
             (*incrs_pips[i][0].get())["increment::in"] = (*incrs_pips[i - 1].back().get())["increment::out"];
 
-        for (int j = 1; j < n_incrs_pips[i]; j++)
+        for (size_t j = 1; j < n_incrs_pips[i]; j++)
         {
             (*incrs_pips[i][j].get())["increment::in"] = (*incrs_pips[i][j - 1].get())["increment::out"];
         }
@@ -96,7 +96,7 @@ main(int argc, char** argv)
       .set_excluded_tasks({});                  // others should be replaced
 
     std::vector<std::unique_ptr<tools::Pipeline_builder::Stage_builder>> stages;
-    for (int i = 0; i < n_incrs_pips.size(); i++)
+    for (size_t i = 0; i < n_incrs_pips.size(); i++)
     {
         stages.emplace_back(new tools::Pipeline_builder::Stage_builder());
         stages[i]

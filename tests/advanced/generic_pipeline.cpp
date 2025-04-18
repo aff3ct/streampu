@@ -97,11 +97,12 @@ split_string(std::string s, const std::string delimiter = "_")
 void
 parse_int_string(std::string& vector_param, std::vector<size_t>& vector)
 {
+    const std::locale loc = std::locale::classic();
     std::vector<std::string> tokens = split_string(vector_param, ",");
     for (size_t i = 0; i < tokens.size(); ++i)
     {
         std::string token = tokens[i];
-        token.erase(remove_if(token.begin(), token.end(), isspace), token.end());
+        token.erase(remove_if(token.begin(), token.end(), [=](char c) { return std::isspace(c, loc); }), token.end());
         vector.push_back(std::atoi(token.c_str()));
     }
 }
@@ -109,6 +110,7 @@ parse_int_string(std::string& vector_param, std::vector<size_t>& vector)
 std::tuple<tsk_e, int, bool>
 extract_tsk_type(const std::string& label, const bool check_replicability)
 {
+    const std::locale loc = std::locale::classic();
     tsk_e tsk = tsk_e::relay;
     int duration = -1;
     bool replicable = true;
@@ -121,7 +123,8 @@ extract_tsk_type(const std::string& label, const bool check_replicability)
         while (i < tokens.size())
         {
             std::string token = tokens[i];
-            token.erase(remove_if(token.begin(), token.end(), isspace), token.end());
+            token.erase(remove_if(token.begin(), token.end(), [=](char c) { return std::isspace(c, loc); }),
+                        token.end());
             if (str_2_tsk.find(token) != str_2_tsk.end())
             {
                 tsk = str_2_tsk[token];
@@ -244,7 +247,7 @@ main(int argc, char** argv)
                           { "pinning-policy", no_argument, NULL, 'P' },
 #endif
                           { "verbose", no_argument, NULL, 'v' },
-                          { 0 } };
+                          { NULL, 0, NULL, 0 } };
 
     std::string n_threads_param;
     std::vector<size_t> n_threads;

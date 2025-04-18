@@ -13,7 +13,7 @@ namespace spu
 {
 namespace tools
 {
-class logic_error : public exception
+class SPU_EXPORT_EXCEPTION logic_error : public exception
 {
   public:
     logic_error() noexcept;

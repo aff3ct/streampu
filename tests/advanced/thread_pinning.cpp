@@ -26,7 +26,7 @@ main(int argc, char** argv)
                           { "debug", no_argument, NULL, 'g' },
                           { "active-waiting", no_argument, NULL, 'w' },
                           { "help", no_argument, NULL, 'h' },
-                          { 0 } };
+                          { NULL, 0, NULL, 0 } };
 
     size_t n_inter_frames = 1;
     size_t data_length = 1;
