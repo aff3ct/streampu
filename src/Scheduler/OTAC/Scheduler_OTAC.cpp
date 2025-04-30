@@ -29,7 +29,7 @@ Scheduler_OTAC::Scheduler_OTAC(runtime::Sequence* sequence, const size_t R)
 double
 weight(const std::vector<runtime::Task*>& s, const unsigned int r)
 {
-    if (r == 0)
+    if (r <= 0)
     {
         return std::numeric_limits<double>::infinity();
     }
@@ -47,7 +47,7 @@ weight(const std::vector<runtime::Task*>& s, const unsigned int r)
 double
 weight_t(const std::vector<task_desc_t>& s, const unsigned int r)
 {
-    if (r == 0)
+    if (r <= 0)
     {
         return std::numeric_limits<double>::infinity();
     }
@@ -176,7 +176,7 @@ extra_tasks_packing(const std::vector<task_desc_t>& chain,
     std::vector<runtime::Task*> s_temp;
     s_temp.push_back(chain[f - 1].tptr);
     int e = f;
-    while ((chain[e - 2].exec_duration[0].count() + weight(s_temp, 1)) <= P)
+    while ((chain[e - 2].exec_duration[0].count() + weight(s_temp, 1)) <= P && s.size() > 1)
     {
         s.pop_back();
         n -= 1;
