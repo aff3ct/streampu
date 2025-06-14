@@ -11,7 +11,7 @@
 #elif defined(__APPLE__) || defined(__MACH__)
 #include <mach-o/dyld.h>
 #elif defined(_WIN32) || defined(_WIN64)
-#include <Windows.h>
+#include <windows.h>
 #endif
 
 #include <cstdio>
