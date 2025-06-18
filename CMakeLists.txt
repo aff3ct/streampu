@@ -385,6 +385,15 @@ else()
                         "$ git submodule update --init -- ../lib/json/")
 endif()
 
+# helgrind
+find_package(PkgConfig REQUIRED)
+find_package(HELGRIND)
+if(HELGRIND_FOUND)
+    message(STATUS "StreamPU - Helgrind found: enabling false positive annotations")
+    spu_target_include_directories2("${spu_targets_list}" PUBLIC "${HELGRIND_INCLUDE_DIRS}")
+    spu_target_compile_definitions("${spu_targets_list}" PUBLIC HAS_HELGRIND)
+endif()
+
 # ---------------------------------------------------------------------------------------------------------------------
 # -------------------------------------------------------------------------------------------------- COMPILED LIBRARIES
 # ---------------------------------------------------------------------------------------------------------------------

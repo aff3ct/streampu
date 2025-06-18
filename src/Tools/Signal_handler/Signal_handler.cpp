@@ -10,6 +10,14 @@
 #include <iostream>
 #include <thread>
 
+#ifdef HAS_HELGRIND
+#include <valgrind/helgrind.h>
+#else
+#define ANNOTATE_HAPPENS_AFTER()
+#define ANNOTATE_HAPPENS_BEFORE()
+#define ANNOTATE_HAPPENS_BEFORE_FORGET_ALL()
+#endif
+
 #include "Runtime/Sequence/Sequence.hpp"
 #include "Tools/Display/rang_format/rang_format.h"
 #include "Tools/Signal_handler/Signal_handler.hpp"
@@ -207,23 +215,33 @@ Signal_handler::init()
 bool
 Signal_handler::is_sigint()
 {
-    return g_sigint;
+    ANNOTATE_HAPPENS_AFTER(&g_sigint);
+    auto ret = g_sigint;
+    ANNOTATE_HAPPENS_BEFORE(&g_sigint);
+    return ret;
 }
 
 void
 Signal_handler::reset_sigint()
 {
+    ANNOTATE_HAPPENS_AFTER(&g_sigint);
     g_sigint = false;
+    ANNOTATE_HAPPENS_BEFORE(&g_sigint);
 }
 
 bool
 Signal_handler::is_sigsegv()
 {
-    return g_sigsegv;
+    ANNOTATE_HAPPENS_AFTER(&g_sigsegv);
+    auto ret = g_sigsegv;
+    ANNOTATE_HAPPENS_BEFORE(&g_sigsegv);
+    return ret;
 }
 
 void
 Signal_handler::reset_sigsegv()
 {
+    ANNOTATE_HAPPENS_AFTER(&g_sigsegv);
     g_sigsegv = false;
+    ANNOTATE_HAPPENS_BEFORE(&g_sigsegv);
 }
