@@ -1515,7 +1515,7 @@ Sequence::replicate(const tools::Digraph_node<SS>* sequence)
 #ifdef SPU_JLUNA
             module::Stateless_Jluna* jl_m = nullptr;
             if ((jl_m = dynamic_cast<module::Stateless_Jluna*>(this->modules[tid][m].get())))
-                this->jl_modules[tid + (this->tasks_inplace ? 1 : 0)].push_back(jl_m);
+                this->jl_modules[tid + (this->tasks_inplace ? 1 : 0)][m] = jl_m;
 #endif /* SPU_JLUNA */
         }
 
