@@ -61,6 +61,7 @@ Thread_pool_Jluna_v3::_start_thread(const size_t tid)
         jluna::unsafe::call(this->jl_unsafe_lock, static_cast<jluna::unsafe::Value*>(this->jl_cnd[tid]));
         this->barrier.arrive(tid + 1);
         jluna::unsafe::call(this->jl_unsafe_wait, static_cast<jluna::unsafe::Value*>(this->jl_cnd[tid]));
+        jluna::unsafe::call(this->jl_unsafe_unlock, static_cast<jluna::unsafe::Value*>(this->jl_cnd[tid]));
 
         if (!this->stop_threads) this->func_exec(tid);
     }

@@ -61,6 +61,7 @@ Thread_pool_Jluna_v2::_start_thread(const size_t tid)
         this->jl_lock(this->jl_cnd[tid]);
         this->barrier.arrive(tid + 1);
         this->jl_wait(this->jl_cnd[tid]);
+        this->jl_unlock(this->jl_cnd[tid]);
 
         if (!this->stop_threads) this->func_exec(tid);
     }
