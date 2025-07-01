@@ -10,15 +10,8 @@
 #include <iostream>
 #include <thread>
 
-#ifdef HAS_HELGRIND
-#include <valgrind/helgrind.h>
-#else
-#define ANNOTATE_HAPPENS_AFTER()
-#define ANNOTATE_HAPPENS_BEFORE()
-#define ANNOTATE_HAPPENS_BEFORE_FORGET_ALL()
-#endif
-
 #include "Runtime/Sequence/Sequence.hpp"
+#include "Tools/Debug/hellgrind_annotations.hxx"
 #include "Tools/Display/rang_format/rang_format.h"
 #include "Tools/Signal_handler/Signal_handler.hpp"
 
