@@ -386,7 +386,11 @@ else()
 endif()
 
 # helgrind
-find_package(PkgConfig REQUIRED)
+
+if(UNIX)
+  find_package(PkgConfig REQUIRED)
+endif()
+
 find_package(HELGRIND)
 if(HELGRIND_FOUND)
     message(STATUS "StreamPU - Helgrind found: enabling false positive annotations")

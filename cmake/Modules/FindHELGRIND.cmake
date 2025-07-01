@@ -1,12 +1,20 @@
-# - Try to find HELGRIND
+# - Try to find HELGRIND (Valgrind annotations)
+# Only works on Unix-like systems
 
-## Check for pkg-config
-#find_package(PkgConfig)
+if(NOT UNIX)
+  message(STATUS "HELGRIND not supported on non-Unix platforms.")
+  return()
+endif()
 
-# Check for HELGRIND
-message(STATUS "Checking for HELGRIND")
+# Try to use pkg-config
+find_package(PkgConfig QUIET)
 
-pkg_check_modules(HELGRIND valgrind)
+if(PKG_CONFIG_FOUND)
+  pkg_check_modules(HELGRIND valgrind)
+endif()
+
+include(FindPackageHandleStandardArgs)
+find_package_handle_standard_args(HELGRIND REQUIRED_VARS HELGRIND_INCLUDE_DIRS)
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(HELGRIND REQUIRED_VARS HELGRIND_INCLUDE_DIRS)
