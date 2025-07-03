@@ -385,12 +385,12 @@ else()
                         "$ git submodule update --init -- ../lib/json/")
 endif()
 
-# helgrind
-
+# PkgConfig
 if(UNIX)
   find_package(PkgConfig REQUIRED)
 endif()
 
+# helgrind
 find_package(HELGRIND)
 if(HELGRIND_FOUND)
     message(STATUS "StreamPU - Helgrind found: enabling false positive annotations")
