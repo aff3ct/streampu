@@ -1,5 +1,5 @@
-#ifndef HELGRIND_ANNOTATIONS_H
-#define HELGRIND_ANNOTATIONS_H
+#ifndef HELGRIND_ANNOTATIONS_H_
+#define HELGRIND_ANNOTATIONS_H_
 
 #ifdef HAS_HELGRIND
 #include <valgrind/helgrind.h>
@@ -9,4 +9,4 @@
 #define ANNOTATE_HAPPENS_BEFORE_FORGET_ALL() ((void)0)
 #endif
 
-#endif // HELGRIND_ANNOTATIONS_H
+#endif // HELGRIND_ANNOTATIONS_H_
