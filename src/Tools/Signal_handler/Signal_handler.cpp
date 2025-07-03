@@ -11,7 +11,7 @@
 #include <thread>
 
 #include "Runtime/Sequence/Sequence.hpp"
-#include "Tools/Debug/hellgrind_annotations.hxx"
+#include "Tools/Debug/hellgrind_annotations.h"
 #include "Tools/Display/rang_format/rang_format.h"
 #include "Tools/Signal_handler/Signal_handler.hpp"
 
