@@ -150,9 +150,6 @@
 #ifndef COMPUTE_BYTES_H_
 #include <Tools/compute_bytes.h>
 #endif
-#ifndef HELGRIND_ANNOTATIONS_H_
-#include <Tools/Debug/hellgrind_annotations.h>
-#endif
 #ifndef RANG_FORMAT_H_
 #include <Tools/Display/rang_format/rang_format.h>
 #endif
