@@ -361,14 +361,7 @@ Sequence::Sequence(const std::vector<runtime::Task*>& firsts,
                    const std::string& sequence_pinning_policy,
                    const bool tasks_inplace,
                    const bool memory_allocation)
-  : Sequence(firsts,
-             lasts,
-             {},
-             n_threads,
-             thread_pinning,
-             sequence_pinning_policy,
-             tasks_inplace,
-             memory_allocation)
+  : Sequence(firsts, lasts, {}, n_threads, thread_pinning, sequence_pinning_policy, tasks_inplace, memory_allocation)
 {
 }
 
@@ -378,14 +371,7 @@ Sequence::Sequence(const std::vector<runtime::Task*>& firsts,
                    const std::string& sequence_pinning_policy,
                    const bool tasks_inplace,
                    const bool memory_allocation)
-  : Sequence(firsts,
-             {},
-             {},
-             n_threads,
-             thread_pinning,
-             sequence_pinning_policy,
-             tasks_inplace,
-             memory_allocation)
+  : Sequence(firsts, {}, {}, n_threads, thread_pinning, sequence_pinning_policy, tasks_inplace, memory_allocation)
 {
 }
 
