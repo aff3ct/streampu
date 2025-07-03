@@ -23,10 +23,6 @@ class Adaptor_m_to_n;
 class Set;
 }
 
-namespace tools
-{
-class Buffer_allocator;
-}
 namespace runtime
 {
 class Sequence;
@@ -43,7 +39,6 @@ class Socket : public tools::Interface_reset
     friend module::Set;
     friend Sequence;
     friend Pipeline;
-    friend tools::Buffer_allocator;
 #endif
   protected:
     Task& task;

@@ -3,7 +3,6 @@
 #include <sstream>
 
 #include "Runtime/Sequence/Sequence.hpp"
-#include "Runtime/Socket/Socket.hpp"
 #include "Tools/Buffer_allocator/Buffer_allocator.hpp"
 
 using namespace spu;
@@ -39,12 +38,12 @@ Buffer_allocator::allocate_sequence_memory(runtime::Sequence* sequence)
     {
         std::stringstream message;
         message << "The sequence pointer is null"
-                << ", Call set_sequence before allocating memory";
+                << ", call set_sequence before allocating memory";
         throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
     }
     else
     {
-        allocate_one_buffer_per_outsocket(sequence);
+        this->allocate_one_buffer_per_outsocket(sequence);
     }
 }
 
@@ -59,6 +58,6 @@ Buffer_allocator::deallocate_sequence_memory(runtime::Sequence* sequence)
     }
     else
     {
-        deallocate_one_buffer_per_outsocket(sequence);
+        this->deallocate_one_buffer_per_outsocket(sequence);
     }
 }

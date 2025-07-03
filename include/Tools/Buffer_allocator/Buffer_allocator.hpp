@@ -13,7 +13,6 @@ namespace spu
 {
 namespace runtime
 {
-class Socket;
 class Sequence;
 };
 namespace tools
