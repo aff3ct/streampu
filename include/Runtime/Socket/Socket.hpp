@@ -23,7 +23,7 @@ class Adaptor_m_to_n;
 class Set;
 }
 
-namespace buffer
+namespace tools
 {
 class Buffer_allocator;
 }
@@ -34,13 +34,16 @@ class Pipeline;
 
 class Socket : public tools::Interface_reset
 {
+    // Alias for buffer datatype
+    typedef std::vector<uint8_t, tools::aligned_allocator<uint8_t>> buffer;
+
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
     friend Task;
     friend module::Adaptor_m_to_n;
     friend module::Set;
     friend Sequence;
     friend Pipeline;
-    friend buffer::Buffer_allocator;
+    friend tools::Buffer_allocator;
 #endif
   protected:
     Task& task;
@@ -56,8 +59,6 @@ class Socket : public tools::Interface_reset
     std::vector<Socket*> bound_sockets;
     Socket* bound_socket;
     socket_t type;
-    // Data management in socket for CPU case
-    typedef std::vector<uint8_t, tools::aligned_allocator<uint8_t>> buffer;
     buffer out_buffer;
     bool sck_out_buffer_allocated;
 
@@ -201,7 +202,7 @@ class Socket : public tools::Interface_reset
 
     inline void set_n_rows(const size_t n_rows);
 
-    inline void set_out_buffer(size_t new_data_bytes);
+    inline void resize_out_buffer(size_t new_data_bytes);
 
   private:
     inline void check_bound_socket();

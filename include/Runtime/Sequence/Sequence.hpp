@@ -114,51 +114,51 @@ class Sequence
 
     // Instance of buffer allocator class
     tools::Buffer_allocator allocation_function;
-    bool sequence_memory_allocate;
+    bool memory_allocation;
 
   public:
     Sequence(const std::vector<const runtime::Task*>& firsts,
              const size_t n_threads = 1,
              const bool thread_pinning = false,
              const std::vector<size_t>& puids = {},
-             const bool sequence_memory_allocate = true);
+             const bool memory_allocation = true);
     Sequence(const std::vector<const runtime::Task*>& firsts,
              const std::vector<const runtime::Task*>& lasts,
              const size_t n_threads = 1,
              const bool thread_pinning = false,
              const std::vector<size_t>& puids = {},
-             const bool sequence_memory_allocate = true);
+             const bool memory_allocation = true);
     Sequence(const std::vector<const runtime::Task*>& firsts,
              const std::vector<const runtime::Task*>& lasts,
              const std::vector<const runtime::Task*>& exclusions,
              const size_t n_threads = 1,
              const bool thread_pinning = false,
              const std::vector<size_t>& puids = {},
-             const bool sequence_memory_allocate = true);
+             const bool memory_allocation = true);
     Sequence(const runtime::Task& first,
              const size_t n_threads = 1,
              const bool thread_pinning = false,
              const std::vector<size_t>& puids = {},
-             const bool sequence_memory_allocate = true);
+             const bool memory_allocation = true);
     Sequence(const runtime::Task& first,
              const runtime::Task& last,
              const size_t n_threads = 1,
              const bool thread_pinning = false,
              const std::vector<size_t>& puids = {},
-             const bool sequence_memory_allocate = true);
+             const bool memory_allocation = true);
     Sequence(const std::vector<runtime::Task*>& firsts,
              const size_t n_threads = 1,
              const bool thread_pinning = false,
              const std::vector<size_t>& puids = {},
              const bool tasks_inplace = true,
-             const bool sequence_memory_allocate = true);
+             const bool memory_allocation = true);
     Sequence(const std::vector<runtime::Task*>& firsts,
              const std::vector<runtime::Task*>& lasts,
              const size_t n_threads = 1,
              const bool thread_pinning = false,
              const std::vector<size_t>& puids = {},
              const bool tasks_inplace = true,
-             const bool sequence_memory_allocate = true);
+             const bool memory_allocation = true);
     Sequence(const std::vector<runtime::Task*>& firsts,
              const std::vector<runtime::Task*>& lasts,
              const std::vector<runtime::Task*>& exclusions,
@@ -166,64 +166,64 @@ class Sequence
              const bool thread_pinning = false,
              const std::vector<size_t>& puids = {},
              const bool tasks_inplace = true,
-             const bool sequence_memory_allocate = true);
+             const bool memory_allocation = true);
     Sequence(runtime::Task& first,
              const size_t n_threads = 1,
              const bool thread_pinning = false,
              const std::vector<size_t>& puids = {},
              const bool tasks_inplace = true,
-             const bool sequence_memory_allocate = true);
+             const bool memory_allocation = true);
     Sequence(runtime::Task& first,
              runtime::Task& last,
              const size_t n_threads = 1,
              const bool thread_pinning = false,
              const std::vector<size_t>& puids = {},
              const bool tasks_inplace = true,
-             const bool sequence_memory_allocate = true);
+             const bool memory_allocation = true);
 
     // Constructors for pinning v2
     Sequence(const std::vector<const runtime::Task*>& firsts,
              const size_t n_threads,
              const bool thread_pinning,
              const std::string& sequence_pinning_policy,
-             const bool sequence_memory_allocate = true);
+             const bool memory_allocation = true);
     Sequence(const std::vector<const runtime::Task*>& firsts,
              const std::vector<const runtime::Task*>& lasts,
              const size_t n_threads,
              const bool thread_pinning,
              const std::string& sequence_pinning_policy,
-             const bool sequence_memory_allocate = true);
+             const bool memory_allocation = true);
     Sequence(const std::vector<const runtime::Task*>& firsts,
              const std::vector<const runtime::Task*>& lasts,
              const std::vector<const runtime::Task*>& exclusions,
              const size_t n_threads,
              const bool thread_pinning,
              const std::string& sequence_pinning_policy,
-             const bool sequence_memory_allocate = true);
+             const bool memory_allocation = true);
     Sequence(const runtime::Task& first,
              const size_t n_threads,
              const bool thread_pinning,
              const std::string& sequence_pinning_policy,
-             const bool sequence_memory_allocate = true);
+             const bool memory_allocation = true);
     Sequence(const runtime::Task& first,
              const runtime::Task& last,
              const size_t n_threads,
              const bool thread_pinning,
              const std::string& sequence_pinning_policy,
-             const bool sequence_memory_allocate = true);
+             const bool memory_allocation = true);
     Sequence(const std::vector<runtime::Task*>& firsts,
              const size_t n_threads,
              const bool thread_pinning,
              const std::string& sequence_pinning_policy,
              const bool tasks_inplace = true,
-             const bool sequence_memory_allocate = true);
+             const bool memory_allocation = true);
     Sequence(const std::vector<runtime::Task*>& firsts,
              const std::vector<runtime::Task*>& lasts,
              const size_t n_threads,
              const bool thread_pinning,
              const std::string& sequence_pinning_policy,
              const bool tasks_inplace = true,
-             const bool sequence_memory_allocate = true);
+             const bool memory_allocation = true);
     Sequence(const std::vector<runtime::Task*>& firsts,
              const std::vector<runtime::Task*>& lasts,
              const std::vector<runtime::Task*>& exclusions,
@@ -231,20 +231,20 @@ class Sequence
              const bool thread_pinning,
              const std::string& sequence_pinning_policy,
              const bool tasks_inplace = true,
-             const bool sequence_memory_allocate = true);
+             const bool memory_allocation = true);
     Sequence(runtime::Task& first,
              const size_t n_threads,
              const bool thread_pinning,
              const std::string& sequence_pinning_policy,
              const bool tasks_inplace = true,
-             const bool sequence_memory_allocate = true);
+             const bool memory_allocation = true);
     Sequence(runtime::Task& first,
              runtime::Task& last,
              const size_t n_threads,
              const bool thread_pinning,
              const std::string& sequence_pinning_policy,
              const bool tasks_inplace = true,
-             const bool sequence_memory_allocate = true);
+             const bool memory_allocation = true);
 
     virtual ~Sequence();
     virtual Sequence* clone() const;
@@ -256,9 +256,9 @@ class Sequence
     bool is_thread_pinning();
 
     // Allocate sequence memory
-    void allocate_this_sequence_memory();
+    void allocate_outbuffers();
     // Deallocate sequence memory
-    void deallocate_this_sequence_memory();
+    void deallocate_outbuffers();
 
     void exec(std::function<bool(const std::vector<const int*>&)> stop_condition);
     void exec(std::function<bool()> stop_condition);

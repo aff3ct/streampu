@@ -1069,7 +1069,7 @@ Task::update_n_frames(const size_t old_n_frames, const size_t new_n_frames)
 
             if (s->get_type() == socket_t::SOUT)
             {
-                s->set_out_buffer(new_databytes);
+                s->resize_out_buffer(new_databytes);
             }
         }
     }

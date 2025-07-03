@@ -1,6 +1,6 @@
 /*!
  * \file
- * \brief Class buffer::Buffer_allocation.
+ * \brief Class buffer::Buffer_allocator.
  */
 #ifndef BUFFER_ALLOCATOR_HPP__
 #define BUFFER_ALLOCATOR_HPP__

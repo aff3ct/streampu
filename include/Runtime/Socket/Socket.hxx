@@ -48,7 +48,6 @@ Socket::Socket(Task& task,
   , start_row(0)
   , bound_socket(nullptr)
   , type(type)
-  , sck_out_buffer_allocated(false)
 {
     if (databytes % type_to_size[datatype] != 0)
     {
@@ -1171,7 +1170,7 @@ Socket::check_bound_socket()
 }
 
 void
-Socket::set_out_buffer(size_t new_data_bytes)
+Socket::resize_out_buffer(size_t new_data_bytes)
 {
     out_buffer.resize(new_data_bytes);
     this->dataptr = ((void*)out_buffer.data());

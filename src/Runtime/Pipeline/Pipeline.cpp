@@ -595,7 +595,7 @@ void Pipeline
     // Allocating memory for stages
     for (auto stage : this->stages)
     {
-        stage->allocate_this_sequence_memory();
+        stage->allocate_outbuffers();
     }
 
     this->thread_pool.reset(new tools::Thread_pool_standard(this->stages.size() - 1));

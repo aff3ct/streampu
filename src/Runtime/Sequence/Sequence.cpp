@@ -31,7 +31,7 @@ Sequence::Sequence(const std::vector<const runtime::Task*>& firsts,
                    const size_t n_threads,
                    const bool thread_pinning,
                    const std::vector<size_t>& puids,
-                   const bool sequence_memory_allocate)
+                   const bool memory_allocation)
   : n_threads(n_threads)
   , sequences(n_threads, nullptr)
   , modules(n_threads)
@@ -49,7 +49,7 @@ Sequence::Sequence(const std::vector<const runtime::Task*>& firsts,
   , next_round_is_over(n_threads, false)
   , cur_task_id(n_threads, 0)
   , cur_ss(n_threads, nullptr)
-  , sequence_memory_allocate(sequence_memory_allocate)
+  , memory_allocation(memory_allocation)
 {
 #ifndef SPU_HWLOC
     if (thread_pinning)
@@ -75,8 +75,8 @@ Sequence::Sequence(const std::vector<const runtime::Task*>& firsts,
                    const size_t n_threads,
                    const bool thread_pinning,
                    const std::vector<size_t>& puids,
-                   const bool sequence_memory_allocate)
-  : Sequence(firsts, lasts, {}, n_threads, thread_pinning, puids, sequence_memory_allocate)
+                   const bool memory_allocation)
+  : Sequence(firsts, lasts, {}, n_threads, thread_pinning, puids, memory_allocation)
 {
 }
 
@@ -84,8 +84,8 @@ Sequence::Sequence(const std::vector<const runtime::Task*>& firsts,
                    const size_t n_threads,
                    const bool thread_pinning,
                    const std::vector<size_t>& puids,
-                   const bool sequence_memory_allocate)
-  : Sequence(firsts, {}, {}, n_threads, thread_pinning, puids, sequence_memory_allocate)
+                   const bool memory_allocation)
+  : Sequence(firsts, {}, {}, n_threads, thread_pinning, puids, memory_allocation)
 {
 }
 
@@ -94,8 +94,8 @@ Sequence::Sequence(const runtime::Task& first,
                    const size_t n_threads,
                    const bool thread_pinning,
                    const std::vector<size_t>& puids,
-                   const bool sequence_memory_allocate)
-  : Sequence({ &first }, { &last }, n_threads, thread_pinning, puids, sequence_memory_allocate)
+                   const bool memory_allocation)
+  : Sequence({ &first }, { &last }, n_threads, thread_pinning, puids, memory_allocation)
 {
 }
 
@@ -103,8 +103,8 @@ Sequence::Sequence(const runtime::Task& first,
                    const size_t n_threads,
                    const bool thread_pinning,
                    const std::vector<size_t>& puids,
-                   const bool sequence_memory_allocate)
-  : Sequence({ &first }, n_threads, thread_pinning, puids, sequence_memory_allocate)
+                   const bool memory_allocation)
+  : Sequence({ &first }, n_threads, thread_pinning, puids, memory_allocation)
 {
 }
 
@@ -124,7 +124,7 @@ Sequence::Sequence(const std::vector<runtime::Task*>& firsts,
                    const bool thread_pinning,
                    const std::vector<size_t>& puids,
                    const bool tasks_inplace,
-                   const bool sequence_memory_allocate)
+                   const bool memory_allocation)
   : n_threads(n_threads)
   , sequences(n_threads, nullptr)
   , modules(tasks_inplace ? n_threads - 1 : n_threads)
@@ -142,7 +142,7 @@ Sequence::Sequence(const std::vector<runtime::Task*>& firsts,
   , next_round_is_over(n_threads, false)
   , cur_task_id(n_threads, 0)
   , cur_ss(n_threads, nullptr)
-  , sequence_memory_allocate(sequence_memory_allocate)
+  , memory_allocation(memory_allocation)
 {
     if (thread_pinning && puids.size() < n_threads)
     {
@@ -175,8 +175,8 @@ Sequence::Sequence(const std::vector<runtime::Task*>& firsts,
                    const bool thread_pinning,
                    const std::vector<size_t>& puids,
                    const bool tasks_inplace,
-                   const bool sequence_memory_allocate)
-  : Sequence(firsts, lasts, {}, n_threads, thread_pinning, puids, tasks_inplace, sequence_memory_allocate)
+                   const bool memory_allocation)
+  : Sequence(firsts, lasts, {}, n_threads, thread_pinning, puids, tasks_inplace, memory_allocation)
 {
 }
 
@@ -185,8 +185,8 @@ Sequence::Sequence(const std::vector<runtime::Task*>& firsts,
                    const bool thread_pinning,
                    const std::vector<size_t>& puids,
                    const bool tasks_inplace,
-                   const bool sequence_memory_allocate)
-  : Sequence(firsts, {}, {}, n_threads, thread_pinning, puids, tasks_inplace, sequence_memory_allocate)
+                   const bool memory_allocation)
+  : Sequence(firsts, {}, {}, n_threads, thread_pinning, puids, tasks_inplace, memory_allocation)
 {
 }
 
@@ -196,8 +196,8 @@ Sequence::Sequence(runtime::Task& first,
                    const bool thread_pinning,
                    const std::vector<size_t>& puids,
                    const bool tasks_inplace,
-                   const bool sequence_memory_allocate)
-  : Sequence({ &first }, { &last }, n_threads, thread_pinning, puids, tasks_inplace, sequence_memory_allocate)
+                   const bool memory_allocation)
+  : Sequence({ &first }, { &last }, n_threads, thread_pinning, puids, tasks_inplace, memory_allocation)
 {
 }
 
@@ -206,8 +206,8 @@ Sequence::Sequence(runtime::Task& first,
                    const bool thread_pinning,
                    const std::vector<size_t>& puids,
                    const bool tasks_inplace,
-                   const bool sequence_memory_allocate)
-  : Sequence({ &first }, n_threads, thread_pinning, puids, tasks_inplace, sequence_memory_allocate)
+                   const bool memory_allocation)
+  : Sequence({ &first }, n_threads, thread_pinning, puids, tasks_inplace, memory_allocation)
 {
 }
 //=======================================New pinning version constructors===============================================
@@ -217,7 +217,7 @@ Sequence::Sequence(const std::vector<const runtime::Task*>& firsts,
                    const size_t n_threads,
                    const bool thread_pinning,
                    const std::string& sequence_pinning_policy,
-                   const bool sequence_memory_allocate)
+                   const bool memory_allocation)
   : n_threads(n_threads)
   , sequences(n_threads, nullptr)
   , modules(n_threads)
@@ -235,7 +235,7 @@ Sequence::Sequence(const std::vector<const runtime::Task*>& firsts,
   , next_round_is_over(n_threads, false)
   , cur_task_id(n_threads, 0)
   , cur_ss(n_threads, nullptr)
-  , sequence_memory_allocate(sequence_memory_allocate)
+  , memory_allocation(memory_allocation)
 {
 #ifndef SPU_HWLOC
     if (thread_pinning)
@@ -264,8 +264,8 @@ Sequence::Sequence(const std::vector<const runtime::Task*>& firsts,
                    const size_t n_threads,
                    const bool thread_pinning,
                    const std::string& sequence_pinning_policy,
-                   const bool sequence_memory_allocate)
-  : Sequence(firsts, lasts, {}, n_threads, thread_pinning, sequence_pinning_policy, sequence_memory_allocate)
+                   const bool memory_allocation)
+  : Sequence(firsts, lasts, {}, n_threads, thread_pinning, sequence_pinning_policy, memory_allocation)
 {
 }
 
@@ -273,8 +273,8 @@ Sequence::Sequence(const std::vector<const runtime::Task*>& firsts,
                    const size_t n_threads,
                    const bool thread_pinning,
                    const std::string& sequence_pinning_policy,
-                   const bool sequence_memory_allocate)
-  : Sequence(firsts, {}, {}, n_threads, thread_pinning, sequence_pinning_policy, sequence_memory_allocate)
+                   const bool memory_allocation)
+  : Sequence(firsts, {}, {}, n_threads, thread_pinning, sequence_pinning_policy, memory_allocation)
 {
 }
 
@@ -283,8 +283,8 @@ Sequence::Sequence(const runtime::Task& first,
                    const size_t n_threads,
                    const bool thread_pinning,
                    const std::string& sequence_pinning_policy,
-                   const bool sequence_memory_allocate)
-  : Sequence({ &first }, { &last }, n_threads, thread_pinning, sequence_pinning_policy, sequence_memory_allocate)
+                   const bool memory_allocation)
+  : Sequence({ &first }, { &last }, n_threads, thread_pinning, sequence_pinning_policy, memory_allocation)
 {
 }
 
@@ -292,8 +292,8 @@ Sequence::Sequence(const runtime::Task& first,
                    const size_t n_threads,
                    const bool thread_pinning,
                    const std::string& sequence_pinning_policy,
-                   const bool sequence_memory_allocate)
-  : Sequence({ &first }, n_threads, thread_pinning, sequence_pinning_policy, sequence_memory_allocate)
+                   const bool memory_allocation)
+  : Sequence({ &first }, n_threads, thread_pinning, sequence_pinning_policy, memory_allocation)
 {
 }
 
@@ -304,7 +304,7 @@ Sequence::Sequence(const std::vector<runtime::Task*>& firsts,
                    const bool thread_pinning,
                    const std::string& sequence_pinning_policy,
                    const bool tasks_inplace,
-                   const bool sequence_memory_allocate)
+                   const bool memory_allocation)
   : n_threads(n_threads)
   , sequences(n_threads, nullptr)
   , modules(tasks_inplace ? n_threads - 1 : n_threads)
@@ -322,7 +322,7 @@ Sequence::Sequence(const std::vector<runtime::Task*>& firsts,
   , next_round_is_over(n_threads, false)
   , cur_task_id(n_threads, 0)
   , cur_ss(n_threads, nullptr)
-  , sequence_memory_allocate(sequence_memory_allocate)
+  , memory_allocation(memory_allocation)
 {
     if (thread_pinning && !sequence_pinning_policy.empty())
     {
@@ -360,7 +360,7 @@ Sequence::Sequence(const std::vector<runtime::Task*>& firsts,
                    const bool thread_pinning,
                    const std::string& sequence_pinning_policy,
                    const bool tasks_inplace,
-                   const bool sequence_memory_allocate)
+                   const bool memory_allocation)
   : Sequence(firsts,
              lasts,
              {},
@@ -368,7 +368,7 @@ Sequence::Sequence(const std::vector<runtime::Task*>& firsts,
              thread_pinning,
              sequence_pinning_policy,
              tasks_inplace,
-             sequence_memory_allocate)
+             memory_allocation)
 {
 }
 
@@ -377,7 +377,7 @@ Sequence::Sequence(const std::vector<runtime::Task*>& firsts,
                    const bool thread_pinning,
                    const std::string& sequence_pinning_policy,
                    const bool tasks_inplace,
-                   const bool sequence_memory_allocate)
+                   const bool memory_allocation)
   : Sequence(firsts,
              {},
              {},
@@ -385,7 +385,7 @@ Sequence::Sequence(const std::vector<runtime::Task*>& firsts,
              thread_pinning,
              sequence_pinning_policy,
              tasks_inplace,
-             sequence_memory_allocate)
+             memory_allocation)
 {
 }
 
@@ -395,14 +395,14 @@ Sequence::Sequence(runtime::Task& first,
                    const bool thread_pinning,
                    const std::string& sequence_pinning_policy,
                    const bool tasks_inplace,
-                   const bool sequence_memory_allocate)
+                   const bool memory_allocation)
   : Sequence({ &first },
              { &last },
              n_threads,
              thread_pinning,
              sequence_pinning_policy,
              tasks_inplace,
-             sequence_memory_allocate)
+             memory_allocation)
 {
 }
 
@@ -411,8 +411,8 @@ Sequence::Sequence(runtime::Task& first,
                    const bool thread_pinning,
                    const std::string& sequence_pinning_policy,
                    const bool tasks_inplace,
-                   const bool sequence_memory_allocate)
-  : Sequence({ &first }, n_threads, thread_pinning, sequence_pinning_policy, tasks_inplace, sequence_memory_allocate)
+                   const bool memory_allocation)
+  : Sequence({ &first }, n_threads, thread_pinning, sequence_pinning_policy, tasks_inplace, memory_allocation)
 {
 }
 
@@ -558,7 +558,7 @@ Sequence::init(const std::vector<TA*>& firsts, const std::vector<TA*>& lasts, co
     }
 
     // Allocating Memory if requested
-    if (this->sequence_memory_allocate)
+    if (this->memory_allocation)
     {
         this->allocation_function.allocate_sequence_memory(this);
     }
@@ -718,12 +718,12 @@ Sequence::is_done() const
 }
 
 void
-Sequence::allocate_this_sequence_memory()
+Sequence::allocate_outbuffers()
 {
-    if (!this->sequence_memory_allocate)
+    if (!this->memory_allocation)
     {
         this->allocation_function.allocate_sequence_memory(this);
-        this->sequence_memory_allocate = true;
+        this->memory_allocation = true;
     }
     else
     {
@@ -734,12 +734,12 @@ Sequence::allocate_this_sequence_memory()
 }
 
 void
-Sequence::deallocate_this_sequence_memory()
+Sequence::deallocate_outbuffers()
 {
-    if (this->sequence_memory_allocate)
+    if (this->memory_allocation)
     {
         this->allocation_function.deallocate_sequence_memory(this);
-        this->sequence_memory_allocate = false;
+        this->memory_allocation = false;
     }
     else
     {
