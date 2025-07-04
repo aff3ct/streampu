@@ -105,6 +105,7 @@ jobs:
           submodules: true
       - name: Build
         run: |
+          apt update && apt install -y pkg-config
           export CXX="clang++"
           export CFLAGS="-Wall -Wno-overloaded-virtual -funroll-loops"
           export GIT_TAG="v0.0.0"
