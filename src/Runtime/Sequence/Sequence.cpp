@@ -407,8 +407,7 @@ Sequence::Sequence(runtime::Task& first,
 
 Sequence::~Sequence()
 {
-    if (this->memory_allocation)
-        tools::Buffer_allocator::deallocate_sequence_memory(this);
+    if (this->memory_allocation) tools::Buffer_allocator::deallocate_sequence_memory(this);
 
     std::vector<tools::Digraph_node<Sub_sequence>*> already_deleted_nodes;
     for (auto s : this->sequences)
