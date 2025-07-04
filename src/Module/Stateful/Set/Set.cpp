@@ -42,7 +42,6 @@ Set::init()
     }
 
     auto& p = this->create_task("exec");
-    p.set_autoalloc(true);
 
     auto& firsts = sequence.get_firsts_tasks()[0];
     for (auto& first : firsts)

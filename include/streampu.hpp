@@ -144,6 +144,9 @@
 #ifndef DIGRAPH_NODE_HPP_
 #include <Tools/Algo/Digraph/Digraph_node.hpp>
 #endif
+#ifndef BUFFER_ALLOCATOR_HPP__
+#include <Tools/Buffer_allocator/Buffer_allocator.hpp>
+#endif
 #ifndef PIPELINE_BUILDER_HPP_
 #include <Tools/Builder/Pipeline_builder.hpp>
 #endif

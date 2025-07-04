@@ -30,7 +30,8 @@ Sequence::Sequence(const std::vector<const runtime::Task*>& firsts,
                    const std::vector<const runtime::Task*>& exclusions,
                    const size_t n_threads,
                    const bool thread_pinning,
-                   const std::vector<size_t>& puids)
+                   const std::vector<size_t>& puids,
+                   const bool memory_allocation)
   : n_threads(n_threads)
   , sequences(n_threads, nullptr)
   , modules(n_threads)
@@ -48,6 +49,7 @@ Sequence::Sequence(const std::vector<const runtime::Task*>& firsts,
   , next_round_is_over(n_threads, false)
   , cur_task_id(n_threads, 0)
   , cur_ss(n_threads, nullptr)
+  , memory_allocation(memory_allocation)
 {
 #ifndef SPU_HWLOC
     if (thread_pinning)
@@ -72,16 +74,18 @@ Sequence::Sequence(const std::vector<const runtime::Task*>& firsts,
                    const std::vector<const runtime::Task*>& lasts,
                    const size_t n_threads,
                    const bool thread_pinning,
-                   const std::vector<size_t>& puids)
-  : Sequence(firsts, lasts, {}, n_threads, thread_pinning, puids)
+                   const std::vector<size_t>& puids,
+                   const bool memory_allocation)
+  : Sequence(firsts, lasts, {}, n_threads, thread_pinning, puids, memory_allocation)
 {
 }
 
 Sequence::Sequence(const std::vector<const runtime::Task*>& firsts,
                    const size_t n_threads,
                    const bool thread_pinning,
-                   const std::vector<size_t>& puids)
-  : Sequence(firsts, {}, {}, n_threads, thread_pinning, puids)
+                   const std::vector<size_t>& puids,
+                   const bool memory_allocation)
+  : Sequence(firsts, {}, {}, n_threads, thread_pinning, puids, memory_allocation)
 {
 }
 
@@ -89,16 +93,18 @@ Sequence::Sequence(const runtime::Task& first,
                    const runtime::Task& last,
                    const size_t n_threads,
                    const bool thread_pinning,
-                   const std::vector<size_t>& puids)
-  : Sequence({ &first }, { &last }, n_threads, thread_pinning, puids)
+                   const std::vector<size_t>& puids,
+                   const bool memory_allocation)
+  : Sequence({ &first }, { &last }, n_threads, thread_pinning, puids, memory_allocation)
 {
 }
 
 Sequence::Sequence(const runtime::Task& first,
                    const size_t n_threads,
                    const bool thread_pinning,
-                   const std::vector<size_t>& puids)
-  : Sequence({ &first }, n_threads, thread_pinning, puids)
+                   const std::vector<size_t>& puids,
+                   const bool memory_allocation)
+  : Sequence({ &first }, n_threads, thread_pinning, puids, memory_allocation)
 {
 }
 
@@ -117,7 +123,8 @@ Sequence::Sequence(const std::vector<runtime::Task*>& firsts,
                    const size_t n_threads,
                    const bool thread_pinning,
                    const std::vector<size_t>& puids,
-                   const bool tasks_inplace)
+                   const bool tasks_inplace,
+                   const bool memory_allocation)
   : n_threads(n_threads)
   , sequences(n_threads, nullptr)
   , modules(tasks_inplace ? n_threads - 1 : n_threads)
@@ -135,6 +142,7 @@ Sequence::Sequence(const std::vector<runtime::Task*>& firsts,
   , next_round_is_over(n_threads, false)
   , cur_task_id(n_threads, 0)
   , cur_ss(n_threads, nullptr)
+  , memory_allocation(memory_allocation)
 {
     if (thread_pinning && puids.size() < n_threads)
     {
@@ -166,8 +174,9 @@ Sequence::Sequence(const std::vector<runtime::Task*>& firsts,
                    const size_t n_threads,
                    const bool thread_pinning,
                    const std::vector<size_t>& puids,
-                   const bool tasks_inplace)
-  : Sequence(firsts, lasts, {}, n_threads, thread_pinning, puids, tasks_inplace)
+                   const bool tasks_inplace,
+                   const bool memory_allocation)
+  : Sequence(firsts, lasts, {}, n_threads, thread_pinning, puids, tasks_inplace, memory_allocation)
 {
 }
 
@@ -175,8 +184,9 @@ Sequence::Sequence(const std::vector<runtime::Task*>& firsts,
                    const size_t n_threads,
                    const bool thread_pinning,
                    const std::vector<size_t>& puids,
-                   const bool tasks_inplace)
-  : Sequence(firsts, {}, {}, n_threads, thread_pinning, puids, tasks_inplace)
+                   const bool tasks_inplace,
+                   const bool memory_allocation)
+  : Sequence(firsts, {}, {}, n_threads, thread_pinning, puids, tasks_inplace, memory_allocation)
 {
 }
 
@@ -185,8 +195,9 @@ Sequence::Sequence(runtime::Task& first,
                    const size_t n_threads,
                    const bool thread_pinning,
                    const std::vector<size_t>& puids,
-                   const bool tasks_inplace)
-  : Sequence({ &first }, { &last }, n_threads, thread_pinning, puids, tasks_inplace)
+                   const bool tasks_inplace,
+                   const bool memory_allocation)
+  : Sequence({ &first }, { &last }, n_threads, thread_pinning, puids, tasks_inplace, memory_allocation)
 {
 }
 
@@ -194,8 +205,9 @@ Sequence::Sequence(runtime::Task& first,
                    const size_t n_threads,
                    const bool thread_pinning,
                    const std::vector<size_t>& puids,
-                   const bool tasks_inplace)
-  : Sequence({ &first }, n_threads, thread_pinning, puids, tasks_inplace)
+                   const bool tasks_inplace,
+                   const bool memory_allocation)
+  : Sequence({ &first }, n_threads, thread_pinning, puids, tasks_inplace, memory_allocation)
 {
 }
 //=======================================New pinning version constructors===============================================
@@ -204,7 +216,8 @@ Sequence::Sequence(const std::vector<const runtime::Task*>& firsts,
                    const std::vector<const runtime::Task*>& exclusions,
                    const size_t n_threads,
                    const bool thread_pinning,
-                   const std::string& sequence_pinning_policy)
+                   const std::string& sequence_pinning_policy,
+                   const bool memory_allocation)
   : n_threads(n_threads)
   , sequences(n_threads, nullptr)
   , modules(n_threads)
@@ -222,6 +235,7 @@ Sequence::Sequence(const std::vector<const runtime::Task*>& firsts,
   , next_round_is_over(n_threads, false)
   , cur_task_id(n_threads, 0)
   , cur_ss(n_threads, nullptr)
+  , memory_allocation(memory_allocation)
 {
 #ifndef SPU_HWLOC
     if (thread_pinning)
@@ -249,16 +263,18 @@ Sequence::Sequence(const std::vector<const runtime::Task*>& firsts,
                    const std::vector<const runtime::Task*>& lasts,
                    const size_t n_threads,
                    const bool thread_pinning,
-                   const std::string& sequence_pinning_policy)
-  : Sequence(firsts, lasts, {}, n_threads, thread_pinning, sequence_pinning_policy)
+                   const std::string& sequence_pinning_policy,
+                   const bool memory_allocation)
+  : Sequence(firsts, lasts, {}, n_threads, thread_pinning, sequence_pinning_policy, memory_allocation)
 {
 }
 
 Sequence::Sequence(const std::vector<const runtime::Task*>& firsts,
                    const size_t n_threads,
                    const bool thread_pinning,
-                   const std::string& sequence_pinning_policy)
-  : Sequence(firsts, {}, {}, n_threads, thread_pinning, sequence_pinning_policy)
+                   const std::string& sequence_pinning_policy,
+                   const bool memory_allocation)
+  : Sequence(firsts, {}, {}, n_threads, thread_pinning, sequence_pinning_policy, memory_allocation)
 {
 }
 
@@ -266,16 +282,18 @@ Sequence::Sequence(const runtime::Task& first,
                    const runtime::Task& last,
                    const size_t n_threads,
                    const bool thread_pinning,
-                   const std::string& sequence_pinning_policy)
-  : Sequence({ &first }, { &last }, n_threads, thread_pinning, sequence_pinning_policy)
+                   const std::string& sequence_pinning_policy,
+                   const bool memory_allocation)
+  : Sequence({ &first }, { &last }, n_threads, thread_pinning, sequence_pinning_policy, memory_allocation)
 {
 }
 
 Sequence::Sequence(const runtime::Task& first,
                    const size_t n_threads,
                    const bool thread_pinning,
-                   const std::string& sequence_pinning_policy)
-  : Sequence({ &first }, n_threads, thread_pinning, sequence_pinning_policy)
+                   const std::string& sequence_pinning_policy,
+                   const bool memory_allocation)
+  : Sequence({ &first }, n_threads, thread_pinning, sequence_pinning_policy, memory_allocation)
 {
 }
 
@@ -285,7 +303,8 @@ Sequence::Sequence(const std::vector<runtime::Task*>& firsts,
                    const size_t n_threads,
                    const bool thread_pinning,
                    const std::string& sequence_pinning_policy,
-                   const bool tasks_inplace)
+                   const bool tasks_inplace,
+                   const bool memory_allocation)
   : n_threads(n_threads)
   , sequences(n_threads, nullptr)
   , modules(tasks_inplace ? n_threads - 1 : n_threads)
@@ -303,6 +322,7 @@ Sequence::Sequence(const std::vector<runtime::Task*>& firsts,
   , next_round_is_over(n_threads, false)
   , cur_task_id(n_threads, 0)
   , cur_ss(n_threads, nullptr)
+  , memory_allocation(memory_allocation)
 {
     if (thread_pinning && !sequence_pinning_policy.empty())
     {
@@ -339,8 +359,9 @@ Sequence::Sequence(const std::vector<runtime::Task*>& firsts,
                    const size_t n_threads,
                    const bool thread_pinning,
                    const std::string& sequence_pinning_policy,
-                   const bool tasks_inplace)
-  : Sequence(firsts, lasts, {}, n_threads, thread_pinning, sequence_pinning_policy, tasks_inplace)
+                   const bool tasks_inplace,
+                   const bool memory_allocation)
+  : Sequence(firsts, lasts, {}, n_threads, thread_pinning, sequence_pinning_policy, tasks_inplace, memory_allocation)
 {
 }
 
@@ -348,8 +369,9 @@ Sequence::Sequence(const std::vector<runtime::Task*>& firsts,
                    const size_t n_threads,
                    const bool thread_pinning,
                    const std::string& sequence_pinning_policy,
-                   const bool tasks_inplace)
-  : Sequence(firsts, {}, {}, n_threads, thread_pinning, sequence_pinning_policy, tasks_inplace)
+                   const bool tasks_inplace,
+                   const bool memory_allocation)
+  : Sequence(firsts, {}, {}, n_threads, thread_pinning, sequence_pinning_policy, tasks_inplace, memory_allocation)
 {
 }
 
@@ -358,8 +380,15 @@ Sequence::Sequence(runtime::Task& first,
                    const size_t n_threads,
                    const bool thread_pinning,
                    const std::string& sequence_pinning_policy,
-                   const bool tasks_inplace)
-  : Sequence({ &first }, { &last }, n_threads, thread_pinning, sequence_pinning_policy, tasks_inplace)
+                   const bool tasks_inplace,
+                   const bool memory_allocation)
+  : Sequence({ &first },
+             { &last },
+             n_threads,
+             thread_pinning,
+             sequence_pinning_policy,
+             tasks_inplace,
+             memory_allocation)
 {
 }
 
@@ -367,8 +396,9 @@ Sequence::Sequence(runtime::Task& first,
                    const size_t n_threads,
                    const bool thread_pinning,
                    const std::string& sequence_pinning_policy,
-                   const bool tasks_inplace)
-  : Sequence({ &first }, n_threads, thread_pinning, sequence_pinning_policy, tasks_inplace)
+                   const bool tasks_inplace,
+                   const bool memory_allocation)
+  : Sequence({ &first }, n_threads, thread_pinning, sequence_pinning_policy, tasks_inplace, memory_allocation)
 {
 }
 
@@ -509,7 +539,15 @@ Sequence::init(const std::vector<TA*>& firsts, const std::vector<TA*>& lasts, co
                 this->switchers_reset[tid].push_back(dynamic_cast<tools::Interface_reset*>(swi));
 
     for (size_t tid = 0; tid < this->sequences.size(); tid++)
+    {
         this->cur_ss[tid] = this->sequences[tid];
+    }
+
+    // Allocating Memory if requested
+    if (this->memory_allocation)
+    {
+        this->allocation_function.allocate_sequence_memory(this);
+    }
 
     this->thread_pool.reset(new tools::Thread_pool_standard(this->n_threads - 1));
     this->thread_pool->init(); // threads are spawned here
@@ -663,6 +701,38 @@ Sequence::is_done() const
     for (auto donner : this->donners)
         if (donner->is_done()) return true;
     return false;
+}
+
+void
+Sequence::allocate_outbuffers()
+{
+    if (!this->memory_allocation)
+    {
+        this->allocation_function.allocate_sequence_memory(this);
+        this->memory_allocation = true;
+    }
+    else
+    {
+        std::stringstream message;
+        message << "The memory is already allocated for this sequence";
+        throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
+    }
+}
+
+void
+Sequence::deallocate_outbuffers()
+{
+    if (this->memory_allocation)
+    {
+        this->allocation_function.deallocate_sequence_memory(this);
+        this->memory_allocation = false;
+    }
+    else
+    {
+        std::stringstream message;
+        message << "Sequence memory is not allocated";
+        throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
+    }
 }
 
 void
@@ -1039,16 +1109,6 @@ Sequence::init_recursive(tools::Digraph_node<SS>* cur_subseq,
                          std::map<TA*, unsigned>& in_sockets_feed,
                          std::map<TA*, std::pair<tools::Digraph_node<SS>*, size_t>>& task_subseq)
 {
-    if (this->tasks_inplace && !current_task.is_autoalloc())
-    {
-        std::stringstream message;
-        message << "When 'tasks_inplace' is set to true 'current_task' should be in autoalloc mode ("
-                << "'current_task.get_name()'"
-                << " = " << current_task.get_name() << ", "
-                << "'current_task.get_module().get_name()'"
-                << " = " << current_task.get_module().get_name() << ").";
-        throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
-    }
 
     if (dynamic_cast<const module::Adaptor_m_to_n*>(&current_task.get_module()) && !this->tasks_inplace)
     {
@@ -1558,8 +1618,6 @@ Sequence::replicate(const tools::Digraph_node<SS>* sequence)
                                 assert(t_id_out != -1);
                                 assert(s_id_out != -1);
 
-                                (*this->all_modules[thread_id][m_id_out]).tasks[t_id_out]->set_autoalloc(true);
-
                                 auto& s_in = *this->all_modules[thread_id][m_id]->tasks[t_id]->sockets[s_id];
                                 auto& s_out =
                                   *this->all_modules[thread_id][m_id_out]->tasks[t_id_out]->sockets[s_id_out];
@@ -1599,8 +1657,6 @@ Sequence::replicate(const tools::Digraph_node<SS>* sequence)
                                 assert(t_id_out != -1);
                                 assert(s_id_out != -1);
 
-                                (*this->all_modules[thread_id][m_id_out]).tasks[t_id_out]->set_autoalloc(true);
-
                                 auto& t_in = *this->all_modules[thread_id][m_id]->tasks[t_id];
                                 auto& s_out =
                                   *this->all_modules[thread_id][m_id_out]->tasks[t_id_out]->sockets[s_id_out];
@@ -1635,21 +1691,6 @@ Sequence::replicate(const tools::Digraph_node<SS>* sequence)
         }
     };
 
-    std::function<void(tools::Digraph_node<Sub_sequence>*, std::vector<tools::Digraph_node<Sub_sequence>*>&)>
-      set_autoalloc_true = [&set_autoalloc_true](tools::Digraph_node<Sub_sequence>* node,
-                                                 std::vector<tools::Digraph_node<Sub_sequence>*>& already_parsed_nodes)
-    {
-        if (std::find(already_parsed_nodes.begin(), already_parsed_nodes.end(), node) == already_parsed_nodes.end())
-        {
-            already_parsed_nodes.push_back(node);
-
-            for (auto t : node->get_c()->tasks)
-                t->set_autoalloc(true);
-            for (auto c : node->get_children())
-                set_autoalloc_true(c, already_parsed_nodes);
-        }
-    };
-
     for (size_t thread_id = (this->tasks_inplace ? 1 : 0); thread_id < this->sequences.size(); thread_id++)
     {
         if (this->is_thread_pinning())
@@ -1664,8 +1705,6 @@ Sequence::replicate(const tools::Digraph_node<SS>* sequence)
         already_parsed_nodes.clear();
         std::map<size_t, tools::Digraph_node<Sub_sequence>*> allocated_nodes;
         replicate_sequence(sequence, this->sequences[thread_id], thread_id, already_parsed_nodes, allocated_nodes);
-        std::vector<tools::Digraph_node<Sub_sequence>*> already_parsed_nodes_bis;
-        set_autoalloc_true(this->sequences[thread_id], already_parsed_nodes_bis);
 
         if (this->is_thread_pinning()) tools::Thread_pinning::unpin();
     }
