@@ -20,12 +20,12 @@ namespace tools
 class Buffer_allocator
 {
   public:
-    void allocate_sequence_memory(runtime::Sequence* sequence);
-    void deallocate_sequence_memory(runtime::Sequence* sequence);
+    static void allocate_sequence_memory(runtime::Sequence* sequence);
+    static void deallocate_sequence_memory(runtime::Sequence* sequence);
 
   private:
-    void allocate_one_buffer_per_outsocket(runtime::Sequence* sequence);
-    void deallocate_one_buffer_per_outsocket(runtime::Sequence* sequence);
+    static void allocate_one_buffer_per_outsocket(runtime::Sequence* sequence);
+    static void deallocate_one_buffer_per_outsocket(runtime::Sequence* sequence);
 };
 } // namespace tools
 } // namespace spu

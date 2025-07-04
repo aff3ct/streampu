@@ -15,6 +15,7 @@
 #include "Runtime/Sequence/Sequence.hpp"
 #include "Runtime/Socket/Socket.hpp"
 #include "Runtime/Task/Task.hpp"
+#include "Tools/Buffer_allocator/Buffer_allocator.hpp"
 #include "Tools/Display/rang_format/rang_format.h"
 #include "Tools/Exception/exception.hpp"
 #include "Tools/Signal_handler/Signal_handler.hpp"
@@ -406,6 +407,9 @@ Sequence::Sequence(runtime::Task& first,
 
 Sequence::~Sequence()
 {
+    if (this->memory_allocation)
+        tools::Buffer_allocator::deallocate_sequence_memory(this);
+
     std::vector<tools::Digraph_node<Sub_sequence>*> already_deleted_nodes;
     for (auto s : this->sequences)
         this->delete_tree(s, already_deleted_nodes);
@@ -546,7 +550,7 @@ Sequence::init(const std::vector<TA*>& firsts, const std::vector<TA*>& lasts, co
     // Allocating Memory if requested
     if (this->memory_allocation)
     {
-        this->allocation_function.allocate_sequence_memory(this);
+        tools::Buffer_allocator::allocate_sequence_memory(this);
     }
 
     this->thread_pool.reset(new tools::Thread_pool_standard(this->n_threads - 1));
@@ -708,7 +712,7 @@ Sequence::allocate_outbuffers()
 {
     if (!this->memory_allocation)
     {
-        this->allocation_function.allocate_sequence_memory(this);
+        tools::Buffer_allocator::allocate_sequence_memory(this);
         this->memory_allocation = true;
     }
     else
@@ -724,7 +728,7 @@ Sequence::deallocate_outbuffers()
 {
     if (this->memory_allocation)
     {
-        this->allocation_function.deallocate_sequence_memory(this);
+        tools::Buffer_allocator::deallocate_sequence_memory(this);
         this->memory_allocation = false;
     }
     else

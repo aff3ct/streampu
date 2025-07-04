@@ -343,6 +343,13 @@ Pipeline
 
 Pipeline::~Pipeline()
 {
+    // hack: this is important to avoid to deallocate twice the same out buffers
+    this->original_sequence.memory_allocation = false;
+
+    // Allocating memory for stages
+    for (auto stage : this->stages)
+        stage->deallocate_outbuffers();
+
     this->unbind_adaptors();
 }
 

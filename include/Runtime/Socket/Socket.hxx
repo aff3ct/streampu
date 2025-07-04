@@ -1013,6 +1013,7 @@ Socket::_allocate_buffer()
 void
 Socket::allocate_buffer()
 {
+#ifndef SPU_FAST
     if (this->dataptr != nullptr)
     {
         std::stringstream message;
@@ -1038,12 +1039,15 @@ Socket::allocate_buffer()
                 << "'task.name' = " << task.get_name() << ").";
         throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
     }
+#endif
+
     _allocate_buffer();
 }
 
 void
 Socket::deallocate_buffer()
 {
+#ifndef SPU_FAST
     if (this->dataptr == nullptr)
     {
         std::stringstream message;
@@ -1070,6 +1074,7 @@ Socket::deallocate_buffer()
                 << "'task.name' = " << task.get_name() << ").";
         throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
     }
+#endif
 
     out_buffer.clear();
     this->dataptr = nullptr;

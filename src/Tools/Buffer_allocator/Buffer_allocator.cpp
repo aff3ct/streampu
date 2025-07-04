@@ -43,7 +43,7 @@ Buffer_allocator::allocate_sequence_memory(runtime::Sequence* sequence)
     }
     else
     {
-        this->allocate_one_buffer_per_outsocket(sequence);
+        Buffer_allocator::allocate_one_buffer_per_outsocket(sequence);
     }
 }
 
@@ -58,6 +58,6 @@ Buffer_allocator::deallocate_sequence_memory(runtime::Sequence* sequence)
     }
     else
     {
-        this->deallocate_one_buffer_per_outsocket(sequence);
+        Buffer_allocator::deallocate_one_buffer_per_outsocket(sequence);
     }
 }

@@ -7,6 +7,7 @@
 #include <typeinfo>
 
 #include "Module/Module.hpp"
+#include "Module/Stateful/Set/Set.hpp"
 #include "Runtime/Socket/Socket.hpp"
 #include "Runtime/Task/Task.hpp"
 #include "Tools/Exception/exception.hpp"
@@ -1162,6 +1163,11 @@ Task::deallocate_outbuffers()
             {
                 bound_socket->set_dataptr(nullptr);
                 spread_nullptr(bound_socket);
+            }
+            else if (dynamic_cast<const module::Set*>(&bound_socket->get_task().get_module()))
+            {
+                // hack: for set that bind SOUT to SOUT for perf
+                bound_socket->set_dataptr(nullptr);
             }
             else
             {

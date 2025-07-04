@@ -16,7 +16,6 @@
 
 #include "Runtime/Socket/Socket.hpp"
 #include "Tools/Algo/Digraph/Digraph_node.hpp"
-#include "Tools/Buffer_allocator/Buffer_allocator.hpp"
 #include "Tools/Interface/Interface_clone.hpp"
 #include "Tools/Interface/Interface_get_set_n_frames.hpp"
 #include "Tools/Interface/Interface_is_done.hpp"
@@ -112,8 +111,7 @@ class Sequence
     // extra attribute for pinning v2
     std::vector<std::string> pin_objects_per_thread;
 
-    // Instance of buffer allocator class
-    tools::Buffer_allocator allocation_function;
+    // is memory allocation enabled?
     bool memory_allocation;
 
   public:

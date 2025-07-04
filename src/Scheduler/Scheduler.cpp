@@ -289,6 +289,10 @@ Scheduler::instantiate_pipeline(const std::vector<size_t> synchro_buffer_sizes,
         s++;
     }
 
+    // hack: this is important to avoid to deallocate twice the same out buffers, the newly instantiated pipeline takes
+    // the ownership of the out buffers deallocation over the sequence
+    this->sequence->memory_allocation = false;
+
     return new runtime::Pipeline(firsts,
                                  lasts,
                                  sep_stages,
