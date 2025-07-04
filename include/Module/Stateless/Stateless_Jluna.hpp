@@ -90,7 +90,7 @@ class Stateless_Jluna final
 
     static size_t get_task_id(runtime::Task& task);
     static int32_t jl_call_func(const std::vector<void*>& args, const bool jl_safe);
-    static jluna::unsafe::Array* jl_new_array_from_data(const runtime::Socket* sck);
+    static jluna::unsafe::Array* jl_new_array_from_data(const runtime::Socket* sck, size_t n_elmts);
 };
 }
 }

@@ -189,30 +189,29 @@ Stateless_Jluna::jl_call_func(const std::vector<void*>& args, const bool jl_safe
 }
 
 jluna::unsafe::Array*
-Stateless_Jluna::jl_new_array_from_data(const runtime::Socket* sck)
+Stateless_Jluna::jl_new_array_from_data(const runtime::Socket* sck, size_t n_elmts)
 {
     void* p = sck->get_dataptr();
-    size_t e = sck->get_n_elmts();
     if (sck->get_datatype() == typeid(uint8_t))
-        return jluna::unsafe::new_array_from_data(jluna::UInt8_t, p, e);
+        return jluna::unsafe::new_array_from_data(jluna::UInt8_t, p, n_elmts);
     else if (sck->get_datatype() == typeid(int8_t))
-        return jluna::unsafe::new_array_from_data(jluna::Int8_t, p, e);
+        return jluna::unsafe::new_array_from_data(jluna::Int8_t, p, n_elmts);
     else if (sck->get_datatype() == typeid(uint16_t))
-        return jluna::unsafe::new_array_from_data(jluna::UInt16_t, p, e);
+        return jluna::unsafe::new_array_from_data(jluna::UInt16_t, p, n_elmts);
     else if (sck->get_datatype() == typeid(int16_t))
-        return jluna::unsafe::new_array_from_data(jluna::Int16_t, p, e);
+        return jluna::unsafe::new_array_from_data(jluna::Int16_t, p, n_elmts);
     else if (sck->get_datatype() == typeid(uint32_t))
-        return jluna::unsafe::new_array_from_data(jluna::UInt32_t, p, e);
+        return jluna::unsafe::new_array_from_data(jluna::UInt32_t, p, n_elmts);
     else if (sck->get_datatype() == typeid(int32_t))
-        return jluna::unsafe::new_array_from_data(jluna::Int32_t, p, e);
+        return jluna::unsafe::new_array_from_data(jluna::Int32_t, p, n_elmts);
     else if (sck->get_datatype() == typeid(uint64_t))
-        return jluna::unsafe::new_array_from_data(jluna::UInt64_t, p, e);
+        return jluna::unsafe::new_array_from_data(jluna::UInt64_t, p, n_elmts);
     else if (sck->get_datatype() == typeid(int64_t))
-        return jluna::unsafe::new_array_from_data(jluna::Int64_t, p, e);
+        return jluna::unsafe::new_array_from_data(jluna::Int64_t, p, n_elmts);
     else if (sck->get_datatype() == typeid(float))
-        return jluna::unsafe::new_array_from_data(jluna::Float32_t, p, e);
+        return jluna::unsafe::new_array_from_data(jluna::Float32_t, p, n_elmts);
     else if (sck->get_datatype() == typeid(double))
-        return jluna::unsafe::new_array_from_data(jluna::Float64_t, p, e);
+        return jluna::unsafe::new_array_from_data(jluna::Float64_t, p, n_elmts);
     else
     {
         std::stringstream message;
@@ -420,7 +419,8 @@ Stateless_Jluna::_create_codelet(runtime::Task& task)
                                for (size_t s = 0; s < t.sockets.size() - 1; s++)
                                {
                                    const runtime::Socket* sck = t.sockets[s].get();
-                                   sjl.jl_func_args[tid][s + 1] = (void*)Stateless_Jluna::jl_new_array_from_data(sck);
+                                   sjl.jl_func_args[tid][s + 1] = (void*)Stateless_Jluna::jl_new_array_from_data(
+                                     sck, sck->get_n_elmts() * sjl.get_n_frames_per_wave() / sjl.get_n_frames());
                                }
 
                                *(int32_t*)sjl.jl_func_args[tid][sjl.jl_func_args[tid].size() - 2] = frame_id;
