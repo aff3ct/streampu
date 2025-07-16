@@ -25,19 +25,19 @@ Scheduler_from_file::Scheduler_from_file(runtime::Sequence& sequence, const std:
 
     json data = json::parse(f);
 
-    if (!data.contains("scheduling"))
+    if (!data.contains("schedule"))
     {
         std::stringstream message;
-        message << "The current json file does not contain the required 'scheduling' field.";
+        message << "The current json file does not contain the required 'schedule' field.";
         throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
     }
 
-    auto sched_data = data["scheduling"];
+    auto sched_data = data["schedule"];
 
     if (!sched_data.is_array())
     {
         std::stringstream message;
-        message << "Unexpected type for the 'scheduling' field (should be an array).";
+        message << "Unexpected type for the 'schedule' field (should be an array).";
         throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
     }
 
