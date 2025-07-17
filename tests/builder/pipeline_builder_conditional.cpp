@@ -39,9 +39,9 @@ remove_and_unbound_stage(tools::Pipeline_builder& builder, const size_t unwanted
 int
 main(int /*argc*/, char** /*argv*/)
 {
-    std::cout << "######################################################################" << std::endl;
-    std::cout << "# Micro-benchmark: Pipeline width builder - conditional construction #" << std::endl;
-    std::cout << "######################################################################" << std::endl;
+    std::cout << "#####################################################################" << std::endl;
+    std::cout << "# Micro-benchmark: Pipeline with builder - Conditional construction #" << std::endl;
+    std::cout << "#####################################################################" << std::endl;
     std::cout << "#" << std::endl;
 
     const std::vector<size_t> n_incrs_pips({ 1, 1, 4, 1, 1, 3 });

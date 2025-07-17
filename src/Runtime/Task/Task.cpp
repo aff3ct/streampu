@@ -10,6 +10,7 @@
 #include "Module/Stateful/Set/Set.hpp"
 #include "Runtime/Socket/Socket.hpp"
 #include "Runtime/Task/Task.hpp"
+#include "Tools/Buffer_allocator/Buffer_allocator.hpp"
 #include "Tools/Exception/exception.hpp"
 
 using namespace spu;
@@ -1043,6 +1044,8 @@ Task::create_codelet(std::function<int(module::Module& m, Task& t, const size_t 
     const bool hack_status = true;
     auto s = this->template create_2d_socket_out<int>("status", 1, this->get_module().get_n_waves(), hack_status);
     this->sockets[s]->dataptr = (void*)this->status.data();
+
+    if (tools::Buffer_allocator::get_task_autoalloc()) this->allocate_outbuffers();
 }
 
 void
@@ -1330,6 +1333,8 @@ Task::clone() const
         if (s_new->get_type() == socket_t::SIN || s_new->get_type() == socket_t::SFWD)
             t->last_input_socket = s_new.get();
     }
+
+    if (tools::Buffer_allocator::get_task_autoalloc()) t->allocate_outbuffers();
 
     return t;
 }
