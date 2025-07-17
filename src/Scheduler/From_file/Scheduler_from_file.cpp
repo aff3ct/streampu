@@ -1,19 +1,21 @@
 #include <cmath>
 #include <fstream>
+#include <hwloc.h>
 #include <iostream>
 #include <limits>
-#include <nlohmann/json.hpp>
+#include <regex>
 #include <sstream>
-using json = nlohmann::json;
 
 #include "Scheduler/From_file/Scheduler_from_file.hpp"
 #include "Tools/Exception/exception.hpp"
+#include "Tools/Thread/Thread_pinning/Thread_pinning_utils.hpp"
 
 using namespace spu;
 using namespace spu::sched;
 
-Scheduler_from_file::Scheduler_from_file(runtime::Sequence& sequence, const std::string filename)
+Scheduler_from_file::Scheduler_from_file(runtime::Sequence& sequence, const std::string filename, uint8_t file_version)
   : Scheduler(sequence)
+  , file_version(file_version)
 {
     std::ifstream f(filename);
     if (!f.good())
@@ -24,6 +26,28 @@ Scheduler_from_file::Scheduler_from_file(runtime::Sequence& sequence, const std:
     }
 
     json data = json::parse(f);
+
+    if (file_version == 1)
+    {
+        this->contsruct_policy_v1(data, sequence);
+    }
+    else
+    {
+        std::stringstream message;
+        message << "Unsupported file version: " << static_cast<int>(file_version) << ". Supported version is 1.";
+        throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
+    }
+}
+
+Scheduler_from_file::Scheduler_from_file(runtime::Sequence* sequence, const std::string filename, uint8_t file_version)
+  : Scheduler_from_file(*sequence, filename, file_version)
+{
+}
+
+// Construct policy function for V1 file
+void
+Scheduler_from_file::contsruct_policy_v1(json& data, runtime::Sequence& sequence)
+{
 
     if (!data.contains("schedule"))
     {
@@ -148,10 +172,185 @@ Scheduler_from_file::Scheduler_from_file(runtime::Sequence& sequence, const std:
     }
 }
 
-Scheduler_from_file::Scheduler_from_file(runtime::Sequence* sequence, const std::string filename)
-  : Scheduler_from_file(*sequence, filename)
+/*######################################### JSON SECOND VERSION ########################################################
+#######################################################################################################################*/
+#ifdef SPU_HWLOC
+hwloc_topology_t topology;
+std::vector<std::string>
+get_pu_from_core(int id)
 {
+    std::vector<std::string> core_pus;
+    hwloc_obj_t core_obj = hwloc_get_obj_by_type(topology, HWLOC_OBJ_CORE, id);
+
+    if (core_obj == nullptr)
+    {
+        std::stringstream message;
+        message << "No core with id " << id << " found in the topology.";
+        throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
+    }
+    std::vector<std::string> pu_vector;
+    for (hwloc_obj_t child = core_obj->first_child; child != nullptr; child = child->next_sibling)
+    {
+        if (child->type == HWLOC_OBJ_PU)
+        {
+            core_pus.push_back("PU_" + std::to_string(child->gp_index));
+        }
+    }
+    return core_pus;
 }
+#endif
+std::regex pu_single_regex(R"(^PU(\d+)$)");
+std::regex pu_range_regex(R"(^PU(\d+)-(\d+)$)");
+std::regex core_single_regex(R"(^CORE(\d+)$)");
+std::regex core_range_regex(R"(^CORE(\d+)-(\d+)$)");
+
+std::vector<std::vector<std::string>>
+get_node_pus_from_node(const std::string& node_str)
+{
+    std::smatch match;
+    std::vector<std::vector<std::string>> pu_vector;
+
+    if (std::regex_match(node_str, match, pu_single_regex))
+    {
+        int pu_id = std::stoi(match[1].str());
+        pu_vector.push_back({ "PU_" + std::to_string(pu_id) });
+    }
+    else if (std::regex_match(node_str, match, pu_range_regex))
+    {
+        int pu_start = std::stoi(match[1].str());
+        int pu_end = std::stoi(match[2].str());
+        for (int pu_id = pu_start; pu_id <= pu_end; ++pu_id)
+        {
+            pu_vector.push_back({ "PU_" + std::to_string(pu_id) });
+        }
+    }
+    else if (std::regex_match(node_str, match, core_single_regex))
+    {
+#ifdef SPU_HWLOC
+        int core_id = std::stoi(match[1].str());
+        pu_vector.push_back(get_pu_from_core(core_id));
+#else
+        std::stringstream message;
+        message << "Using the V2 json format pinning to cores feature"
+                << "requires linking with the 'hwloc' library.";
+        throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
+#endif
+    }
+    else if (std::regex_match(node_str, match, core_range_regex))
+    {
+#ifdef SPU_HWLOC
+        int core_start = std::stoi(match[1].str());
+        int core_end = std::stoi(match[2].str());
+        for (int core_id = core_start; core_id <= core_end; ++core_id)
+            pu_vector.push_back(get_pu_from_core(core_id));
+#else
+        std::stringstream message;
+        message << "Using the V2 json format pinning to cores feature"
+                << "requires linking with the 'hwloc' library.";
+        throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
+#endif
+    }
+    else
+    {
+        std::stringstream message;
+        message << "Invalid node string format: " << node_str;
+        throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
+    }
+    return pu_vector;
+}
+
+void
+Scheduler_from_file::contsruct_policy_v2(json& data, runtime::Sequence& sequence)
+{
+    if (!data.contains("resources"))
+    {
+        std::stringstream message;
+        message << "No ressources information in the json file.";
+        throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
+    }
+    auto& resources = data["resources"];
+
+    if (!resources.contains("p-core"))
+    {
+        std::stringstream message;
+        message << "P-cores informations are not specified in the json file.";
+        throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
+    }
+
+    if (!resources.contains("e-core"))
+    {
+        std::stringstream message;
+        message << "E-cores informations are not specified in the json file.";
+        throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
+    }
+
+    auto& p_core_ressources = resources["p-core"];
+    auto& e_core_ressources = resources["e-core"];
+
+    if (!p_core_ressources.contains("nodes-list"))
+    {
+        std::stringstream message;
+        message << "P-cores list is not given in the json file.";
+        throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
+    }
+    if (!e_core_ressources.contains("nodes-list"))
+    {
+        std::stringstream message;
+        message << "E-cores list is not given in the json file.";
+        throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
+    }
+    auto& p_core_list = p_core_ressources["nodes-list"];
+    auto& e_core_list = e_core_ressources["nodes-list"];
+
+    // Getting the list of PU of the given lists
+#ifdef SPU_HWLOC
+    hwloc_topology_init(&topology);
+    hwloc_topology_load(topology);
+#endif
+
+    // Creating the p_core_pu_list
+    for (auto& node : p_core_list)
+    {
+        std::vector<std::vector<std::string>> pu_vector;
+        if (node.is_string())
+        {
+            pu_vector = get_node_pus_from_node(node);
+        }
+        else if (node.is_number_integer())
+        {
+            pu_vector = get_node_pus_from_node("PU" + std::to_string((int)node));
+        }
+        else
+        {
+            std::stringstream message;
+            message << "Invalid type for p-core node: " << node.dump();
+            throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
+        }
+        this->p_core_pu_list.insert(this->p_core_pu_list.end(), pu_vector.begin(), pu_vector.end());
+    }
+    // Creating the e_core_pu_list
+    for (auto& node : e_core_list)
+    {
+        std::vector<std::vector<std::string>> pu_vector;
+        if (node.is_string())
+        {
+            pu_vector = get_node_pus_from_node(node);
+        }
+        else if (node.is_number_integer())
+        {
+            pu_vector = get_node_pus_from_node("PU" + std::to_string((int)node));
+        }
+        else
+        {
+            std::stringstream message;
+            message << "Invalid type for p-core node: " << node.dump();
+            throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
+        }
+        this->e_core_pu_list.insert(this->e_core_pu_list.end(), pu_vector.begin(), pu_vector.end());
+    }
+}
+/*######################################################################################################################
+#######################################################################################################################*/
 
 void
 Scheduler_from_file::schedule()
