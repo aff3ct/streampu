@@ -393,7 +393,7 @@ endif()
 # helgrind
 find_package(HELGRIND)
 if(HELGRIND_FOUND)
-    message(STATUS "StreamPU - Helgrind found: enabling false positive annotations")
+    message(STATUS "StreamPU - Header found: helgrind")
     spu_target_include_directories2("${spu_targets_list}" PUBLIC "${HELGRIND_INCLUDE_DIRS}")
     spu_target_compile_definitions("${spu_targets_list}" PUBLIC HAS_HELGRIND)
 endif()
