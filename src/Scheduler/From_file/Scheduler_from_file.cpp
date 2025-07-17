@@ -1,6 +1,5 @@
 #include <cmath>
 #include <fstream>
-#include <hwloc.h>
 #include <iostream>
 #include <limits>
 #include <regex>
@@ -9,6 +8,8 @@
 #include "Scheduler/From_file/Scheduler_from_file.hpp"
 #include "Tools/Exception/exception.hpp"
 #include "Tools/Thread/Thread_pinning/Thread_pinning_utils.hpp"
+
+using json = nlohmann::json;
 
 using namespace spu;
 using namespace spu::sched;
@@ -259,6 +260,12 @@ get_node_pus_from_node(const std::string& node_str)
     return pu_vector;
 }
 
+//! TO DO : define the function
+std::string
+build_stage_policy(std::vector<std::vector<std::string>>& pu_list, size_t n_replicates)
+{
+}
+
 void
 Scheduler_from_file::contsruct_policy_v2(json& data, runtime::Sequence& sequence)
 {
@@ -273,14 +280,14 @@ Scheduler_from_file::contsruct_policy_v2(json& data, runtime::Sequence& sequence
     if (!resources.contains("p-core"))
     {
         std::stringstream message;
-        message << "P-cores informations are not specified in the json file.";
+        message << "p-cores informations are not specified in the json file.";
         throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
     }
 
     if (!resources.contains("e-core"))
     {
         std::stringstream message;
-        message << "E-cores informations are not specified in the json file.";
+        message << "e-cores informations are not specified in the json file.";
         throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
     }
 
@@ -290,13 +297,13 @@ Scheduler_from_file::contsruct_policy_v2(json& data, runtime::Sequence& sequence
     if (!p_core_ressources.contains("nodes-list"))
     {
         std::stringstream message;
-        message << "P-cores list is not given in the json file.";
+        message << "p-cores list is not given in the json file.";
         throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
     }
     if (!e_core_ressources.contains("nodes-list"))
     {
         std::stringstream message;
-        message << "E-cores list is not given in the json file.";
+        message << "e-cores list is not given in the json file.";
         throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
     }
     auto& p_core_list = p_core_ressources["nodes-list"];
@@ -347,6 +354,90 @@ Scheduler_from_file::contsruct_policy_v2(json& data, runtime::Sequence& sequence
             throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
         }
         this->e_core_pu_list.insert(this->e_core_pu_list.end(), pu_vector.begin(), pu_vector.end());
+    }
+
+    // Generating the solution_from_file
+    if (!data.contains("schedule"))
+    {
+        std::stringstream message;
+        message << "The current json file does not contain the required 'schedule' field.";
+        throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
+    }
+
+    auto sched_data = data["schedule"];
+
+    if (!sched_data.is_array())
+    {
+        std::stringstream message;
+        message << "Unexpected type for the 'schedule' field (should be an array).";
+        throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
+    }
+
+    // Starting the core allocation algorithme
+    size_t n_tasks_json = 0;
+    std::string pinning_policy = "";
+    for (auto& stage : sched_data)
+    {
+        // Adding the | for stage separation
+        if (!pinning_policy.empty()) pinning_policy += " | ";
+
+        // Checking task entry
+        if (!stage.contains("tasks"))
+        {
+            std::stringstream message;
+            message << "The current entry does not contain the 'tasks' field.";
+            throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
+        }
+        if (!stage["tasks"].is_number_integer())
+        {
+            std::stringstream message;
+            message << "Unexpected type for 'tasks' field (should be an integer).";
+            throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
+        }
+        size_t n_tasks = stage["tasks"];
+        // Checking if the threads entry
+        if (!stage.contains("threads"))
+        {
+            std::stringstream message;
+            message << "The current entry does not contain the 'threads' field.";
+            throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
+        }
+        if (!stage["threads"].is_number_integer())
+        {
+            std::stringstream message;
+            message << "Unexpected type for 'threads' field (should be an integer).";
+            throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
+        }
+        size_t n_replicates = stage["threads"];
+        // Checking the type of cores to which the threads will be pinned
+        if (!stage.contains("core-type"))
+        {
+            std::stringstream message;
+            message << "The current entry does not contain the 'core-type' field.";
+            throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
+        }
+        if (!stage["core-type"].is_string())
+        {
+            std::stringstream message;
+            message << "Unexpected type for 'core-type' field (should be a string).";
+            throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
+        }
+        std::string core_type = stage["core-type"];
+        if (core_type == "p-core")
+        {
+            pinning_policy += build_stage_policy(this->p_core_pu_list, n_replicates);
+        }
+        else if (core_type == "e-core")
+        {
+            pinning_policy += build_stage_policy(this->e_core_pu_list, n_replicates);
+        }
+        else
+        {
+            std::stringstream message;
+            message << "Unexpected value for 'core-type' field (should be 'p-core' or 'e-core', given = " << core_type
+                    << ").";
+            throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
+        }
     }
 }
 /*######################################################################################################################

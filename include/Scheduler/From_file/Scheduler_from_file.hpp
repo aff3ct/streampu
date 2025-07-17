@@ -7,7 +7,6 @@
 
 #include "Scheduler/Scheduler.hpp"
 #include <nlohmann/json.hpp>
-using json = nlohmann::json;
 
 namespace spu
 {
@@ -22,12 +21,12 @@ class Scheduler_from_file : public Scheduler
     std::vector<size_t> sync_buff_sizes_from_file;
     std::vector<bool> sync_active_waitings_from_file;
     std::vector<std::vector<size_t>> puids_from_file;
-    void contsruct_policy_v1(json& data, runtime::Sequence& sequence);
+    void contsruct_policy_v1(nlohmann::json& data, runtime::Sequence& sequence);
 
     // Construct policy function for V2 file
     std::vector<std::vector<std::string>> p_core_pu_list;
     std::vector<std::vector<std::string>> e_core_pu_list;
-    void contsruct_policy_v2(json& data, runtime::Sequence& sequence);
+    void contsruct_policy_v2(nlohmann::json& data, runtime::Sequence& sequence);
 
   public:
     Scheduler_from_file(runtime::Sequence& sequence, const std::string filename, uint8_t file_version = 1);
