@@ -17,6 +17,7 @@ using namespace spu::sched;
 Scheduler_from_file::Scheduler_from_file(runtime::Sequence& sequence, const std::string filename, uint8_t file_version)
   : Scheduler(sequence)
   , file_version(file_version)
+  , final_pinning_policy_v2("")
 {
     std::ifstream f(filename);
     if (!f.good())
@@ -31,6 +32,10 @@ Scheduler_from_file::Scheduler_from_file(runtime::Sequence& sequence, const std:
     if (file_version == 1)
     {
         this->contsruct_policy_v1(data, sequence);
+    }
+    else if (file_version == 2)
+    {
+        this->contsruct_policy_v2(data, sequence);
     }
     else
     {
@@ -49,7 +54,6 @@ Scheduler_from_file::Scheduler_from_file(runtime::Sequence* sequence, const std:
 void
 Scheduler_from_file::contsruct_policy_v1(json& data, runtime::Sequence& sequence)
 {
-
     if (!data.contains("schedule"))
     {
         std::stringstream message;
@@ -194,7 +198,7 @@ get_pu_from_core(int id)
     {
         if (child->type == HWLOC_OBJ_PU)
         {
-            core_pus.push_back("PU_" + std::to_string(child->gp_index));
+            core_pus.push_back("PU_" + std::to_string(child->logical_index));
         }
     }
     return core_pus;
@@ -202,8 +206,8 @@ get_pu_from_core(int id)
 #endif
 std::regex pu_single_regex(R"(^PU(\d+)$)");
 std::regex pu_range_regex(R"(^PU(\d+)-(\d+)$)");
-std::regex core_single_regex(R"(^CORE(\d+)$)");
-std::regex core_range_regex(R"(^CORE(\d+)-(\d+)$)");
+std::regex core_single_regex(R"(^core(\d+)$)");
+std::regex core_range_regex(R"(^core(\d+)-(\d+)$)");
 
 std::vector<std::vector<std::string>>
 get_node_pus_from_node(const std::string& node_str)
@@ -260,10 +264,34 @@ get_node_pus_from_node(const std::string& node_str)
     return pu_vector;
 }
 
-//! TO DO : define the function
 std::string
-build_stage_policy(std::vector<std::vector<std::string>>& pu_list, size_t n_replicates)
+build_stage_policy_packed(std::vector<std::vector<std::string>>& pu_list, size_t n_replicates)
 {
+    std::string pinning_policy = "";
+
+    size_t pu_index = 0;
+    size_t pu_list_size = pu_list.size();
+    for (size_t i = 0; i < n_replicates; i++)
+    {
+        // Check if the current PU list is empty
+        if (pu_list.empty())
+        {
+            std::stringstream message;
+            message << "Consumed the list of all avalable PUs during construction.";
+            throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
+        }
+        if (i != 0) pinning_policy += "; ";
+        pinning_policy += pu_list[pu_index][0];
+        pu_list[pu_index].erase(pu_list[pu_index].begin()); // Remove the first PU from the list
+        if (pu_list[pu_index].empty())
+        {
+            pu_list.erase(pu_list.begin() + pu_index); // Remove the empty list
+            pu_index--;
+            pu_list_size--;
+        }
+        pu_index = (pu_index + 1) % pu_list_size; // Move to the next PU in the list
+    }
+    return pinning_policy;
 }
 
 void
@@ -365,71 +393,73 @@ Scheduler_from_file::contsruct_policy_v2(json& data, runtime::Sequence& sequence
     }
 
     auto sched_data = data["schedule"];
-
     if (!sched_data.is_array())
     {
         std::stringstream message;
         message << "Unexpected type for the 'schedule' field (should be an array).";
         throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
     }
+    // Getting information about wait type and buffer size
+    this->sync_buff_sizes_from_file.resize(sched_data.size() - 1, 1);
+    this->sync_active_waitings_from_file.resize(sched_data.size() - 1, false);
 
     // Starting the core allocation algorithme
     size_t n_tasks_json = 0;
-    std::string pinning_policy = "";
-    for (auto& stage : sched_data)
+    for (size_t d = 0; d < sched_data.size(); d++)
     {
         // Adding the | for stage separation
-        if (!pinning_policy.empty()) pinning_policy += " | ";
+        if (!this->final_pinning_policy_v2.empty()) this->final_pinning_policy_v2 += " | ";
 
         // Checking task entry
-        if (!stage.contains("tasks"))
+        if (!sched_data[d].contains("tasks"))
         {
             std::stringstream message;
             message << "The current entry does not contain the 'tasks' field.";
             throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
         }
-        if (!stage["tasks"].is_number_integer())
+        if (!sched_data[d]["tasks"].is_number_integer())
         {
             std::stringstream message;
             message << "Unexpected type for 'tasks' field (should be an integer).";
             throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
         }
-        size_t n_tasks = stage["tasks"];
+        std::cout << "CHECKING fort tasks STAGE" << std::endl;
+        n_tasks_json += (size_t)sched_data[d]["tasks"];
         // Checking if the threads entry
-        if (!stage.contains("threads"))
+        if (!sched_data[d].contains("threads"))
         {
             std::stringstream message;
             message << "The current entry does not contain the 'threads' field.";
             throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
         }
-        if (!stage["threads"].is_number_integer())
+        if (!sched_data[d]["threads"].is_number_integer())
         {
             std::stringstream message;
             message << "Unexpected type for 'threads' field (should be an integer).";
             throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
         }
-        size_t n_replicates = stage["threads"];
+        size_t n_replicates = sched_data[d]["threads"];
         // Checking the type of cores to which the threads will be pinned
-        if (!stage.contains("core-type"))
+        if (!sched_data[d].contains("core-type"))
         {
             std::stringstream message;
             message << "The current entry does not contain the 'core-type' field.";
             throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
         }
-        if (!stage["core-type"].is_string())
+        if (!sched_data[d]["core-type"].is_string())
         {
             std::stringstream message;
             message << "Unexpected type for 'core-type' field (should be a string).";
             throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
         }
-        std::string core_type = stage["core-type"];
+        std::string core_type = sched_data[d]["core-type"];
         if (core_type == "p-core")
         {
-            pinning_policy += build_stage_policy(this->p_core_pu_list, n_replicates);
+            this->final_pinning_policy_v2 += build_stage_policy_packed(this->p_core_pu_list, n_replicates);
         }
         else if (core_type == "e-core")
         {
-            pinning_policy += build_stage_policy(this->e_core_pu_list, n_replicates);
+            this->final_pinning_policy_v2 += build_stage_policy_packed(this->e_core_pu_list, n_replicates);
         }
         else
         {
@@ -438,6 +468,56 @@ Scheduler_from_file::contsruct_policy_v2(json& data, runtime::Sequence& sequence
                     << ").";
             throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
         }
+        // Checking if the current stage has inter-stage buffer size
+        if (sched_data[d].contains("sync_buff_size"))
+        {
+            if (!sched_data[d]["sync_buff_size"].is_number_unsigned())
+            {
+                std::stringstream message;
+                message << "Unexpected type for 'sync_buff_size' field (should be unsigned integer).";
+                throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
+            }
+            else
+            {
+                this->sync_buff_sizes_from_file[d] = (size_t)sched_data[d]["sync_buff_size"];
+            }
+        }
+        // Checking if the current stage has a synchronization type
+        if (sched_data[d].contains("sync_waiting_type"))
+        {
+            if (d == sched_data.size() - 1)
+            {
+                std::stringstream message;
+                message << "The 'sync_waiting_type' field cannot be set on the last stage.";
+                throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
+            }
+            if (!sched_data[d]["sync_waiting_type"].is_string())
+            {
+                std::stringstream message;
+                message << "Unexpected type for 'sync_waiting_type' field (should be a string).";
+                throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
+            }
+
+            std::string cur_sync_waiting_type(sched_data[d]["sync_waiting_type"]);
+            if (cur_sync_waiting_type != "active" && cur_sync_waiting_type != "passive")
+            {
+                std::stringstream message;
+                message << "Unexpected value for 'sync_waiting_type' field (should be a 'active' or 'passive', given = "
+                        << cur_sync_waiting_type << ").";
+                throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
+            }
+            if (cur_sync_waiting_type == "active") this->sync_active_waitings_from_file[d] = true;
+        }
+    }
+    // Checking if the number of tasks in the json file is equal to the number of tasks in the sequence
+    if (n_tasks_json != sequence.get_tasks_per_threads()[0].size())
+    {
+        std::stringstream message;
+        message << "The number of tasks in the json file differs from the number of tasks in the sequence "
+                << "('n_tasks_json' = " << n_tasks_json
+                << ", 'sequence.get_tasks_per_threads()[0].size()' = " << sequence.get_tasks_per_threads()[0].size()
+                << ").";
+        throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
     }
 }
 /*######################################################################################################################
@@ -489,4 +569,16 @@ Scheduler_from_file::get_threads_mapping() const
         pinning_policy = Scheduler::get_threads_mapping();
 
     return pinning_policy;
+}
+
+std::string
+Scheduler_from_file::get_final_pinning_policy_v2() const
+{
+    if (this->file_version != 2)
+    {
+        std::stringstream message;
+        message << "The current scheduler is not a V2 scheduler, cannot return the final pinning policy.";
+        throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
+    }
+    return this->final_pinning_policy_v2;
 }

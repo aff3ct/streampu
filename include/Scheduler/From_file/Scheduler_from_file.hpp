@@ -17,6 +17,7 @@ class Scheduler_from_file : public Scheduler
 {
   protected:
     // Construct policy function for V1 file
+    uint8_t file_version;
     std::vector<std::pair<size_t, size_t>> solution_from_file;
     std::vector<size_t> sync_buff_sizes_from_file;
     std::vector<bool> sync_active_waitings_from_file;
@@ -26,6 +27,7 @@ class Scheduler_from_file : public Scheduler
     // Construct policy function for V2 file
     std::vector<std::vector<std::string>> p_core_pu_list;
     std::vector<std::vector<std::string>> e_core_pu_list;
+    std::string final_pinning_policy_v2;
     void contsruct_policy_v2(nlohmann::json& data, runtime::Sequence& sequence);
 
   public:
@@ -34,11 +36,11 @@ class Scheduler_from_file : public Scheduler
     ~Scheduler_from_file() = default;
     virtual void schedule() override;
 
-    uint8_t file_version;
     std::vector<bool> get_thread_pinnings() const override;
     std::vector<size_t> get_sync_buff_sizes() const override;
     std::vector<bool> get_sync_active_waitings() const override;
     std::string get_threads_mapping() const override;
+    std::string get_final_pinning_policy_v2() const;
 };
 } // namespace sched
 } // namespace spu
