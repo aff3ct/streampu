@@ -181,10 +181,10 @@ Scheduler_from_file::contsruct_policy_v1(json& data, runtime::Sequence& sequence
 #######################################################################################################################*/
 #ifdef SPU_HWLOC
 hwloc_topology_t topology;
-std::vector<std::string>
+std::vector<std::size_t>
 get_pu_from_core(int id)
 {
-    std::vector<std::string> core_pus;
+    std::vector<std::size_t> core_pus;
     hwloc_obj_t core_obj = hwloc_get_obj_by_type(topology, HWLOC_OBJ_CORE, id);
 
     if (core_obj == nullptr)
@@ -193,12 +193,11 @@ get_pu_from_core(int id)
         message << "No core with id " << id << " found in the topology.";
         throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
     }
-    std::vector<std::string> pu_vector;
     for (hwloc_obj_t child = core_obj->first_child; child != nullptr; child = child->next_sibling)
     {
         if (child->type == HWLOC_OBJ_PU)
         {
-            core_pus.push_back("PU_" + std::to_string(child->logical_index));
+            core_pus.push_back(child->logical_index);
         }
     }
     return core_pus;
@@ -209,30 +208,30 @@ std::regex pu_range_regex(R"(^PU(\d+)-(\d+)$)");
 std::regex core_single_regex(R"(^core(\d+)$)");
 std::regex core_range_regex(R"(^core(\d+)-(\d+)$)");
 
-std::vector<std::vector<std::string>>
+std::vector<std::vector<size_t>>
 get_node_pus_from_node(const std::string& node_str)
 {
     std::smatch match;
-    std::vector<std::vector<std::string>> pu_vector;
+    std::vector<std::vector<size_t>> pu_vector;
 
     if (std::regex_match(node_str, match, pu_single_regex))
     {
-        int pu_id = std::stoi(match[1].str());
-        pu_vector.push_back({ "PU_" + std::to_string(pu_id) });
+        size_t pu_id = std::stoi(match[1].str());
+        pu_vector.push_back({ pu_id });
     }
     else if (std::regex_match(node_str, match, pu_range_regex))
     {
-        int pu_start = std::stoi(match[1].str());
-        int pu_end = std::stoi(match[2].str());
-        for (int pu_id = pu_start; pu_id <= pu_end; ++pu_id)
+        size_t pu_start = std::stoi(match[1].str());
+        size_t pu_end = std::stoi(match[2].str());
+        for (size_t pu_id = pu_start; pu_id <= pu_end; ++pu_id)
         {
-            pu_vector.push_back({ "PU_" + std::to_string(pu_id) });
+            pu_vector.push_back({ pu_id });
         }
     }
     else if (std::regex_match(node_str, match, core_single_regex))
     {
 #ifdef SPU_HWLOC
-        int core_id = std::stoi(match[1].str());
+        size_t core_id = std::stoi(match[1].str());
         pu_vector.push_back(get_pu_from_core(core_id));
 #else
         std::stringstream message;
@@ -244,9 +243,9 @@ get_node_pus_from_node(const std::string& node_str)
     else if (std::regex_match(node_str, match, core_range_regex))
     {
 #ifdef SPU_HWLOC
-        int core_start = std::stoi(match[1].str());
-        int core_end = std::stoi(match[2].str());
-        for (int core_id = core_start; core_id <= core_end; ++core_id)
+        size_t core_start = std::stoi(match[1].str());
+        size_t core_end = std::stoi(match[2].str());
+        for (size_t core_id = core_start; core_id <= core_end; ++core_id)
             pu_vector.push_back(get_pu_from_core(core_id));
 #else
         std::stringstream message;
@@ -264,13 +263,14 @@ get_node_pus_from_node(const std::string& node_str)
     return pu_vector;
 }
 
-std::string
-build_stage_policy_packed(std::vector<std::vector<std::string>>& pu_list, size_t n_replicates)
+void
+Scheduler_from_file::build_stage_policy_packed(std::vector<std::vector<size_t>>& pu_list,
+                                               size_t n_replicates,
+                                               size_t st_index)
 {
-    std::string pinning_policy = "";
-
     size_t pu_index = 0;
     size_t pu_list_size = pu_list.size();
+    this->puids_from_file.push_back({});
     for (size_t i = 0; i < n_replicates; i++)
     {
         // Check if the current PU list is empty
@@ -280,8 +280,8 @@ build_stage_policy_packed(std::vector<std::vector<std::string>>& pu_list, size_t
             message << "Consumed the list of all avalable PUs during construction.";
             throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
         }
-        if (i != 0) pinning_policy += "; ";
-        pinning_policy += pu_list[pu_index][0];
+        this->puids_from_file[st_index].push_back(pu_list[pu_index][0]);
+
         pu_list[pu_index].erase(pu_list[pu_index].begin()); // Remove the first PU from the list
         if (pu_list[pu_index].empty())
         {
@@ -289,9 +289,8 @@ build_stage_policy_packed(std::vector<std::vector<std::string>>& pu_list, size_t
             pu_index--;
             pu_list_size--;
         }
-        pu_index = (pu_index + 1) % pu_list_size; // Move to the next PU in the list
+        if (pu_list_size > 0) pu_index = (pu_index + 1) % pu_list_size; // Move to the next PU in the list
     }
-    return pinning_policy;
 }
 
 void
@@ -346,7 +345,7 @@ Scheduler_from_file::contsruct_policy_v2(json& data, runtime::Sequence& sequence
     // Creating the p_core_pu_list
     for (auto& node : p_core_list)
     {
-        std::vector<std::vector<std::string>> pu_vector;
+        std::vector<std::vector<size_t>> pu_vector;
         if (node.is_string())
         {
             pu_vector = get_node_pus_from_node(node);
@@ -366,7 +365,7 @@ Scheduler_from_file::contsruct_policy_v2(json& data, runtime::Sequence& sequence
     // Creating the e_core_pu_list
     for (auto& node : e_core_list)
     {
-        std::vector<std::vector<std::string>> pu_vector;
+        std::vector<std::vector<size_t>> pu_vector;
         if (node.is_string())
         {
             pu_vector = get_node_pus_from_node(node);
@@ -383,7 +382,6 @@ Scheduler_from_file::contsruct_policy_v2(json& data, runtime::Sequence& sequence
         }
         this->e_core_pu_list.insert(this->e_core_pu_list.end(), pu_vector.begin(), pu_vector.end());
     }
-
     // Generating the solution_from_file
     if (!data.contains("schedule"))
     {
@@ -407,9 +405,6 @@ Scheduler_from_file::contsruct_policy_v2(json& data, runtime::Sequence& sequence
     size_t n_tasks_json = 0;
     for (size_t d = 0; d < sched_data.size(); d++)
     {
-        // Adding the | for stage separation
-        if (!this->final_pinning_policy_v2.empty()) this->final_pinning_policy_v2 += " | ";
-
         // Checking task entry
         if (!sched_data[d].contains("tasks"))
         {
@@ -423,7 +418,6 @@ Scheduler_from_file::contsruct_policy_v2(json& data, runtime::Sequence& sequence
             message << "Unexpected type for 'tasks' field (should be an integer).";
             throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
         }
-        std::cout << "CHECKING fort tasks STAGE" << std::endl;
         n_tasks_json += (size_t)sched_data[d]["tasks"];
         // Checking if the threads entry
         if (!sched_data[d].contains("threads"))
@@ -439,6 +433,10 @@ Scheduler_from_file::contsruct_policy_v2(json& data, runtime::Sequence& sequence
             throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
         }
         size_t n_replicates = sched_data[d]["threads"];
+
+        // Generating solution_from_file
+        this->solution_from_file.push_back(std::make_pair((size_t)sched_data[d]["tasks"], n_replicates));
+
         // Checking the type of cores to which the threads will be pinned
         if (!sched_data[d].contains("core-type"))
         {
@@ -455,11 +453,11 @@ Scheduler_from_file::contsruct_policy_v2(json& data, runtime::Sequence& sequence
         std::string core_type = sched_data[d]["core-type"];
         if (core_type == "p-core")
         {
-            this->final_pinning_policy_v2 += build_stage_policy_packed(this->p_core_pu_list, n_replicates);
+            build_stage_policy_packed(this->p_core_pu_list, n_replicates, d);
         }
         else if (core_type == "e-core")
         {
-            this->final_pinning_policy_v2 += build_stage_policy_packed(this->e_core_pu_list, n_replicates);
+            build_stage_policy_packed(this->e_core_pu_list, n_replicates, d);
         }
         else
         {
@@ -569,16 +567,4 @@ Scheduler_from_file::get_threads_mapping() const
         pinning_policy = Scheduler::get_threads_mapping();
 
     return pinning_policy;
-}
-
-std::string
-Scheduler_from_file::get_final_pinning_policy_v2() const
-{
-    if (this->file_version != 2)
-    {
-        std::stringstream message;
-        message << "The current scheduler is not a V2 scheduler, cannot return the final pinning policy.";
-        throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
-    }
-    return this->final_pinning_policy_v2;
 }
