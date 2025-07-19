@@ -40,7 +40,7 @@ Scheduler_from_file::Scheduler_from_file(runtime::Sequence& sequence, const std:
     else
     {
         std::stringstream message;
-        message << "Unsupported file version: " << static_cast<int>(file_version) << ". Supported version is 1.";
+        message << "Unsupported file version: " << static_cast<int>(file_version) << ". Supported version are 1 or 2.";
         throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
     }
 }

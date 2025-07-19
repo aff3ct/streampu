@@ -452,8 +452,8 @@ main(int argc, char** argv)
                 std::cout << "  -v, --verbose            "
                           << "Show information about the scheduling choices                         "
                           << "[false]" << std::endl;
-                std::cout << "  -k, --task-autoalloc "
-                          << "Enable task SOUT autoalloc mode                                      "
+                std::cout << "  -k, --task-autoalloc     "
+                          << "Enable task SOUT autoalloc mode                                       "
                           << "[" << (task_autoalloc ? "true" : "false") << "]" << std::endl;
                 std::cout << "  -h, --help               "
                           << "This help                                                             "

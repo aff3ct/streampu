@@ -32,8 +32,8 @@ class Scheduler_from_file : public Scheduler
     void contsruct_policy_v2(nlohmann::json& data, runtime::Sequence& sequence);
 
   public:
-    Scheduler_from_file(runtime::Sequence& sequence, const std::string filename, uint8_t file_version = 1);
-    Scheduler_from_file(runtime::Sequence* sequence, const std::string filename, uint8_t file_version = 1);
+    Scheduler_from_file(runtime::Sequence& sequence, const std::string filename, uint8_t file_version = 2);
+    Scheduler_from_file(runtime::Sequence* sequence, const std::string filename, uint8_t file_version = 2);
     ~Scheduler_from_file() = default;
     virtual void schedule() override;
 
