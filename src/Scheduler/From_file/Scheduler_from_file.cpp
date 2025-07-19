@@ -321,20 +321,20 @@ Scheduler_from_file::contsruct_policy_v2(json& data, runtime::Sequence& sequence
     auto& p_core_ressources = resources["p-core"];
     auto& e_core_ressources = resources["e-core"];
 
-    if (!p_core_ressources.contains("nodes-list"))
+    if (!p_core_ressources.contains("node-list"))
     {
         std::stringstream message;
         message << "p-cores list is not given in the json file.";
         throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
     }
-    if (!e_core_ressources.contains("nodes-list"))
+    if (!e_core_ressources.contains("node-list"))
     {
         std::stringstream message;
         message << "e-cores list is not given in the json file.";
         throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
     }
-    auto& p_core_list = p_core_ressources["nodes-list"];
-    auto& e_core_list = e_core_ressources["nodes-list"];
+    auto& p_core_list = p_core_ressources["node-list"];
+    auto& e_core_list = e_core_ressources["node-list"];
 
     // Getting the list of PU of the given lists
 #ifdef SPU_HWLOC
