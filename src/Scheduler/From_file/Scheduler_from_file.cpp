@@ -651,7 +651,7 @@ Scheduler_from_file::get_threads_mapping() const
     std::string pinning_policy;
     if (this->puids_from_file.size())
     {
-        if (this->pinning_strategy == "packed")
+        if (this->file_version == 1 || (this->file_version == 2 && this->pinning_strategy == "packed"))
         {
             for (size_t s = 0; s < this->puids_from_file.size(); s++)
             {
@@ -665,7 +665,7 @@ Scheduler_from_file::get_threads_mapping() const
                 if (!this->puids_from_file[s].size()) pinning_policy += "NO_PIN";
             }
         }
-        else if (this->pinning_strategy == "loose")
+        else if (this->file_version == 2 && this->pinning_strategy == "loose")
         {
             for (size_t s = 0; s < this->puids_from_file.size(); s++)
             {
