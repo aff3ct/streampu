@@ -336,12 +336,28 @@ Scheduler_from_file::contsruct_policy_v2(json& data, runtime::Sequence& sequence
     auto& p_core_list = p_core_ressources["node-list"];
     auto& e_core_list = e_core_ressources["node-list"];
 
+	// Getting the smt value
+	if (!p_core_ressources.contains("smt"))
+	{
+		std::stringstream message;
+		message << "p-cores smt value is not given in the json file.";
+		throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
+	}
+	size_t p_core_smt = p_core_ressources["smt"];
+
+	if (!e_core_ressources.contains("smt"))
+	{
+		std::stringstream message;
+		message << "e-cores smt value is not given in the json file.";
+		throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
+	}
+	size_t e_core_smt = e_core_ressources["smt"];
+
     // Getting the list of PU of the given lists
 #ifdef SPU_HWLOC
     hwloc_topology_init(&topology);
     hwloc_topology_load(topology);
 #endif
-
     // Creating the p_core_pu_list
     for (auto& node : p_core_list)
     {
@@ -362,6 +378,20 @@ Scheduler_from_file::contsruct_policy_v2(json& data, runtime::Sequence& sequence
         }
         this->p_core_pu_list.insert(this->p_core_pu_list.end(), pu_vector.begin(), pu_vector.end());
     }
+	if (p_core_smt > 1)
+	{
+		for (size_t i = 0 ; i < p_core_smt - 1; i++)
+		{
+			for (size_t j = 0; j < this->p_core_pu_list.size(); j++)
+			{
+				if (this->p_core_pu_list[j].size() > 1)
+				{	this->p_core_pu_list.push_back({this->p_core_pu_list[j][1]});
+					this->p_core_pu_list[j].erase(this->p_core_pu_list[j].begin() + 1);
+				}
+				
+			}
+		}
+	}
     // Creating the e_core_pu_list
     for (auto& node : e_core_list)
     {
@@ -382,6 +412,21 @@ Scheduler_from_file::contsruct_policy_v2(json& data, runtime::Sequence& sequence
         }
         this->e_core_pu_list.insert(this->e_core_pu_list.end(), pu_vector.begin(), pu_vector.end());
     }
+	if (e_core_smt > 1)
+	{
+		for (size_t i = 0 ; i < e_core_smt - 1; i++)
+		{
+			for (size_t j = 0; j < this->e_core_pu_list.size(); j++)
+			{
+				if (this->e_core_pu_list[j].size() > 1)
+				{
+					this->e_core_pu_list.push_back({this->e_core_pu_list[j][1]});
+					this->e_core_pu_list[j].erase(this->e_core_pu_list[j].begin() + 1);
+				}
+			}
+		}
+	}
+
     // Generating the solution_from_file
     if (!data.contains("schedule"))
     {
