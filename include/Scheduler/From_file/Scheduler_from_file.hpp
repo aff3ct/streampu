@@ -27,8 +27,10 @@ class Scheduler_from_file : public Scheduler
     // Construct policy function for V2 file
     std::vector<std::vector<size_t>> p_core_pu_list;
     std::vector<std::vector<size_t>> e_core_pu_list;
+    std::string pinning_strategy;
     std::string final_pinning_policy_v2;
     void build_stage_policy_packed(std::vector<std::vector<size_t>>& pu_list, size_t n_replicates, size_t st_index);
+    void build_stage_policy_loose(std::vector<std::vector<size_t>>& pu_list, size_t n_replicates, size_t st_index);
     void contsruct_policy_v2(nlohmann::json& data, runtime::Sequence& sequence);
 
   public:
