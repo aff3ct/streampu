@@ -305,6 +305,39 @@ Scheduler_from_file::build_stage_policy_loose(std::vector<std::vector<size_t>>& 
 }
 
 void
+Scheduler_from_file::build_stage_policy_distant(std::vector<std::vector<size_t>>& pu_list,
+                                                size_t n_replicates,
+                                                size_t st_index,
+                                                size_t curr_type_index,
+                                                size_t smt_value)
+{
+    size_t pu_index = 0;
+    size_t pu_list_size = pu_list.size();
+    this->puids_from_file.push_back({});
+    for (size_t i = 0; i < n_replicates; i++)
+    {
+        // Check if the current PU list is empty
+        if (pu_list.empty())
+        {
+            std::stringstream message;
+            message << "Consumed the list of all avalable PUs during construction.";
+            throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
+        }
+        // Compute the index of the PU to use
+        pu_index = ((curr_type_index + i) % 2) * (pu_list_size / (2 * smt_value));
+        this->puids_from_file[st_index].push_back(pu_list[pu_index][0]);
+
+        pu_list[pu_index].erase(pu_list[pu_index].begin()); // Remove the first PU from the list
+        if (pu_list[pu_index].empty())
+        {
+            pu_list.erase(pu_list.begin() + pu_index); // Remove the empty list
+            pu_index--;
+            pu_list_size--;
+        }
+    }
+}
+
+void
 Scheduler_from_file::contsruct_policy_v2(json& data, runtime::Sequence& sequence)
 {
     if (!data.contains("resources"))
@@ -459,6 +492,8 @@ Scheduler_from_file::contsruct_policy_v2(json& data, runtime::Sequence& sequence
 
     // Starting the core allocation algorithme
     size_t n_tasks_json = 0;
+    size_t curr_p_core_stage = 0;
+    size_t curr_e_core_stage = 0;
     for (size_t d = 0; d < sched_data.size(); d++)
     {
         // Checking task entry
@@ -532,12 +567,17 @@ Scheduler_from_file::contsruct_policy_v2(json& data, runtime::Sequence& sequence
             {
                 build_stage_policy_loose(this->p_core_pu_list, n_replicates, d);
             }
+            else if (this->pinning_strategy == "distant")
+            {
+                build_stage_policy_distant(this->p_core_pu_list, n_replicates, d, curr_p_core_stage, p_core_smt);
+            }
             else
             {
                 std::stringstream message;
                 message << "Unkown pinning strategy : " << this->pinning_strategy << " for stage " << d;
                 throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
             }
+            curr_p_core_stage++;
         }
         else if (core_type == "e-core")
         {
@@ -549,12 +589,17 @@ Scheduler_from_file::contsruct_policy_v2(json& data, runtime::Sequence& sequence
             {
                 build_stage_policy_loose(this->e_core_pu_list, n_replicates, d);
             }
+            else if (this->pinning_strategy == "distant")
+            {
+                build_stage_policy_distant(this->e_core_pu_list, n_replicates, d, curr_e_core_stage, e_core_smt);
+            }
             else
             {
                 std::stringstream message;
                 message << "Unkown pinning strategy : " << this->pinning_strategy << " for stage " << d;
                 throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
             }
+            curr_e_core_stage++;
         }
         else
         {
@@ -651,7 +696,8 @@ Scheduler_from_file::get_threads_mapping() const
     std::string pinning_policy;
     if (this->puids_from_file.size())
     {
-        if (this->file_version == 1 || (this->file_version == 2 && this->pinning_strategy == "packed"))
+        if (this->file_version == 1 || (this->file_version == 2 && this->pinning_strategy == "packed") ||
+            (this->file_version == 2 && this->pinning_strategy == "distant"))
         {
             for (size_t s = 0; s < this->puids_from_file.size(); s++)
             {
