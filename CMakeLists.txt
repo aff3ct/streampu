@@ -26,7 +26,7 @@ option(SPU_SHOW_DEPRECATED     "Print message each time a deprecated func. is ca
 option(SPU_FAST                "Remove checks to speedup the code"                           OFF)
 option(SPU_OVERRIDE_VERSION    "Compile without .git directory, provided a version and hash" OFF)
 option(SPU_LINK_JULIA          "Link with Julia"                                             OFF)
-option(SPU_LINK_JLUNA          "Link with Jluna (sets SPU_LINK_JULIA to ON automatically"    OFF)
+option(SPU_LINK_JLUNA          "Link with Jluna (sets SPU_LINK_JULIA to ON automatically)"   OFF)
 
 if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/.git" AND NOT SPU_OVERRIDE_VERSION)
     message(FATAL_ERROR "The '.git' folder can't be found, StreamPU can't be compiled if it is not cloned "
@@ -262,6 +262,13 @@ if(SPU_TESTS)
         list(APPEND spu_targets_list spu-test-thread-pinning)
     endif (SPU_LINK_HWLOC)
 
+    if(SPU_LINK_JULIA)
+        add_executable(spu-test-thread-pool $<TARGET_OBJECTS:spu-obj> ${CMAKE_CURRENT_SOURCE_DIR}/tests/julia/thread-pool.cpp)
+        set_target_properties(spu-test-thread-pool PROPERTIES OUTPUT_NAME test-thread-pool POSITION_INDEPENDENT_CODE ON)
+        list(APPEND spu_tests_list spu-test-thread-pool)
+        list(APPEND spu_targets_list spu-test-thread-pool)
+    endif()
+
     if(SPU_LINK_JLUNA)
         add_executable(spu-test-simple-chain-julia $<TARGET_OBJECTS:spu-obj> ${CMAKE_CURRENT_SOURCE_DIR}/tests/julia/simple_chain_julia.cpp)
         set_target_properties(spu-test-simple-chain-julia PROPERTIES OUTPUT_NAME test-simple-chain-julia POSITION_INDEPENDENT_CODE ON)
@@ -272,6 +279,11 @@ if(SPU_TESTS)
         set_target_properties(spu-test-simple-chain-fwd-julia PROPERTIES OUTPUT_NAME test-simple-chain-fwd-julia POSITION_INDEPENDENT_CODE ON)
         list(APPEND spu_tests_list spu-test-simple-chain-fwd-julia)
         list(APPEND spu_targets_list spu-test-simple-chain-fwd-julia)
+
+        add_executable(spu-test-thread-pool $<TARGET_OBJECTS:spu-obj> ${CMAKE_CURRENT_SOURCE_DIR}/tests/julia/thread-pool.cpp)
+        set_target_properties(spu-test-thread-pool PROPERTIES OUTPUT_NAME test-thread-pool POSITION_INDEPENDENT_CODE ON)
+        list(APPEND spu_tests_list spu-test-thread-pool)
+        list(APPEND spu_targets_list spu-test-thread-pool)
     endif()
 endif()
 
