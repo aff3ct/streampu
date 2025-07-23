@@ -374,89 +374,89 @@ main(int argc, char** argv)
                 std::cout << "usage: " << argv[0] << " [options]" << std::endl;
                 std::cout << std::endl;
                 std::cout << "  -t, --n-threads          "
-                          << "Number of threads to run in parallel for each stage                   "
+                          << "Number of threads to run in parallel for each stage                    "
                              "["
                           << (n_threads_param.empty() ? "empty" : "\"" + n_threads_param + "\"") << "]" << std::endl;
                 std::cout << "  -f, --n-inter-frames     "
-                          << "Number of frames to process in one task                               "
+                          << "Number of frames to process in one task                                "
                           << "[" << n_inter_frames << "]" << std::endl;
                 std::cout << "  -s, --sleep-time         "
-                          << "Sleep time duration in one task (microseconds)                        "
+                          << "Sleep time duration in one task (microseconds)                         "
                           << "[" << sleep_time_us << "]" << std::endl;
                 std::cout << "  -d, --data-length        "
-                          << "Size of data to process in one task (in bytes)                        "
+                          << "Size of data to process in one task (in bytes)                         "
                           << "[" << data_length << "]" << std::endl;
                 std::cout << "  -e, --n-exec             "
-                          << "Number of executions (0 means -> never stop because of this counter)  "
+                          << "Number of executions (0 means -> never stop because of this counter)   "
                           << "[" << n_exec << "]" << std::endl;
                 std::cout << "  -l, --n-exec-pro         "
-                          << "Number of executions during the scheduler profiling phase             "
+                          << "Number of executions during the scheduler profiling phase              "
                           << "[" << n_exec_pro << "]" << std::endl;
                 std::cout << "  -u, --buffer-size        "
-                          << "Size of the buffer between the different stages of the pipeline       "
+                          << "Size of the buffer between the different stages of the pipeline        "
                           << "[" << buffer_size << "]" << std::endl;
                 std::cout << "  -o, --dot-filepath       "
-                          << "Path to dot output file                                               "
+                          << "Path to dot output file                                                "
                           << "[" << (dot_filepath.empty() ? "empty" : "\"" + dot_filepath + "\"") << "]" << std::endl;
                 std::cout << "  -i, --in-filepath        "
-                          << "Path to the input file (used to generate bits of the chain)           "
+                          << "Path to the input file (used to generate bits of the chain)            "
                           << "[" << (in_filepath.empty() ? "empty" : "\"" + in_filepath + "\"") << "]" << std::endl;
                 std::cout << "  -j, --out-filepath       "
-                          << "Path to the output file (written at the end of the chain)             "
+                          << "Path to the output file (written at the end of the chain)              "
                           << "[" << (out_filepath.empty() ? "empty" : "\"" + out_filepath + "\"") << "]" << std::endl;
                 std::cout << "  -c, --copy-mode          "
-                          << "Enable to copy data in sequence (performance will be reduced)         "
+                          << "Enable to copy data in sequence (performance will be reduced)          "
                           << "[" << (no_copy_mode ? "false" : "true") << "]" << std::endl;
                 std::cout << "  -b, --step-by-step       "
-                          << "Enable step-by-step sequence execution (performance will be reduced)  "
+                          << "Enable step-by-step sequence execution (performance will be reduced)   "
                           << "[" << (step_by_step ? "true" : "false") << "]" << std::endl;
                 std::cout << "  -p, --print-stats        "
-                          << "Enable to print per task statistics (performance will be reduced)     "
+                          << "Enable to print per task statistics (performance will be reduced)      "
                           << "[" << (print_stats ? "true" : "false") << "]" << std::endl;
                 std::cout << "  -g, --debug              "
-                          << "Enable task debug mode (print socket data)                            "
+                          << "Enable task debug mode (print socket data)                             "
                           << "[" << (debug ? "true" : "false") << "]" << std::endl;
                 std::cout << "  -q, --force-sequence     "
-                          << "Force sequence instead of pipeline                                    "
+                          << "Force sequence instead of pipeline                                     "
                           << "[" << (force_sequence ? "true" : "false") << "]" << std::endl;
                 std::cout << "  -w, --active-waiting     "
-                          << "Enable active waiting in the pipeline synchronizations                "
+                          << "Enable active waiting in the pipeline synchronizations                 "
                           << "[" << (active_waiting ? "true" : "false") << "]" << std::endl;
                 std::cout << "  -n, --tsk-per-sta        "
-                          << "The number of tasks on each stage of the pipeline                     "
+                          << "The number of tasks on each stage of the pipeline                      "
                           << "[" << (tsk_per_sta_param.empty() ? "empty" : "\"" + tsk_per_sta_param + "\"") << "]"
                           << std::endl;
                 std::cout << "  -r, --tsk-types          "
-                          << "The socket type of each task (SFWD or SIO)                            "
+                          << "The socket type of each task (SFWD or SIO)                             "
                           << "[" << (tsk_types_param.empty() ? "empty" : "\"" + tsk_types_param + "\"") << "]"
                           << std::endl;
                 std::cout << "  -R, --tsk-types-sta      "
-                          << "The socket type of tasks on each stage (SFWD or SIO)                  "
+                          << "The socket type of tasks on each stage (SFWD or SIO)                   "
                           << "[" << (tsk_types_sta_param.empty() ? "empty" : "\"" + tsk_types_sta_param + "\"") << "]"
                           << std::endl;
                 std::cout << "  -C, --chain              "
-                          << "Description of the tasks chain (to be combined with '-S' param)       "
+                          << "Description of the tasks chain (to be combined with '-S' param)        "
                           << "[" << (chain_param.empty() ? "empty" : "\"" + chain_param + "\"") << "]" << std::endl;
                 std::cout << "  -S, --sched              "
-                          << "Scheduler algorithm for the pipeline creation ('OTAC', 'FILE')        "
+                          << "Scheduler algorithm for the pipeline creation ('OTAC', 'GR' or 'FILE') "
                           << "[" << (sched.empty() ? "empty" : "\"" + sched + "\"") << "]" << std::endl;
                 std::cout << "  -F, --sched-file         "
-                          << "File that contains the scheduling, to combine with 'FILE' scheduler   "
+                          << "File that contains the scheduling, to combine with 'FILE' scheduler    "
                           << "[" << (sched_file.empty() ? "empty" : "\"" + sched_file + "\"") << "]" << std::endl;
 #ifdef SPU_HWLOC
                 std::cout << "  -P, --pinning-policy     "
-                          << "Pinning policy for pipeline execution                                 "
+                          << "Pinning policy for pipeline execution                                  "
                           << "[" << (pinning_policy.empty() ? "empty" : "\"" + pinning_policy + "\"") << "]"
                           << std::endl;
 #endif
                 std::cout << "  -v, --verbose            "
-                          << "Show information about the scheduling choices                         "
+                          << "Show information about the scheduling choices                          "
                           << "[false]" << std::endl;
                 std::cout << "  -k, --task-autoalloc     "
-                          << "Enable task SOUT autoalloc mode                                       "
+                          << "Enable task SOUT autoalloc mode                                        "
                           << "[" << (task_autoalloc ? "true" : "false") << "]" << std::endl;
                 std::cout << "  -h, --help               "
-                          << "This help                                                             "
+                          << "This help                                                              "
                           << "[false]" << std::endl;
                 exit(0);
                 break;
@@ -813,6 +813,10 @@ main(int argc, char** argv)
             if (sched == "OTAC")
             {
                 sched_ptr.reset(new sched::Scheduler_OTAC(sequence_chain.get(), R));
+            }
+            if (sched == "GR")
+            {
+                sched_ptr.reset(new sched::Scheduler_GR(sequence_chain.get(), R));
             }
             else if (sched == "FILE")
             {
