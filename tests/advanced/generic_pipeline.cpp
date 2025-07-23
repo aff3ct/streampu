@@ -814,7 +814,7 @@ main(int argc, char** argv)
             {
                 sched_ptr.reset(new sched::Scheduler_OTAC(sequence_chain.get(), R));
             }
-            if (sched == "GR")
+            else if (sched == "GR")
             {
                 sched_ptr.reset(new sched::Scheduler_GR(sequence_chain.get(), R));
             }
