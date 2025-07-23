@@ -796,6 +796,10 @@ Sequence::_exec(const size_t tid,
                 // do nothing, this is normal
             }
         } while (!*force_exit_loop && !stop_condition(statuses) && !tools::Signal_handler::is_sigint());
+
+        if (tools::Signal_handler::is_sigint())
+            for (auto& m : this->get_modules<tools::Interface_waiting>())
+                m->cancel_waiting();
     }
     catch (tools::waiting_canceled const&)
     {
@@ -879,6 +883,10 @@ Sequence::_exec_without_statuses(const size_t tid,
                 // do nothing, this is normal
             }
         } while (!*force_exit_loop && !stop_condition() && !tools::Signal_handler::is_sigint());
+
+        if (tools::Signal_handler::is_sigint())
+            for (auto& m : this->get_modules<tools::Interface_waiting>())
+                m->cancel_waiting();
     }
     catch (tools::waiting_canceled const&)
     {
