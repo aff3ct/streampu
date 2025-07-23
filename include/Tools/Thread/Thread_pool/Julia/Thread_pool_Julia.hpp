@@ -1,7 +1,7 @@
-#ifdef SPU_JULIA
-
 #ifndef THREAD_POOL_JULIA_HPP_
 #define THREAD_POOL_JULIA_HPP_
+
+#ifdef SPU_JULIA
 
 #include <pthread.h>
 #include <semaphore.h>
@@ -43,6 +43,6 @@ class Thread_pool_Julia : public Thread_pool
 }
 }
 
-#endif /* THREAD_POOL_JULIA_HPP_ */
-
 #endif /* SPU_JULIA */
+
+#endif /* THREAD_POOL_JULIA_HPP_ */
