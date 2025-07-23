@@ -5,8 +5,9 @@
 #ifndef SCHEDULER_GR_HPP__
 #define SCHEDULER_GR_HPP__
 
-#include "Scheduler/Scheduler.hpp"
 #include <thread>
+
+#include "Scheduler/Scheduler.hpp"
 
 namespace spu
 {

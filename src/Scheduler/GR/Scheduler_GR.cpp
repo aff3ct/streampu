@@ -1,14 +1,13 @@
-#include "Scheduler/GR/Scheduler_GR.hpp"
-#include "Tools/Exception/exception.hpp"
 #include <cmath>
 #include <iostream>
 #include <limits>
 #include <sstream>
 
+#include "Scheduler/GR/Scheduler_GR.hpp"
+#include "Tools/Exception/exception.hpp"
+
 using namespace spu;
 using namespace spu::sched;
-
-/*#define VERBOSE*/
 
 Scheduler_GR::Scheduler_GR(runtime::Sequence& sequence, const size_t R)
   : Scheduler(&sequence)
