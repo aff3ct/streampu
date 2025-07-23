@@ -8,8 +8,6 @@
 
 #include <streampu.hpp>
 
-#include "Tools/Thread/Thread_pool/Julia/Thread_pool_Julia.hpp"
-
 int
 main(int argc, char** argv)
 {

@@ -279,6 +279,9 @@
 #ifndef THREAD_POOL_JLUNA_V3_HPP_
 #include <Tools/Thread/Thread_pool/Jluna/Thread_pool_Jluna_v3.hpp>
 #endif
+#ifndef THREAD_POOL_JULIA_HPP_
+#include <Tools/Thread/Thread_pool/Julia/Thread_pool_Julia.hpp>
+#endif
 #ifndef THREAD_POOL_STANDARD_HPP_
 #include <Tools/Thread/Thread_pool/Standard/Thread_pool_standard.hpp>
 #endif
