@@ -234,6 +234,9 @@
 #ifndef INTERFACE_WAITING_HPP__
 #include <Tools/Interface/Interface_waiting.hpp>
 #endif
+#ifndef JULIA_UTILS_H_
+#include <Tools/Julia/utils.hpp>
+#endif
 #ifndef BINARYOP_H
 #include <Tools/Math/binaryop.h>
 #endif
