@@ -263,9 +263,12 @@ if(SPU_TESTS)
     endif (SPU_LINK_HWLOC)
 
     if(SPU_LINK_JULIA)
+        add_executable(spu-test-jl_adopt_thread $<TARGET_OBJECTS:spu-obj> ${CMAKE_CURRENT_SOURCE_DIR}/tests/julia/jl_adopt_thread.cpp)
+        set_target_properties(spu-test-jl_adopt_thread PROPERTIES OUTPUT_NAME test-jl_adopt_thread POSITION_INDEPENDENT_CODE ON)
+        list(APPEND spu_targets_list spu-test-jl_adopt_thread)
+
         add_executable(spu-test-thread-pool $<TARGET_OBJECTS:spu-obj> ${CMAKE_CURRENT_SOURCE_DIR}/tests/julia/thread-pool.cpp)
         set_target_properties(spu-test-thread-pool PROPERTIES OUTPUT_NAME test-thread-pool POSITION_INDEPENDENT_CODE ON)
-        list(APPEND spu_tests_list spu-test-thread-pool)
         list(APPEND spu_targets_list spu-test-thread-pool)
     endif()
 
@@ -279,11 +282,6 @@ if(SPU_TESTS)
         set_target_properties(spu-test-simple-chain-fwd-julia PROPERTIES OUTPUT_NAME test-simple-chain-fwd-julia POSITION_INDEPENDENT_CODE ON)
         list(APPEND spu_tests_list spu-test-simple-chain-fwd-julia)
         list(APPEND spu_targets_list spu-test-simple-chain-fwd-julia)
-
-        add_executable(spu-test-thread-pool $<TARGET_OBJECTS:spu-obj> ${CMAKE_CURRENT_SOURCE_DIR}/tests/julia/thread-pool.cpp)
-        set_target_properties(spu-test-thread-pool PROPERTIES OUTPUT_NAME test-thread-pool POSITION_INDEPENDENT_CODE ON)
-        list(APPEND spu_tests_list spu-test-thread-pool)
-        list(APPEND spu_targets_list spu-test-thread-pool)
     endif()
 endif()
 
@@ -871,6 +869,22 @@ if(SPU_TESTS)
         add_test(NAME pipeline1::spu-test-thread-pinning COMMAND spu-test-thread-pinning -e 300 -f 5)
         set_tests_properties(pipeline1::spu-test-thread-pinning PROPERTIES LABELS "thread-pinning;skip-memcheck") # to exclude this previous test from memchecks, it looks like there is a liitle memory leak in the hwloc lib but not sure
     endif (SPU_LINK_HWLOC)
+
+    if (SPU_LINK_JULIA)
+        add_test(NAME unit0::spu-test-jl_adopt_thread COMMAND spu-test-jl_adopt_thread -t 2 -n 1048576)
+        set_tests_properties(unit0::spu-test-jl_adopt_thread PROPERTIES LABELS jl_adopt_thread)
+        add_test(NAME unit1::spu-test-jl_adopt_thread COMMAND spu-test-jl_adopt_thread -t 50 -n 1048576)
+        set_tests_properties(unit1::spu-test-jl_adopt_thread PROPERTIES LABELS jl_adopt_thread)
+        add_test(NAME unit2::spu-test-jl_adopt_thread COMMAND spu-test-jl_adopt_thread -t 1 -n 1048576)
+        set_tests_properties(unit2::spu-test-jl_adopt_thread PROPERTIES LABELS jl_adopt_thread)
+
+        add_test(NAME unit0::spu-test-thread-pool COMMAND spu-test-thread-pool -t 2)
+        set_tests_properties(unit0::spu-test-thread-pool PROPERTIES LABELS thread-pool)
+        add_test(NAME unit1::spu-test-thread-pool COMMAND spu-test-thread-pool -t 100)
+        set_tests_properties(unit1::spu-test-thread-pool PROPERTIES LABELS thread-pool)
+        add_test(NAME unit2::spu-test-thread-pool COMMAND spu-test-thread-pool -t 1)
+        set_tests_properties(unit2::spu-test-thread-pool PROPERTIES LABELS thread-pool)
+    endif()
 
     # check if the automatic pipeline scheduling is giving expected results
     find_program (BASH_PROGRAM bash)

@@ -91,6 +91,7 @@ main(int argc, char** argv)
     printf("pid: %d\n", getpid()); // to kill if necessary
 #ifdef SPU_JLUNA
     jluna::initialize(0);
+    gc_pause;
 #else
     jl_init();
 #endif
