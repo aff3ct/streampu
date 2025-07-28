@@ -573,7 +573,7 @@ Scheduler_from_file::contsruct_policy_v2(json& data, runtime::Sequence& sequence
             }
             else if (this->pinning_strategy != "no")
             {
-                this->pinning_strategy = "no"
+                this->pinning_strategy = "no";
             }
             curr_p_core_stage++;
         }
@@ -593,7 +593,7 @@ Scheduler_from_file::contsruct_policy_v2(json& data, runtime::Sequence& sequence
             }
             else if (this->pinning_strategy != "no")
             {
-                this->pinning_strategy = "no"
+                this->pinning_strategy = "no";
             }
             curr_e_core_stage++;
         }
