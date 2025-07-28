@@ -571,11 +571,9 @@ Scheduler_from_file::contsruct_policy_v2(json& data, runtime::Sequence& sequence
             {
                 build_stage_policy_distant(this->p_core_pu_list, n_replicates, d, curr_p_core_stage, p_core_smt);
             }
-            else
+            else if (this->pinning_strategy != "no")
             {
-                std::stringstream message;
-                message << "Unkown pinning strategy : " << this->pinning_strategy << " for stage " << d;
-                throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
+                this->pinning_strategy = "no"
             }
             curr_p_core_stage++;
         }
@@ -593,11 +591,9 @@ Scheduler_from_file::contsruct_policy_v2(json& data, runtime::Sequence& sequence
             {
                 build_stage_policy_distant(this->e_core_pu_list, n_replicates, d, curr_e_core_stage, e_core_smt);
             }
-            else
+            else if (this->pinning_strategy != "no")
             {
-                std::stringstream message;
-                message << "Unkown pinning strategy : " << this->pinning_strategy << " for stage " << d;
-                throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
+                this->pinning_strategy = "no"
             }
             curr_e_core_stage++;
         }
@@ -693,6 +689,8 @@ Scheduler_from_file::get_thread_pinnings() const
 std::string
 Scheduler_from_file::get_threads_mapping() const
 {
+    if (this->pinning_strategy == "no") return "";
+
     std::string pinning_policy;
     if (this->puids_from_file.size())
     {
