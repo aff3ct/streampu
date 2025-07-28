@@ -40,6 +40,10 @@ compare_files(const std::string& filename1, const std::string& filename2)
 int
 main(int argc, char** argv)
 {
+#ifdef SPU_JLUNA
+    jluna::initialize(1);
+#endif
+
     tools::Signal_handler::init();
 
     option longopts[] = { { "n-threads", required_argument, NULL, 't' },
