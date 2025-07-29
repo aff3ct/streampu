@@ -71,13 +71,11 @@ main(int argc, char** argv)
     jl_value_t* str = jl_cstr_to_string("Hello World!");
     size_t n_threads = 2;
     size_t N = 1 << 20;
+    bool verbose = false;
 
-    option longopts[] = {
-        { "threads", required_argument, NULL, 't' }, { "n-inter-frames", required_argument, NULL, 'f' },
-        { "print-stats", no_argument, NULL, 'p' },   { "step-by-step", no_argument, NULL, 'b' },
-        { "debug", no_argument, NULL, 'g' },         { "verbose", no_argument, NULL, 'v' },
-        { "help", no_argument, NULL, 'h' },          { 0 }
-    };
+    option longopts[] = { { "threads", required_argument, NULL, 't' }, { "n-iter", required_argument, NULL, 'n' },
+                          { "debug", no_argument, NULL, 'g' },         { "verbose", no_argument, NULL, 'v' },
+                          { "help", no_argument, NULL, 'h' },          { 0 } };
     while (1)
     {
         const int opt = getopt_long(argc, argv, "t:f:j:pbgvh", longopts, 0);
@@ -90,6 +88,11 @@ main(int argc, char** argv)
             case 'n':
                 N = atoi(optarg);
                 break;
+            case 'g':
+                break;
+            case 'v':
+                verbose = true;
+                break;
             case 'h':
                 std::cout << "usage: " << argv[0] << " [options]" << std::endl;
                 std::cout << std::endl;
@@ -99,6 +102,9 @@ main(int argc, char** argv)
                 std::cout << "  -n, --n-iter          "
                           << "Number of iteration in thrads code                                    "
                           << "[" << N << "]" << std::endl;
+                std::cout << "  -v, --verbose         "
+                          << "Enable verbose mode                                                   "
+                          << "[" << (verbose ? "true" : "false") << "]" << std::endl;
                 std::cout << "  -h, --help            "
                           << "This help                                                             "
                           << "[false]" << std::endl;
@@ -114,7 +120,7 @@ main(int argc, char** argv)
     args.N = N;
 
     jl_gc_enable(0);
-    std::cout << "gc: " << jl_gc_is_enabled() << std::endl;
+    if (verbose) std::cout << "gc: " << jl_gc_is_enabled() << std::endl;
 
     std::vector<pthread_t> threads(n_threads);
     for (size_t i = 0; i < n_threads; i++)
@@ -122,6 +128,7 @@ main(int argc, char** argv)
         pthread_create(&threads[i], NULL, thread_code, (void*)&args);
     }
 
+    if (verbose)
     {
         std::stringstream msg;
         msg << "[main]: " << jl_gc_is_enabled() << std::endl;
@@ -133,6 +140,7 @@ main(int argc, char** argv)
     jl_gc_enable(1);
 #endif
 
+    if (verbose)
     {
         std::stringstream msg;
         msg << "[main]: " << jl_gc_is_enabled() << std::endl;
@@ -143,7 +151,7 @@ main(int argc, char** argv)
     {
         void* ret;
         pthread_join(t, &ret);
-        std::cout << "ret: " << ret << std::endl;
+        if (verbose) std::cout << "ret: " << ret << std::endl;
     }
 #ifndef SPU_JLUNA
     jl_atexit_hook(0);
