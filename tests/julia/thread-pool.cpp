@@ -1,4 +1,5 @@
 #include "Tools/Thread/Thread_pool/Julia/Thread_pool_Julia.hpp"
+#include <chrono>
 #include <cstdlib>
 #include <ctime>
 #include <getopt.h>
@@ -137,30 +138,37 @@ main(int argc, char** argv)
     jl_function_t* jl_println = jl_eval_string("return Base.println");
     std::function<void(const size_t)> func_exec1 = [jl_get_threadid, print_stats](const size_t tid)
     {
-        time_t t0, t1;
-        time(&t0);
+        auto t0 = std::chrono::steady_clock::now();
         std::stringstream msg;
         msg << '[' << tid << "] COUCOUUUUUUUUUU 1 - jl_threadid = " << jl_unbox_int64(jl_call0(jl_get_threadid))
             << std::endl;
         std::cout << msg.str();
-        time(&t1);
+        std::chrono::nanoseconds duration = std::chrono::steady_clock::now() - t0;
         if (print_stats)
         {
             std::stringstream ss;
-            ss << '[' << tid << "] time taken for 2: " << t1 - t0 << std::endl;
+            ss << '[' << tid << "] time elapsed for 1: " << duration.count() / 1000000.0 << "ms" << std::endl;
             std::cout << ss.str();
         }
     };
 
     print_verbose("main -- 3");
+    auto t0 = std::chrono::steady_clock::now();
     tp->run(func_exec1);
+    std::chrono::nanoseconds duration = std::chrono::steady_clock::now() - t0;
+    if (print_stats)
+    {
+        std::stringstream ss;
+        ss << "[main] time elapsed for 1: " << duration.count() / 1000000.0 << "ms" << std::endl;
+        std::cout << ss.str();
+    }
     print_verbose("main -- 4");
 
     (void)spu::tools::jl_eval_file("../tests/julia/computations.jl");
     jl_function_t* computation = jl_eval_string("return multiple_square_and_multiply");
     std::function<void(const size_t)> func_exec3 = [computation, jl_println, print_stats, verbose](const size_t tid)
     {
-        time_t t0 = time(NULL);
+        auto t0 = std::chrono::steady_clock::now();
         jl_value_t* threadid = jl_box_int32(tid);
         jl_value_t* jl_text3 = jl_eval_string("return \" - \"");
         jl_value_t* p = jl_box_int32(1392908813);
@@ -173,18 +181,26 @@ main(int argc, char** argv)
             msg << jl_unbox_int64(threadid) << " - " << jl_unbox_int64(r) << std::endl;
             std::cout << msg.str();
         }
-        time_t t1 = time(NULL);
+        std::chrono::nanoseconds duration = std::chrono::steady_clock::now() - t0;
         if (print_stats)
         {
             std::stringstream ss;
-            ss << '[' << tid << "] time taken for 2: " << t1 - t0 << std::endl;
+            ss << '[' << tid << "] time elapsed for 2: " << duration.count() / 1000000.0 << "ms" << std::endl;
             std::cout << ss.str();
         }
     };
 
+    t0 = std::chrono::steady_clock::now();
     tp->run(func_exec3, true);
     print_verbose("main -- 5");
     tp->wait();
+    duration = std::chrono::steady_clock::now() - t0;
+    if (print_stats)
+    {
+        std::stringstream ss;
+        ss << "[main] time elapsed for 2: " << duration.count() / 1000000.0 << "ms" << std::endl;
+        std::cout << ss.str();
+    }
     print_verbose("main -- 6");
     delete tp;
     print_verbose("main -- 7");
