@@ -9,7 +9,7 @@ using namespace spu::tools;
 Thread_pool_Jluna_v2::Thread_pool_Jluna_v2(const size_t n_threads)
   : Thread_pool(n_threads)
   , pool()
-  , jl_cnd(n_threads, jluna::Base.safe_eval("return Base.Threads.Condition()"))
+  , jl_cnd()
   , jl_lock(jluna::Base.safe_eval("return Base.Threads.lock"))
   , jl_unlock(jluna::Base.safe_eval("return Base.Threads.unlock"))
   , jl_wait(jluna::Base.safe_eval("return Base.Threads.wait"))
@@ -28,7 +28,7 @@ Thread_pool_Jluna_v2::Thread_pool_Jluna_v2(const size_t n_threads, std::function
 Thread_pool_Jluna_v2::Thread_pool_Jluna_v2(const Thread_pool_Jluna_v2& other)
   : Thread_pool(other)
   , pool()
-  , jl_cnd(n_threads, jluna::Base.safe_eval("return Base.Threads.Condition()"))
+  , jl_cnd()
   , jl_lock(jluna::Base.safe_eval("return Base.Threads.lock"))
   , jl_unlock(jluna::Base.safe_eval("return Base.Threads.unlock"))
   , jl_wait(jluna::Base.safe_eval("return Base.Threads.wait"))
@@ -80,6 +80,7 @@ Thread_pool_Jluna_v2::init(const bool async)
 
     for (size_t tid = 0; tid < n_threads; tid++)
     {
+        this->jl_cnd.emplace_back(jluna::Base.safe_eval("return Base.Threads.Condition()"));
         std::function<void(size_t)> jl_fstart = [this](const size_t tid) -> void { this->_start_thread(tid); };
         this->pool.push_back(jluna::ThreadPool::create(jl_fstart, tid));
         this->pool.back().schedule();

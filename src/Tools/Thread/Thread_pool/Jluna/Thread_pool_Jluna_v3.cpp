@@ -9,7 +9,7 @@ using namespace spu::tools;
 Thread_pool_Jluna_v3::Thread_pool_Jluna_v3(const size_t n_threads)
   : Thread_pool(n_threads)
   , pool()
-  , jl_cnd(n_threads, jluna::Base.safe_eval("return Base.Threads.Condition()"))
+  , jl_cnd()
   , jl_unsafe_lock(jluna::unsafe::get_function(jluna::Base, jluna::Symbol("lock")))
   , jl_unsafe_unlock(jluna::unsafe::get_function(jluna::Base, jluna::Symbol("unlock")))
   , jl_unsafe_wait(jluna::unsafe::get_function(jluna::Base, jluna::Symbol("wait")))
@@ -28,7 +28,7 @@ Thread_pool_Jluna_v3::Thread_pool_Jluna_v3(const size_t n_threads, std::function
 Thread_pool_Jluna_v3::Thread_pool_Jluna_v3(const Thread_pool_Jluna_v3& other)
   : Thread_pool(other)
   , pool()
-  , jl_cnd(n_threads, jluna::Base.safe_eval("return Base.Threads.Condition()"))
+  , jl_cnd()
   , jl_unsafe_lock(jluna::unsafe::get_function(jluna::Base, jluna::Symbol("lock")))
   , jl_unsafe_unlock(jluna::unsafe::get_function(jluna::Base, jluna::Symbol("unlock")))
   , jl_unsafe_wait(jluna::unsafe::get_function(jluna::Base, jluna::Symbol("wait")))
@@ -80,6 +80,7 @@ Thread_pool_Jluna_v3::init(const bool async)
 
     for (size_t tid = 0; tid < n_threads; tid++)
     {
+        this->jl_cnd.emplace_back(jluna::Base.safe_eval("return Base.Threads.Condition()"));
         std::function<void(size_t)> jl_fstart = [this](const size_t tid) -> void { this->_start_thread(tid); };
         this->pool.push_back(jluna::ThreadPool::create(jl_fstart, tid));
         this->pool.back().schedule();
