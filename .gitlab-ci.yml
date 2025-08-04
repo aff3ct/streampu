@@ -103,7 +103,6 @@ analysis-clang-format:
     - job: analysis-headers
       artifacts: false
   script:
-    - apt update && apt install -y pkg-config
     - source ./ci/tools/threads.sh
     - ./ci/build-linux-macos.sh
 

@@ -24,6 +24,7 @@ option(SPU_STACKTRACE          "Print the stack trace when an exception is raise
 option(SPU_STACKTRACE_SEGFAULT "Try to print the stack trace when a segfault occurs"         OFF)
 option(SPU_SHOW_DEPRECATED     "Print message each time a deprecated func. is called"        OFF)
 option(SPU_FAST                "Remove checks to speedup the code"                           OFF)
+option(SPU_HELGRIND            "Annotate the code for Helgrind thread error detector"        OFF)
 option(SPU_OVERRIDE_VERSION    "Compile without .git directory, provided a version and hash" OFF)
 
 if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/.git" AND NOT SPU_OVERRIDE_VERSION)
@@ -391,11 +392,13 @@ if(UNIX)
 endif()
 
 # helgrind
-find_package(HELGRIND)
-if(HELGRIND_FOUND)
-    message(STATUS "StreamPU - Header found: helgrind")
-    spu_target_include_directories2("${spu_targets_list}" PUBLIC "${HELGRIND_INCLUDE_DIRS}")
-    spu_target_compile_definitions("${spu_targets_list}" PUBLIC HAS_HELGRIND)
+if (SPU_HELGRIND)
+    find_package(HELGRIND)
+    if(HELGRIND_FOUND)
+        message(STATUS "StreamPU - Header found: helgrind")
+        spu_target_include_directories2("${spu_targets_list}" PUBLIC "${HELGRIND_INCLUDE_DIRS}")
+        spu_target_compile_definitions("${spu_targets_list}" PUBLIC HAS_HELGRIND)
+    endif()
 endif()
 
 # ---------------------------------------------------------------------------------------------------------------------

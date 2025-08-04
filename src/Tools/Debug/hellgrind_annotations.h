@@ -1,7 +1,7 @@
 #ifndef HELGRIND_ANNOTATIONS_H_
 #define HELGRIND_ANNOTATIONS_H_
 
-#ifdef HAS_HELGRIND
+#ifdef SPU_HAS_HELGRIND
 #include <valgrind/helgrind.h>
 #else
 #define ANNOTATE_HAPPENS_BEFORE(x) ((void)0)
