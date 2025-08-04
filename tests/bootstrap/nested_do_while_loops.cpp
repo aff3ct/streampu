@@ -27,6 +27,7 @@ main(int argc, char** argv)
                           { "print-stats", no_argument, NULL, 'p' },
                           { "step-by-step", no_argument, NULL, 'b' },
                           { "debug", no_argument, NULL, 'g' },
+                          { "task-autoalloc", no_argument, NULL, 'k' },
                           { "help", no_argument, NULL, 'h' },
                           { NULL, 0, NULL, 0 } };
 
@@ -42,10 +43,11 @@ main(int argc, char** argv)
     bool print_stats = false;
     bool step_by_step = false;
     bool debug = false;
+    bool task_autoalloc = false;
 
     while (1)
     {
-        const int opt = getopt_long(argc, argv, "t:f:s:d:e:i:j:o:cpbgh", longopts, 0);
+        const int opt = getopt_long(argc, argv, "t:f:s:d:e:i:j:o:cpbgkh", longopts, 0);
         if (opt == -1) break;
         switch (opt)
         {
@@ -84,6 +86,9 @@ main(int argc, char** argv)
                 break;
             case 'g':
                 debug = true;
+                break;
+            case 'k':
+                task_autoalloc = true;
                 break;
             case 'h':
                 std::cout << "usage: " << argv[0] << " [options]" << std::endl;
@@ -124,6 +129,9 @@ main(int argc, char** argv)
                 std::cout << "  -g, --debug           "
                           << "Enable task debug mode (print socket data)                            "
                           << "[" << (debug ? "true" : "false") << "]" << std::endl;
+                std::cout << "  -k, --task-autoalloc "
+                          << "Enable task SOUT autoalloc mode                                      "
+                          << "[" << (task_autoalloc ? "true" : "false") << "]" << std::endl;
                 std::cout << "  -h, --help            "
                           << "This help                                                             "
                           << "[false]" << std::endl;
@@ -152,7 +160,10 @@ main(int argc, char** argv)
     std::cout << "#   - print_stats    = " << (print_stats ? "true" : "false") << std::endl;
     std::cout << "#   - step_by_step   = " << (step_by_step ? "true" : "false") << std::endl;
     std::cout << "#   - debug          = " << (debug ? "true" : "false") << std::endl;
+    std::cout << "#   - task_autoalloc = " << (task_autoalloc ? "true" : "false") << std::endl;
     std::cout << "#" << std::endl;
+
+    tools::Buffer_allocator::set_task_autoalloc(task_autoalloc);
 
     module::Switcher switcher(2, data_length, typeid(uint8_t));
     switcher.set_custom_name("SwitcherIn");

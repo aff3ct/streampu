@@ -329,10 +329,12 @@ Scheduler::generate_pipeline()
 
     if (solution.empty()) this->schedule();
 
-    return this->instantiate_pipeline(this->get_sync_buff_sizes(),
-                                      this->get_sync_active_waitings(),
-                                      this->get_thread_pinnings(),
-                                      this->get_threads_mapping());
+    std::string threads_mapping = this->get_threads_mapping();
+    std::vector<bool> thread_pinnings =
+      threads_mapping.empty() ? std::vector<bool>(this->solution.size(), false) : this->get_thread_pinnings();
+
+    return this->instantiate_pipeline(
+      this->get_sync_buff_sizes(), this->get_sync_active_waitings(), thread_pinnings, threads_mapping);
 }
 
 size_t

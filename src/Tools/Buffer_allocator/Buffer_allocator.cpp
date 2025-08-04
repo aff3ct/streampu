@@ -8,6 +8,20 @@
 using namespace spu;
 using namespace spu::tools;
 
+bool g_task_autoalloc = false;
+
+void
+Buffer_allocator::set_task_autoalloc(bool autoalloc)
+{
+    g_task_autoalloc = autoalloc;
+}
+
+bool
+Buffer_allocator::get_task_autoalloc()
+{
+    return g_task_autoalloc;
+}
+
 void
 Buffer_allocator::allocate_one_buffer_per_outsocket(runtime::Sequence* sequence)
 {

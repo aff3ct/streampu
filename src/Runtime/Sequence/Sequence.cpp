@@ -407,7 +407,9 @@ Sequence::Sequence(runtime::Task& first,
 
 Sequence::~Sequence()
 {
-    if (this->memory_allocation) tools::Buffer_allocator::deallocate_sequence_memory(this);
+    // The following line is commented because it leads to double free correction in AFF3CT because the tasks can be
+    // freed before the sequence :-(
+    // if (this->memory_allocation) tools::Buffer_allocator::deallocate_sequence_memory(this);
 
     std::vector<tools::Digraph_node<Sub_sequence>*> already_deleted_nodes;
     for (auto s : this->sequences)
@@ -794,6 +796,10 @@ Sequence::_exec(const size_t tid,
                 // do nothing, this is normal
             }
         } while (!*force_exit_loop && !stop_condition(statuses) && !tools::Signal_handler::is_sigint());
+
+        if (tools::Signal_handler::is_sigint())
+            for (auto& m : this->get_modules<tools::Interface_waiting>())
+                m->cancel_waiting();
     }
     catch (tools::waiting_canceled const&)
     {
@@ -877,6 +883,10 @@ Sequence::_exec_without_statuses(const size_t tid,
                 // do nothing, this is normal
             }
         } while (!*force_exit_loop && !stop_condition() && !tools::Signal_handler::is_sigint());
+
+        if (tools::Signal_handler::is_sigint())
+            for (auto& m : this->get_modules<tools::Interface_waiting>())
+                m->cancel_waiting();
     }
     catch (tools::waiting_canceled const&)
     {

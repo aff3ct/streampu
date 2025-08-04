@@ -27,6 +27,7 @@ main(int argc, char** argv)
                           { "step-by-step", no_argument, NULL, 'b' },
                           { "debug", no_argument, NULL, 'g' },
                           { "cyclic-path", no_argument, NULL, 'y' },
+                          { "task-autoalloc", no_argument, NULL, 'k' },
                           { "help", no_argument, NULL, 'h' },
                           { NULL, 0, NULL, 0 } };
 
@@ -42,10 +43,11 @@ main(int argc, char** argv)
     bool step_by_step = false;
     bool debug = false;
     bool cyclic_path = false;
+    bool task_autoalloc = false;
 
     while (1)
     {
-        const int opt = getopt_long(argc, argv, "t:f:s:d:e:a:o:cpbgyh", longopts, 0);
+        const int opt = getopt_long(argc, argv, "t:f:s:d:e:a:o:cpbgykh", longopts, 0);
         if (opt == -1) break;
         switch (opt)
         {
@@ -84,6 +86,9 @@ main(int argc, char** argv)
                 break;
             case 'y':
                 cyclic_path = true;
+                break;
+            case 'k':
+                task_autoalloc = true;
                 break;
             case 'h':
                 std::cout << "usage: " << argv[0] << " [options]" << std::endl;
@@ -124,6 +129,9 @@ main(int argc, char** argv)
                 std::cout << "  -y, --cyclic-path     "
                           << "Enable cyclic selection of the path (with this `--path` is ignored)   "
                           << "[" << (cyclic_path ? "true" : "false") << "]" << std::endl;
+                std::cout << "  -k, --task-autoalloc "
+                          << "Enable task SOUT autoalloc mode                                      "
+                          << "[" << (task_autoalloc ? "true" : "false") << "]" << std::endl;
                 std::cout << "  -h, --help            "
                           << "This help                                                             "
                           << "[false]" << std::endl;
@@ -152,7 +160,10 @@ main(int argc, char** argv)
     std::cout << "#   - step_by_step   = " << (step_by_step ? "true" : "false") << std::endl;
     std::cout << "#   - debug          = " << (debug ? "true" : "false") << std::endl;
     std::cout << "#   - cyclic_path    = " << (cyclic_path ? "true" : "false") << std::endl;
+    std::cout << "#   - task_autoalloc = " << (task_autoalloc ? "true" : "false") << std::endl;
     std::cout << "#" << std::endl;
+
+    tools::Buffer_allocator::set_task_autoalloc(task_autoalloc);
 
     if (path >= 3)
     {

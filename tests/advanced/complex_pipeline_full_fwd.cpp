@@ -29,6 +29,7 @@ main(int argc, char** argv)
                           { "debug", no_argument, NULL, 'g' },
                           { "force-sequence", no_argument, NULL, 'q' },
                           { "active-waiting", no_argument, NULL, 'w' },
+                          { "task-autoalloc", no_argument, NULL, 'k' },
                           { "help", no_argument, NULL, 'h' },
                           { NULL, 0, NULL, 0 } };
 
@@ -44,10 +45,11 @@ main(int argc, char** argv)
     bool debug = false;
     bool force_sequence = false;
     bool active_waiting = false;
+    bool task_autoalloc = false;
 
     while (1)
     {
-        const int opt = getopt_long(argc, argv, "t:f:s:d:e:u:o:pbgqwh", longopts, 0);
+        const int opt = getopt_long(argc, argv, "t:f:s:d:e:u:o:pbgqwkh", longopts, 0);
         if (opt == -1) break;
         switch (opt)
         {
@@ -86,6 +88,9 @@ main(int argc, char** argv)
                 break;
             case 'q':
                 force_sequence = true;
+                break;
+            case 'k':
+                task_autoalloc = true;
                 break;
             case 'h':
                 std::cout << "usage: " << argv[0] << " [options]" << std::endl;
@@ -126,6 +131,9 @@ main(int argc, char** argv)
                 std::cout << "  -w, --active-waiting  "
                           << "Enable active waiting in the pipeline synchronizations                "
                           << "[" << (active_waiting ? "true" : "false") << "]" << std::endl;
+                std::cout << "  -k, --task-autoalloc "
+                          << "Enable task SOUT autoalloc mode                                      "
+                          << "[" << (task_autoalloc ? "true" : "false") << "]" << std::endl;
                 std::cout << "  -h, --help            "
                           << "This help                                                             "
                           << "[false]" << std::endl;
@@ -154,7 +162,10 @@ main(int argc, char** argv)
     std::cout << "#   - debug          = " << (debug ? "true" : "false") << std::endl;
     std::cout << "#   - force_sequence = " << (force_sequence ? "true" : "false") << std::endl;
     std::cout << "#   - active_waiting = " << (active_waiting ? "true" : "false") << std::endl;
+    std::cout << "#   - task_autoalloc = " << (task_autoalloc ? "true" : "false") << std::endl;
     std::cout << "#" << std::endl;
+
+    tools::Buffer_allocator::set_task_autoalloc(task_autoalloc);
 
     if (!force_sequence && step_by_step)
         std::clog << rang::tag::warning << "'step_by_step' is not available with pipeline" << std::endl;

@@ -20,6 +20,9 @@ namespace tools
 class Buffer_allocator
 {
   public:
+    static void set_task_autoalloc(bool autoalloc);
+    static bool get_task_autoalloc();
+
     static void allocate_sequence_memory(runtime::Sequence* sequence);
     static void deallocate_sequence_memory(runtime::Sequence* sequence);
 
