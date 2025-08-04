@@ -30,7 +30,7 @@ class Scheduler_from_file : public Scheduler
     std::string pinning_strategy;
     std::string final_pinning_policy_v2;
     void build_stage_policy_packed(std::vector<std::vector<size_t>>& pu_list, size_t n_replicates, size_t st_index);
-    void build_stage_policy_loose(std::vector<std::vector<size_t>>& pu_list, size_t n_replicates, size_t st_index);
+    void build_stage_policy_guided(std::vector<std::vector<size_t>>& pu_list, size_t n_replicates, size_t st_index);
     void build_stage_policy_distant(std::vector<std::vector<size_t>>& pu_list,
                                     size_t n_replicates,
                                     size_t st_index,

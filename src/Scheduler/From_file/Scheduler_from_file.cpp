@@ -294,9 +294,9 @@ Scheduler_from_file::build_stage_policy_packed(std::vector<std::vector<size_t>>&
 }
 
 void
-Scheduler_from_file::build_stage_policy_loose(std::vector<std::vector<size_t>>& pu_list,
-                                              size_t n_replicates,
-                                              size_t st_index)
+Scheduler_from_file::build_stage_policy_guided(std::vector<std::vector<size_t>>& pu_list,
+                                               size_t n_replicates,
+                                               size_t st_index)
 {
     size_t pu_list_size = pu_list.size();
     this->puids_from_file.push_back({});
@@ -563,9 +563,9 @@ Scheduler_from_file::contsruct_policy_v2(json& data, runtime::Sequence& sequence
             {
                 build_stage_policy_packed(this->p_core_pu_list, n_replicates, d);
             }
-            else if (this->pinning_strategy == "loose")
+            else if (this->pinning_strategy == "guided")
             {
-                build_stage_policy_loose(this->p_core_pu_list, n_replicates, d);
+                build_stage_policy_guided(this->p_core_pu_list, n_replicates, d);
             }
             else if (this->pinning_strategy == "distant")
             {
@@ -583,9 +583,9 @@ Scheduler_from_file::contsruct_policy_v2(json& data, runtime::Sequence& sequence
             {
                 build_stage_policy_packed(this->e_core_pu_list, n_replicates, d);
             }
-            else if (this->pinning_strategy == "loose")
+            else if (this->pinning_strategy == "guided")
             {
-                build_stage_policy_loose(this->e_core_pu_list, n_replicates, d);
+                build_stage_policy_guided(this->e_core_pu_list, n_replicates, d);
             }
             else if (this->pinning_strategy == "distant")
             {
@@ -709,7 +709,7 @@ Scheduler_from_file::get_threads_mapping() const
                 if (!this->puids_from_file[s].size()) pinning_policy += "NO_PIN";
             }
         }
-        else if (this->file_version == 2 && this->pinning_strategy == "loose")
+        else if (this->file_version == 2 && this->pinning_strategy == "guided")
         {
             for (size_t s = 0; s < this->puids_from_file.size(); s++)
             {
