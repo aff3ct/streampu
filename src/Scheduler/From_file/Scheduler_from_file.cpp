@@ -529,19 +529,19 @@ Scheduler_from_file::contsruct_policy_v2(json& data, runtime::Sequence& sequence
         this->solution_from_file.push_back(std::make_pair((size_t)sched_data[d]["tasks"], n_replicates));
 
         // Getting the currect stage pinning strategy
-        if (!sched_data[d].contains("pinning-strategy"))
+        if (!sched_data[d].contains("pinning-policy"))
         {
             std::stringstream message;
-            message << "The current entry does not contain the 'pinning-strategy' field.";
+            message << "The current entry does not contain the 'pinning-policy' field.";
             throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
         }
-        if (!sched_data[d]["pinning-strategy"].is_string())
+        if (!sched_data[d]["pinning-policy"].is_string())
         {
             std::stringstream message;
-            message << "Unexpected type for 'pinning-strategy' field (should be a string).";
+            message << "Unexpected type for 'pinning-policy' field (should be a string).";
             throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
         }
-        this->pinning_strategy = sched_data[d]["pinning-strategy"];
+        this->pinning_policy = sched_data[d]["pinning-policy"];
 
         // Checking the type of cores to which the threads will be pinned
         if (!sched_data[d].contains("core-type"))
@@ -559,41 +559,41 @@ Scheduler_from_file::contsruct_policy_v2(json& data, runtime::Sequence& sequence
         std::string core_type = sched_data[d]["core-type"];
         if (core_type == "p-core")
         {
-            if (this->pinning_strategy == "packed")
+            if (this->pinning_policy == "packed")
             {
                 build_stage_policy_packed(this->p_core_pu_list, n_replicates, d);
             }
-            else if (this->pinning_strategy == "guided")
+            else if (this->pinning_policy == "guided")
             {
                 build_stage_policy_guided(this->p_core_pu_list, n_replicates, d);
             }
-            else if (this->pinning_strategy == "distant")
+            else if (this->pinning_policy == "distant")
             {
                 build_stage_policy_distant(this->p_core_pu_list, n_replicates, d, curr_p_core_stage, p_core_smt);
             }
-            else if (this->pinning_strategy != "loose")
+            else if (this->pinning_policy != "loose")
             {
-                this->pinning_strategy = "loose";
+                this->pinning_policy = "loose";
             }
             curr_p_core_stage++;
         }
         else if (core_type == "e-core")
         {
-            if (this->pinning_strategy == "packed")
+            if (this->pinning_policy == "packed")
             {
                 build_stage_policy_packed(this->e_core_pu_list, n_replicates, d);
             }
-            else if (this->pinning_strategy == "guided")
+            else if (this->pinning_policy == "guided")
             {
                 build_stage_policy_guided(this->e_core_pu_list, n_replicates, d);
             }
-            else if (this->pinning_strategy == "distant")
+            else if (this->pinning_policy == "distant")
             {
                 build_stage_policy_distant(this->e_core_pu_list, n_replicates, d, curr_e_core_stage, e_core_smt);
             }
-            else if (this->pinning_strategy != "loose")
+            else if (this->pinning_policy != "loose")
             {
-                this->pinning_strategy = "loose";
+                this->pinning_policy = "loose";
             }
             curr_e_core_stage++;
         }
@@ -689,52 +689,52 @@ Scheduler_from_file::get_thread_pinnings() const
 std::string
 Scheduler_from_file::get_threads_mapping() const
 {
-    if (this->pinning_strategy == "loose") return "";
+    if (this->pinning_policy == "loose") return "";
 
-    std::string pinning_policy;
+    std::string pinning_policy_str;
     if (this->puids_from_file.size())
     {
-        if (this->file_version == 1 || (this->file_version == 2 && this->pinning_strategy == "packed") ||
-            (this->file_version == 2 && this->pinning_strategy == "distant"))
+        if (this->file_version == 1 || (this->file_version == 2 && this->pinning_policy == "packed") ||
+            (this->file_version == 2 && this->pinning_policy == "distant"))
         {
             for (size_t s = 0; s < this->puids_from_file.size(); s++)
             {
-                if (s != 0) pinning_policy += " | ";
+                if (s != 0) pinning_policy_str += " | ";
                 for (size_t i = 0; i < this->puids_from_file[s].size(); i++)
                 {
-                    pinning_policy +=
+                    pinning_policy_str +=
                       std::string((i == 0) ? "" : "; ") + "PU_" + std::to_string(this->puids_from_file[s][i]);
                 }
 
-                if (!this->puids_from_file[s].size()) pinning_policy += "NO_PIN";
+                if (!this->puids_from_file[s].size()) pinning_policy_str += "NO_PIN";
             }
         }
-        else if (this->file_version == 2 && this->pinning_strategy == "guided")
+        else if (this->file_version == 2 && this->pinning_policy == "guided")
         {
             for (size_t s = 0; s < this->puids_from_file.size(); s++)
             {
-                if (s != 0) pinning_policy += " | ";
+                if (s != 0) pinning_policy_str += " | ";
                 for (size_t replicate = 0; this->solution_from_file[s].second > replicate; replicate++)
                 {
-                    if (replicate != 0) pinning_policy += " ; ";
+                    if (replicate != 0) pinning_policy_str += " ; ";
                     for (size_t i = 0; i < this->puids_from_file[s].size(); i++)
                     {
-                        pinning_policy +=
+                        pinning_policy_str +=
                           std::string((i == 0) ? "" : ", ") + "PU_" + std::to_string(this->puids_from_file[s][i]);
                     }
                 }
-                if (!this->puids_from_file[s].size()) pinning_policy += "NO_PIN";
+                if (!this->puids_from_file[s].size()) pinning_policy_str += "NO_PIN";
             }
         }
         else
         {
             std::stringstream message;
-            message << "Unknown pinning strategy: " << this->pinning_strategy;
+            message << "Unknown pinning strategy: " << this->pinning_policy;
             throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
         }
     }
     else
-        pinning_policy = Scheduler::get_threads_mapping();
+        pinning_policy_str = Scheduler::get_threads_mapping();
 
-    return pinning_policy;
+    return pinning_policy_str;
 }

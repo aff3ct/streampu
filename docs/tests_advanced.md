@@ -9,7 +9,7 @@ that can be instantiated:
 - **First task**: To be correct, a chain should start with a task that have no 
   input socket. As a consequence, there is only one first task and it is 
   possible to choose between `read` and `initialize` tasks.
-- **Middle task**: A task that have an input and an output socket. It is up to 
+- **Middle task**: A task that has an input and an output socket. It is up to 
   the user to decide the number and the combination of middle tasks he wants. It 
   is possible to select between `relay`, `relayf`, `increment` and `incrementf` 
   tasks.
@@ -99,26 +99,38 @@ thread.
     ```json
     {
     "platform": "x7ti",
-    "ressources": {
-      "e-core": 8,
-      "p-core": 6
+    "resources": {
+      "p-core": {
+        "node-list": ["core0-5"],
+        "cluster-size": 1,
+        "smt": 2
+      },
+      "e-core": {
+        "node-list": ["core6-13"],
+        "cluster-size": 4,
+        "smt": 1
+      }
     },
     "scheduler_name": "HeRAD",
-    "date": "2025-02-03",
-    "scheduling": [
-        { "tasks": 5, "cores": [0],                          "core-type": "p-core", "sync_buff_size": 1, "sync_waiting_type": "active"  },
-        { "tasks": 1, "cores": [2],                          "core-type": "p-core", "sync_buff_size": 8, "sync_waiting_type": "passive" },
-        { "tasks": 6, "cores": [4],                          "core-type": "p-core",                                                     },
-        { "tasks": 4, "cores": [6, 8],                       "core-type": "p-core", "sync_buff_size": 1,                                },
-        { "tasks": 3, "cores": [12, 13, 14, 15, 16, 17, 18], "core-type": "e-core",                      "sync_waiting_type": "active"  },
-        { "tasks": 4, "cores": [19],                         "core-type": "e-core"                                                      }
+    "date": "2025-07-23",
+    "schedule": [
+        { "tasks": 5, "threads": 1, "core-type": "p-core", "pinning-policy": "packed",  "sync_buff_size": 1, "sync_waiting_type": "active"  },
+        { "tasks": 1, "threads": 1, "core-type": "p-core", "pinning-policy": "packed",  "sync_buff_size": 8, "sync_waiting_type": "passive" },
+        { "tasks": 6, "threads": 1, "core-type": "p-core", "pinning-policy": "packed",                                                      },
+        { "tasks": 4, "threads": 2, "core-type": "p-core", "pinning-policy": "guided",  "sync_buff_size": 1,                                },
+        { "tasks": 3, "threads": 7, "core-type": "e-core", "pinning-policy": "distant",                      "sync_waiting_type": "active"  },
+        { "tasks": 4, "threads": 2, "core-type": "p-core", "pinning-policy": "guided",                                                      }
       ]
     }
     ```
-    Each line corresponds to one pipeline stage, the field `tasks` counts the
-    number of consecutive tasks of the current stage while the field `cores` 
-    gives either the number of threads to use for the current stage or an array 
-    of PU ids to specify the mapping of the threads over the PUs. Finally, 
+    In the `schedule` field, each line corresponds to one pipeline stage, the 
+    field `tasks` counts the number of consecutive tasks of the current stage 
+    while the field `threads` gives the number of threads to use for the 
+    current stage. Four policies are available while using the `pinning-policy` 
+    field: `loose` (do not pin), `guided` (pin to core type), `packed` (pin 
+    following the ascending order of core ids given by the `resources` field) or 
+    `distant` (pin in a round robin way between the clusters and packages). When
+    no pinning policy is specified, the `loose` policy is applied. Finally, 
     `sync_buff_size` and `sync_waiting_type` are optional and may help to fine 
     tune the synchronizations between the pipeline stages. The last stage should 
     not contain `sync_buff_size` or `sync_waiting_type` fields. Using the `FILE` 
