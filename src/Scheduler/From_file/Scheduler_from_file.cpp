@@ -571,9 +571,9 @@ Scheduler_from_file::contsruct_policy_v2(json& data, runtime::Sequence& sequence
             {
                 build_stage_policy_distant(this->p_core_pu_list, n_replicates, d, curr_p_core_stage, p_core_smt);
             }
-            else if (this->pinning_strategy != "no")
+            else if (this->pinning_strategy != "loose")
             {
-                this->pinning_strategy = "no";
+                this->pinning_strategy = "loose";
             }
             curr_p_core_stage++;
         }
@@ -591,9 +591,9 @@ Scheduler_from_file::contsruct_policy_v2(json& data, runtime::Sequence& sequence
             {
                 build_stage_policy_distant(this->e_core_pu_list, n_replicates, d, curr_e_core_stage, e_core_smt);
             }
-            else if (this->pinning_strategy != "no")
+            else if (this->pinning_strategy != "loose")
             {
-                this->pinning_strategy = "no";
+                this->pinning_strategy = "loose";
             }
             curr_e_core_stage++;
         }
@@ -689,7 +689,7 @@ Scheduler_from_file::get_thread_pinnings() const
 std::string
 Scheduler_from_file::get_threads_mapping() const
 {
-    if (this->pinning_strategy == "no") return "";
+    if (this->pinning_strategy == "loose") return "";
 
     std::string pinning_policy;
     if (this->puids_from_file.size())
