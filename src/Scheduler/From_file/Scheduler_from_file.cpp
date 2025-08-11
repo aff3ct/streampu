@@ -572,13 +572,13 @@ Scheduler_from_file::contsruct_policy_v2(json& data, runtime::Sequence& sequence
             }
             else if (this->pinning_policy.back() == "loose")
             {
-                this->puids_from_file.push_back({});
+                this->puids_from_file.push_back({ 1 });
             }
             else if (this->pinning_policy.back() != "loose")
             {
                 this->pinning_policy.pop_back();
                 this->pinning_policy.push_back("loose");
-                this->puids_from_file.push_back({});
+                this->puids_from_file.push_back({ 1 });
             }
             curr_p_core_stage++;
         }
@@ -598,13 +598,13 @@ Scheduler_from_file::contsruct_policy_v2(json& data, runtime::Sequence& sequence
             }
             else if (this->pinning_policy.back() == "loose")
             {
-                this->puids_from_file.push_back({});
+                this->puids_from_file.push_back({ 1 });
             }
             else if (this->pinning_policy.back() != "loose")
             {
                 this->pinning_policy.pop_back();
                 this->pinning_policy.push_back("loose");
-                this->puids_from_file.push_back({});
+                this->puids_from_file.push_back({ 1 });
             }
             curr_e_core_stage++;
         }
@@ -733,7 +733,7 @@ Scheduler_from_file::get_threads_mapping() const
             else if (this->pinning_policy[sta] == "loose")
             {
                 if (sta != 0) pinning_policy_str += " | ";
-                pinning_policy_str += "";
+                pinning_policy_str += "MACHINE_0";
             }
             else
             {

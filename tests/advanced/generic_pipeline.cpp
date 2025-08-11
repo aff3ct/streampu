@@ -851,6 +851,12 @@ main(int argc, char** argv)
             {
                 thread_pinnings = sched_ptr->get_thread_pinnings();
                 pinning_policy = sched_ptr->get_threads_mapping();
+                std::cout << "# Effective pinning policy: " << pinning_policy << std::endl;
+
+                std::cout << "# Thread pinnings: {";
+                for (auto tp : thread_pinnings)
+                    std::cout << tp << ", ";
+                std::cout << "}" << std::endl;
 #ifdef SPU_HWLOC
                 if (verbose) std::cout << "# Effective pinning policy: " << pinning_policy << std::endl;
 #endif
