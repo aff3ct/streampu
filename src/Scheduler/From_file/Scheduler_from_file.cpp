@@ -263,8 +263,7 @@ get_node_pus_from_node(const std::string& node_str)
 }
 
 void
-Scheduler_from_file::build_stage_policy_packed(std::vector<std::vector<size_t>>& pu_list,
-                                               size_t n_replicates)
+Scheduler_from_file::build_stage_policy_packed(std::vector<std::vector<size_t>>& pu_list, size_t n_replicates)
 {
     size_t pu_index = 0;
     size_t pu_list_size = pu_list.size();
@@ -292,8 +291,7 @@ Scheduler_from_file::build_stage_policy_packed(std::vector<std::vector<size_t>>&
 }
 
 void
-Scheduler_from_file::build_stage_policy_guided(std::vector<std::vector<size_t>>& pu_list,
-                                               size_t n_replicates)
+Scheduler_from_file::build_stage_policy_guided(std::vector<std::vector<size_t>>& pu_list, size_t n_replicates)
 {
     size_t pu_list_size = pu_list.size();
     this->puids_from_file.push_back({});
