@@ -264,8 +264,7 @@ get_node_pus_from_node(const std::string& node_str)
 
 void
 Scheduler_from_file::build_stage_policy_packed(std::vector<std::vector<size_t>>& pu_list,
-                                               size_t n_replicates,
-                                               size_t st_index)
+                                               size_t n_replicates)
 {
     size_t pu_index = 0;
     size_t pu_list_size = pu_list.size();
@@ -279,7 +278,7 @@ Scheduler_from_file::build_stage_policy_packed(std::vector<std::vector<size_t>>&
             message << "Consumed the list of all avalable PUs during construction.";
             throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
         }
-        this->puids_from_file[st_index].push_back(pu_list[pu_index][0]);
+        this->puids_from_file.back().push_back(pu_list[pu_index][0]);
 
         pu_list[pu_index].erase(pu_list[pu_index].begin()); // Remove the first PU from the list
         if (pu_list[pu_index].empty())
@@ -294,13 +293,12 @@ Scheduler_from_file::build_stage_policy_packed(std::vector<std::vector<size_t>>&
 
 void
 Scheduler_from_file::build_stage_policy_guided(std::vector<std::vector<size_t>>& pu_list,
-                                               size_t n_replicates,
-                                               size_t st_index)
+                                               size_t n_replicates)
 {
     size_t pu_list_size = pu_list.size();
     this->puids_from_file.push_back({});
     for (size_t j = 0; j < pu_list_size; j++)
-        this->puids_from_file[st_index].push_back(pu_list[j][0]);
+        this->puids_from_file.back().push_back(pu_list[j][0]);
 }
 
 void
@@ -559,11 +557,11 @@ Scheduler_from_file::contsruct_policy_v2(json& data, runtime::Sequence& sequence
         {
             if (this->pinning_policy.back() == "packed")
             {
-                build_stage_policy_packed(this->p_core_pu_list, n_replicates, d);
+                build_stage_policy_packed(this->p_core_pu_list, n_replicates);
             }
             else if (this->pinning_policy.back() == "guided")
             {
-                build_stage_policy_guided(this->p_core_pu_list, n_replicates, d);
+                build_stage_policy_guided(this->p_core_pu_list, n_replicates);
             }
             else if (this->pinning_policy.back() == "distant")
             {
@@ -586,11 +584,11 @@ Scheduler_from_file::contsruct_policy_v2(json& data, runtime::Sequence& sequence
         {
             if (this->pinning_policy.back() == "packed")
             {
-                build_stage_policy_packed(this->e_core_pu_list, n_replicates, d);
+                build_stage_policy_packed(this->e_core_pu_list, n_replicates);
             }
             else if (this->pinning_policy.back() == "guided")
             {
-                build_stage_policy_guided(this->e_core_pu_list, n_replicates, d);
+                build_stage_policy_guided(this->e_core_pu_list, n_replicates);
             }
             else if (this->pinning_policy.back() == "distant")
             {

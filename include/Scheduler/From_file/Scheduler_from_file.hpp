@@ -28,8 +28,8 @@ class Scheduler_from_file : public Scheduler
     std::vector<std::vector<size_t>> p_core_pu_list;
     std::vector<std::vector<size_t>> e_core_pu_list;
     std::vector<std::string> pinning_policy;
-    void build_stage_policy_packed(std::vector<std::vector<size_t>>& pu_list, size_t n_replicates, size_t st_index);
-    void build_stage_policy_guided(std::vector<std::vector<size_t>>& pu_list, size_t n_replicates, size_t st_index);
+    void build_stage_policy_packed(std::vector<std::vector<size_t>>& pu_list, size_t n_replicates);
+    void build_stage_policy_guided(std::vector<std::vector<size_t>>& pu_list, size_t n_replicates);
     void build_stage_policy_distant(std::vector<std::vector<size_t>>& pu_list,
                                     size_t n_replicates,
                                     size_t curr_type_index,
