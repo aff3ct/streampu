@@ -1822,9 +1822,9 @@ Sequence::export_dot_subsequence(const VTA& subseq,
                << "\";" << std::endl;
         stream << tab << tab << tab << tab << "color=" << (t->is_replicable() ? color : "red") << ";" << std::endl;
         stream << tab << tab << tab << "}" << std::endl;
-        stream << tab << tab << tab << "label=\"" << t->get_module().get_name() << "\n"
-               << (t->get_module().get_custom_name().empty() ? "" : t->get_module().get_custom_name() + "\n")
-               << "exec order: [" << exec_order++ << "]\n"
+        stream << tab << tab << tab << "label=\"" << t->get_module().get_name() << "\\n"
+               << (t->get_module().get_custom_name().empty() ? "" : t->get_module().get_custom_name() + "\\n")
+               << "exec order: [" << exec_order++ << "]\\n"
                << "addr: " << +&t->get_module() << "\";" << std::endl;
         stream << tab << tab << tab << "color=" << color << ";" << std::endl;
         stream << tab << tab << "}" << std::endl;
