@@ -1,0 +1,1348 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://aff3ct.github.io/streampu/tests_advanced/">
+      
+      
+        <link rel="prev" href="../tests_bootstrap/">
+      
+      
+        <link rel="next" href="../thread_pinning/">
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.18">
+    
+    
+      
+        <title>Advanced - StreamPU Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.7e37652d.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../css/extra.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#advanced" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="StreamPU Documentation" class="md-header__button md-logo" aria-label="StreamPU Documentation" data-md-component="logo">
+      
+  <img src="../assets/diagram-project-solid.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            StreamPU Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Advanced
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m14.3 16-.7-2h-3.2l-.7 2H7.8L11 7h2l3.2 9zM20 8.69V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12zm-9.15 3.96h2.3L12 9z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to system preference"  type="radio" name="__palette" id="__palette_2">
+    
+      <label class="md-header__button md-icon" title="Switch to system preference" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/aff3ct/streampu" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.0.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path fill="currentColor" d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="StreamPU Documentation" class="md-nav__button md-logo" aria-label="StreamPU Documentation" data-md-component="logo">
+      
+  <img src="../assets/diagram-project-solid.svg" alt="logo">
+
+    </a>
+    StreamPU Documentation
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/aff3ct/streampu" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.0.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path fill="currentColor" d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_1" id="__nav_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_1">
+            <span class="md-nav__icon md-icon"></span>
+            Home
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    StreamPU Documentation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    For Users
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            For Users
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_1" id="__nav_2_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Concepts
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_1">
+            <span class="md-nav__icon md-icon"></span>
+            Concepts
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../concepts_overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2_2" id="__nav_2_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Tests
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2_2">
+            <span class="md-nav__icon md-icon"></span>
+            Tests
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tests_bootstrap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Bootstrap
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Advanced
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    Advanced
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#generic-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      Generic Pipeline
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_3" id="__nav_2_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Runtime
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_3">
+            <span class="md-nav__icon md-icon"></span>
+            Runtime
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../thread_pinning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Thread Pinning
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    For Developers
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            For Developers
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_1" id="__nav_3_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Basic Components
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_1">
+            <span class="md-nav__icon md-icon"></span>
+            Basic Components
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../task/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Task
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../module/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Module
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../socket/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Socket
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../sequence/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Sequence
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../pipeline/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Pipeline
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../switcher/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Switcher
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_2" id="__nav_3_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    New Features and Discussions
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_2">
+            <span class="md-nav__icon md-icon"></span>
+            New Features and Discussions
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../socket_fwd/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Forward Socket
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../pipeline_ctrl_flow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Pipeline &amp; Control Flow
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../wip/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Work in Progress
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="advanced">Advanced<a class="headerlink" href="#advanced" title="Permanent link">&para;</a></h1>
+<h2 id="generic-pipeline">Generic Pipeline<a class="headerlink" href="#generic-pipeline" title="Permanent link">&para;</a></h2>
+<p>This program allows to build and to execute generic chains directly from the 
+command line interface (<abbr title="Command Line Interface">CLI</abbr>). Basically, there are 3 different types of task 
+that can be instantiated:</p>
+<ul>
+<li><strong>First task</strong>: To be correct, a chain should start with a task that have no 
+  input socket. As a consequence, there is only one first task and it is 
+  possible to choose between <code>read</code> and <code>initialize</code> tasks.</li>
+<li><strong>Middle task</strong>: A task that has an input and an output socket. It is up to 
+  the user to decide the number and the combination of middle tasks he wants. It 
+  is possible to select between <code>relay</code>, <code>relayf</code>, <code>increment</code> and <code>incrementf</code> 
+  tasks.</li>
+<li><strong>Last task</strong>: To be correct, a chain should always end with a task that does 
+  not have an output socket. As a consequence, there is only one last task and 
+  it is possible to choose between <code>write</code> or <code>finalize</code> tasks.</li>
+</ul>
+<p>Here is a summary of the available tasks and their behavior:</p>
+<ul>
+<li><code>read</code>: Reads data from a binary file and writes the read bytes on its output 
+  socket.</li>
+<li><code>initialize</code> or <code>init</code>: Initializes the data in its output socket (useful for 
+  benchmark and validation).</li>
+<li><code>relay</code>: Copies the data from its input socket into its output socket.</li>
+<li><code>relayf</code>: Variant of the <code>relay</code> task that uses 
+  a <a href="../socket_fwd/">forward socket</a>, consequently, this task does NOTHING.</li>
+<li><code>increment</code> or <code>incr</code>: Increments (+1) the data of its input socket and writes 
+  the result in its output socket.</li>
+<li><code>incrementf</code> or <code>incrf</code>: Variant of the <code>increment</code> task that uses 
+  a <a href="../socket_fwd/">forward socket</a> to write the result in place.</li>
+<li><code>write</code>: Writes contents of its input socket into a binary file. It expects 0 
+  or 1 values in its input socket to work correctly. </li>
+<li><code>finalize</code> or <code>fin</code>: Memorizes (= copies) the input data for further 
+  validation (if there is a validation). </li>
+</ul>
+<p>There are three main ways of describing a processing chain:</p>
+<ol>
+<li>
+<p><strong>Specification of homogeneous types of task per stage.</strong> This is performed 
+   with the combination of the <code>-R</code> (or <code>--tsk-types-sta</code>) and <code>-n</code> 
+   (or <code>--tsk-per-sta</code>) <abbr title="Command Line Interface">CLI</abbr> parameters. <code>-R</code> gives the tasks type per stage 
+   (example of a 4-stage pipeline: <code>-R (read,incr,relayf,write)</code>) and <code>-n</code> gives 
+   how many tasks of the same type will be created per stage. For instance, the 
+   combination of <code>-R (read,incr,relayf,write)</code> and <code>-n "1,2,3,1"</code> will produce 
+   a 4-stage pipeline with the following sequence of tasks: <code>read</code> <span class="arithmatex">\(\rightarrow\)</span> 
+   <code>incr</code> <span class="arithmatex">\(\rightarrow\)</span> <code>incr</code> <span class="arithmatex">\(\rightarrow\)</span> <code>relayf</code> <span class="arithmatex">\(\rightarrow\)</span> <code>relayf</code> 
+   <span class="arithmatex">\(\rightarrow\)</span> <code>relayf</code> <span class="arithmatex">\(\rightarrow\)</span> <code>write</code>.</p>
+</li>
+<li>
+<p><strong>Specification of heterogeneous types of task per stage.</strong> This is achieved 
+   with <code>-r</code> (or <code>--tsk-types</code>) <abbr title="Command Line Interface">CLI</abbr> parameter. For instance, 
+   <code>-r ((init),(incrf,relay,incr),(fin))</code> will produce a 3-stage pipeline with 
+   the following sequence of tasks: <code>init</code> <span class="arithmatex">\(\rightarrow\)</span> <code>incrf</code> <span class="arithmatex">\(\rightarrow\)</span> 
+   <code>relay</code> <span class="arithmatex">\(\rightarrow\)</span> <code>incr</code> <span class="arithmatex">\(\rightarrow\)</span> <code>fin</code>.</p>
+</li>
+<li>
+<p><strong>Use of a scheduler to perform the pipeline decomposition in stages 
+   automatically.</strong> This is achieved with <code>-C</code> (or <code>--chain</code>) <abbr title="Command Line Interface">CLI</abbr> parameter.
+   For instance, <code>-C "(init,relayf_15,incrementf_S_60,relay_15,fin)"</code> defines
+   a chain that starts with an <code>initialize</code> task, after that, a <code>relayf</code> task of 
+   15 microseconds is executed, then an <code>incrementf</code> task of 60 microseconds is 
+   executed (note that the <code>_S</code> means that this task will be considered 
+   sequential and "non-replicable" for the scheduler). Finally, a 15 
+   microseconds <code>relay</code> task and a <code>finalize</code> task are executed. By default the 
+   scheduler considers that the number of resources <span class="arithmatex">\(R\)</span> is the number of <abbr title="Central Process Unit">CPU</abbr> 
+   hardware threads but you can override this behavior by using the <code>-t</code> (or 
+   <code>--n-threads</code>) <abbr title="Command Line Interface">CLI</abbr> parameter. It is also possible to choose the scheduler 
+   algorithm through the <code>-S</code> (or <code>--sched</code>) <abbr title="Command Line Interface">CLI</abbr> parameter. For now, the 
+   available schedulers are <code>OTAC</code> and <code>FILE</code> (please see the note below about 
+   the latest).</p>
+</li>
+</ol>
+<p>The first notation is a compressed way to describe chains of tasks. By default, 
+the chain is split in <a href="../pipeline/">pipeline</a> stages according to the given 
+decomposition (with <code>-R</code> and <code>-r</code>) and each stage is run on a separated thread. 
+It is also possible to run the chain in a <a href="../sequence/">sequence</a> (with the <code>-q</code> 
+or <code>--force-sequence</code> <abbr title="Command Line Interface">CLI</abbr> parameter). In this case, the given stage 
+decomposition is ignored and all the tasks of the chain are run by the same 
+thread. </p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>You cannot use <code>-r</code> and <code>-R</code> parameters at the same time, they are 
+exclusive.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If <code>StreamPU</code> has been compiled with the CMake <code>-DSPU_LINK_HWLOC=ON</code> option,
+then it is possible to specify an <a href="../thread_pinning/">pinning policy</a> with 
+the <code>-P</code> or <code>--pinning-policy</code> <abbr title="Command Line Interface">CLI</abbr> argument.</p>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>For the <code>initialize</code>, <code>increment</code>, <code>incrementf</code>, <code>relay</code>, <code>relayf</code> and 
+<code>finalize</code> tasks it is possible to specify the duration. For instance, 
+<code>relay_12</code> means that the <code>relay</code> task will spend 12 microseconds in active 
+waiting. This is different from using the <code>-s</code> <abbr title="Command Line Interface">CLI</abbr> parameter. The <code>-s</code> 
+parameter will set the same duration for all the previously mentioned tasks.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The scheduler <code>FILE</code> reads the scheduling from a <abbr title="JavaScript Object Notation">JSON</abbr> file, to set the path
+to this file there is the <code>-F</code> parameter (or <code>--sched-file</code>).
+The expected <abbr title="JavaScript Object Notation">JSON</abbr> file looks like the following:
+<div class="language-json highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="p">{</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="nt">&quot;platform&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;x7ti&quot;</span><span class="p">,</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="nt">&quot;resources&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">  </span><span class="nt">&quot;p-core&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">    </span><span class="nt">&quot;node-list&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;core0-5&quot;</span><span class="p">],</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">    </span><span class="nt">&quot;cluster-size&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">    </span><span class="nt">&quot;smt&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">  </span><span class="p">},</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">  </span><span class="nt">&quot;e-core&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">    </span><span class="nt">&quot;node-list&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;core6-13&quot;</span><span class="p">],</span>
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="w">    </span><span class="nt">&quot;cluster-size&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span>
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="w">    </span><span class="nt">&quot;smt&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span>
+</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="w">  </span><span class="p">}</span>
+</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="p">},</span>
+</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="nt">&quot;scheduler_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;HeRAD&quot;</span><span class="p">,</span>
+</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="nt">&quot;date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2025-07-23&quot;</span><span class="p">,</span>
+</span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="nt">&quot;schedule&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a><span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;tasks&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;threads&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;core-type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;p-core&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;pinning-policy&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;packed&quot;</span><span class="p">,</span><span class="w">  </span><span class="nt">&quot;sync_buff_size&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;sync_waiting_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;active&quot;</span><span class="w">  </span><span class="p">},</span>
+</span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a><span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;tasks&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;threads&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;core-type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;p-core&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;pinning-policy&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;packed&quot;</span><span class="p">,</span><span class="w">  </span><span class="nt">&quot;sync_buff_size&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">8</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;sync_waiting_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;passive&quot;</span><span class="w"> </span><span class="p">},</span>
+</span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a><span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;tasks&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">6</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;threads&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;core-type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;p-core&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;pinning-policy&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;packed&quot;</span><span class="p">,</span><span class="w">                                                      </span><span class="p">},</span>
+</span><span id="__span-0-21"><a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a><span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;tasks&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;threads&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;core-type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;p-core&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;pinning-policy&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;guided&quot;</span><span class="p">,</span><span class="w">  </span><span class="nt">&quot;sync_buff_size&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">                                </span><span class="p">},</span>
+</span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a><span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;tasks&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;threads&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">7</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;core-type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;e-core&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;pinning-policy&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;distant&quot;</span><span class="p">,</span><span class="w">                      </span><span class="nt">&quot;sync_waiting_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;active&quot;</span><span class="w">  </span><span class="p">},</span>
+</span><span id="__span-0-23"><a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a><span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;tasks&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;threads&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;core-type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;p-core&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;pinning-policy&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;guided&quot;</span><span class="p">,</span><span class="w">                                                      </span><span class="p">}</span>
+</span><span id="__span-0-24"><a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a><span class="w">  </span><span class="p">]</span>
+</span><span id="__span-0-25"><a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a><span class="p">}</span>
+</span></code></pre></div>
+In the <code>schedule</code> field, each line corresponds to one pipeline stage, the 
+field <code>tasks</code> counts the number of consecutive tasks of the current stage 
+while the field <code>threads</code> gives the number of threads to use for the 
+current stage. Four policies are available while using the <code>pinning-policy</code> 
+field: <code>loose</code> (do not pin), <code>guided</code> (pin to core type), <code>packed</code> (pin 
+following the ascending order of core ids given by the <code>resources</code> field) or 
+<code>distant</code> (pin in a round robin way between the clusters and packages). When
+no pinning policy is specified, the <code>loose</code> policy is applied. Finally, 
+<code>sync_buff_size</code> and <code>sync_waiting_type</code> are optional and may help to fine 
+tune the synchronizations between the pipeline stages. The last stage should 
+not contain <code>sync_buff_size</code> or <code>sync_waiting_type</code> fields. Using the <code>FILE</code> 
+scheduler will override the following parameters: <code>-u</code> (or <code>--buffer-size</code>) 
+and <code>-w</code> (or <code>--active-waiting</code>).</p>
+</div>
+<p>Moreover, for each stage it is possible to specify the number of replications 
+(= number of threads that will execute the stage) with the <code>-t</code> 
+(or <code>--n-threads</code>) <abbr title="Command Line Interface">CLI</abbr> parameter. Here are some examples of generated pipelines:</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:4"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><input id="__tabbed_1_4" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">3-stage pipeline with in/out sockets</label><label for="__tabbed_1_2">3-stage pipeline with forward sockets</label><label for="__tabbed_1_3">3-stage pipeline with hybrid sockets</label><label for="__tabbed_1_4">Complex 5-stage pipeline</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p><figure markdown>
+  <img alt="simple pipeline io" src="../assets/test_generic_pipeline_io.svg" width="600" />
+  <figcaption><code>test-generic-pipeline</code>: input/output sockets &amp; 3-stage pipeline.</figcaption>
+</figure>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>test-generic-pipeline<span class="w"> </span>-e<span class="w"> </span><span class="m">100</span><span class="w"> </span>-n<span class="w"> </span><span class="s2">&quot;1,3,1&quot;</span><span class="w"> </span>-t<span class="w"> </span><span class="s2">&quot;3,1,3&quot;</span><span class="w"> </span>-R<span class="w"> </span><span class="s2">&quot;(init,increment,fin)&quot;</span>
+</span></code></pre></div></p>
+</div>
+<div class="tabbed-block">
+<p><figure markdown>
+  <img alt="simple pipeline fwd" src="../assets/test_generic_pipeline_fwd.svg" width="600" />
+  <figcaption><code>test-generic-pipeline</code>: forward sockets &amp; 3-stage pipeline.</figcaption>
+</figure>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>test-generic-pipeline<span class="w"> </span>-i<span class="w"> </span>INPUT_FILE<span class="w"> </span>-n<span class="w"> </span><span class="s2">&quot;1,3,1&quot;</span><span class="w"> </span>-t<span class="w"> </span><span class="s2">&quot;1,3,1&quot;</span><span class="w"> </span>-R<span class="w"> </span><span class="s2">&quot;(read,relayf,write)&quot;</span>
+</span></code></pre></div></p>
+</div>
+<div class="tabbed-block">
+<p><figure markdown>
+  <img alt="simple pipeline hybrid" src="../assets/test_generic_pipeline_hybrid.svg" width="600" />
+  <figcaption><code>test-generic-pipeline</code>: hybrid in/out and forward sockets &amp; 3-stage pipeline.</figcaption>
+</figure>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>test-generic-pipeline<span class="w"> </span>-i<span class="w"> </span>INPUT_FILE<span class="w"> </span>-t<span class="w"> </span><span class="s2">&quot;1,3,1&quot;</span><span class="w"> </span>-r<span class="w"> </span><span class="s2">&quot;((read),(relayf,incrementf,relay),(write))&quot;</span>
+</span></code></pre></div></p>
+</div>
+<div class="tabbed-block">
+<p><figure markdown>
+  <img alt="simple pipeline hybrid" src="../assets/test_generic_pipeline_hybrid_5_stages.svg" width="1100" />
+  <figcaption><code>test-generic-pipeline</code>: hybrid in/out and forward sockets &amp; 5-stage pipeline.</figcaption>
+</figure>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>test-generic-pipeline<span class="w"> </span>-e<span class="w"> </span><span class="m">100</span><span class="w"> </span>-t<span class="w"> </span><span class="s2">&quot;1,3,1,2,1&quot;</span><span class="w"> </span>-r<span class="w"> </span><span class="s2">&quot;((init,relayf,incr),(relayf,relay),(incrf),(relay),(relay,fin))&quot;</span>
+</span></code></pre></div></p>
+</div>
+</div>
+</div>
+<hr />
+<p><strong>Command Line Arguments</strong></p>
+<p>The following verbatim is a copy-paste from the <code>-h</code> stdout:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>usage:<span class="w"> </span>./bin/test-generic-pipeline<span class="w"> </span><span class="o">[</span>options<span class="o">]</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">  </span>-t,<span class="w"> </span>--n-threads<span class="w">          </span>Number<span class="w"> </span>of<span class="w"> </span>threads<span class="w"> </span>to<span class="w"> </span>run<span class="w"> </span><span class="k">in</span><span class="w"> </span>parallel<span class="w"> </span><span class="k">for</span><span class="w"> </span>each<span class="w"> </span>stage<span class="w">                   </span><span class="o">[</span>empty<span class="o">]</span>
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">  </span>-f,<span class="w"> </span>--n-inter-frames<span class="w">     </span>Number<span class="w"> </span>of<span class="w"> </span>frames<span class="w"> </span>to<span class="w"> </span>process<span class="w"> </span><span class="k">in</span><span class="w"> </span>one<span class="w"> </span>task<span class="w">                               </span><span class="o">[</span><span class="m">1</span><span class="o">]</span>
+</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="w">  </span>-s,<span class="w"> </span>--sleep-time<span class="w">         </span>Sleep<span class="w"> </span><span class="nb">time</span><span class="w"> </span>duration<span class="w"> </span><span class="k">in</span><span class="w"> </span>one<span class="w"> </span>task<span class="w"> </span><span class="o">(</span>microseconds<span class="o">)</span><span class="w">                        </span><span class="o">[</span><span class="m">5</span><span class="o">]</span>
+</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="w">  </span>-d,<span class="w"> </span>--data-length<span class="w">        </span>Size<span class="w"> </span>of<span class="w"> </span>data<span class="w"> </span>to<span class="w"> </span>process<span class="w"> </span><span class="k">in</span><span class="w"> </span>one<span class="w"> </span>task<span class="w"> </span><span class="o">(</span><span class="k">in</span><span class="w"> </span>bytes<span class="o">)</span><span class="w">                        </span><span class="o">[</span><span class="m">2048</span><span class="o">]</span>
+</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="w">  </span>-e,<span class="w"> </span>--n-exec<span class="w">             </span>Number<span class="w"> </span>of<span class="w"> </span>executions<span class="w"> </span><span class="o">(</span><span class="m">0</span><span class="w"> </span>means<span class="w"> </span>-&gt;<span class="w"> </span>never<span class="w"> </span>stop<span class="w"> </span>because<span class="w"> </span>of<span class="w"> </span>this<span class="w"> </span>counter<span class="o">)</span><span class="w">  </span><span class="o">[</span><span class="m">0</span><span class="o">]</span>
+</span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="w">  </span>-l,<span class="w"> </span>--n-exec-pro<span class="w">         </span>Number<span class="w"> </span>of<span class="w"> </span>executions<span class="w"> </span>during<span class="w"> </span>the<span class="w"> </span>scheduler<span class="w"> </span>profiling<span class="w"> </span>phase<span class="w">             </span><span class="o">[</span><span class="m">100</span><span class="o">]</span>
+</span><span id="__span-5-9"><a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a><span class="w">  </span>-u,<span class="w"> </span>--buffer-size<span class="w">        </span>Size<span class="w"> </span>of<span class="w"> </span>the<span class="w"> </span>buffer<span class="w"> </span>between<span class="w"> </span>the<span class="w"> </span>different<span class="w"> </span>stages<span class="w"> </span>of<span class="w"> </span>the<span class="w"> </span>pipeline<span class="w">       </span><span class="o">[</span><span class="m">16</span><span class="o">]</span>
+</span><span id="__span-5-10"><a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a><span class="w">  </span>-o,<span class="w"> </span>--dot-filepath<span class="w">       </span>Path<span class="w"> </span>to<span class="w"> </span>dot<span class="w"> </span>output<span class="w"> </span>file<span class="w">                                               </span><span class="o">[</span>empty<span class="o">]</span>
+</span><span id="__span-5-11"><a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a><span class="w">  </span>-i,<span class="w"> </span>--in-filepath<span class="w">        </span>Path<span class="w"> </span>to<span class="w"> </span>the<span class="w"> </span>input<span class="w"> </span>file<span class="w"> </span><span class="o">(</span>used<span class="w"> </span>to<span class="w"> </span>generate<span class="w"> </span>bits<span class="w"> </span>of<span class="w"> </span>the<span class="w"> </span>chain<span class="o">)</span><span class="w">           </span><span class="o">[</span>empty<span class="o">]</span>
+</span><span id="__span-5-12"><a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a><span class="w">  </span>-j,<span class="w"> </span>--out-filepath<span class="w">       </span>Path<span class="w"> </span>to<span class="w"> </span>the<span class="w"> </span>output<span class="w"> </span>file<span class="w"> </span><span class="o">(</span>written<span class="w"> </span>at<span class="w"> </span>the<span class="w"> </span>end<span class="w"> </span>of<span class="w"> </span>the<span class="w"> </span>chain<span class="o">)</span><span class="w">             </span><span class="o">[</span><span class="s2">&quot;file.out&quot;</span><span class="o">]</span>
+</span><span id="__span-5-13"><a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a><span class="w">  </span>-c,<span class="w"> </span>--copy-mode<span class="w">          </span>Enable<span class="w"> </span>to<span class="w"> </span>copy<span class="w"> </span>data<span class="w"> </span><span class="k">in</span><span class="w"> </span>sequence<span class="w"> </span><span class="o">(</span>performance<span class="w"> </span>will<span class="w"> </span>be<span class="w"> </span>reduced<span class="o">)</span><span class="w">         </span><span class="o">[</span>false<span class="o">]</span>
+</span><span id="__span-5-14"><a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a><span class="w">  </span>-b,<span class="w"> </span>--step-by-step<span class="w">       </span>Enable<span class="w"> </span>step-by-step<span class="w"> </span>sequence<span class="w"> </span>execution<span class="w"> </span><span class="o">(</span>performance<span class="w"> </span>will<span class="w"> </span>be<span class="w"> </span>reduced<span class="o">)</span><span class="w">  </span><span class="o">[</span>false<span class="o">]</span>
+</span><span id="__span-5-15"><a id="__codelineno-5-15" name="__codelineno-5-15" href="#__codelineno-5-15"></a><span class="w">  </span>-p,<span class="w"> </span>--print-stats<span class="w">        </span>Enable<span class="w"> </span>to<span class="w"> </span>print<span class="w"> </span>per<span class="w"> </span>task<span class="w"> </span>statistics<span class="w"> </span><span class="o">(</span>performance<span class="w"> </span>will<span class="w"> </span>be<span class="w"> </span>reduced<span class="o">)</span><span class="w">     </span><span class="o">[</span>false<span class="o">]</span>
+</span><span id="__span-5-16"><a id="__codelineno-5-16" name="__codelineno-5-16" href="#__codelineno-5-16"></a><span class="w">  </span>-g,<span class="w"> </span>--debug<span class="w">              </span>Enable<span class="w"> </span>task<span class="w"> </span>debug<span class="w"> </span>mode<span class="w"> </span><span class="o">(</span>print<span class="w"> </span>socket<span class="w"> </span>data<span class="o">)</span><span class="w">                            </span><span class="o">[</span>false<span class="o">]</span>
+</span><span id="__span-5-17"><a id="__codelineno-5-17" name="__codelineno-5-17" href="#__codelineno-5-17"></a><span class="w">  </span>-q,<span class="w"> </span>--force-sequence<span class="w">     </span>Force<span class="w"> </span>sequence<span class="w"> </span>instead<span class="w"> </span>of<span class="w"> </span>pipeline<span class="w">                                    </span><span class="o">[</span>false<span class="o">]</span>
+</span><span id="__span-5-18"><a id="__codelineno-5-18" name="__codelineno-5-18" href="#__codelineno-5-18"></a><span class="w">  </span>-w,<span class="w"> </span>--active-waiting<span class="w">     </span>Enable<span class="w"> </span>active<span class="w"> </span>waiting<span class="w"> </span><span class="k">in</span><span class="w"> </span>the<span class="w"> </span>pipeline<span class="w"> </span>synchronizations<span class="w">                </span><span class="o">[</span>false<span class="o">]</span>
+</span><span id="__span-5-19"><a id="__codelineno-5-19" name="__codelineno-5-19" href="#__codelineno-5-19"></a><span class="w">  </span>-n,<span class="w"> </span>--tsk-per-sta<span class="w">        </span>The<span class="w"> </span>number<span class="w"> </span>of<span class="w"> </span>tasks<span class="w"> </span>on<span class="w"> </span>each<span class="w"> </span>stage<span class="w"> </span>of<span class="w"> </span>the<span class="w"> </span>pipeline<span class="w">                     </span><span class="o">[</span>empty<span class="o">]</span>
+</span><span id="__span-5-20"><a id="__codelineno-5-20" name="__codelineno-5-20" href="#__codelineno-5-20"></a><span class="w">  </span>-r,<span class="w"> </span>--tsk-types<span class="w">          </span>The<span class="w"> </span>socket<span class="w"> </span><span class="nb">type</span><span class="w"> </span>of<span class="w"> </span>each<span class="w"> </span>task<span class="w"> </span><span class="o">(</span>SFWD<span class="w"> </span>or<span class="w"> </span>SIO<span class="o">)</span><span class="w">                            </span><span class="o">[</span>empty<span class="o">]</span>
+</span><span id="__span-5-21"><a id="__codelineno-5-21" name="__codelineno-5-21" href="#__codelineno-5-21"></a><span class="w">  </span>-R,<span class="w"> </span>--tsk-types-sta<span class="w">      </span>The<span class="w"> </span>socket<span class="w"> </span><span class="nb">type</span><span class="w"> </span>of<span class="w"> </span>tasks<span class="w"> </span>on<span class="w"> </span>each<span class="w"> </span>stage<span class="w"> </span><span class="o">(</span>SFWD<span class="w"> </span>or<span class="w"> </span>SIO<span class="o">)</span><span class="w">                  </span><span class="o">[</span>empty<span class="o">]</span>
+</span><span id="__span-5-22"><a id="__codelineno-5-22" name="__codelineno-5-22" href="#__codelineno-5-22"></a><span class="w">  </span>-C,<span class="w"> </span>--chain<span class="w">              </span>Description<span class="w"> </span>of<span class="w"> </span>the<span class="w"> </span>tasks<span class="w"> </span>chain<span class="w"> </span><span class="o">(</span>to<span class="w"> </span>be<span class="w"> </span>combined<span class="w"> </span>with<span class="w"> </span><span class="s1">&#39;-S&#39;</span><span class="w"> </span>param<span class="o">)</span><span class="w">       </span><span class="o">[</span>empty<span class="o">]</span>
+</span><span id="__span-5-23"><a id="__codelineno-5-23" name="__codelineno-5-23" href="#__codelineno-5-23"></a><span class="w">  </span>-S,<span class="w"> </span>--sched<span class="w">              </span>Scheduler<span class="w"> </span>algorithm<span class="w"> </span><span class="k">for</span><span class="w"> </span>the<span class="w"> </span>pipeline<span class="w"> </span>creation<span class="w"> </span><span class="o">(</span><span class="s1">&#39;OTAC&#39;</span>,<span class="w"> </span><span class="s1">&#39;FILE&#39;</span><span class="o">)</span><span class="w">        </span><span class="o">[</span><span class="s2">&quot;OTAC&quot;</span><span class="o">]</span>
+</span><span id="__span-5-24"><a id="__codelineno-5-24" name="__codelineno-5-24" href="#__codelineno-5-24"></a><span class="w">  </span>-F,<span class="w"> </span>--sched-file<span class="w">         </span>File<span class="w"> </span>that<span class="w"> </span>contains<span class="w"> </span>the<span class="w"> </span>scheduling,<span class="w"> </span>to<span class="w"> </span>combine<span class="w"> </span>with<span class="w"> </span><span class="s1">&#39;FILE&#39;</span><span class="w"> </span>scheduler<span class="w">   </span><span class="o">[</span><span class="s2">&quot;sched.json&quot;</span><span class="o">]</span>
+</span><span id="__span-5-25"><a id="__codelineno-5-25" name="__codelineno-5-25" href="#__codelineno-5-25"></a><span class="w">  </span>-v,<span class="w"> </span>--verbose<span class="w">            </span>Show<span class="w"> </span>information<span class="w"> </span>about<span class="w"> </span>the<span class="w"> </span>scheduling<span class="w"> </span>choices<span class="w">                         </span><span class="o">[</span>false<span class="o">]</span>
+</span><span id="__span-5-26"><a id="__codelineno-5-26" name="__codelineno-5-26" href="#__codelineno-5-26"></a><span class="w">  </span>-h,<span class="w"> </span>--help<span class="w">               </span>This<span class="w"> </span><span class="nb">help</span><span class="w">                                                             </span><span class="o">[</span>false<span class="o">]</span>
+</span></code></pre></div>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../tests_bootstrap/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Bootstrap">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                Bootstrap
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../thread_pinning/" class="md-footer__link md-footer__link--next" aria-label="Next: Thread Pinning">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                Thread Pinning
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "..", "features": ["toc.integrate", "navigation.top", "search.suggest", "search.highlight", "content.tabs.link", "content.code.annotation", "content.code.copy", "navigation.footer"], "search": "../assets/javascripts/workers/search.973d3a69.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.92b07e13.min.js"></script>
+      
+        <script src="../javascripts/mathjax.js"></script>
+      
+        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+    
+  </body>
+</html>

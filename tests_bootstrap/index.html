@@ -1,0 +1,1454 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://aff3ct.github.io/streampu/tests_bootstrap/">
+      
+      
+        <link rel="prev" href="../concepts_overview/">
+      
+      
+        <link rel="next" href="../tests_advanced/">
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.18">
+    
+    
+      
+        <title>Bootstrap - StreamPU Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.7e37652d.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../css/extra.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#bootstrap" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="StreamPU Documentation" class="md-header__button md-logo" aria-label="StreamPU Documentation" data-md-component="logo">
+      
+  <img src="../assets/diagram-project-solid.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            StreamPU Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Bootstrap
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m14.3 16-.7-2h-3.2l-.7 2H7.8L11 7h2l3.2 9zM20 8.69V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12zm-9.15 3.96h2.3L12 9z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to system preference"  type="radio" name="__palette" id="__palette_2">
+    
+      <label class="md-header__button md-icon" title="Switch to system preference" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/aff3ct/streampu" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.0.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path fill="currentColor" d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="StreamPU Documentation" class="md-nav__button md-logo" aria-label="StreamPU Documentation" data-md-component="logo">
+      
+  <img src="../assets/diagram-project-solid.svg" alt="logo">
+
+    </a>
+    StreamPU Documentation
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/aff3ct/streampu" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.0.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path fill="currentColor" d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_1" id="__nav_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_1">
+            <span class="md-nav__icon md-icon"></span>
+            Home
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    StreamPU Documentation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    For Users
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            For Users
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_1" id="__nav_2_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Concepts
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_1">
+            <span class="md-nav__icon md-icon"></span>
+            Concepts
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../concepts_overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2_2" id="__nav_2_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Tests
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2_2">
+            <span class="md-nav__icon md-icon"></span>
+            Tests
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Bootstrap
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    Bootstrap
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#simple-chains" class="md-nav__link">
+    <span class="md-ellipsis">
+      Simple Chains
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#looping" class="md-nav__link">
+    <span class="md-ellipsis">
+      Looping
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#switch-case" class="md-nav__link">
+    <span class="md-ellipsis">
+      Switch-case
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#simple-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      Simple Pipeline
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tests_advanced/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Advanced
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_3" id="__nav_2_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Runtime
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_3">
+            <span class="md-nav__icon md-icon"></span>
+            Runtime
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../thread_pinning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Thread Pinning
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    For Developers
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            For Developers
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_1" id="__nav_3_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Basic Components
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_1">
+            <span class="md-nav__icon md-icon"></span>
+            Basic Components
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../task/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Task
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../module/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Module
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../socket/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Socket
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../sequence/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Sequence
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../pipeline/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Pipeline
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../switcher/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Switcher
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_2" id="__nav_3_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    New Features and Discussions
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_2">
+            <span class="md-nav__icon md-icon"></span>
+            New Features and Discussions
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../socket_fwd/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Forward Socket
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../pipeline_ctrl_flow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Pipeline &amp; Control Flow
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../wip/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Work in Progress
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="bootstrap">Bootstrap<a class="headerlink" href="#bootstrap" title="Permanent link">&para;</a></h1>
+<p><code>StreamPU</code> comes with simple tests to validate its behavior. The later are
+always a good way to bootstrap when you want to write your first code with the
+<abbr title="Domain-Specific Embedded Language">DSEL</abbr>. The source codes of the following tests are located in the 
+<code>tests/bootstrap</code> folder. Each file corresponds to an executable test.</p>
+<h2 id="simple-chains">Simple Chains<a class="headerlink" href="#simple-chains" title="Permanent link">&para;</a></h2>
+<p>At some point we have to start somewhere :-). The following graphs are a very 
+simple chains made from <code>increment</code>/<code>incrementf</code> tasks that simply perform 
+"<span class="arithmatex">\(+1\)</span>" on the data. Each time there are 6 <code>Incrementer</code> (<span class="arithmatex">\(t_{[2:7]}\)</span>) so the 
+final expected values in the <code>Finalizer</code> (<span class="arithmatex">\(t_8\)</span>) are equal to the values from 
+the <code>Initializer</code> (<span class="arithmatex">\(t_1\)</span>) "<span class="arithmatex">\(+6\)</span>".</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:3"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">With Input and Output Sockets</label><label for="__tabbed_1_2">With Forward Sockets</label><label for="__tabbed_1_3">With Input, Output and Forward Sockets</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p><figure markdown>
+  <img alt="Simple sequence" src="../assets/test_simple_chain.svg" width="1000" />
+</figure>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>./bin/test-simple-chain<span class="w"> </span>-t<span class="w"> </span><span class="m">1</span>
+</span></code></pre></div>
+This version of the simple chain is based on <code>increment</code> tasks that have one
+input socket and one output socket.</p>
+<p><strong>Command Line Arguments</strong></p>
+<p>The following verbatim is a copy-paste from the <code>-h</code> stdout:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>usage:<span class="w"> </span>./bin/test-simple-chain<span class="w"> </span><span class="o">[</span>options<span class="o">]</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">  </span>-t,<span class="w"> </span>--n-threads<span class="w">       </span>Number<span class="w"> </span>of<span class="w"> </span>threads<span class="w"> </span>to<span class="w"> </span>run<span class="w"> </span><span class="k">in</span><span class="w"> </span>parallel<span class="w">                                  </span><span class="o">[</span><span class="m">10</span><span class="o">]</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">  </span>-f,<span class="w"> </span>--n-inter-frames<span class="w">  </span>Number<span class="w"> </span>of<span class="w"> </span>frames<span class="w"> </span>to<span class="w"> </span>process<span class="w"> </span><span class="k">in</span><span class="w"> </span>one<span class="w"> </span>task<span class="w">                               </span><span class="o">[</span><span class="m">1</span><span class="o">]</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">  </span>-s,<span class="w"> </span>--sleep-time<span class="w">      </span>Sleep<span class="w"> </span><span class="nb">time</span><span class="w"> </span>duration<span class="w"> </span><span class="k">in</span><span class="w"> </span>one<span class="w"> </span>task<span class="w"> </span><span class="o">(</span>microseconds<span class="o">)</span><span class="w">                        </span><span class="o">[</span><span class="m">5</span><span class="o">]</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">  </span>-d,<span class="w"> </span>--data-length<span class="w">     </span>Size<span class="w"> </span>of<span class="w"> </span>data<span class="w"> </span>to<span class="w"> </span>process<span class="w"> </span><span class="k">in</span><span class="w"> </span>one<span class="w"> </span>task<span class="w"> </span><span class="o">(</span><span class="k">in</span><span class="w"> </span>bytes<span class="o">)</span><span class="w">                        </span><span class="o">[</span><span class="m">2048</span><span class="o">]</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">  </span>-e,<span class="w"> </span>--n-exec<span class="w">          </span>Number<span class="w"> </span>of<span class="w"> </span>sequence<span class="w"> </span>executions<span class="w">                                         </span><span class="o">[</span><span class="m">100000</span><span class="o">]</span>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="w">  </span>-o,<span class="w"> </span>--dot-filepath<span class="w">    </span>Path<span class="w"> </span>to<span class="w"> </span>dot<span class="w"> </span>output<span class="w"> </span>file<span class="w">                                               </span><span class="o">[</span>empty<span class="o">]</span>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="w">  </span>-c,<span class="w"> </span>--copy-mode<span class="w">       </span>Enable<span class="w"> </span>to<span class="w"> </span>copy<span class="w"> </span>data<span class="w"> </span><span class="k">in</span><span class="w"> </span>sequence<span class="w"> </span><span class="o">(</span>performance<span class="w"> </span>will<span class="w"> </span>be<span class="w"> </span>reduced<span class="o">)</span><span class="w">         </span><span class="o">[</span>false<span class="o">]</span>
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="w">  </span>-b,<span class="w"> </span>--step-by-step<span class="w">    </span>Enable<span class="w"> </span>step-by-step<span class="w"> </span>sequence<span class="w"> </span>execution<span class="w"> </span><span class="o">(</span>performance<span class="w"> </span>will<span class="w"> </span>be<span class="w"> </span>reduced<span class="o">)</span><span class="w">  </span><span class="o">[</span>false<span class="o">]</span>
+</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="w">  </span>-p,<span class="w"> </span>--print-stats<span class="w">     </span>Enable<span class="w"> </span>to<span class="w"> </span>print<span class="w"> </span>per<span class="w"> </span>task<span class="w"> </span>statistics<span class="w"> </span><span class="o">(</span>performance<span class="w"> </span>will<span class="w"> </span>be<span class="w"> </span>reduced<span class="o">)</span><span class="w">     </span><span class="o">[</span>false<span class="o">]</span>
+</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="w">  </span>-g,<span class="w"> </span>--debug<span class="w">           </span>Enable<span class="w"> </span>task<span class="w"> </span>debug<span class="w"> </span>mode<span class="w"> </span><span class="o">(</span>print<span class="w"> </span>socket<span class="w"> </span>data<span class="o">)</span><span class="w">                            </span><span class="o">[</span>false<span class="o">]</span>
+</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="w">  </span>-u,<span class="w"> </span>--subseq<span class="w">          </span>Enable<span class="w"> </span>subsequence<span class="w"> </span><span class="k">in</span><span class="w"> </span>the<span class="w"> </span>executed<span class="w"> </span>sequence<span class="w">                           </span><span class="o">[</span>false<span class="o">]</span>
+</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a><span class="w">  </span>-v,<span class="w"> </span>--verbose<span class="w">         </span>Enable<span class="w"> </span>verbose<span class="w"> </span>mode<span class="w">                                                   </span><span class="o">[</span>false<span class="o">]</span>
+</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a><span class="w">  </span>-h,<span class="w"> </span>--help<span class="w">            </span>This<span class="w"> </span><span class="nb">help</span><span class="w">                                                             </span><span class="o">[</span>false<span class="o">]</span>
+</span></code></pre></div>
+</div>
+<div class="tabbed-block">
+<p><figure markdown>
+  <img alt="Simple sequence" src="../assets/test_simple_chain_fwd.svg" width="1000" />
+</figure>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>./bin/test-simple-chain-fwd<span class="w"> </span>-t<span class="w"> </span><span class="m">1</span>
+</span></code></pre></div>
+This version of the simple chain is based on <code>incrementf</code> tasks that have
+only one forward socket.</p>
+<p><strong>Command Line Arguments</strong></p>
+<p>The following verbatim is a copy-paste from the <code>-h</code> stdout:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>usage:<span class="w"> </span>./bin/test-simple-chain-fwd<span class="w"> </span><span class="o">[</span>options<span class="o">]</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">  </span>-t,<span class="w"> </span>--n-threads<span class="w">       </span>Number<span class="w"> </span>of<span class="w"> </span>threads<span class="w"> </span>to<span class="w"> </span>run<span class="w"> </span><span class="k">in</span><span class="w"> </span>parallel<span class="w">                                  </span><span class="o">[</span><span class="m">10</span><span class="o">]</span>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">  </span>-f,<span class="w"> </span>--n-inter-frames<span class="w">  </span>Number<span class="w"> </span>of<span class="w"> </span>frames<span class="w"> </span>to<span class="w"> </span>process<span class="w"> </span><span class="k">in</span><span class="w"> </span>one<span class="w"> </span>task<span class="w">                               </span><span class="o">[</span><span class="m">1</span><span class="o">]</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">  </span>-s,<span class="w"> </span>--sleep-time<span class="w">      </span>Sleep<span class="w"> </span><span class="nb">time</span><span class="w"> </span>duration<span class="w"> </span><span class="k">in</span><span class="w"> </span>one<span class="w"> </span>task<span class="w"> </span><span class="o">(</span>microseconds<span class="o">)</span><span class="w">                        </span><span class="o">[</span><span class="m">5</span><span class="o">]</span>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">  </span>-d,<span class="w"> </span>--data-length<span class="w">     </span>Size<span class="w"> </span>of<span class="w"> </span>data<span class="w"> </span>to<span class="w"> </span>process<span class="w"> </span><span class="k">in</span><span class="w"> </span>one<span class="w"> </span>task<span class="w"> </span><span class="o">(</span><span class="k">in</span><span class="w"> </span>bytes<span class="o">)</span><span class="w">                        </span><span class="o">[</span><span class="m">2048</span><span class="o">]</span>
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="w">  </span>-e,<span class="w"> </span>--n-exec<span class="w">          </span>Number<span class="w"> </span>of<span class="w"> </span>sequence<span class="w"> </span>executions<span class="w">                                         </span><span class="o">[</span><span class="m">100000</span><span class="o">]</span>
+</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="w">  </span>-o,<span class="w"> </span>--dot-filepath<span class="w">    </span>Path<span class="w"> </span>to<span class="w"> </span>dot<span class="w"> </span>output<span class="w"> </span>file<span class="w">                                               </span><span class="o">[</span>empty<span class="o">]</span>
+</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="w">  </span>-c,<span class="w"> </span>--copy-mode<span class="w">       </span>Enable<span class="w"> </span>to<span class="w"> </span>copy<span class="w"> </span>data<span class="w"> </span><span class="k">in</span><span class="w"> </span>sequence<span class="w"> </span><span class="o">(</span>performance<span class="w"> </span>will<span class="w"> </span>be<span class="w"> </span>reduced<span class="o">)</span><span class="w">         </span><span class="o">[</span>true<span class="o">]</span>
+</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="w">  </span>-b,<span class="w"> </span>--step-by-step<span class="w">    </span>Enable<span class="w"> </span>step-by-step<span class="w"> </span>sequence<span class="w"> </span>execution<span class="w"> </span><span class="o">(</span>performance<span class="w"> </span>will<span class="w"> </span>be<span class="w"> </span>reduced<span class="o">)</span><span class="w">  </span><span class="o">[</span>false<span class="o">]</span>
+</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a><span class="w">  </span>-p,<span class="w"> </span>--print-stats<span class="w">     </span>Enable<span class="w"> </span>to<span class="w"> </span>print<span class="w"> </span>per<span class="w"> </span>task<span class="w"> </span>statistics<span class="w"> </span><span class="o">(</span>performance<span class="w"> </span>will<span class="w"> </span>be<span class="w"> </span>reduced<span class="o">)</span><span class="w">     </span><span class="o">[</span>false<span class="o">]</span>
+</span><span id="__span-3-12"><a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a><span class="w">  </span>-g,<span class="w"> </span>--debug<span class="w">           </span>Enable<span class="w"> </span>task<span class="w"> </span>debug<span class="w"> </span>mode<span class="w"> </span><span class="o">(</span>print<span class="w"> </span>socket<span class="w"> </span>data<span class="o">)</span><span class="w">                            </span><span class="o">[</span>false<span class="o">]</span>
+</span><span id="__span-3-13"><a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a><span class="w">  </span>-u,<span class="w"> </span>--subseq<span class="w">          </span>Enable<span class="w"> </span>subsequence<span class="w"> </span><span class="k">in</span><span class="w"> </span>the<span class="w"> </span>executed<span class="w"> </span>sequence<span class="w">                           </span><span class="o">[</span>false<span class="o">]</span>
+</span><span id="__span-3-14"><a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a><span class="w">  </span>-v,<span class="w"> </span>--verbose<span class="w">         </span>Enable<span class="w"> </span>verbose<span class="w"> </span>mode<span class="w">                                                   </span><span class="o">[</span>false<span class="o">]</span>
+</span><span id="__span-3-15"><a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a><span class="w">  </span>-h,<span class="w"> </span>--help<span class="w">            </span>This<span class="w"> </span><span class="nb">help</span><span class="w">                                                             </span><span class="o">[</span>false<span class="o">]</span>
+</span></code></pre></div>
+</div>
+<div class="tabbed-block">
+<p><figure markdown>
+  <img alt="Simple sequence" src="../assets/test_simple_chain_hybrid.svg" width="1000" />
+</figure>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>./bin/test-simple-chain-hybrid<span class="w"> </span>-t<span class="w"> </span><span class="m">1</span>
+</span></code></pre></div>
+This version of the simple chain is based on a combination of <code>increment</code> 
+and <code>incrementf</code> tasks.</p>
+<p><strong>Command Line Arguments</strong></p>
+<p>The following verbatim is a copy-paste from the <code>-h</code> stdout:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>usage:<span class="w"> </span>./bin/test-simple-chain-hybrid<span class="w"> </span><span class="o">[</span>options<span class="o">]</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">  </span>-t,<span class="w"> </span>--n-threads<span class="w">       </span>Number<span class="w"> </span>of<span class="w"> </span>threads<span class="w"> </span>to<span class="w"> </span>run<span class="w"> </span><span class="k">in</span><span class="w"> </span>parallel<span class="w">                                  </span><span class="o">[</span><span class="m">10</span><span class="o">]</span>
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">  </span>-f,<span class="w"> </span>--n-inter-frames<span class="w">  </span>Number<span class="w"> </span>of<span class="w"> </span>frames<span class="w"> </span>to<span class="w"> </span>process<span class="w"> </span><span class="k">in</span><span class="w"> </span>one<span class="w"> </span>task<span class="w">                               </span><span class="o">[</span><span class="m">1</span><span class="o">]</span>
+</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="w">  </span>-s,<span class="w"> </span>--sleep-time<span class="w">      </span>Sleep<span class="w"> </span><span class="nb">time</span><span class="w"> </span>duration<span class="w"> </span><span class="k">in</span><span class="w"> </span>one<span class="w"> </span>task<span class="w"> </span><span class="o">(</span>microseconds<span class="o">)</span><span class="w">                        </span><span class="o">[</span><span class="m">5</span><span class="o">]</span>
+</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="w">  </span>-d,<span class="w"> </span>--data-length<span class="w">     </span>Size<span class="w"> </span>of<span class="w"> </span>data<span class="w"> </span>to<span class="w"> </span>process<span class="w"> </span><span class="k">in</span><span class="w"> </span>one<span class="w"> </span>task<span class="w"> </span><span class="o">(</span><span class="k">in</span><span class="w"> </span>bytes<span class="o">)</span><span class="w">                        </span><span class="o">[</span><span class="m">2048</span><span class="o">]</span>
+</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="w">  </span>-e,<span class="w"> </span>--n-exec<span class="w">          </span>Number<span class="w"> </span>of<span class="w"> </span>sequence<span class="w"> </span>executions<span class="w">                                         </span><span class="o">[</span><span class="m">100000</span><span class="o">]</span>
+</span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="w">  </span>-o,<span class="w"> </span>--dot-filepath<span class="w">    </span>Path<span class="w"> </span>to<span class="w"> </span>dot<span class="w"> </span>output<span class="w"> </span>file<span class="w">                                               </span><span class="o">[</span>empty<span class="o">]</span>
+</span><span id="__span-5-9"><a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a><span class="w">  </span>-c,<span class="w"> </span>--copy-mode<span class="w">       </span>Enable<span class="w"> </span>to<span class="w"> </span>copy<span class="w"> </span>data<span class="w"> </span><span class="k">in</span><span class="w"> </span>sequence<span class="w"> </span><span class="o">(</span>performance<span class="w"> </span>will<span class="w"> </span>be<span class="w"> </span>reduced<span class="o">)</span><span class="w">         </span><span class="o">[</span>false<span class="o">]</span>
+</span><span id="__span-5-10"><a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a><span class="w">  </span>-b,<span class="w"> </span>--step-by-step<span class="w">    </span>Enable<span class="w"> </span>step-by-step<span class="w"> </span>sequence<span class="w"> </span>execution<span class="w"> </span><span class="o">(</span>performance<span class="w"> </span>will<span class="w"> </span>be<span class="w"> </span>reduced<span class="o">)</span><span class="w">  </span><span class="o">[</span>false<span class="o">]</span>
+</span><span id="__span-5-11"><a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a><span class="w">  </span>-p,<span class="w"> </span>--print-stats<span class="w">     </span>Enable<span class="w"> </span>to<span class="w"> </span>print<span class="w"> </span>per<span class="w"> </span>task<span class="w"> </span>statistics<span class="w"> </span><span class="o">(</span>performance<span class="w"> </span>will<span class="w"> </span>be<span class="w"> </span>reduced<span class="o">)</span><span class="w">     </span><span class="o">[</span>false<span class="o">]</span>
+</span><span id="__span-5-12"><a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a><span class="w">  </span>-g,<span class="w"> </span>--debug<span class="w">           </span>Enable<span class="w"> </span>task<span class="w"> </span>debug<span class="w"> </span>mode<span class="w"> </span><span class="o">(</span>print<span class="w"> </span>socket<span class="w"> </span>data<span class="o">)</span><span class="w">                            </span><span class="o">[</span>false<span class="o">]</span>
+</span><span id="__span-5-13"><a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a><span class="w">  </span>-v,<span class="w"> </span>--verbose<span class="w">         </span>Enable<span class="w"> </span>verbose<span class="w"> </span>mode<span class="w">                                                   </span><span class="o">[</span>false<span class="o">]</span>
+</span><span id="__span-5-14"><a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a><span class="w">  </span>-h,<span class="w"> </span>--help<span class="w">            </span>This<span class="w"> </span><span class="nb">help</span><span class="w">                                                             </span><span class="o">[</span>false<span class="o">]</span>
+</span></code></pre></div>
+</div>
+</div>
+</div>
+<hr />
+<h2 id="looping">Looping<a class="headerlink" href="#looping" title="Permanent link">&para;</a></h2>
+<p>The looping tests are here to introduce and to validate how to implement simple
+control flow. Each of the graph below execute one or multiple loops and in the
+innermost loop 6 <code>increment</code> tasks are executed. <code>Switcher</code> modules are used to 
+create two different paths, one for the loop and the other for the exit (the 
+<code>Finalizer</code> task here). The output socket of the <code>iterate</code> task (from the 
+<code>Iterator</code>  module) is bound to the input socket 1 of the <code>commute</code> task. The 
+<code>iterate</code> task controls if the commute should execute the 6 <code>increment</code> tasks or 
+the end the stream by executing the <code>finalize</code> task.</p>
+<p>Each time there are 6 <code>Incrementer</code> in the innermost loop so the final expected 
+values in the <code>Finalizer</code> are equal to the values from the <code>Initializer</code> (<span class="arithmatex">\(t_1\)</span>) 
+"<span class="arithmatex">\(+(i \times j\times 6)\)</span>" (<span class="arithmatex">\(j = 1\)</span> in the <code>for</code> loop and <code>do-while</code> loop 
+examples). </p>
+<div class="tabbed-set tabbed-alternate" data-tabs="2:3"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><input id="__tabbed_2_3" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1"><code>For</code> Loop</label><label for="__tabbed_2_2"><code>Do-while</code> Loop</label><label for="__tabbed_2_3">Nested Loops</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p><figure markdown>
+  <img alt="Simple sequence" src="../assets/test_for_loop.svg" width="1000" />
+</figure>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>./bin/test-for-loop<span class="w"> </span>-t<span class="w"> </span><span class="m">1</span><span class="w"> </span>-i<span class="w"> </span><span class="m">10</span>
+</span></code></pre></div>
+This test implements a classic <code>for-loop</code> where the condition is evaluated
+first in <span class="arithmatex">\(t_3\)</span> (a basic loop counter) and the the body of the loop is 
+executed (<span class="arithmatex">\(t_{[5:10]}\)</span>) after. Note that this <code>for-loop</code> example can easily
+be extended to a more generic <code>while-loop</code> if the <span class="arithmatex">\(t_3\)</span> task is replaced 
+by an other task that depends on an input data socket. </p>
+<p>In the command line, <code>-i 10</code> indicates that the loop is repeated 10 times.</p>
+<p><strong>Command Line Arguments</strong></p>
+<p>The following verbatim is a copy-paste from the <code>-h</code> stdout:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>usage:<span class="w"> </span>./bin/test-for-loop<span class="w"> </span><span class="o">[</span>options<span class="o">]</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="w">  </span>-t,<span class="w"> </span>--n-threads<span class="w">       </span>Number<span class="w"> </span>of<span class="w"> </span>threads<span class="w"> </span>to<span class="w"> </span>run<span class="w"> </span><span class="k">in</span><span class="w"> </span>parallel<span class="w">                                  </span><span class="o">[</span><span class="m">10</span><span class="o">]</span>
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="w">  </span>-f,<span class="w"> </span>--n-inter-frames<span class="w">  </span>Number<span class="w"> </span>of<span class="w"> </span>frames<span class="w"> </span>to<span class="w"> </span>process<span class="w"> </span><span class="k">in</span><span class="w"> </span>one<span class="w"> </span>task<span class="w">                               </span><span class="o">[</span><span class="m">1</span><span class="o">]</span>
+</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="w">  </span>-s,<span class="w"> </span>--sleep-time<span class="w">      </span>Sleep<span class="w"> </span><span class="nb">time</span><span class="w"> </span>duration<span class="w"> </span><span class="k">in</span><span class="w"> </span>one<span class="w"> </span>task<span class="w"> </span><span class="o">(</span>microseconds<span class="o">)</span><span class="w">                        </span><span class="o">[</span><span class="m">5</span><span class="o">]</span>
+</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="w">  </span>-d,<span class="w"> </span>--data-length<span class="w">     </span>Size<span class="w"> </span>of<span class="w"> </span>data<span class="w"> </span>to<span class="w"> </span>process<span class="w"> </span><span class="k">in</span><span class="w"> </span>one<span class="w"> </span>task<span class="w"> </span><span class="o">(</span><span class="k">in</span><span class="w"> </span>bytes<span class="o">)</span><span class="w">                        </span><span class="o">[</span><span class="m">2048</span><span class="o">]</span>
+</span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="w">  </span>-e,<span class="w"> </span>--n-exec<span class="w">          </span>Number<span class="w"> </span>of<span class="w"> </span>sequence<span class="w"> </span>executions<span class="w">                                         </span><span class="o">[</span><span class="m">100000</span><span class="o">]</span>
+</span><span id="__span-7-8"><a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="w">  </span>-i,<span class="w"> </span>--n-loop<span class="w">          </span>Number<span class="w"> </span>of<span class="w"> </span>iterations<span class="w"> </span>to<span class="w"> </span>perform<span class="w"> </span><span class="k">in</span><span class="w"> </span>the<span class="w"> </span>loop<span class="w">                           </span><span class="o">[</span><span class="m">10</span><span class="o">]</span>
+</span><span id="__span-7-9"><a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a><span class="w">  </span>-o,<span class="w"> </span>--dot-filepath<span class="w">    </span>Path<span class="w"> </span>to<span class="w"> </span>dot<span class="w"> </span>output<span class="w"> </span>file<span class="w">                                               </span><span class="o">[</span>empty<span class="o">]</span>
+</span><span id="__span-7-10"><a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a><span class="w">  </span>-c,<span class="w"> </span>--copy-mode<span class="w">       </span>Enable<span class="w"> </span>to<span class="w"> </span>copy<span class="w"> </span>data<span class="w"> </span><span class="k">in</span><span class="w"> </span>sequence<span class="w"> </span><span class="o">(</span>performance<span class="w"> </span>will<span class="w"> </span>be<span class="w"> </span>reduced<span class="o">)</span><span class="w">         </span><span class="o">[</span>false<span class="o">]</span>
+</span><span id="__span-7-11"><a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a><span class="w">  </span>-b,<span class="w"> </span>--step-by-step<span class="w">    </span>Enable<span class="w"> </span>step-by-step<span class="w"> </span>sequence<span class="w"> </span>execution<span class="w"> </span><span class="o">(</span>performance<span class="w"> </span>will<span class="w"> </span>be<span class="w"> </span>reduced<span class="o">)</span><span class="w">  </span><span class="o">[</span>false<span class="o">]</span>
+</span><span id="__span-7-12"><a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a><span class="w">  </span>-p,<span class="w"> </span>--print-stats<span class="w">     </span>Enable<span class="w"> </span>to<span class="w"> </span>print<span class="w"> </span>per<span class="w"> </span>task<span class="w"> </span>statistics<span class="w"> </span><span class="o">(</span>performance<span class="w"> </span>will<span class="w"> </span>be<span class="w"> </span>reduced<span class="o">)</span><span class="w">     </span><span class="o">[</span>false<span class="o">]</span>
+</span><span id="__span-7-13"><a id="__codelineno-7-13" name="__codelineno-7-13" href="#__codelineno-7-13"></a><span class="w">  </span>-g,<span class="w"> </span>--debug<span class="w">           </span>Enable<span class="w"> </span>task<span class="w"> </span>debug<span class="w"> </span>mode<span class="w"> </span><span class="o">(</span>print<span class="w"> </span>socket<span class="w"> </span>data<span class="o">)</span><span class="w">                            </span><span class="o">[</span>false<span class="o">]</span>
+</span><span id="__span-7-14"><a id="__codelineno-7-14" name="__codelineno-7-14" href="#__codelineno-7-14"></a><span class="w">  </span>-h,<span class="w"> </span>--help<span class="w">            </span>This<span class="w"> </span><span class="nb">help</span><span class="w">                                                             </span><span class="o">[</span>false<span class="o">]</span>
+</span></code></pre></div>
+</div>
+<div class="tabbed-block">
+<p><figure markdown>
+  <img alt="Simple sequence" src="../assets/test_do_while_loop.svg" width="1000" />
+</figure>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>./bin/test-do-while-loop<span class="w"> </span>-t<span class="w"> </span><span class="m">1</span><span class="w"> </span>-i<span class="w"> </span><span class="m">10</span>
+</span></code></pre></div>
+An implementation of a <code>do-while</code> loop where the condition <span class="arithmatex">\(t_9\)</span> is 
+evaluated after the body of the loop (<span class="arithmatex">\(t_{[3:8]}\)</span>).</p>
+<p>In the command line, <code>-i 10</code> indicates that the loop is repeated 10 times.</p>
+<p><strong>Command Line Arguments</strong></p>
+<p>The following verbatim is a copy-paste from the <code>-h</code> stdout:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>usage:<span class="w"> </span>./bin/test-do-while-loop<span class="w"> </span><span class="o">[</span>options<span class="o">]</span>
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>
+</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="w">  </span>-t,<span class="w"> </span>--n-threads<span class="w">       </span>Number<span class="w"> </span>of<span class="w"> </span>threads<span class="w"> </span>to<span class="w"> </span>run<span class="w"> </span><span class="k">in</span><span class="w"> </span>parallel<span class="w">                                  </span><span class="o">[</span><span class="m">10</span><span class="o">]</span>
+</span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="w">  </span>-f,<span class="w"> </span>--n-inter-frames<span class="w">  </span>Number<span class="w"> </span>of<span class="w"> </span>frames<span class="w"> </span>to<span class="w"> </span>process<span class="w"> </span><span class="k">in</span><span class="w"> </span>one<span class="w"> </span>task<span class="w">                               </span><span class="o">[</span><span class="m">1</span><span class="o">]</span>
+</span><span id="__span-9-5"><a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="w">  </span>-s,<span class="w"> </span>--sleep-time<span class="w">      </span>Sleep<span class="w"> </span><span class="nb">time</span><span class="w"> </span>duration<span class="w"> </span><span class="k">in</span><span class="w"> </span>one<span class="w"> </span>task<span class="w"> </span><span class="o">(</span>microseconds<span class="o">)</span><span class="w">                        </span><span class="o">[</span><span class="m">5</span><span class="o">]</span>
+</span><span id="__span-9-6"><a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="w">  </span>-d,<span class="w"> </span>--data-length<span class="w">     </span>Size<span class="w"> </span>of<span class="w"> </span>data<span class="w"> </span>to<span class="w"> </span>process<span class="w"> </span><span class="k">in</span><span class="w"> </span>one<span class="w"> </span>task<span class="w"> </span><span class="o">(</span><span class="k">in</span><span class="w"> </span>bytes<span class="o">)</span><span class="w">                        </span><span class="o">[</span><span class="m">2048</span><span class="o">]</span>
+</span><span id="__span-9-7"><a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="w">  </span>-e,<span class="w"> </span>--n-exec<span class="w">          </span>Number<span class="w"> </span>of<span class="w"> </span>sequence<span class="w"> </span>executions<span class="w">                                         </span><span class="o">[</span><span class="m">100000</span><span class="o">]</span>
+</span><span id="__span-9-8"><a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a><span class="w">  </span>-i,<span class="w"> </span>--n-loop<span class="w">          </span>Number<span class="w"> </span>of<span class="w"> </span>iterations<span class="w"> </span>to<span class="w"> </span>perform<span class="w"> </span><span class="k">in</span><span class="w"> </span>the<span class="w"> </span>loop<span class="w">                           </span><span class="o">[</span><span class="m">9</span><span class="o">]</span>
+</span><span id="__span-9-9"><a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a><span class="w">  </span>-o,<span class="w"> </span>--dot-filepath<span class="w">    </span>Path<span class="w"> </span>to<span class="w"> </span>dot<span class="w"> </span>output<span class="w"> </span>file<span class="w">                                               </span><span class="o">[</span>empty<span class="o">]</span>
+</span><span id="__span-9-10"><a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a><span class="w">  </span>-c,<span class="w"> </span>--copy-mode<span class="w">       </span>Enable<span class="w"> </span>to<span class="w"> </span>copy<span class="w"> </span>data<span class="w"> </span><span class="k">in</span><span class="w"> </span>sequence<span class="w"> </span><span class="o">(</span>performance<span class="w"> </span>will<span class="w"> </span>be<span class="w"> </span>reduced<span class="o">)</span><span class="w">         </span><span class="o">[</span>false<span class="o">]</span>
+</span><span id="__span-9-11"><a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a><span class="w">  </span>-b,<span class="w"> </span>--step-by-step<span class="w">    </span>Enable<span class="w"> </span>step-by-step<span class="w"> </span>sequence<span class="w"> </span>execution<span class="w"> </span><span class="o">(</span>performance<span class="w"> </span>will<span class="w"> </span>be<span class="w"> </span>reduced<span class="o">)</span><span class="w">  </span><span class="o">[</span>false<span class="o">]</span>
+</span><span id="__span-9-12"><a id="__codelineno-9-12" name="__codelineno-9-12" href="#__codelineno-9-12"></a><span class="w">  </span>-p,<span class="w"> </span>--print-stats<span class="w">     </span>Enable<span class="w"> </span>to<span class="w"> </span>print<span class="w"> </span>per<span class="w"> </span>task<span class="w"> </span>statistics<span class="w"> </span><span class="o">(</span>performance<span class="w"> </span>will<span class="w"> </span>be<span class="w"> </span>reduced<span class="o">)</span><span class="w">     </span><span class="o">[</span>false<span class="o">]</span>
+</span><span id="__span-9-13"><a id="__codelineno-9-13" name="__codelineno-9-13" href="#__codelineno-9-13"></a><span class="w">  </span>-g,<span class="w"> </span>--debug<span class="w">           </span>Enable<span class="w"> </span>task<span class="w"> </span>debug<span class="w"> </span>mode<span class="w"> </span><span class="o">(</span>print<span class="w"> </span>socket<span class="w"> </span>data<span class="o">)</span><span class="w">                            </span><span class="o">[</span>false<span class="o">]</span>
+</span><span id="__span-9-14"><a id="__codelineno-9-14" name="__codelineno-9-14" href="#__codelineno-9-14"></a><span class="w">  </span>-h,<span class="w"> </span>--help<span class="w">            </span>This<span class="w"> </span><span class="nb">help</span><span class="w">                                                             </span><span class="o">[</span>false<span class="o">]</span>
+</span></code></pre></div>
+</div>
+<div class="tabbed-block">
+<p><figure markdown>
+  <img alt="Simple sequence" src="../assets/test_nested_loops.svg" width="1000" />
+</figure></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>./bin/test-do-while-loop<span class="w"> </span>-t<span class="w"> </span><span class="m">1</span><span class="w"> </span>-i<span class="w"> </span><span class="m">5</span><span class="w"> </span>-j<span class="w"> </span><span class="m">2</span>
+</span></code></pre></div>
+<p>Implementation of 2 nested <code>for-loop</code>s. <code>-j 2</code> controls the number of times
+the innermost loops is repeated and <code>-i 5</code> controls the outermost loop. </p>
+<p><strong>Command Line Arguments</strong></p>
+<p>The following verbatim is a copy-paste from the <code>-h</code> stdout:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>usage:<span class="w"> </span>./bin/test-nested-loops<span class="w"> </span><span class="o">[</span>options<span class="o">]</span>
+</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>
+</span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="w">  </span>-t,<span class="w"> </span>--n-threads<span class="w">       </span>Number<span class="w"> </span>of<span class="w"> </span>threads<span class="w"> </span>to<span class="w"> </span>run<span class="w"> </span><span class="k">in</span><span class="w"> </span>parallel<span class="w">                                  </span><span class="o">[</span><span class="m">10</span><span class="o">]</span>
+</span><span id="__span-11-4"><a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="w">  </span>-f,<span class="w"> </span>--n-inter-frames<span class="w">  </span>Number<span class="w"> </span>of<span class="w"> </span>frames<span class="w"> </span>to<span class="w"> </span>process<span class="w"> </span><span class="k">in</span><span class="w"> </span>one<span class="w"> </span>task<span class="w">                               </span><span class="o">[</span><span class="m">1</span><span class="o">]</span>
+</span><span id="__span-11-5"><a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a><span class="w">  </span>-s,<span class="w"> </span>--sleep-time<span class="w">      </span>Sleep<span class="w"> </span><span class="nb">time</span><span class="w"> </span>duration<span class="w"> </span><span class="k">in</span><span class="w"> </span>one<span class="w"> </span>task<span class="w"> </span><span class="o">(</span>microseconds<span class="o">)</span><span class="w">                        </span><span class="o">[</span><span class="m">5</span><span class="o">]</span>
+</span><span id="__span-11-6"><a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a><span class="w">  </span>-d,<span class="w"> </span>--data-length<span class="w">     </span>Size<span class="w"> </span>of<span class="w"> </span>data<span class="w"> </span>to<span class="w"> </span>process<span class="w"> </span><span class="k">in</span><span class="w"> </span>one<span class="w"> </span>task<span class="w"> </span><span class="o">(</span><span class="k">in</span><span class="w"> </span>bytes<span class="o">)</span><span class="w">                        </span><span class="o">[</span><span class="m">2048</span><span class="o">]</span>
+</span><span id="__span-11-7"><a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a><span class="w">  </span>-e,<span class="w"> </span>--n-exec<span class="w">          </span>Number<span class="w"> </span>of<span class="w"> </span>sequence<span class="w"> </span>executions<span class="w">                                         </span><span class="o">[</span><span class="m">100000</span><span class="o">]</span>
+</span><span id="__span-11-8"><a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a><span class="w">  </span>-i,<span class="w"> </span>--n-loop-out<span class="w">      </span>Number<span class="w"> </span>of<span class="w"> </span>iterations<span class="w"> </span>to<span class="w"> </span>perform<span class="w"> </span><span class="k">in</span><span class="w"> </span>the<span class="w"> </span>outer<span class="w"> </span>loop<span class="w">                     </span><span class="o">[</span><span class="m">5</span><span class="o">]</span>
+</span><span id="__span-11-9"><a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a><span class="w">  </span>-j,<span class="w"> </span>--n-loop-in<span class="w">       </span>Number<span class="w"> </span>of<span class="w"> </span>iterations<span class="w"> </span>to<span class="w"> </span>perform<span class="w"> </span><span class="k">in</span><span class="w"> </span>the<span class="w"> </span>inner<span class="w"> </span>loop<span class="w">                     </span><span class="o">[</span><span class="m">2</span><span class="o">]</span>
+</span><span id="__span-11-10"><a id="__codelineno-11-10" name="__codelineno-11-10" href="#__codelineno-11-10"></a><span class="w">  </span>-o,<span class="w"> </span>--dot-filepath<span class="w">    </span>Path<span class="w"> </span>to<span class="w"> </span>dot<span class="w"> </span>output<span class="w"> </span>file<span class="w">                                               </span><span class="o">[</span>empty<span class="o">]</span>
+</span><span id="__span-11-11"><a id="__codelineno-11-11" name="__codelineno-11-11" href="#__codelineno-11-11"></a><span class="w">  </span>-c,<span class="w"> </span>--copy-mode<span class="w">       </span>Enable<span class="w"> </span>to<span class="w"> </span>copy<span class="w"> </span>data<span class="w"> </span><span class="k">in</span><span class="w"> </span>sequence<span class="w"> </span><span class="o">(</span>performance<span class="w"> </span>will<span class="w"> </span>be<span class="w"> </span>reduced<span class="o">)</span><span class="w">         </span><span class="o">[</span>false<span class="o">]</span>
+</span><span id="__span-11-12"><a id="__codelineno-11-12" name="__codelineno-11-12" href="#__codelineno-11-12"></a><span class="w">  </span>-b,<span class="w"> </span>--step-by-step<span class="w">    </span>Enable<span class="w"> </span>step-by-step<span class="w"> </span>sequence<span class="w"> </span>execution<span class="w"> </span><span class="o">(</span>performance<span class="w"> </span>will<span class="w"> </span>be<span class="w"> </span>reduced<span class="o">)</span><span class="w">  </span><span class="o">[</span>false<span class="o">]</span>
+</span><span id="__span-11-13"><a id="__codelineno-11-13" name="__codelineno-11-13" href="#__codelineno-11-13"></a><span class="w">  </span>-p,<span class="w"> </span>--print-stats<span class="w">     </span>Enable<span class="w"> </span>to<span class="w"> </span>print<span class="w"> </span>per<span class="w"> </span>task<span class="w"> </span>statistics<span class="w"> </span><span class="o">(</span>performance<span class="w"> </span>will<span class="w"> </span>be<span class="w"> </span>reduced<span class="o">)</span><span class="w">     </span><span class="o">[</span>false<span class="o">]</span>
+</span><span id="__span-11-14"><a id="__codelineno-11-14" name="__codelineno-11-14" href="#__codelineno-11-14"></a><span class="w">  </span>-g,<span class="w"> </span>--debug<span class="w">           </span>Enable<span class="w"> </span>task<span class="w"> </span>debug<span class="w"> </span>mode<span class="w"> </span><span class="o">(</span>print<span class="w"> </span>socket<span class="w"> </span>data<span class="o">)</span><span class="w">                            </span><span class="o">[</span>false<span class="o">]</span>
+</span><span id="__span-11-15"><a id="__codelineno-11-15" name="__codelineno-11-15" href="#__codelineno-11-15"></a><span class="w">  </span>-h,<span class="w"> </span>--help<span class="w">            </span>This<span class="w"> </span><span class="nb">help</span><span class="w">                                                             </span><span class="o">[</span>false<span class="o">]</span>
+</span></code></pre></div>
+</div>
+</div>
+</div>
+<hr />
+<h2 id="switch-case">Switch-case<a class="headerlink" href="#switch-case" title="Permanent link">&para;</a></h2>
+<p>The following test implements a <code>switch-case</code> pattern based on <code>increment</code> 
+tasks (<span class="arithmatex">\(t_{[4;9]}\)</span>). Depending on the <code>control</code> task (<span class="arithmatex">\(t_2\)</span>), one of the three 
+different paths (or cases in the <code>switch-case</code> pattern) will be executed. The 
+first path (or <code>case 0</code>) is composed by <span class="arithmatex">\(t_4\)</span>, <span class="arithmatex">\(t_5\)</span> and <span class="arithmatex">\(t_6\)</span> tasks, the second 
+path (or <code>case 1</code>) is composed by <span class="arithmatex">\(t_7\)</span> and <span class="arithmatex">\(t_8\)</span> tasks while the 
+third path (or <code>case 2</code>) is only composed by the <span class="arithmatex">\(t_9\)</span> task.</p>
+<p>The final expected values in the <code>Finalizer</code> depends on the selected path. If 
+the first path is chosen (<span class="arithmatex">\(t_{[4:6]}\)</span>), "<span class="arithmatex">\(+3\)</span>" is added to the values from the 
+<code>Initializer</code> (<span class="arithmatex">\(t_1\)</span>). If the second path is chosen (<span class="arithmatex">\(t_{[7:8]}\)</span>), "<span class="arithmatex">\(+2\)</span>" is 
+added to the values from the <code>Initializer</code> (<span class="arithmatex">\(t_1\)</span>). Finally, if the last path is 
+chosen (<span class="arithmatex">\(t_{9}\)</span>), "<span class="arithmatex">\(+1\)</span>" is added to the values from the <code>Initializer</code> (<span class="arithmatex">\(t_1\)</span>).</p>
+<figure>
+<p><img alt="Simple sequence" src="../assets/test_exclusive_paths.svg" width="1000" /></p>
+</figure>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>./bin/test-exclusive-paths<span class="w"> </span>-t<span class="w"> </span><span class="m">1</span><span class="w"> </span>-y
+</span></code></pre></div>
+<p>The <code>-y</code> option indicates that the <code>Controller</code> is cyclic: for the first stream
+the first path is selected, for the second stream the second path is taken, for
+the third stream the third path is taken, for the fourth stream the first path
+is taken and so on...</p>
+<p>It is also possible to have a fixed path for all the streams with the <code>-a N</code> 
+option (with <code>N</code> the path id).</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>You cannot use <code>-y</code> and <code>-a</code> parameters at the same time, they are 
+exclusive.</p>
+</div>
+<p><strong>Command Line Arguments</strong></p>
+<p>The following verbatim is a copy-paste from the <code>-h</code> stdout:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>usage:<span class="w"> </span>./bin/test-exclusive-paths<span class="w"> </span><span class="o">[</span>options<span class="o">]</span>
+</span><span id="__span-13-2"><a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>
+</span><span id="__span-13-3"><a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a><span class="w">  </span>-t,<span class="w"> </span>--n-threads<span class="w">       </span>Number<span class="w"> </span>of<span class="w"> </span>threads<span class="w"> </span>to<span class="w"> </span>run<span class="w"> </span><span class="k">in</span><span class="w"> </span>parallel<span class="w">                                  </span><span class="o">[</span><span class="m">10</span><span class="o">]</span>
+</span><span id="__span-13-4"><a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a><span class="w">  </span>-f,<span class="w"> </span>--n-inter-frames<span class="w">  </span>Number<span class="w"> </span>of<span class="w"> </span>frames<span class="w"> </span>to<span class="w"> </span>process<span class="w"> </span><span class="k">in</span><span class="w"> </span>one<span class="w"> </span>task<span class="w">                               </span><span class="o">[</span><span class="m">1</span><span class="o">]</span>
+</span><span id="__span-13-5"><a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a><span class="w">  </span>-s,<span class="w"> </span>--sleep-time<span class="w">      </span>Sleep<span class="w"> </span><span class="nb">time</span><span class="w"> </span>duration<span class="w"> </span><span class="k">in</span><span class="w"> </span>one<span class="w"> </span>task<span class="w"> </span><span class="o">(</span>microseconds<span class="o">)</span><span class="w">                        </span><span class="o">[</span><span class="m">5</span><span class="o">]</span>
+</span><span id="__span-13-6"><a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a><span class="w">  </span>-d,<span class="w"> </span>--data-length<span class="w">     </span>Size<span class="w"> </span>of<span class="w"> </span>data<span class="w"> </span>to<span class="w"> </span>process<span class="w"> </span><span class="k">in</span><span class="w"> </span>one<span class="w"> </span>task<span class="w"> </span><span class="o">(</span><span class="k">in</span><span class="w"> </span>bytes<span class="o">)</span><span class="w">                        </span><span class="o">[</span><span class="m">2048</span><span class="o">]</span>
+</span><span id="__span-13-7"><a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a><span class="w">  </span>-e,<span class="w"> </span>--n-exec<span class="w">          </span>Number<span class="w"> </span>of<span class="w"> </span>sequence<span class="w"> </span>executions<span class="w">                                         </span><span class="o">[</span><span class="m">100000</span><span class="o">]</span>
+</span><span id="__span-13-8"><a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a><span class="w">  </span>-a,<span class="w"> </span>--path<span class="w">            </span>Path<span class="w"> </span>to<span class="w"> </span>take<span class="w"> </span><span class="k">in</span><span class="w"> </span>the<span class="w"> </span>switch<span class="w"> </span><span class="o">(</span><span class="m">0</span>,<span class="w"> </span><span class="m">1</span><span class="w"> </span>or<span class="w"> </span><span class="m">2</span><span class="o">)</span><span class="w">                                </span><span class="o">[</span><span class="m">0</span><span class="o">]</span>
+</span><span id="__span-13-9"><a id="__codelineno-13-9" name="__codelineno-13-9" href="#__codelineno-13-9"></a><span class="w">  </span>-o,<span class="w"> </span>--dot-filepath<span class="w">    </span>Path<span class="w"> </span>to<span class="w"> </span>dot<span class="w"> </span>output<span class="w"> </span>file<span class="w">                                               </span><span class="o">[</span>empty<span class="o">]</span>
+</span><span id="__span-13-10"><a id="__codelineno-13-10" name="__codelineno-13-10" href="#__codelineno-13-10"></a><span class="w">  </span>-c,<span class="w"> </span>--copy-mode<span class="w">       </span>Enable<span class="w"> </span>to<span class="w"> </span>copy<span class="w"> </span>data<span class="w"> </span><span class="k">in</span><span class="w"> </span>sequence<span class="w"> </span><span class="o">(</span>performance<span class="w"> </span>will<span class="w"> </span>be<span class="w"> </span>reduced<span class="o">)</span><span class="w">         </span><span class="o">[</span>false<span class="o">]</span>
+</span><span id="__span-13-11"><a id="__codelineno-13-11" name="__codelineno-13-11" href="#__codelineno-13-11"></a><span class="w">  </span>-b,<span class="w"> </span>--step-by-step<span class="w">    </span>Enable<span class="w"> </span>step-by-step<span class="w"> </span>sequence<span class="w"> </span>execution<span class="w"> </span><span class="o">(</span>performance<span class="w"> </span>will<span class="w"> </span>be<span class="w"> </span>reduced<span class="o">)</span><span class="w">  </span><span class="o">[</span>false<span class="o">]</span>
+</span><span id="__span-13-12"><a id="__codelineno-13-12" name="__codelineno-13-12" href="#__codelineno-13-12"></a><span class="w">  </span>-p,<span class="w"> </span>--print-stats<span class="w">     </span>Enable<span class="w"> </span>to<span class="w"> </span>print<span class="w"> </span>per<span class="w"> </span>task<span class="w"> </span>statistics<span class="w"> </span><span class="o">(</span>performance<span class="w"> </span>will<span class="w"> </span>be<span class="w"> </span>reduced<span class="o">)</span><span class="w">     </span><span class="o">[</span>false<span class="o">]</span>
+</span><span id="__span-13-13"><a id="__codelineno-13-13" name="__codelineno-13-13" href="#__codelineno-13-13"></a><span class="w">  </span>-g,<span class="w"> </span>--debug<span class="w">           </span>Enable<span class="w"> </span>task<span class="w"> </span>debug<span class="w"> </span>mode<span class="w"> </span><span class="o">(</span>print<span class="w"> </span>socket<span class="w"> </span>data<span class="o">)</span><span class="w">                            </span><span class="o">[</span>false<span class="o">]</span>
+</span><span id="__span-13-14"><a id="__codelineno-13-14" name="__codelineno-13-14" href="#__codelineno-13-14"></a><span class="w">  </span>-y,<span class="w"> </span>--cyclic-path<span class="w">     </span>Enable<span class="w"> </span>cyclic<span class="w"> </span>selection<span class="w"> </span>of<span class="w"> </span>the<span class="w"> </span>path<span class="w"> </span><span class="o">(</span>with<span class="w"> </span>this<span class="w"> </span><span class="sb">`</span>--path<span class="sb">`</span><span class="w"> </span>is<span class="w"> </span>ignored<span class="o">)</span><span class="w">   </span><span class="o">[</span>false<span class="o">]</span>
+</span><span id="__span-13-15"><a id="__codelineno-13-15" name="__codelineno-13-15" href="#__codelineno-13-15"></a><span class="w">  </span>-h,<span class="w"> </span>--help<span class="w">            </span>This<span class="w"> </span><span class="nb">help</span><span class="w">                                                             </span><span class="o">[</span>false<span class="o">]</span>
+</span></code></pre></div>
+<hr />
+<h2 id="simple-pipeline">Simple Pipeline<a class="headerlink" href="#simple-pipeline" title="Permanent link">&para;</a></h2>
+<p>This test is an implementation of a 3 stages pipeline. The first stage 
+<span class="arithmatex">\(S1 = t_1\)</span> reads data from a file. Thus, the <code>generate</code> task (<span class="arithmatex">\(t_1\)</span>) is 
+intrinsically sequential (= executes on a single thread). The second stage 
+<span class="arithmatex">\(S2 = t_{[2:7]}\)</span> just copies the data from the stage <span class="arithmatex">\(S_1\)</span> through <code>relay</code> 
+tasks. The <code>relay</code> tasks can be replicated and ran over multiple threads. 
+Finally, the last stage <span class="arithmatex">\(S3 = t_8\)</span> is a <code>Sink</code> that writes the data on the 
+file system. This operation is also intrinsically sequential.</p>
+<p>The purpose of this test is to validate that buffer exchanges between the 
+pipeline stages are working well. At the end, the code checks that the input 
+file and the output file are the same.</p>
+<figure>
+<p><img alt="Simple sequence" src="../assets/test_simple_pipeline.svg" width="1000" /></p>
+</figure>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>./bin/test-simple-pipeline<span class="w"> </span>-t<span class="w"> </span><span class="m">3</span><span class="w"> </span>--in-filepath<span class="w"> </span>~/.bashrc<span class="w"> </span>--out-filepath<span class="w"> </span>output_file
+</span></code></pre></div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The second output socket of the <code>generate</code> task (<span class="arithmatex">\(t_1\)</span>) is bound to the
+second input socket of the <code>send_count</code> task (<span class="arithmatex">\(t_8\)</span>). If the read data is 
+not a multiple of the stream size, then the stream is padded with 0. But,
+these zeros are NOT written on the file system by the <code>send_count</code> task.
+The second output socket of the <code>generate</code> task (<span class="arithmatex">\(t_1\)</span>) contains the number
+of bits that have been read from the input file. Then, the <code>send_count</code> task
+can avoid to write the padding zeros (if any).</p>
+</div>
+<p><strong>Command Line Arguments</strong></p>
+<p>The following verbatim is a copy-paste from the <code>-h</code> stdout:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>usage:<span class="w"> </span>./bin/test-simple-pipeline<span class="w"> </span><span class="o">[</span>options<span class="o">]</span>
+</span><span id="__span-15-2"><a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>
+</span><span id="__span-15-3"><a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a><span class="w">  </span>-t,<span class="w"> </span>--n-threads<span class="w">       </span>Number<span class="w"> </span>of<span class="w"> </span>threads<span class="w"> </span>to<span class="w"> </span>run<span class="w"> </span><span class="k">in</span><span class="w"> </span>parallel<span class="w">                                  </span><span class="o">[</span><span class="m">10</span><span class="o">]</span>
+</span><span id="__span-15-4"><a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a><span class="w">  </span>-f,<span class="w"> </span>--n-inter-frames<span class="w">  </span>Number<span class="w"> </span>of<span class="w"> </span>frames<span class="w"> </span>to<span class="w"> </span>process<span class="w"> </span><span class="k">in</span><span class="w"> </span>one<span class="w"> </span>task<span class="w">                               </span><span class="o">[</span><span class="m">1</span><span class="o">]</span>
+</span><span id="__span-15-5"><a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a><span class="w">  </span>-s,<span class="w"> </span>--sleep-time<span class="w">      </span>Sleep<span class="w"> </span><span class="nb">time</span><span class="w"> </span>duration<span class="w"> </span><span class="k">in</span><span class="w"> </span>one<span class="w"> </span>task<span class="w"> </span><span class="o">(</span>microseconds<span class="o">)</span><span class="w">                        </span><span class="o">[</span><span class="m">5</span><span class="o">]</span>
+</span><span id="__span-15-6"><a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a><span class="w">  </span>-d,<span class="w"> </span>--data-length<span class="w">     </span>Size<span class="w"> </span>of<span class="w"> </span>data<span class="w"> </span>to<span class="w"> </span>process<span class="w"> </span><span class="k">in</span><span class="w"> </span>one<span class="w"> </span>task<span class="w"> </span><span class="o">(</span><span class="k">in</span><span class="w"> </span>bytes<span class="o">)</span><span class="w">                        </span><span class="o">[</span><span class="m">2048</span><span class="o">]</span>
+</span><span id="__span-15-7"><a id="__codelineno-15-7" name="__codelineno-15-7" href="#__codelineno-15-7"></a><span class="w">  </span>-u,<span class="w"> </span>--buffer-size<span class="w">     </span>Size<span class="w"> </span>of<span class="w"> </span>the<span class="w"> </span>buffer<span class="w"> </span>between<span class="w"> </span>the<span class="w"> </span>different<span class="w"> </span>stages<span class="w"> </span>of<span class="w"> </span>the<span class="w"> </span>pipeline<span class="w">       </span><span class="o">[</span><span class="m">2048</span><span class="o">]</span>
+</span><span id="__span-15-8"><a id="__codelineno-15-8" name="__codelineno-15-8" href="#__codelineno-15-8"></a><span class="w">  </span>-o,<span class="w"> </span>--dot-filepath<span class="w">    </span>Path<span class="w"> </span>to<span class="w"> </span>dot<span class="w"> </span>output<span class="w"> </span>file<span class="w">                                               </span><span class="o">[</span>empty<span class="o">]</span>
+</span><span id="__span-15-9"><a id="__codelineno-15-9" name="__codelineno-15-9" href="#__codelineno-15-9"></a><span class="w">  </span>-i,<span class="w"> </span>--in-filepath<span class="w">     </span>Path<span class="w"> </span>to<span class="w"> </span>the<span class="w"> </span>input<span class="w"> </span>file<span class="w"> </span><span class="o">(</span>used<span class="w"> </span>to<span class="w"> </span>generate<span class="w"> </span>bits<span class="w"> </span>of<span class="w"> </span>the<span class="w"> </span>chain<span class="o">)</span><span class="w">           </span><span class="o">[</span>empty<span class="o">]</span>
+</span><span id="__span-15-10"><a id="__codelineno-15-10" name="__codelineno-15-10" href="#__codelineno-15-10"></a><span class="w">  </span>-j,<span class="w"> </span>--out-filepath<span class="w">    </span>Path<span class="w"> </span>to<span class="w"> </span>the<span class="w"> </span>output<span class="w"> </span>file<span class="w"> </span><span class="o">(</span>written<span class="w"> </span>at<span class="w"> </span>the<span class="w"> </span>end<span class="w"> </span>of<span class="w"> </span>the<span class="w"> </span>chain<span class="o">)</span><span class="w">             </span><span class="o">[</span><span class="s2">&quot;file.out&quot;</span><span class="o">]</span>
+</span><span id="__span-15-11"><a id="__codelineno-15-11" name="__codelineno-15-11" href="#__codelineno-15-11"></a><span class="w">  </span>-c,<span class="w"> </span>--copy-mode<span class="w">       </span>Enable<span class="w"> </span>to<span class="w"> </span>copy<span class="w"> </span>data<span class="w"> </span><span class="k">in</span><span class="w"> </span>sequence<span class="w"> </span><span class="o">(</span>performance<span class="w"> </span>will<span class="w"> </span>be<span class="w"> </span>reduced<span class="o">)</span><span class="w">         </span><span class="o">[</span>false<span class="o">]</span>
+</span><span id="__span-15-12"><a id="__codelineno-15-12" name="__codelineno-15-12" href="#__codelineno-15-12"></a><span class="w">  </span>-b,<span class="w"> </span>--step-by-step<span class="w">    </span>Enable<span class="w"> </span>step-by-step<span class="w"> </span>sequence<span class="w"> </span>execution<span class="w"> </span><span class="o">(</span>performance<span class="w"> </span>will<span class="w"> </span>be<span class="w"> </span>reduced<span class="o">)</span><span class="w">  </span><span class="o">[</span>false<span class="o">]</span>
+</span><span id="__span-15-13"><a id="__codelineno-15-13" name="__codelineno-15-13" href="#__codelineno-15-13"></a><span class="w">  </span>-p,<span class="w"> </span>--print-stats<span class="w">     </span>Enable<span class="w"> </span>to<span class="w"> </span>print<span class="w"> </span>per<span class="w"> </span>task<span class="w"> </span>statistics<span class="w"> </span><span class="o">(</span>performance<span class="w"> </span>will<span class="w"> </span>be<span class="w"> </span>reduced<span class="o">)</span><span class="w">     </span><span class="o">[</span>false<span class="o">]</span>
+</span><span id="__span-15-14"><a id="__codelineno-15-14" name="__codelineno-15-14" href="#__codelineno-15-14"></a><span class="w">  </span>-g,<span class="w"> </span>--debug<span class="w">           </span>Enable<span class="w"> </span>task<span class="w"> </span>debug<span class="w"> </span>mode<span class="w"> </span><span class="o">(</span>print<span class="w"> </span>socket<span class="w"> </span>data<span class="o">)</span><span class="w">                            </span><span class="o">[</span>false<span class="o">]</span>
+</span><span id="__span-15-15"><a id="__codelineno-15-15" name="__codelineno-15-15" href="#__codelineno-15-15"></a><span class="w">  </span>-q,<span class="w"> </span>--force-sequence<span class="w">  </span>Force<span class="w"> </span>sequence<span class="w"> </span>instead<span class="w"> </span>of<span class="w"> </span>pipeline<span class="w">                                    </span><span class="o">[</span>false<span class="o">]</span>
+</span><span id="__span-15-16"><a id="__codelineno-15-16" name="__codelineno-15-16" href="#__codelineno-15-16"></a><span class="w">  </span>-w,<span class="w"> </span>--active-waiting<span class="w">  </span>Enable<span class="w"> </span>active<span class="w"> </span>waiting<span class="w"> </span><span class="k">in</span><span class="w"> </span>the<span class="w"> </span>pipeline<span class="w"> </span>synchronizations<span class="w">                </span><span class="o">[</span>false<span class="o">]</span>
+</span><span id="__span-15-17"><a id="__codelineno-15-17" name="__codelineno-15-17" href="#__codelineno-15-17"></a><span class="w">  </span>-h,<span class="w"> </span>--help<span class="w">            </span>This<span class="w"> </span><span class="nb">help</span><span class="w">                                                             </span><span class="o">[</span>false<span class="o">]</span>
+</span></code></pre></div>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../concepts_overview/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Overview">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                Overview
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../tests_advanced/" class="md-footer__link md-footer__link--next" aria-label="Next: Advanced">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                Advanced
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "..", "features": ["toc.integrate", "navigation.top", "search.suggest", "search.highlight", "content.tabs.link", "content.code.annotation", "content.code.copy", "navigation.footer"], "search": "../assets/javascripts/workers/search.973d3a69.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.92b07e13.min.js"></script>
+      
+        <script src="../javascripts/mathjax.js"></script>
+      
+        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+    
+  </body>
+</html>
