@@ -4,6 +4,8 @@
 #include <sstream>
 
 #include "Tools/Exception/runtime_error/runtime_error.hpp"
+#include "Tools/Julia/Ref_keeper.hpp"
+#include "Tools/Julia/utils.hpp"
 #include "Tools/Thread/Thread_pool/Julia/Thread_pool_Julia.hpp"
 #include "Tools/Thread/Thread_pool/Thread_pool.hpp"
 
@@ -25,6 +27,8 @@ Thread_pool_Julia::thread_code(void* args)
     pthread_mutex_unlock(&data->lock);
     jl_task_t* ct = jl_current_task;
     int8_t gc_state = jl_gc_safe_enter(ct->ptls);
+
+    if (module != NULL) Ref_keeper::init(256);
 
     tp->func_init(tid);
 

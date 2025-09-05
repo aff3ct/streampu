@@ -270,6 +270,10 @@ if(SPU_TESTS)
         add_executable(spu-test-thread-pool $<TARGET_OBJECTS:spu-obj> ${CMAKE_CURRENT_SOURCE_DIR}/tests/julia/thread-pool.cpp)
         set_target_properties(spu-test-thread-pool PROPERTIES OUTPUT_NAME test-thread-pool POSITION_INDEPENDENT_CODE ON)
         list(APPEND spu_targets_list spu-test-thread-pool)
+
+        add_executable(spu-test-proxy $<TARGET_OBJECTS:spu-obj> ${CMAKE_CURRENT_SOURCE_DIR}/tests/julia/proxy.cpp)
+        set_target_properties(spu-test-proxy PROPERTIES OUTPUT_NAME test-proxy POSITION_INDEPENDENT_CODE ON)
+        list(APPEND spu_targets_list spu-test-proxy)
     endif()
 
     if(SPU_LINK_JLUNA)
@@ -884,6 +888,13 @@ if(SPU_TESTS)
         set_tests_properties(unit1::spu-test-thread-pool PROPERTIES LABELS thread-pool)
         add_test(NAME unit2::spu-test-thread-pool COMMAND spu-test-thread-pool -t 1)
         set_tests_properties(unit2::spu-test-thread-pool PROPERTIES LABELS thread-pool)
+
+        add_test(NAME unit0::spu-test-proxy COMMAND spu-test-proxy -t 2)
+        set_tests_properties(unit0::spu-test-proxy PROPERTIES LABELS proxy)
+        add_test(NAME unit1::spu-test-proxy COMMAND spu-test-proxy -t 100)
+        set_tests_properties(unit1::spu-test-proxy PROPERTIES LABELS proxy)
+        add_test(NAME unit2::spu-test-proxy COMMAND spu-test-proxy -t 1)
+        set_tests_properties(unit2::spu-test-proxy PROPERTIES LABELS proxy)
     endif()
 
     # check if the automatic pipeline scheduling is giving expected results

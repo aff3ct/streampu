@@ -1,3 +1,4 @@
+#include "Tools/Julia/Ref_keeper.hpp"
 #ifdef SPU_JULIA
 
 #include <fstream>
@@ -73,9 +74,8 @@ jl_eval_file(const char* filename)
 }
 
 void
-init(uint64_t n_threads)
+init(uint64_t n_proxies)
 {
-    (void)n_threads;
     (void)jl_eval_string(code);
     module = (jl_module_t*)jl_eval_string("return Test");
     assign = jl_get_function(module, "assign");
@@ -83,6 +83,7 @@ init(uint64_t n_threads)
     jl_get = jl_get_function(module, "unref");
     mk_ref = jl_get_function(module, "mk_ref");
     mycall = jl_get_function(module, "call");
+    Ref_keeper::init(n_proxies);
     // TODO init proxies
 }
 

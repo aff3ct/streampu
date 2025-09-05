@@ -120,7 +120,7 @@ Ref_keeper::update_value(size_t id, jl_value_t* v)
 void
 Ref_keeper::unmark(size_t id)
 {
-	marks[id] = last_result;
+    marks[id] = last_result;
     freelist.push_back(id);
 }
 

@@ -234,6 +234,12 @@
 #ifndef INTERFACE_WAITING_HPP__
 #include <Tools/Interface/Interface_waiting.hpp>
 #endif
+#ifndef PROXY_HPP_
+#include <Tools/Julia/Proxy.hpp>
+#endif
+#ifndef REF_KEEPER_HPP_
+#include <Tools/Julia/Ref_keeper.hpp>
+#endif
 #ifndef JULIA_UTILS_H_
 #include <Tools/Julia/utils.hpp>
 #endif

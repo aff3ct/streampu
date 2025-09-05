@@ -26,7 +26,7 @@ Proxy::~Proxy()
 }
 
 Proxy::
-operator jl_value_t*()
+operator jl_value_t*() const
 {
     return value;
 }
@@ -64,19 +64,19 @@ Proxy::operator=(const Proxy& oth)
 }
 
 jl_value_t*
-Proxy::operator()()
+Proxy::operator()() const
 {
     return Ref_keeper::get()->call0(value);
 }
 
 jl_value_t*
-Proxy::operator()(jl_value_t* a)
+Proxy::operator()(jl_value_t* a) const
 {
     return Ref_keeper::get()->call1(value, a);
 }
 
 jl_value_t*
-Proxy::operator()(const Proxy& a)
+Proxy::operator()(const Proxy& a) const
 {
     return (*this)(a.value);
 }

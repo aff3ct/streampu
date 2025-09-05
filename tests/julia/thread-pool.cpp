@@ -287,7 +287,7 @@ main(int argc, char** argv)
     print_verbose("main -- 6");
 
     std::vector<uint64_t> ref(n_threads);
-    std::function func_ref = [print_stats, verbose, &ref, &array](size_t tid)
+    std::function<void(const size_t)> func_ref = [print_stats, verbose, &ref, &array](size_t tid)
     {
         auto t0 = std::chrono::steady_clock::now();
         ref[tid] = computation1(tid, array);

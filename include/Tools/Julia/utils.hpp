@@ -20,7 +20,7 @@ jl_value_t*
 jl_eval_file(const char* filename);
 
 void
-init(uint64_t n_threads);
+init(uint64_t n_proxies);
 }
 }
 
