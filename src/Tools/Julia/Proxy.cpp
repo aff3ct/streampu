@@ -25,26 +25,22 @@ Proxy::~Proxy()
     Ref_keeper::get()->unmark(this->id);
 }
 
-Proxy::
-operator jl_value_t*() const
+Proxy::operator jl_value_t*() const
 {
     return value;
 }
 
-Proxy::
-operator const jl_value_t*() const
+Proxy::operator const jl_value_t*() const
 {
     return value;
 }
 
-Proxy::
-operator void*()
+Proxy::operator void*()
 {
     return (void*)value;
 }
 
-Proxy::
-operator const void*() const
+Proxy::operator const void*() const
 {
     return (const void*)value;
 }
