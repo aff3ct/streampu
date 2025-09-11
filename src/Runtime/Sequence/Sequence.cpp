@@ -13,7 +13,6 @@
 #include "Module/Stateful/Adaptor/Adaptor.hpp"
 #include "Module/Stateful/Probe/Probe.hpp"
 #include "Module/Stateful/Switcher/Switcher.hpp"
-#include "Module/Stateless/Stateless_Jluna.hpp"
 #include "Runtime/Sequence/Sequence.hpp"
 #include "Runtime/Socket/Socket.hpp"
 #include "Runtime/Task/Task.hpp"
@@ -22,12 +21,14 @@
 #include "Tools/Signal_handler/Signal_handler.hpp"
 #include "Tools/Thread/Thread_pinning/Thread_pinning.hpp"
 #include "Tools/Thread/Thread_pinning/Thread_pinning_utils.hpp"
-
+#include "Tools/Thread/Thread_pool/Standard/Thread_pool_standard.hpp"
+#ifdef SPU_JULIA
 #include "Module/Stateless/Stateless_Julia.hpp"
 #include "Tools/Thread/Thread_pool/Julia/Thread_pool_Julia.hpp"
-#include "Tools/Thread/Thread_pool/Standard/Thread_pool_standard.hpp"
 #ifdef SPU_JLUNA
+#include "Module/Stateless/Stateless_Jluna.hpp"
 #include "Tools/Thread/Thread_pool/Jluna/Thread_pool_Jluna_v1.hpp"
+#endif
 #endif
 
 using namespace spu;
@@ -530,10 +531,21 @@ Sequence::init(const std::vector<TA*>& firsts, const std::vector<TA*>& lasts, co
         this->thread_pool.reset(new tools::Thread_pool_standard(this->n_threads - 1));
 #else
 #ifdef SPU_JULIA
-
-    this->thread_pool.reset(new tools::Thread_pool_Julia(this->n_threads - 1));
+    bool has_julia = false;
+    for (auto m : this->get_modules())
+    {
+        if (dynamic_cast<module::Stateless_Julia*>(m))
+        {
+            has_julia = true;
+            break;
+        }
+    }
+    if (has_julia)
+        this->thread_pool.reset(new tools::Thread_pool_Julia(this->n_threads - 1));
+    else
+        this->thread_pool.reset(new tools::Thread_pool_standard(this->n_threads - 1));
 #else
-    // this->thread_pool.reset(new tools::Thread_pool_standard(this->n_threads - 1));
+    this->thread_pool.reset(new tools::Thread_pool_standard(this->n_threads - 1));
 #endif /* SPU_JULIA */
 #endif /* SPU_JLUNA */
 
