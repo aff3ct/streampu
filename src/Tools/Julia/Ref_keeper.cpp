@@ -1,3 +1,4 @@
+#include "Tools/Exception/runtime_error/runtime_error.hpp"
 #ifdef SPU_JULIA
 
 #include <cstddef>
@@ -34,6 +35,22 @@ Ref_keeper::call1(jl_function_t* f, jl_value_t* a)
     return jl_call3(mycall, last_result, f, a);
 }
 
+static inline jl_value_t*
+_call(jl_function_t* call, jl_value_t* ref, jl_function_t* f, jl_value_t** args, size_t n)
+{
+    jl_value_t** args2;
+    JL_GC_PUSHARGS(args2, n + 2);
+    args2[0] = ref;
+    args2[1] = f;
+    for (size_t i = 0; i < n; i++)
+    {
+        args2[i + 2] = args[i];
+    }
+    jl_value_t* res = jl_call(call, args2, n + 2); // NULL for some reason
+    JL_GC_POP();
+    return res;
+}
+
 jl_value_t*
 Ref_keeper::call(jl_function_t* f, jl_value_t** args, size_t n)
 {
@@ -48,6 +65,16 @@ Ref_keeper::call(jl_function_t* f, jl_value_t** args, size_t n)
     jl_value_t* res = jl_call(mycall, args2, n + 2); // NULL for some reason
     JL_GC_POP();
     return res;
+}
+
+jl_value_t*
+Ref_keeper::safe_call(jl_function_t* f, jl_value_t** args, size_t n)
+{
+    jl_value_t* res = _call(jl_safe_call, last_result, f, args, n);
+    if (jl_unbox_bool(jl_get_nth_field(res, 1)))
+        throw runtime_error(__FILE__, __LINE__, __func__, jl_string_ptr(jl_get_nth_field(res, 3)));
+    // throw JuliaException(jl_get_nth_field(res, 2), jl_string_ptr(jl_get_nth_field(res, 3)));
+    return jl_get_nth_field(res, 0);
 }
 
 jl_value_t*

@@ -39,6 +39,7 @@ class Ref_keeper
     jl_value_t* call0(jl_function_t* f);
     jl_value_t* call1(jl_function_t* f, jl_value_t* a);
     jl_value_t* call(jl_function_t* f, jl_value_t** args, size_t n);
+    jl_value_t* safe_call(jl_function_t* f, jl_value_t** args, size_t n);
 
     jl_value_t* eval(std::string code);
     jl_value_t* unsafe_eval(std::string code);
