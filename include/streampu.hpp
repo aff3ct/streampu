@@ -126,6 +126,9 @@
 #ifndef STATELESS_JLUNA_HPP_
 #include <Module/Stateless/Stateless_Jluna.hpp>
 #endif
+#ifndef STATELESS_JULIA_HPP_
+#include <Module/Stateless/Stateless_Julia.hpp>
+#endif
 #ifndef PIPELINE_HPP_
 #include <Runtime/Pipeline/Pipeline.hpp>
 #endif

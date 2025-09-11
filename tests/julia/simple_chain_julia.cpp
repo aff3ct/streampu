@@ -1,8 +1,10 @@
+#include "Tools/Julia/Ref_keeper.hpp"
+#include "Tools/Julia/utils.hpp"
 #include <atomic>
 #include <cstdlib>
 #include <getopt.h>
 #include <iostream>
-#include <jluna.hpp>
+#include <julia.h>
 #include <memory>
 #include <string>
 #include <vector>
@@ -14,7 +16,8 @@ using namespace spu::runtime;
 int
 main(int argc, char** argv)
 {
-    jluna::initialize(1);
+    jl_init();
+    tools::init(256);
 
     tools::Signal_handler::init();
 
@@ -120,7 +123,7 @@ main(int argc, char** argv)
                           << "[" << (print_stats ? "true" : "false") << "]" << std::endl;
                 std::cout << "  -J, --jl-safe         "
                           << "Enable Julia safe mode (throw exceptions to C++)                      "
-                          << "[" << (debug ? "true" : "false") << "]" << std::endl;
+                          << "[" << (jl_safe ? "true" : "false") << "]" << std::endl;
                 std::cout << "  -g, --debug           "
                           << "Enable task debug mode (print socket data)                            "
                           << "[" << (debug ? "true" : "false") << "]" << std::endl;
@@ -161,13 +164,35 @@ main(int argc, char** argv)
     module::Initializer<uint8_t> initializer(data_length);
     module::Finalizer<uint8_t> finalizer(data_length);
 
-    module::Stateless_Jluna incr;
+    module::Stateless_Julia incr;
     runtime::Task& t = incr.create_task("increment");
     incr.create_socket_in<uint8_t>(t, "in", data_length);
     incr.create_socket_out<uint8_t>(t, "out", data_length);
     incr.create_constant<uint32_t>(t, sleep_time_us * 1000); // wait time in ns
     // incr.create_constant<std::string>(t, "Adrien");
     // incr.create_codelet_file(t, "../tests/julia/increment.jl");
+    // jl_eval_string(R""""(
+    //     function increment(sck_in, sck_out, cst_wait_time_ns, rnt_frame_id, rnt_n_frames_per_wave)
+    //         if cst_wait_time_ns > 0
+    //             start_incr = time_ns()
+    //         end
+    //
+    //         for n in eachindex(sck_in)
+    //             sck_out[n] = sck_in[n] + 1
+    //         end
+    //
+    //         if cst_wait_time_ns != 0
+    //             stop_incr = time_ns()
+    //             elapse_incr = stop_incr - start_incr
+    //
+    //             while elapse_incr < cst_wait_time_ns
+    //                 elapse_incr = time_ns() - start_incr
+    //             end
+    //         end
+    //
+    //         return 0
+    //     end
+    // )"""");
     incr.create_codelet(t, R""""(
         function increment(sck_in, sck_out, cst_wait_time_ns, rnt_frame_id, rnt_n_frames_per_wave)
             if cst_wait_time_ns > 0
@@ -191,7 +216,7 @@ main(int argc, char** argv)
         end
     )"""");
 
-    std::vector<std::shared_ptr<module::Stateless_Jluna>> incs(6);
+    std::vector<std::shared_ptr<module::Stateless_Julia>> incs(6);
     for (size_t s = 0; s < incs.size(); s++)
     {
         incs[s].reset(incr.clone());

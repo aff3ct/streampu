@@ -23,6 +23,8 @@
 #include "Tools/Thread/Thread_pinning/Thread_pinning.hpp"
 #include "Tools/Thread/Thread_pinning/Thread_pinning_utils.hpp"
 
+#include "Module/Stateless/Stateless_Julia.hpp"
+#include "Tools/Thread/Thread_pool/Julia/Thread_pool_Julia.hpp"
 #include "Tools/Thread/Thread_pool/Standard/Thread_pool_standard.hpp"
 #ifdef SPU_JLUNA
 #include "Tools/Thread/Thread_pool/Jluna/Thread_pool_Jluna_v1.hpp"
@@ -527,8 +529,13 @@ Sequence::init(const std::vector<TA*>& firsts, const std::vector<TA*>& lasts, co
     else
         this->thread_pool.reset(new tools::Thread_pool_standard(this->n_threads - 1));
 #else
-    this->thread_pool.reset(new tools::Thread_pool_standard(this->n_threads - 1));
-#endif
+#ifdef SPU_JULIA
+
+    this->thread_pool.reset(new tools::Thread_pool_Julia(this->n_threads - 1));
+#else
+    // this->thread_pool.reset(new tools::Thread_pool_standard(this->n_threads - 1));
+#endif /* SPU_JULIA */
+#endif /* SPU_JLUNA */
 
     std::function<void(const size_t)> func_init = [this](const size_t tid) { this->eval_jl_modules(tid + 1); };
     this->thread_pool->set_func_init(func_init);
@@ -540,7 +547,7 @@ Sequence::init(const std::vector<TA*>& firsts, const std::vector<TA*>& lasts, co
 void
 Sequence::eval_jl_modules(const size_t tid)
 {
-#ifdef SPU_JLUNA
+#ifdef SPU_JULIA
     if (this->is_thread_pinning())
     {
         if (!puids.empty())
@@ -549,11 +556,11 @@ Sequence::eval_jl_modules(const size_t tid)
             tools::Thread_pinning::pin(this->pin_objects_per_thread[0]);
     }
 
-    for (module::Stateless_Jluna* jl_m : this->jl_modules[tid])
+    for (auto* jl_m : this->jl_modules[tid])
         if (!jl_m->is_eval()) jl_m->eval();
 
     if (this->is_thread_pinning()) tools::Thread_pinning::unpin();
-#endif /* SPU_JLUNA */
+#endif /* SPU_JULIA */
 }
 
 Sequence*
@@ -1469,14 +1476,18 @@ Sequence::replicate(const tools::Digraph_node<SS>* sequence)
             }
 
     std::vector<MO*> modules_vec;
-#ifdef SPU_JLUNA
+#ifdef SPU_JULIA /* Also true for jluna */
     size_t jl_modules_count = 0;
-#endif /* SPU_JLUNA */
+#endif /* SPU_JULIA */
     for (auto m : modules_set)
     {
         modules_vec.push_back(m);
 #ifdef SPU_JLUNA
         if (dynamic_cast<const module::Stateless_Jluna*>(m)) jl_modules_count++;
+#else
+#ifdef SPU_JULIA
+        if (dynamic_cast<const module::Stateless_Julia*>(m)) jl_modules_count++;
+#endif /* SPU_JULIA */
 #endif /* SPU_JLUNA */
     }
 
@@ -1494,9 +1505,9 @@ Sequence::replicate(const tools::Digraph_node<SS>* sequence)
 
         this->modules[tid].resize(modules_vec.size());
         this->all_modules[tid + (this->tasks_inplace ? 1 : 0)].resize(modules_vec.size());
-#ifdef SPU_JLUNA
+#ifdef SPU_JULIA
         this->jl_modules[tid + (this->tasks_inplace ? 1 : 0)].resize(jl_modules_count);
-#endif /* SPU_JLUNA */
+#endif /* SPU_JULIA */
         for (size_t m = 0; m < modules_vec.size(); m++)
         {
             try
@@ -1516,6 +1527,12 @@ Sequence::replicate(const tools::Digraph_node<SS>* sequence)
             module::Stateless_Jluna* jl_m = nullptr;
             if ((jl_m = dynamic_cast<module::Stateless_Jluna*>(this->modules[tid][m].get())))
                 this->jl_modules[tid + (this->tasks_inplace ? 1 : 0)][m] = jl_m;
+#else
+#ifdef SPU_JULIA
+            module::Stateless_Julia* jl_m = nullptr;
+            if ((jl_m = dynamic_cast<module::Stateless_Julia*>(this->modules[tid][m].get())))
+                this->jl_modules[tid + (this->tasks_inplace ? 1 : 0)][m] = jl_m;
+#endif /* SPU_JULIA */
 #endif /* SPU_JLUNA */
         }
 
@@ -2682,5 +2699,10 @@ Sequence::init_jl_module(module::Module* m)
 #ifdef SPU_JLUNA
     module::Stateless_Jluna* jl_m = nullptr;
     if ((jl_m = dynamic_cast<module::Stateless_Jluna*>(m))) this->jl_modules[0].push_back(jl_m);
+#else
+#ifdef SPU_JULIA
+    module::Stateless_Julia* jl_m = nullptr;
+    if ((jl_m = dynamic_cast<module::Stateless_Julia*>(m))) this->jl_modules[0].push_back(jl_m);
+#endif /* SPU_JULIA */
 #endif /* SPU_JLUNA */
 }
