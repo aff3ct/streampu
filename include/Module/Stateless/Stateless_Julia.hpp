@@ -84,6 +84,9 @@ class Stateless_Julia final
     void create_cdl_file(runtime::Task& task, const std::string& julia_filepath);
     void create_codelet_file(runtime::Task& task, const std::string& julia_filepath);
 
+    void create_cdl_function(runtime::Task& task, jl_function_t* f);
+    void create_codelet_function(runtime::Task& task, jl_function_t* f);
+
     void eval();
 
   private:

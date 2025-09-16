@@ -1,12 +1,13 @@
-#include <cstddef>
-#include <pthread.h>
 #ifdef SPU_JULIA
 
+#include <cstddef>
 #include <iostream>
 #include <julia.h>
+#include <pthread.h>
 #include <sstream>
 
 #include "Module/Stateless/Stateless_Julia.hpp"
+#include "Runtime/Task/Task.hpp"
 #include "Tools/Exception/exception.hpp"
 #include "Tools/Julia/Proxy.hpp"
 #include "Tools/Julia/utils.hpp"
@@ -240,6 +241,36 @@ Stateless_Julia::create_cdl_file(runtime::Task& task, const std::string& julia_f
     this->create_codelet_file(task, julia_filepath);
 }
 
+// TODO: test
+void
+Stateless_Julia::create_codelet_function(runtime::Task& task, jl_function_t* f)
+{
+    if ((*this->n_clones) > 0)
+    {
+        std::stringstream message;
+        message << "It is not possible to create a new codelet when clones exist ('n_clones' = " << (*this->n_clones)
+                << ").";
+        throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
+    }
+
+    size_t tid = Stateless_Julia::get_task_id(task);
+
+    this->jl_evaluate->push_back(
+      [this, f, tid]()
+      {
+          size_t f_id = tools::gc_preserve(f);
+          this->jl_constants_ptr[tid].push_back(f);
+          this->jl_constants_id[tid].push_back(f_id);
+      });
+    this->_create_codelet(task);
+}
+
+void
+Stateless_Julia::create_cdl_function(runtime::Task& task, jl_function_t* f)
+{
+    this->create_codelet_function(task, f);
+}
+
 void
 Stateless_Julia::_create_codelet(runtime::Task& task)
 {
@@ -291,9 +322,11 @@ Stateless_Julia::_create_codelet(runtime::Task& task)
 
           m.jl_func_args[tid].resize(1 + task.sockets.size() + m.jl_constants_ptr[tid].size() + 1);
 
-          jl_function_t* jl_codelet = jl_get_function(jl_main_module, task.get_name().c_str());
-
-          m.jl_func_args[tid][0] = (void*)jl_codelet;
+          if (m.jl_func_args[tid][0] == nullptr)
+          {
+              jl_function_t* jl_codelet = jl_get_function(jl_main_module, task.get_name().c_str());
+              m.jl_func_args[tid][0] = (void*)jl_codelet;
+          }
 
           for (size_t i = 0; i < m.jl_constants_ptr[tid].size(); i++)
               m.jl_func_args[tid][m.jl_func_args[tid].size() - (m.jl_constants_ptr[tid].size() + 2) + i] =

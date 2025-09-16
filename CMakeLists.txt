@@ -440,7 +440,7 @@ endif()
 
 # julia
 if(SPU_LINK_JULIA)
-    find_package(Julia 1.9.0 REQUIRED) # because Julia thread adoption feature is required
+    find_package(Julia 1.10.9 REQUIRED) # because Julia thread adoption feature is required
     spu_target_link_libraries("${spu_targets_list}" PUBLIC "Julia::Julia")
     spu_target_compile_definitions("${spu_targets_list}" PUBLIC "SPU_JULIA")
 endif()
