@@ -3,9 +3,12 @@
 
 #ifdef SPU_JULIA
 
+#include <condition_variable>
+#include <mutex>
 #include <pthread.h>
 #include <semaphore.h>
 
+#include "Tools/Thread/Thread_barrier/Standard/Thread_barrier_standard.hpp"
 #include "Tools/Thread/Thread_pool/Thread_pool.hpp"
 
 namespace spu
@@ -25,8 +28,9 @@ class Thread_pool_Julia : public Thread_pool
 
     static void* thread_code(void* args);
 
-    pthread_barrier_t barrier;
-    pthread_barrier_t cond;
+    std::vector<std::mutex> mtx;
+    std::vector<std::condition_variable> cnd;
+    Thread_barrier_standard barrier;
     std::vector<pthread_t> pool;
 
   public:

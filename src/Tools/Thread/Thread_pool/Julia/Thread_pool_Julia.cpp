@@ -34,13 +34,11 @@ Thread_pool_Julia::thread_code(void* args)
 
     while (!tp->stop_threads)
     {
-        pthread_barrier_wait(&tp->barrier);
-        pthread_barrier_wait(&tp->cond);
+        std::unique_lock<std::mutex> lock(tp->mtx[tid]);
+        tp->barrier.arrive();
+        tp->cnd[tid].wait(lock);
 
-        if (!tp->stop_threads)
-        {
-            tp->func_exec(tid);
-        }
+        if (!tp->stop_threads) tp->func_exec(tid);
     }
 
     tp->func_deinit(tid);
@@ -50,9 +48,10 @@ Thread_pool_Julia::thread_code(void* args)
 Thread_pool_Julia::Thread_pool_Julia(const size_t n_threads)
   : Thread_pool(n_threads)
   , pool(n_threads)
+  , mtx(n_threads)
+  , cnd(n_threads)
+  , barrier(n_threads)
 {
-    pthread_barrier_init(&this->barrier, NULL, n_threads + 1);
-    pthread_barrier_init(&this->cond, NULL, n_threads + 1);
 }
 
 Thread_pool_Julia::Thread_pool_Julia(size_t n_threads, std::function<void(const size_t)>& func_init)
@@ -62,18 +61,23 @@ Thread_pool_Julia::Thread_pool_Julia(size_t n_threads, std::function<void(const 
     this->init();
 }
 
-Thread_pool_Julia::Thread_pool_Julia(const Thread_pool_Julia& oth)
-  : Thread_pool(oth)
+Thread_pool_Julia::Thread_pool_Julia(const Thread_pool_Julia& other)
+  : Thread_pool(other)
+  , pool(other.n_threads)
+  , mtx(other.n_threads)
+  , cnd(other.n_threads)
+  , barrier(other.barrier)
 {
-    pthread_barrier_init(&this->barrier, NULL, n_threads + 1);
-    pthread_barrier_init(&this->cond, NULL, n_threads + 1);
 }
 
 Thread_pool_Julia::~Thread_pool_Julia()
 {
     this->stop_threads = true;
-
-    pthread_barrier_wait(&this->cond);
+    for (size_t tid = 0; tid < this->n_threads; tid++)
+    {
+        std::lock_guard<std::mutex> lock(this->mtx[tid]);
+        this->cnd[tid].notify_one();
+    }
 
     void* ret;
     for (auto& t : pool)
@@ -124,12 +128,13 @@ Thread_pool_Julia::run(const bool async)
         throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
     }
 
-    pthread_barrier_wait(&this->cond);
-
-    if (!async)
+    for (size_t tid = 0; tid < n_threads; tid++)
     {
-        this->wait();
+        std::lock_guard<std::mutex> lock(this->mtx[tid]);
+        this->cnd[tid].notify_one();
     }
+
+    if (!async) this->barrier.wait();
 }
 
 void
@@ -142,7 +147,7 @@ Thread_pool_Julia::run(std::function<void(const size_t)>& func_exec, bool async)
 void
 Thread_pool_Julia::wait()
 {
-    pthread_barrier_wait(&this->barrier);
+    this->barrier.wait();
     this->initialized = true;
 }
 
