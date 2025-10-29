@@ -28,9 +28,7 @@ option(SPU_HELGRIND            "Annotate the code for Helgrind thread error dete
 option(SPU_OVERRIDE_VERSION    "Compile without .git directory, provided a version and hash" OFF)
 
 if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/.git" AND NOT SPU_OVERRIDE_VERSION)
-    message(FATAL_ERROR "The '.git' folder can't be found, StreamPU can't be compiled if it is not cloned "
-                        "from a Git repository. Please do not download archives from GitHub and make a Git "
-                        "clone instead (git clone https://github.com/aff3ct/streampu.git).")
+    message(WARNING "StreamPU - '.git' folder can't be found, this is dangerous!")
 endif()
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -64,6 +62,11 @@ if(NOT SPU_OVERRIDE_VERSION)
     git_describe(GIT_VERSION "--tags" "--abbrev=7")
 else()
     set(GIT_VERSION ${SPU_OVERRIDE_VERSION})
+endif()
+
+if(NOT GIT_VERSION)
+    message(WARNING "StreamPU - Var GIT_VERSION is not defined, forcing a fake version")
+    set(GIT_VERSION v0.0.0)
 endif()
 
 string(REGEX REPLACE "^v"             ""    SPU_VERSION_FULL  ${GIT_VERSION})
