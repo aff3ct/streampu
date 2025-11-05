@@ -167,7 +167,8 @@ main(int argc, char** argv)
     incr.create_socket_out<uint8_t>(t, "out", data_length);
     incr.create_constant<uint32_t>(t, sleep_time_us * 1000); // wait time in ns
     // incr.create_constant<std::string>(t, "Adrien");
-    // incr.create_codelet_file(t, "../tests/julia/increment.jl");
+    incr.create_codelet_file(t, "../tests/julia/increment.jl");
+    /*
     incr.create_codelet(t, R""""(
         function increment(sck_in, sck_out, cst_wait_time_ns, rnt_frame_id, rnt_n_frames_per_wave)
             if cst_wait_time_ns > 0
@@ -190,7 +191,7 @@ main(int argc, char** argv)
             return 0
         end
     )"""");
-
+    */
     std::vector<std::shared_ptr<module::Stateless_Jluna>> incs(6);
     for (size_t s = 0; s < incs.size(); s++)
     {

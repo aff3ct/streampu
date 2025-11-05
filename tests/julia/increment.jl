@@ -68,3 +68,24 @@ function increment2(sck_in, sck_out, cst_wait_time_ns, rnt_frame_id, rnt_n_frame
 
     return 0
 end
+
+function incrementf(sck_fwd, cst_wait_time_ns, rnt_frame_id, rnt_n_frames_per_wave)
+    if cst_wait_time_ns > 0
+        start_incr = time_ns()
+    end
+
+    for n in eachindex(sck_fwd)
+        sck_fwd[n] = sck_fwd[n] + 1
+    end
+
+    if cst_wait_time_ns != 0
+        stop_incr = time_ns()
+        elapse_incr = stop_incr - start_incr
+
+        while elapse_incr < cst_wait_time_ns
+            elapse_incr = time_ns() - start_incr
+        end
+    end
+
+    return 0
+end
