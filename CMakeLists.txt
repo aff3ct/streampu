@@ -295,7 +295,7 @@ if(SPU_TESTS)
         list(APPEND spu_targets_list spu-test-simple-chain-jluna)
 
         add_executable(spu-test-simple-chain-fwd-jluna $<TARGET_OBJECTS:spu-obj> ${CMAKE_CURRENT_SOURCE_DIR}/tests/julia/simple_chain_fwd_jluna.cpp)
-        set_target_properties(spu-test-simple-chain-fwd-jluna PROPERTIES OUTPUT_NAME test-simple-chain-fwd-julia POSITION_INDEPENDENT_CODE ON)
+        set_target_properties(spu-test-simple-chain-fwd-jluna PROPERTIES OUTPUT_NAME test-simple-chain-fwd-jluna POSITION_INDEPENDENT_CODE ON)
         list(APPEND spu_tests_list spu-test-simple-chain-fwd-jluna)
         list(APPEND spu_targets_list spu-test-simple-chain-fwd-jluna)
     endif()
