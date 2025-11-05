@@ -13,8 +13,7 @@ using namespace spu::runtime;
 int
 main(int argc, char** argv)
 {
-    jl_init();
-    tools::init(256);
+    jluna::initialize(1);
 
     tools::Signal_handler::init();
 
