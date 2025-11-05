@@ -2,6 +2,7 @@
 #include <cstdlib>
 #include <getopt.h>
 #include <iostream>
+#include <jluna.hpp>
 #include <memory>
 #include <string>
 #include <vector>
@@ -160,7 +161,7 @@ main(int argc, char** argv)
     module::Initializer<uint8_t> initializer(data_length);
     module::Finalizer<uint8_t> finalizer(data_length);
 
-    module::Stateless_Julia incr;
+    module::Stateless_Jluna incr;
     runtime::Task& t = incr.create_task("incrementf");
     incr.create_socket_fwd<uint8_t>(t, "fwd", data_length);
     incr.create_constant<uint32_t>(t, sleep_time_us * 1000); // wait time in ns
@@ -171,7 +172,7 @@ main(int argc, char** argv)
             end
 
             for n in eachindex(sck_fwd)
-                sck_fwd[n] = (sck_fwd[n] + 1) & 0xff
+                sck_fwd[n] = sck_fwd[n] + 1
             end
 
             if cst_wait_time_ns != 0
@@ -187,7 +188,7 @@ main(int argc, char** argv)
         end
     )"""");
 
-    std::vector<std::shared_ptr<module::Stateless_Julia>> incs(6);
+    std::vector<std::shared_ptr<module::Stateless_Jluna>> incs(6);
     for (size_t s = 0; s < incs.size(); s++)
     {
         incs[s].reset(incr.clone());
