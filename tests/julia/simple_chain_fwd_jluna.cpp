@@ -138,7 +138,7 @@ main(int argc, char** argv)
     }
 
     std::cout << "###############################################" << std::endl;
-    std::cout << "# Micro-benchmark: Simple chain forward Julia #" << std::endl;
+    std::cout << "# Micro-benchmark: Simple chain forward Jluna #" << std::endl;
     std::cout << "###############################################" << std::endl;
     std::cout << "#" << std::endl;
 
