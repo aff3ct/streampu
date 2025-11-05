@@ -276,6 +276,11 @@ if(SPU_TESTS)
         list(APPEND spu_tests_list spu-test-simple-chain-julia)
         list(APPEND spu_targets_list spu-test-simple-chain-julia)
 
+        add_executable(spu-test-simple-chain-fwd-julia $<TARGET_OBJECTS:spu-obj> ${CMAKE_CURRENT_SOURCE_DIR}/tests/julia/simple_chain_fwd_julia.cpp)
+        set_target_properties(spu-test-simple-chain-fwd-julia PROPERTIES OUTPUT_NAME test-simple-chain-fwd-julia POSITION_INDEPENDENT_CODE ON)
+        list(APPEND spu_tests_list spu-test-simple-chain-fwd-julia)
+        list(APPEND spu_targets_list spu-test-simple-chain-fwd-julia)
+
         if(NOT APPLE)
             add_executable(spu-test-jl_adopt_thread $<TARGET_OBJECTS:spu-obj> ${CMAKE_CURRENT_SOURCE_DIR}/tests/julia/jl_adopt_thread.cpp)
             set_target_properties(spu-test-jl_adopt_thread PROPERTIES OUTPUT_NAME test-jl_adopt_thread POSITION_INDEPENDENT_CODE ON)
@@ -288,11 +293,6 @@ if(SPU_TESTS)
         set_target_properties(spu-test-simple-chain-jluna PROPERTIES OUTPUT_NAME test-simple-chain-jluna POSITION_INDEPENDENT_CODE ON)
         list(APPEND spu_tests_list spu-test-simple-chain-jluna)
         list(APPEND spu_targets_list spu-test-simple-chain-jluna)
-
-        add_executable(spu-test-simple-chain-fwd-julia $<TARGET_OBJECTS:spu-obj> ${CMAKE_CURRENT_SOURCE_DIR}/tests/julia/simple_chain_fwd_julia.cpp)
-        set_target_properties(spu-test-simple-chain-fwd-julia PROPERTIES OUTPUT_NAME test-simple-chain-fwd-julia POSITION_INDEPENDENT_CODE ON)
-        list(APPEND spu_tests_list spu-test-simple-chain-fwd-julia)
-        list(APPEND spu_targets_list spu-test-simple-chain-fwd-julia)
     endif()
 endif()
 
