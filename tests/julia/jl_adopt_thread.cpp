@@ -128,6 +128,9 @@ main(int argc, char** argv)
         pthread_create(&threads[i], NULL, thread_code, (void*)&args);
     }
 
+    jl_task_t* ct = jl_current_task;
+    int8_t gc_state = jl_gc_safe_enter(ct->ptls);
+
     if (verbose)
     {
         std::stringstream msg;
