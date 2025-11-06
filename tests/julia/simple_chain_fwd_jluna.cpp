@@ -184,7 +184,7 @@ main(int argc, char** argv)
                 end
 
                 for n in eachindex(sck_fwd)
-                    sck_fwd[n] = sck_fwd[n] + 1
+                    sck_fwd[n] = (sck_fwd[n] + 1) & 0xff
                 end
 
                 if cst_wait_time_ns != 0
