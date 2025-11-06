@@ -28,6 +28,7 @@ main(int argc, char** argv)
                           { "print-stats", no_argument, NULL, 'p' },
                           { "step-by-step", no_argument, NULL, 'b' },
                           { "jl-safe", no_argument, NULL, 'J' },
+                          { "jl-extern", no_argument, NULL, 'E' },
                           { "debug", no_argument, NULL, 'g' },
                           { "verbose", no_argument, NULL, 'v' },
                           { "help", no_argument, NULL, 'h' },
@@ -45,10 +46,11 @@ main(int argc, char** argv)
     bool debug = false;
     bool verbose = false;
     bool jl_safe = false;
+    bool jl_extern = false;
 
     while (1)
     {
-        const int opt = getopt_long(argc, argv, "t:f:s:d:e:o:cpbgvhJ", longopts, 0);
+        const int opt = getopt_long(argc, argv, "t:f:s:d:e:o:cpbgvhJE", longopts, 0);
         if (opt == -1) break;
         switch (opt)
         {
@@ -88,6 +90,9 @@ main(int argc, char** argv)
             case 'J':
                 jl_safe = true;
                 break;
+            case 'E':
+                jl_extern = true;
+                break;
             case 'h':
                 std::cout << "usage: " << argv[0] << " [options]" << std::endl;
                 std::cout << std::endl;
@@ -121,6 +126,9 @@ main(int argc, char** argv)
                 std::cout << "  -J, --jl-safe         "
                           << "Enable Julia safe mode (throw exceptions to C++)                      "
                           << "[" << (debug ? "true" : "false") << "]" << std::endl;
+                std::cout << "  -E, --jl-extern       "
+                          << "Evaluate the Julia code from an external file                         "
+                          << "[" << (jl_extern ? "true" : "false") << "]" << std::endl;
                 std::cout << "  -g, --debug           "
                           << "Enable task debug mode (print socket data)                            "
                           << "[" << (debug ? "true" : "false") << "]" << std::endl;
@@ -153,6 +161,7 @@ main(int argc, char** argv)
     std::cout << "#   - print_stats    = " << (print_stats ? "true" : "false") << std::endl;
     std::cout << "#   - step_by_step   = " << (step_by_step ? "true" : "false") << std::endl;
     std::cout << "#   - jl_safe        = " << (jl_safe ? "true" : "false") << std::endl;
+    std::cout << "#   - jl_extern      = " << (jl_extern ? "true" : "false") << std::endl;
     std::cout << "#   - debug          = " << (debug ? "true" : "false") << std::endl;
     std::cout << "#   - verbose        = " << (verbose ? "true" : "false") << std::endl;
     std::cout << "#" << std::endl;
@@ -167,31 +176,32 @@ main(int argc, char** argv)
     incr.create_socket_out<uint8_t>(t, "out", data_length);
     incr.create_constant<uint32_t>(t, sleep_time_us * 1000); // wait time in ns
     // incr.create_constant<std::string>(t, "Adrien");
-    incr.create_codelet_file(t, "../tests/julia/increment.jl");
-    /*
-    incr.create_codelet(t, R""""(
-        function increment(sck_in, sck_out, cst_wait_time_ns, rnt_frame_id, rnt_n_frames_per_wave)
-            if cst_wait_time_ns > 0
-                start_incr = time_ns()
-            end
-
-            for n in eachindex(sck_in)
-                sck_out[n] = sck_in[n] + 1
-            end
-
-            if cst_wait_time_ns != 0
-                stop_incr = time_ns()
-                elapse_incr = stop_incr - start_incr
-
-                while elapse_incr < cst_wait_time_ns
-                    elapse_incr = time_ns() - start_incr
+    if (jl_extern)
+        incr.create_codelet_file(t, "../tests/julia/increment.jl");
+    else
+        incr.create_codelet(t, R""""(
+            function increment(sck_in, sck_out, cst_wait_time_ns, rnt_frame_id, rnt_n_frames_per_wave)
+                if cst_wait_time_ns > 0
+                    start_incr = time_ns()
                 end
-            end
 
-            return 0
-        end
-    )"""");
-    */
+                for n in eachindex(sck_in)
+                    sck_out[n] = sck_in[n] + 1
+                end
+
+                if cst_wait_time_ns != 0
+                    stop_incr = time_ns()
+                    elapse_incr = stop_incr - start_incr
+
+                    while elapse_incr < cst_wait_time_ns
+                        elapse_incr = time_ns() - start_incr
+                    end
+                end
+
+                return 0
+            end
+        )"""");
+
     std::vector<std::shared_ptr<module::Stateless_Jluna>> incs(6);
     for (size_t s = 0; s < incs.size(); s++)
     {
