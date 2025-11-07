@@ -230,7 +230,10 @@ main(int argc, char** argv)
     {
         std::vector<std::vector<uint8_t>> init_data(n_inter_frames, std::vector<uint8_t>(data_length, 0));
         for (size_t f = 0; f < n_inter_frames; f++)
-            std::fill(init_data[f].begin(), init_data[f].end(), tid * n_inter_frames + f);
+        {
+            size_t init_val = (tid * n_inter_frames + f) % (256 - incs.size());
+            std::fill(init_data[f].begin(), init_data[f].end(), init_val);
+        }
         cur_initializer->set_init_data(init_data);
         tid++;
     }
@@ -301,8 +304,7 @@ main(int argc, char** argv)
             const auto& final_data = cur_finalizer->get_final_data()[f];
             for (size_t d = 0; d < final_data.size(); d++)
             {
-                auto expected = (int)(incs.size() + (tid * n_inter_frames + f));
-                expected = expected % 256;
+                auto expected = (int)(incs.size() + ((tid * n_inter_frames + f) % (256 - incs.size())));
                 if (final_data[d] != expected)
                 {
                     std::cout << "# expected = " << +expected << " - obtained = " << +final_data[d] << " (d = " << d
