@@ -67,6 +67,7 @@ Thread_pool_Julia::Thread_pool_Julia(const Thread_pool_Julia& other)
   , mtx(other.n_threads)
   , cnd(other.n_threads)
   , barrier(other.barrier)
+  , gc_old_state(0)
 {
 }
 
@@ -96,7 +97,7 @@ Thread_pool_Julia::init(const bool async)
         throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
     }
 
-    int old_state = jl_gc_enable(0);
+    this->gc_old_state = jl_gc_enable(0);
 
     struct _args args; // Some args for thread initialization
     args.tp = this;
@@ -112,7 +113,7 @@ Thread_pool_Julia::init(const bool async)
     if (!async)
     { // WARNING: jl_gc_enable must be set manually if async
         this->wait();
-        jl_gc_enable(old_state);
+        jl_gc_enable(this->gc_old_state);
     }
 
     // return old_state; ?
@@ -148,7 +149,10 @@ void
 Thread_pool_Julia::wait()
 {
     this->barrier.wait();
-    this->initialized = true;
+    if(!this->initialized) {
+		this->initialized = true;
+		jl_gc_enable(this->gc_old_state);
+	}
 }
 
 }

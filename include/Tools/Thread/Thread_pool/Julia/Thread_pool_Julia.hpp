@@ -32,6 +32,7 @@ class Thread_pool_Julia : public Thread_pool
     std::vector<std::condition_variable> cnd;
     Thread_barrier_standard barrier;
     std::vector<pthread_t> pool;
+    int gc_old_state;
 
   public:
     Thread_pool_Julia(const size_t n_threads, std::function<void(const size_t)>& func_init);
