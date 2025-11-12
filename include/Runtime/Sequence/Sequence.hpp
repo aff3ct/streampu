@@ -92,11 +92,7 @@ class Sequence
     std::vector<std::vector<runtime::Task*>> lasts_tasks;
     std::vector<std::vector<std::shared_ptr<module::Module>>> modules;
     std::vector<std::vector<module::Module*>> all_modules;
-#ifdef SPU_JLUNA
-    std::vector<std::vector<module::Stateless_Jluna*>> jl_modules;
-#else
-    std::vector<std::vector<module::Stateless_Julia*>> jl_modules;
-#endif
+    std::vector<std::vector<module::Module*>> jl_modules;
     std::shared_ptr<std::mutex> mtx_exception;
     std::vector<std::string> prev_exception_messages;
     std::vector<std::string> prev_exception_messages_to_display;
