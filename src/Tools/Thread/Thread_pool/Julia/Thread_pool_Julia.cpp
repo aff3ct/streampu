@@ -149,10 +149,11 @@ void
 Thread_pool_Julia::wait()
 {
     this->barrier.wait();
-    if(!this->initialized) {
-		this->initialized = true;
-		jl_gc_enable(this->gc_old_state);
-	}
+    if (!this->initialized)
+    {
+        this->initialized = true;
+        jl_gc_enable(this->gc_old_state);
+    }
 }
 
 }

@@ -572,13 +572,19 @@ Sequence::eval_jl_modules(const size_t tid)
 #ifdef SPU_JLUNA
     {
         spu::module::Stateless_Jluna* ptr = dynamic_cast<spu::module::Stateless_Jluna*>(jl_m);
-        if (ptr && !ptr->is_eval()) ptr->eval();
+        if (ptr)
+        {
+            if (!ptr->is_eval()) ptr->eval();
+        }
+        else
+#endif
+        {
+            spu::module::Stateless_Julia* ptr = dynamic_cast<spu::module::Stateless_Julia*>(jl_m);
+            if (ptr && !ptr->is_eval()) ptr->eval();
+        }
+#ifdef SPU_JLUNA
     }
 #endif
-    {
-        spu::module::Stateless_Julia* ptr = dynamic_cast<spu::module::Stateless_Julia*>(jl_m);
-        if (ptr && !ptr->is_eval()) ptr->eval();
-    }
 
     if (this->is_thread_pinning()) tools::Thread_pinning::unpin();
 #endif /* SPU_JULIA */
