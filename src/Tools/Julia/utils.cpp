@@ -86,6 +86,8 @@ init(uint64_t n_proxies)
     mk_ref = jl_get_function(module, "mk_ref");
     mycall = jl_get_function(module, "call");
     Ref_keeper::init(n_proxies);
+    jl_task_t* ct = jl_current_task;
+    int8_t gc_state = jl_gc_safe_enter(ct->ptls);
 }
 
 //
