@@ -222,6 +222,9 @@ main(int argc, char** argv)
     runtime::Sequence sequence_chain(initializer("initialize"), n_threads);
     sequence_chain.set_n_frames(n_inter_frames);
     sequence_chain.set_no_copy_mode(no_copy_mode);
+    // jl_gc_enable(1);
+    jl_task_t* ct = jl_current_task;
+    /* int8_t gc_state = */ jl_gc_safe_enter(ct->ptls);
 
     // warmup to compile Julia code
     auto t_start_warmup = std::chrono::steady_clock::now();
@@ -276,7 +279,12 @@ main(int argc, char** argv)
     if (!step_by_step)
     {
         // execute the sequence (multi-threaded)
-        sequence_chain.exec([&counter, n_exec]() { return ++counter >= n_exec; });
+        sequence_chain.exec(
+          [&counter, n_exec]()
+          {
+              jl_gc_collect(JL_GC_AUTO); // Should not be here
+              return ++counter >= n_exec;
+          });
     }
     else
     {

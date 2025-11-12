@@ -551,9 +551,11 @@ Sequence::init(const std::vector<TA*>& firsts, const std::vector<TA*>& lasts, co
 
     std::function<void(const size_t)> func_init = [this](const size_t tid) { this->eval_jl_modules(tid + 1); };
     this->thread_pool->set_func_init(func_init);
+    int gc = jl_gc_enable(0);
     this->thread_pool->init(true);
     this->eval_jl_modules(0);
     this->thread_pool->wait();
+    jl_gc_enable(gc);
 }
 
 void
