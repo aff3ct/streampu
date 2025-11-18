@@ -116,6 +116,12 @@ class Pipeline_builder
      */
     runtime::Pipeline build();
 
+    /**
+     * Getter for number of stages
+     * @return Number of stages.
+     */
+    size_t get_n_stages();
+
     class Stage_builder
     {
       public:

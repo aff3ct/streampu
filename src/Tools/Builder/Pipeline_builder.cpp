@@ -166,6 +166,12 @@ Pipeline_builder::build()
       this->get_tasks_for_checking(), built_stages, threads, buffer_sizes, waitings, pinning, pinning_policy);
 }
 
+size_t
+spu::tools::Pipeline_builder::get_n_stages()
+{
+    return stages.size();
+}
+
 Pipeline_builder::Stage_builder&
 Pipeline_builder::Stage_builder::set_n_threads(const size_t n)
 {
