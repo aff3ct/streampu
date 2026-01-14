@@ -116,34 +116,27 @@ Pipeline_builder::get_interstage_synchro(const size_t synchro_id)
     return *this->synchros[synchro_id];
 }
 
-runtime::Pipeline
-Pipeline_builder::build()
+spu::tools::Pipeline_builder::pipeline_construct_t
+Pipeline_builder::_build()
 {
-    std::vector<
-      std::tuple<std::vector<spu::runtime::Task*>, std::vector<spu::runtime::Task*>, std::vector<spu::runtime::Task*>>>
-      built_stages;
-    std::vector<size_t> threads;
-    std::vector<bool> pinning;
-    std::vector<size_t> buffer_sizes;
-    std::vector<bool> waitings;
-    std::string pinning_policy("");
+    spu::tools::Pipeline_builder::pipeline_construct_t pipc;
 
     // Build stages
     for (auto it = this->stages.begin(); it != this->stages.end(); it++)
     {
         Stage_builder* stage = *it;
 
-        built_stages.push_back(std::make_tuple<std::vector<spu::runtime::Task*>,
-                                               std::vector<spu::runtime::Task*>,
-                                               std::vector<spu::runtime::Task*>>(
+        pipc.built_stages.push_back(std::make_tuple<std::vector<spu::runtime::Task*>,
+                                                    std::vector<spu::runtime::Task*>,
+                                                    std::vector<spu::runtime::Task*>>(
           std::vector<spu::runtime::Task*>(stage->get_first_tasks()),
           std::vector<spu::runtime::Task*>(stage->get_last_tasks()),
           std::vector<spu::runtime::Task*>(stage->get_excluded_tasks())));
 
-        threads.push_back(stage->get_n_threads());
-        pinning.push_back(stage->is_pinning());
-        pinning_policy += stage->get_pinning_policy();
-        if (it < this->stages.end() - 1) pinning_policy += "|";
+        pipc.threads.push_back(stage->get_n_threads());
+        pipc.pinning.push_back(stage->is_pinning());
+        pipc.pinning_policy += stage->get_pinning_policy();
+        if (it < this->stages.end() - 1) pipc.pinning_policy += "|";
     }
 
     // Build synchronization between stages
@@ -152,18 +145,43 @@ Pipeline_builder::build()
     {
         if (stage_id < this->synchros.size())
         {
-            buffer_sizes.push_back(this->synchros[stage_id]->get_buffer_size());
-            waitings.push_back(this->synchros[stage_id]->is_active_waiting());
+            pipc.buffer_sizes.push_back(this->synchros[stage_id]->get_buffer_size());
+            pipc.waitings.push_back(this->synchros[stage_id]->is_active_waiting());
         }
         else
         {
-            buffer_sizes.push_back(synchro_default.get_buffer_size());
-            waitings.push_back(synchro_default.is_active_waiting());
+            pipc.buffer_sizes.push_back(synchro_default.get_buffer_size());
+            pipc.waitings.push_back(synchro_default.is_active_waiting());
         }
     }
 
-    return runtime::Pipeline(
-      this->get_tasks_for_checking(), built_stages, threads, buffer_sizes, waitings, pinning, pinning_policy);
+    return pipc;
+}
+
+runtime::Pipeline
+Pipeline_builder::build()
+{
+    pipeline_construct_t pipc = _build();
+    return runtime::Pipeline(this->get_tasks_for_checking(),
+                             pipc.built_stages,
+                             pipc.threads,
+                             pipc.buffer_sizes,
+                             pipc.waitings,
+                             pipc.pinning,
+                             pipc.pinning_policy);
+}
+
+runtime::Pipeline*
+Pipeline_builder::build_ptr()
+{
+    pipeline_construct_t pipc = _build();
+    return new runtime::Pipeline(this->get_tasks_for_checking(),
+                                 pipc.built_stages,
+                                 pipc.threads,
+                                 pipc.buffer_sizes,
+                                 pipc.waitings,
+                                 pipc.pinning,
+                                 pipc.pinning_policy);
 }
 
 Pipeline_builder::Stage_builder&

@@ -116,6 +116,12 @@ class Pipeline_builder
      */
     runtime::Pipeline build();
 
+    /**
+     * Build a new Pipeline according to the given configuration.
+     * @return A pointer of an allocated and constructed Pipeline.
+     */
+    runtime::Pipeline* build_ptr();
+
     class Stage_builder
     {
       public:
@@ -349,6 +355,21 @@ class Pipeline_builder
     std::vector<Stage_builder*> stages;
     std::vector<Synchro_builder*> synchros;
     std::vector<runtime::Task*> tasks_for_checking;
+
+    struct pipeline_construct_t
+    {
+        std::vector<std::tuple<std::vector<spu::runtime::Task*>,
+                               std::vector<spu::runtime::Task*>,
+                               std::vector<spu::runtime::Task*>>>
+          built_stages;
+        std::vector<size_t> threads;
+        std::vector<size_t> buffer_sizes;
+        std::vector<bool> waitings;
+        std::vector<bool> pinning;
+        std::string pinning_policy;
+    };
+
+    pipeline_construct_t _build();
 };
 
 } // end namespace tools
