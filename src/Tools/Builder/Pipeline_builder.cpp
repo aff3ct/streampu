@@ -184,6 +184,12 @@ Pipeline_builder::build_ptr()
                                  pipc.pinning_policy);
 }
 
+size_t
+spu::tools::Pipeline_builder::get_n_stages()
+{
+    return stages.size();
+}
+
 Pipeline_builder::Stage_builder&
 Pipeline_builder::Stage_builder::set_n_threads(const size_t n)
 {
