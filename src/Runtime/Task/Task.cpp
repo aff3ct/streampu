@@ -688,16 +688,30 @@ Task::exec(const int frame_id, const bool managed_memory)
     }
     else
     {
-        std::stringstream socs;
-        socs << "'socket(s).name' = [";
+        std::stringstream input_socs;
+        std::stringstream output_socs;
+        input_socs << "'socket(s).name' = [";
+        output_socs << "'socket(s).name' = [";
         auto s = 0;
         for (size_t i = 0; i < sockets.size(); i++)
-            if (sockets[i]->dataptr == nullptr) socs << (s != 0 ? ", " : "") << sockets[i]->name;
-        socs << "]";
-
+        {
+            if (sockets[i]->dataptr == nullptr)
+            {
+                if (sockets[i]->get_type() == runtime::socket_t::SOUT)
+                {
+                    output_socs << (s != 0 ? ", " : "") << sockets[i]->name;
+                }
+                else
+                {
+                    input_socs << (s != 0 ? ", " : "") << sockets[i]->name;
+                }
+            }
+        }
         std::stringstream message;
-        message << "The task cannot be executed because some of the inputs/output sockets are not fed ('task.name' = "
-                << this->get_name() << ", 'module.name' = " << module->get_name() << ", " << socs.str() << ").";
+        message << "The task ('task.name' = " << this->get_name() << ", 'module.name' = " << module->get_name()
+                << ", cannot be executed because : " << std::endl
+                << "The inputs/forward sockets : " << input_socs.str() << "] are not fed" << std::endl
+                << "The output sockets : " << output_socs.str() << "] are not allocated";
         throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
     }
 #endif /* !SPU_FAST */
