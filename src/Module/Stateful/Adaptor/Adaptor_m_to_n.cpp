@@ -37,8 +37,6 @@ Adaptor_m_to_n::deep_copy(const Adaptor_m_to_n& m)
     this->tid_pull = -1;
     this->cur_push_id = -1;
     this->cur_pull_id = -1;
-
-    this->waiting_canceled.reset(new std::atomic<bool>(m.waiting_canceled->load()));
 }
 
 void
