@@ -529,9 +529,9 @@ main(int argc, char** argv)
     for (size_t t = 0; t < n_threads.size(); t++)
         n_threads_param += std::to_string(n_threads[t]) + ((t < n_threads.size() - 1) ? "," : "");
 
-    std::cout << "#####################################" << std::endl;
-    std::cout << "# Micro-benchmark: Generic pipeline #" << std::endl;
-    std::cout << "#####################################" << std::endl;
+    std::cout << "######################" << std::endl;
+    std::cout << "# StreamPU Benchmark #" << std::endl;
+    std::cout << "######################" << std::endl;
     std::cout << "#" << std::endl;
 
     std::cout << "# Command line arguments:" << std::endl;

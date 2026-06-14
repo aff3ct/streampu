@@ -1,10 +1,11 @@
-# Advanced
+# Benchmark Application
 
-## Generic Pipeline
+StreamPU comes with an integrated **benchmark application** that allows to 
+**build and to execute custom chains directly from the command line interface** 
+(CLI). The `spu-benchmark` can be used to **simulate simple streaming 
+applications** or as a **performance test suite for specific architectures**.
 
-This program allows to build and to execute generic chains directly from the 
-command line interface (CLI). Basically, there are 3 different types of task 
-that can be instantiated:
+Basically, there are 3 different types of task that can be instantiated:
 
 - **First task**: To be correct, a chain should start with a task that have no 
   input socket. As a consequence, there is only one first task and it is 
@@ -93,7 +94,7 @@ thread.
     parameter will set the same duration for all the previously mentioned tasks.
 
 !!! note
-    The scheduler `FILE` reads the scheduling from a JSON file, to set the path
+    The `FILE` scheduler reads the scheduling from a JSON file, to set the path
     to this file there is the `-F` parameter (or `--sched-file`).
     The expected JSON file looks like the following:
     ```json
@@ -144,37 +145,37 @@ Moreover, for each stage it is possible to specify the number of replications
 === "3-stage pipeline with in/out sockets" 
     <figure markdown>
       ![simple pipeline io](./assets/test_generic_pipeline_io.svg){ width="600" }
-      <figcaption>`test-generic-pipeline`: input/output sockets & 3-stage pipeline.</figcaption>
+      <figcaption>`spu-benchmark`: input/output sockets & 3-stage pipeline.</figcaption>
     </figure>
     ```bash
-    test-generic-pipeline -e 100 -n "1,3,1" -t "3,1,3" -R "(init,increment,fin)"
+    spu-benchmark -e 100 -n "1,3,1" -t "3,1,3" -R "(init,increment,fin)"
     ```
 
 === "3-stage pipeline with forward sockets"
     <figure markdown>
       ![simple pipeline fwd](./assets/test_generic_pipeline_fwd.svg){ width="600" }
-      <figcaption>`test-generic-pipeline`: forward sockets & 3-stage pipeline.</figcaption>
+      <figcaption>`spu-benchmark`: forward sockets & 3-stage pipeline.</figcaption>
     </figure>
     ```bash
-    test-generic-pipeline -i INPUT_FILE -n "1,3,1" -t "1,3,1" -R "(read,relayf,write)"
+    spu-benchmark -i INPUT_FILE -n "1,3,1" -t "1,3,1" -R "(read,relayf,write)"
     ```
 
 === "3-stage pipeline with hybrid sockets"
     <figure markdown>
       ![simple pipeline hybrid](./assets/test_generic_pipeline_hybrid.svg){ width="600" }
-      <figcaption>`test-generic-pipeline`: hybrid in/out and forward sockets & 3-stage pipeline.</figcaption>
+      <figcaption>`spu-benchmark`: hybrid in/out and forward sockets & 3-stage pipeline.</figcaption>
     </figure>
     ```bash
-    test-generic-pipeline -i INPUT_FILE -t "1,3,1" -r "((read),(relayf,incrementf,relay),(write))"
+    spu-benchmark -i INPUT_FILE -t "1,3,1" -r "((read),(relayf,incrementf,relay),(write))"
     ```
 
 === "Complex 5-stage pipeline"
     <figure markdown>
       ![simple pipeline hybrid](./assets/test_generic_pipeline_hybrid_5_stages.svg){ width="1100" }
-      <figcaption>`test-generic-pipeline`: hybrid in/out and forward sockets & 5-stage pipeline.</figcaption>
+      <figcaption>`spu-benchmark`: hybrid in/out and forward sockets & 5-stage pipeline.</figcaption>
     </figure>
     ```bash
-    test-generic-pipeline -e 100 -t "1,3,1,2,1" -r "((init,relayf,incr),(relayf,relay),(incrf),(relay),(relay,fin))"
+    spu-benchmark -e 100 -t "1,3,1,2,1" -r "((init,relayf,incr),(relayf,relay),(incrf),(relay),(relay,fin))"
     ```
 
 ------
@@ -184,30 +185,31 @@ Moreover, for each stage it is possible to specify the number of replications
 The following verbatim is a copy-paste from the `-h` stdout:
 
 ```bash
-usage: ./bin/test-generic-pipeline [options]
+usage: ./bin/spu-benchmark [options]
 
-  -t, --n-threads          Number of threads to run in parallel for each stage                   [empty]
-  -f, --n-inter-frames     Number of frames to process in one task                               [1]
-  -s, --sleep-time         Sleep time duration in one task (microseconds)                        [5]
-  -d, --data-length        Size of data to process in one task (in bytes)                        [2048]
-  -e, --n-exec             Number of executions (0 means -> never stop because of this counter)  [0]
-  -l, --n-exec-pro         Number of executions during the scheduler profiling phase             [100]
-  -u, --buffer-size        Size of the buffer between the different stages of the pipeline       [16]
-  -o, --dot-filepath       Path to dot output file                                               [empty]
-  -i, --in-filepath        Path to the input file (used to generate bits of the chain)           [empty]
-  -j, --out-filepath       Path to the output file (written at the end of the chain)             ["file.out"]
-  -c, --copy-mode          Enable to copy data in sequence (performance will be reduced)         [false]
-  -b, --step-by-step       Enable step-by-step sequence execution (performance will be reduced)  [false]
-  -p, --print-stats        Enable to print per task statistics (performance will be reduced)     [false]
-  -g, --debug              Enable task debug mode (print socket data)                            [false]
-  -q, --force-sequence     Force sequence instead of pipeline                                    [false]
-  -w, --active-waiting     Enable active waiting in the pipeline synchronizations                [false]
-  -n, --tsk-per-sta        The number of tasks on each stage of the pipeline                     [empty]
-  -r, --tsk-types          The socket type of each task (SFWD or SIO)                            [empty]
-  -R, --tsk-types-sta      The socket type of tasks on each stage (SFWD or SIO)                  [empty]
-  -C, --chain              Description of the tasks chain (to be combined with '-S' param)       [empty]
-  -S, --sched              Scheduler algorithm for the pipeline creation ('OTAC', 'FILE')        ["OTAC"]
-  -F, --sched-file         File that contains the scheduling, to combine with 'FILE' scheduler   ["sched.json"]
-  -v, --verbose            Show information about the scheduling choices                         [false]
-  -h, --help               This help                                                             [false]
+  -t, --n-threads          Number of threads to run in parallel for each stage                         [empty]
+  -f, --n-inter-frames     Number of frames to process in one task                                     [1]
+  -s, --sleep-time         Sleep time duration in one task (microseconds)                              [5]
+  -d, --data-length        Size of data to process in one task (in bytes)                              [2048]
+  -e, --n-exec             Number of executions (0 means -> never stop because of this counter)        [0]
+  -l, --n-exec-pro         Number of executions during the scheduler profiling phase                   [100]
+  -u, --buffer-size        Size of the buffer between the different stages of the pipeline             [16]
+  -o, --dot-filepath       Path to dot output file                                                     [empty]
+  -i, --in-filepath        Path to the input file (used to generate bits of the chain)                 [empty]
+  -j, --out-filepath       Path to the output file (written at the end of the chain)                   ["file.out"]
+  -c, --copy-mode          Enable to copy data in sequence (performance will be reduced)               [false]
+  -b, --step-by-step       Enable step-by-step sequence execution (performance will be reduced)        [false]
+  -p, --print-stats        Enable to print per task statistics (performance will be reduced)           [false]
+  -g, --debug              Enable task debug mode (print socket data)                                  [false]
+  -q, --force-sequence     Force sequence instead of pipeline                                          [false]
+  -w, --active-waiting     Enable active waiting in the pipeline synchronizations                      [false]
+  -n, --tsk-per-sta        The number of tasks on each stage of the pipeline                           [empty]
+  -r, --tsk-types          The socket type of each task (SFWD or SIO)                                  [empty]
+  -R, --tsk-types-sta      The socket type of tasks on each stage (SFWD or SIO)                        [empty]
+  -C, --chain              Description of the tasks chain (to be combined with '-S' param)             [empty]
+  -S, --sched              Scheduler algorithm for the pipeline creation ('OTAC', 'FILE')              ["OTAC"]
+  -P, --pinning-policy     Pinning policy for pipeline execution (only available if linked with hwloc) [empty]
+  -F, --sched-file         File that contains the scheduling, to combine with 'FILE' scheduler         ["sched.json"]
+  -v, --verbose            Show information about the scheduling choices                               [false]
+  -h, --help               This help                                                                   [false]
 ```
