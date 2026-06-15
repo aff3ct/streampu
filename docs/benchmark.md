@@ -185,7 +185,7 @@ Moreover, for each stage it is possible to specify the number of replications
 The following verbatim is a copy-paste from the `-h` stdout:
 
 ```bash
-usage: ./bin/spu-benchmark [options]
+usage: spu-benchmark [options]
 
   -t, --n-threads          Number of threads to run in parallel for each stage                         [empty]
   -f, --n-inter-frames     Number of frames to process in one task                                     [1]
@@ -208,8 +208,8 @@ usage: ./bin/spu-benchmark [options]
   -R, --tsk-types-sta      The socket type of tasks on each stage (SFWD or SIO)                        [empty]
   -C, --chain              Description of the tasks chain (to be combined with '-S' param)             [empty]
   -S, --sched              Scheduler algorithm for the pipeline creation ('OTAC', 'FILE')              ["OTAC"]
-  -P, --pinning-policy     Pinning policy for pipeline execution (only available if linked with hwloc) [empty]
   -F, --sched-file         File that contains the scheduling, to combine with 'FILE' scheduler         ["sched.json"]
+  -P, --pinning-policy     Pinning policy for pipeline execution (only available if linked with hwloc) [empty]
   -v, --verbose            Show information about the scheduling choices                               [false]
   -h, --help               This help                                                                   [false]
 ```
