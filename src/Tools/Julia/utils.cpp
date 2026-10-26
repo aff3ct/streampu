@@ -69,6 +69,19 @@ jl_value_t*
 jl_eval_file(const char* filename)
 {
     std::ifstream is(filename);
+    if (!is.is_open())
+    {
+        std::string alt = (filename[0] == '.' && filename[1] == '.' && filename[2] == '/')
+                            ? std::string(filename + 3)
+                            : std::string("../") + filename;
+        is.open(alt);
+        if (!is.is_open())
+        {
+            std::stringstream message;
+            message << "Cannot open file '" << filename << "'.";
+            throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
+        }
+    }
     std::stringstream ss;
     (ss << is.rdbuf());
     return jl_eval_string(ss.str().c_str());
@@ -86,8 +99,6 @@ init(uint64_t n_proxies)
     mk_ref = jl_get_function(module, "mk_ref");
     mycall = jl_get_function(module, "call");
     Ref_keeper::init(n_proxies);
-    jl_task_t* ct = jl_current_task;
-    int8_t gc_state = jl_gc_safe_enter(ct->ptls);
 }
 
 //
@@ -176,7 +187,6 @@ jl_call_func(jl_function_t* f, jl_value_t** args, size_t n, bool jl_safe)
 jl_value_t*
 jl_call_func(std::vector<jl_value_t*>& args, bool jl_safe)
 {
-    auto foo = &args.data()[1];
     return jl_call_func((jl_function_t*)args[0], &args.data()[1], args.size() - 1, jl_safe);
 }
 

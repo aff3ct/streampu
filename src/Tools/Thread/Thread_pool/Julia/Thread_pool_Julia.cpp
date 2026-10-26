@@ -14,19 +14,28 @@ namespace spu
 namespace tools
 {
 
+std::mutex Thread_pool_Julia::jl_adopt_mutex;
+
 void*
 Thread_pool_Julia::thread_code(void* args)
 {
-    struct _args* data = (struct _args*)args;
+    Thread_arg* data = (Thread_arg*)args;
     size_t tid = data->tid;
     Thread_pool_Julia* tp = data->tp;
-    sem_post(&data->sem); // args and data cesases to exist
 
-    pthread_mutex_lock(&data->lock);
-    jl_gcframe_t** gc_struct = jl_adopt_thread();
-    pthread_mutex_unlock(&data->lock);
+    {
+        std::lock_guard<std::mutex> adopt_lock(Thread_pool_Julia::jl_adopt_mutex);
+        jl_gcframe_t** gc_struct = jl_adopt_thread();
+        (void)gc_struct;
+    }
+
+    {
+        std::lock_guard<std::mutex> lk(data->mtx);
+        data->ready = true;
+    }
+    data->cv.notify_one();
+
     jl_task_t* ct = jl_current_task;
-    int8_t gc_state = jl_gc_safe_enter(ct->ptls);
 
     if (module != NULL) Ref_keeper::init(256);
 
@@ -34,9 +43,13 @@ Thread_pool_Julia::thread_code(void* args)
 
     while (!tp->stop_threads)
     {
-        std::unique_lock<std::mutex> lock(tp->mtx[tid]);
-        tp->barrier.arrive();
-        tp->cnd[tid].wait(lock);
+        int8_t gc_state = jl_gc_safe_enter(ct->ptls);
+        {
+            std::unique_lock<std::mutex> lock(tp->mtx[tid]);
+            tp->barrier.arrive();
+            tp->cnd[tid].wait(lock);
+        }
+        jl_gc_safe_leave(ct->ptls, gc_state);
 
         if (!tp->stop_threads) tp->func_exec(tid);
     }
@@ -99,15 +112,15 @@ Thread_pool_Julia::init(const bool async)
 
     this->gc_old_state = jl_gc_enable(0);
 
-    struct _args args; // Some args for thread initialization
-    args.tp = this;
-    pthread_mutex_init(&args.lock, NULL);
-    sem_init(&args.sem, 0, 0);
     for (size_t i = 0; i < n_threads; i++)
     {
-        args.tid = i;
-        pthread_create(&pool[i], NULL, thread_code, (void*)&args);
-        sem_wait(&args.sem);
+        Thread_arg arg;
+        arg.tid = i;
+        arg.tp = this;
+        arg.ready = false;
+        pthread_create(&pool[i], NULL, thread_code, (void*)&arg);
+        std::unique_lock<std::mutex> lk(arg.mtx);
+        arg.cv.wait(lk, [&arg] { return arg.ready; });
     }
 
     if (!async)

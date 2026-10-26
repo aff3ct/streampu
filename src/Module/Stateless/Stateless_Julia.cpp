@@ -3,6 +3,7 @@
 #include <cstddef>
 #include <iostream>
 #include <julia.h>
+#include <mutex>
 #include <pthread.h>
 #include <sstream>
 
@@ -139,14 +140,8 @@ Stateless_Julia::is_jl_safe()
 void
 Stateless_Julia::eval()
 {
-    static pthread_mutex_t mutex;
-    static bool mutex_init = false;
-    if (!mutex_init)
-    {
-        mutex_init = true;
-        pthread_mutex_init(&mutex, NULL);
-    }
-    pthread_mutex_lock(&mutex);
+    static std::mutex mutex;
+    std::unique_lock<std::mutex> lock(mutex);
     if (this->is_eval())
     {
         std::stringstream message;
@@ -171,7 +166,6 @@ Stateless_Julia::eval()
     }
 
     this->evaluated = true;
-    pthread_mutex_unlock(&mutex);
 }
 
 runtime::Task&
@@ -277,7 +271,7 @@ Stateless_Julia::_create_codelet(runtime::Task& task)
     size_t tid = Stateless_Julia::get_task_id(task);
 
     Module::create_codelet(task,
-                           [tid, this](module::Module& m, runtime::Task& t, const size_t frame_id)
+                           [tid](module::Module& m, runtime::Task& t, const size_t frame_id)
                            {
                                auto& sjl = static_cast<Stateless_Julia&>(m);
 
@@ -339,7 +333,7 @@ Stateless_Julia::_create_codelet(runtime::Task& task)
           m.jl_func_args[tid][m.jl_func_args[tid].size() - 2] = (void*)jl_frame_id;
 
           jl_value_t* jl_n_frames_per_wave = jl_box_uint32(m.get_n_frames_per_wave());
-          size_t jl_n_frames_per_wave_id = tools::gc_preserve(jl_frame_id);
+          size_t jl_n_frames_per_wave_id = tools::gc_preserve(jl_n_frames_per_wave);
           m.jl_constants_ptr[tid].push_back(jl_n_frames_per_wave);
           m.jl_constants_id[tid].push_back(jl_n_frames_per_wave_id);
           m.jl_func_args[tid][m.jl_func_args[tid].size() - 1] = (void*)jl_n_frames_per_wave;

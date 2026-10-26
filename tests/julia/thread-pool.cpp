@@ -193,7 +193,6 @@ main(int argc, char** argv)
         }
         auto t0 = std::chrono::steady_clock::now();
         jl_value_t* threadid = jl_box_int32(tid);
-        jl_value_t* jl_text3 = jl_eval_string("return \" - \"");
         jl_value_t* r = jl_call2(computation, threadid, (jl_value_t*)jl_array);
         res[tid] = jl_unbox_uint64(r);
         std::chrono::nanoseconds duration = std::chrono::steady_clock::now() - t0;

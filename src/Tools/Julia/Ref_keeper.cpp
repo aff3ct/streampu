@@ -159,7 +159,7 @@ Ref_keeper::init(size_t size)
     singleton->size = size;
     singleton->marks = new jl_value_t*[size + 3];
     singleton->cpt = 3; // 0 and 1 for gcframe, 2 for last_result
-    singleton->marks[0] = (jl_value_t*)JL_GC_ENCODE_PUSHARGS(size);
+    singleton->marks[0] = (jl_value_t*)JL_GC_ENCODE_PUSHARGS(size + 1);
     singleton->marks[1] = (jl_value_t*)jl_pgcstack;
     for (size_t i = 0; i < size + 1; i++)
         singleton->marks[i + 2] = singleton->last_result;
