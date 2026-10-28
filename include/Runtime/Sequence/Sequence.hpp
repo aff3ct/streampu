@@ -300,6 +300,8 @@ class Sequence
 
     bool is_control_flow() const;
 
+    bool has_julia() const;
+
   protected:
     template<class SS>
     void delete_tree(tools::Digraph_node<SS>* node, std::vector<tools::Digraph_node<SS>*>& already_deleted_nodes);

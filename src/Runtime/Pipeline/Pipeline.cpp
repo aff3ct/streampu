@@ -10,6 +10,12 @@
 #include "Tools/Interface/Interface_waiting.hpp"
 #include "Tools/Thread/Thread_pinning/Thread_pinning_utils.hpp"
 #include "Tools/Thread/Thread_pool/Standard/Thread_pool_standard.hpp"
+#ifdef SPU_JULIA
+#include "Tools/Thread/Thread_pool/Julia/Thread_pool_Julia.hpp"
+#ifdef SPU_JLUNA
+#include "Tools/Thread/Thread_pool/Jluna/Thread_pool_Jluna_v1.hpp"
+#endif
+#endif
 
 using namespace spu;
 using namespace spu::runtime;
@@ -605,7 +611,18 @@ void Pipeline
         stage->allocate_outbuffers();
     }
 
+#ifdef SPU_JULIA
+    if (this->original_sequence.has_julia())
+#ifdef SPU_JLUNA
+        this->thread_pool.reset(new tools::Thread_pool_Jluna_v1(this->stages.size() - 1));
+#else
+        this->thread_pool.reset(new tools::Thread_pool_Julia(this->stages.size() - 1));
+#endif /* SPU_JLUNA */
+    else
+        this->thread_pool.reset(new tools::Thread_pool_standard(this->stages.size() - 1));
+#else
     this->thread_pool.reset(new tools::Thread_pool_standard(this->stages.size() - 1));
+#endif /* SPU_JULIA */
     this->thread_pool->init(); // threads are spawned here
 }
 

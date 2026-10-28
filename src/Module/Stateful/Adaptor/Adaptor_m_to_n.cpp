@@ -1,3 +1,7 @@
+#ifdef SPU_JULIA
+#include <julia.h>
+#endif
+
 #include "Module/Stateful/Adaptor/Adaptor_m_to_n.hpp"
 #include "Tools/Math/utils.h"
 
@@ -274,18 +278,42 @@ Adaptor_m_to_n::wait_push()
         throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
     }
 
+    // When the inter-stage buffer is full, a thread registered with the Julia runtime ('jl_get_pgcstack() != nullptr')
+    // must enter GC_SAFE before blocking (active spin-wait or passive condition_variable wait) so that another pipeline
+    // stage running Julia tasks can execute a Stop-The-World GC cycle and drain the buffer without deadlocking.
     if (this->active_waiting)
     {
-        while (this->is_full(this->cur_push_id) && !*this->waiting_canceled)
-            ;
+        if (this->is_full(this->cur_push_id) && !*this->waiting_canceled)
+        {
+#ifdef SPU_JULIA
+            int8_t gc_state = 0;
+            const bool can_safe = (jl_get_pgcstack() != nullptr);
+            if (can_safe) gc_state = jl_gc_safe_enter(jl_current_task->ptls);
+#endif
+            while (this->is_full(this->cur_push_id) && !*this->waiting_canceled)
+                ;
+#ifdef SPU_JULIA
+            if (can_safe) jl_gc_safe_leave(jl_current_task->ptls, gc_state);
+#endif
+        }
     }
     else // passive waiting
     {
         if (this->is_full(this->cur_push_id) && !*this->waiting_canceled)
         {
-            std::unique_lock<std::mutex> lock((*this->mtx_push.get())[this->cur_push_id]);
-            ((*this->cnd_push.get())[this->cur_push_id])
-              .wait(lock, [this]() { return !(this->is_full(this->cur_push_id) && !*this->waiting_canceled); });
+#ifdef SPU_JULIA
+            int8_t gc_state = 0;
+            const bool can_safe = (jl_get_pgcstack() != nullptr);
+            if (can_safe) gc_state = jl_gc_safe_enter(jl_current_task->ptls);
+#endif
+            {
+                std::unique_lock<std::mutex> lock((*this->mtx_push.get())[this->cur_push_id]);
+                ((*this->cnd_push.get())[this->cur_push_id])
+                  .wait(lock, [this]() { return !(this->is_full(this->cur_push_id) && !*this->waiting_canceled); });
+            }
+#ifdef SPU_JULIA
+            if (can_safe) jl_gc_safe_leave(jl_current_task->ptls, gc_state);
+#endif
         }
     }
 
@@ -302,18 +330,41 @@ Adaptor_m_to_n::wait_pull()
         throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
     }
 
+    // When the inter-stage buffer is empty, enter GC_SAFE if this thread is registered with the Julia runtime
+    // ('jl_get_pgcstack() != nullptr') so upstream Julia stages can run a Stop-The-World GC cycle without deadlocking.
     if (this->active_waiting)
     {
-        while (this->is_empty(this->cur_pull_id) && !*this->waiting_canceled)
-            ;
+        if (this->is_empty(this->cur_pull_id) && !*this->waiting_canceled)
+        {
+#ifdef SPU_JULIA
+            int8_t gc_state = 0;
+            const bool can_safe = (jl_get_pgcstack() != nullptr);
+            if (can_safe) gc_state = jl_gc_safe_enter(jl_current_task->ptls);
+#endif
+            while (this->is_empty(this->cur_pull_id) && !*this->waiting_canceled)
+                ;
+#ifdef SPU_JULIA
+            if (can_safe) jl_gc_safe_leave(jl_current_task->ptls, gc_state);
+#endif
+        }
     }
     else // passive waiting
     {
         if (this->is_empty(this->cur_pull_id) && !*this->waiting_canceled)
         {
-            std::unique_lock<std::mutex> lock((*this->mtx_pull.get())[this->cur_pull_id]);
-            ((*this->cnd_pull.get())[this->cur_pull_id])
-              .wait(lock, [this]() { return !(this->is_empty(this->cur_pull_id) && !*this->waiting_canceled); });
+#ifdef SPU_JULIA
+            int8_t gc_state = 0;
+            const bool can_safe = (jl_get_pgcstack() != nullptr);
+            if (can_safe) gc_state = jl_gc_safe_enter(jl_current_task->ptls);
+#endif
+            {
+                std::unique_lock<std::mutex> lock((*this->mtx_pull.get())[this->cur_pull_id]);
+                ((*this->cnd_pull.get())[this->cur_pull_id])
+                  .wait(lock, [this]() { return !(this->is_empty(this->cur_pull_id) && !*this->waiting_canceled); });
+            }
+#ifdef SPU_JULIA
+            if (can_safe) jl_gc_safe_leave(jl_current_task->ptls, gc_state);
+#endif
         }
     }
 

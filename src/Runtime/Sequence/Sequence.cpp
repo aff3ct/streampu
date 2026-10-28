@@ -567,30 +567,18 @@ Sequence::init(const std::vector<TA*>& firsts, const std::vector<TA*>& lasts, co
         tools::Buffer_allocator::allocate_sequence_memory(this);
     }
 
-#ifdef SPU_JLUNA
-    if (this->jl_modules[0].size())
-        this->thread_pool.reset(new tools::Thread_pool_Jluna_v1(this->n_threads - 1));
-    else
-        this->thread_pool.reset(new tools::Thread_pool_standard(this->n_threads - 1));
-#else
 #ifdef SPU_JULIA
-    bool has_julia = false;
-    for (auto m : this->get_modules())
-    {
-        if (dynamic_cast<module::Stateless_Julia*>(m))
-        {
-            has_julia = true;
-            break;
-        }
-    }
-    if (has_julia)
+    if (this->has_julia())
+#ifdef SPU_JLUNA
+        this->thread_pool.reset(new tools::Thread_pool_Jluna_v1(this->n_threads - 1));
+#else
         this->thread_pool.reset(new tools::Thread_pool_Julia(this->n_threads - 1));
+#endif /* SPU_JLUNA */
     else
         this->thread_pool.reset(new tools::Thread_pool_standard(this->n_threads - 1));
 #else
     this->thread_pool.reset(new tools::Thread_pool_standard(this->n_threads - 1));
 #endif /* SPU_JULIA */
-#endif /* SPU_JLUNA */
 
     std::function<void(const size_t)> func_init = [this](const size_t tid) { this->eval_jl_modules(tid + 1); };
     this->thread_pool->set_func_init(func_init);
@@ -841,6 +829,16 @@ Sequence::_exec(const size_t tid,
     };
 
     std::vector<const int*> statuses(this->n_tasks, nullptr);
+#ifdef SPU_JULIA
+    // If this sequence (or pipeline stage) contains only pure C++ tasks (!this->has_julia()) but is executed by a
+    // thread registered with the Julia runtime (e.g., the main thread or a Thread_pool_Julia stage runner, where
+    // jl_get_pgcstack() != nullptr), mark the thread as GC_SAFE for the duration of the execution loop. Because pure
+    // C++ code never hits Julia GC safepoints, remaining in GC_UNSAFE would stall or deadlock Julia's Stop-The-World
+    // Garbage Collector when triggered concurrently by another pipeline stage running Julia tasks.
+    int8_t gc_state = 0;
+    const bool enter_gc_safe = (!this->has_julia() && jl_get_pgcstack() != nullptr);
+    if (enter_gc_safe) gc_state = jl_gc_safe_enter(jl_current_task->ptls);
+#endif
     try
     {
         do
@@ -890,6 +888,9 @@ Sequence::_exec(const size_t tid,
 
         this->mtx_exception->unlock();
     }
+#ifdef SPU_JULIA
+    if (enter_gc_safe) jl_gc_safe_leave(jl_current_task->ptls, gc_state);
+#endif
 
     if (this->is_thread_pinning()) tools::Thread_pinning::unpin();
 }
@@ -929,6 +930,16 @@ Sequence::_exec_without_statuses(const size_t tid,
         }
     };
 
+#ifdef SPU_JULIA
+    // If this sequence (or pipeline stage) contains only pure C++ tasks (!this->has_julia()) but is executed by a
+    // thread registered with the Julia runtime (e.g., the main thread or a Thread_pool_Julia stage runner, where
+    // jl_get_pgcstack() != nullptr), mark the thread as GC_SAFE for the duration of the execution loop. Because pure
+    // C++ code never hits Julia GC safepoints, remaining in GC_UNSAFE would stall or deadlock Julia's Stop-The-World
+    // Garbage Collector when triggered concurrently by another pipeline stage running Julia tasks.
+    int8_t gc_state = 0;
+    const bool enter_gc_safe = (!this->has_julia() && jl_get_pgcstack() != nullptr);
+    if (enter_gc_safe) gc_state = jl_gc_safe_enter(jl_current_task->ptls);
+#endif
     try
     {
         do
@@ -977,6 +988,9 @@ Sequence::_exec_without_statuses(const size_t tid,
 
         this->mtx_exception->unlock();
     }
+#ifdef SPU_JULIA
+    if (enter_gc_safe) jl_gc_safe_leave(jl_current_task->ptls, gc_state);
+#endif
 
     if (this->is_thread_pinning()) tools::Thread_pinning::unpin();
 }
@@ -2757,5 +2771,15 @@ Sequence::init_jl_module(module::Module* m)
     if ((jl_m = dynamic_cast<module::Stateless_Jluna*>(m))) this->jl_modules[0].push_back(jl_m);
 #endif /* SPU_JLUNA */
     if ((jl_m = dynamic_cast<module::Stateless_Julia*>(m))) this->jl_modules[0].push_back(jl_m);
+#endif /* SPU_JULIA */
+}
+
+bool
+Sequence::has_julia() const
+{
+#ifdef SPU_JULIA
+    return !this->jl_modules.empty() && !this->jl_modules[0].empty();
+#else
+    return false;
 #endif /* SPU_JULIA */
 }

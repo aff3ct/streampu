@@ -12,6 +12,7 @@
 #include "Tools/Exception/exception.hpp"
 #include "Tools/Julia/Julia.hpp"
 #include "Tools/Julia/Proxy.hpp"
+#include "Tools/Julia/Ref_keeper.hpp"
 
 using namespace spu;
 using namespace spu::module;
@@ -72,6 +73,7 @@ Stateless_Julia::Stateless_Julia(const bool jl_safe)
   , jl_constants_id(std::vector<std::vector<size_t>>())
   , jl_func_args(std::vector<std::vector<void*>>())
   , evaluated(bool(false))
+  , jl_eval_thread_keeper(nullptr)
   , n_clones(new size_t(0))
   , jl_create_constants(new std::vector<std::vector<std::function<void(Stateless_Julia& m)>>>())
   , jl_evaluate(new std::vector<std::function<void()>>())
@@ -82,11 +84,12 @@ Stateless_Julia::Stateless_Julia(const bool jl_safe)
 
 Stateless_Julia::~Stateless_Julia()
 {
-    // if ((*this->n_clones) == 0)
-    for (size_t tid = 0; tid < this->jl_constants_id.size(); tid++)
-        for (size_t jl_id : this->jl_constants_id[tid])
-            tools::Julia::release(jl_id);
-    // else
+    if (this->jl_eval_thread_keeper != nullptr && this->jl_eval_thread_keeper == (void*)tools::Ref_keeper::get())
+    {
+        for (size_t tid = 0; tid < this->jl_constants_id.size(); tid++)
+            for (size_t jl_id : this->jl_constants_id[tid])
+                tools::Julia::release(jl_id);
+    }
     (*this->n_clones)--;
 }
 
@@ -117,6 +120,7 @@ Stateless_Julia::reset()
         funcs_list.clear();
 
     this->evaluated = false;
+    this->jl_eval_thread_keeper = nullptr;
 }
 
 bool
@@ -166,6 +170,7 @@ Stateless_Julia::eval()
     }
 
     this->evaluated = true;
+    this->jl_eval_thread_keeper = (void*)tools::Ref_keeper::get();
 }
 
 runtime::Task&
@@ -305,19 +310,18 @@ Stateless_Julia::_create_codelet(runtime::Task& task)
                                if (!task_compiled->load(std::memory_order_acquire))
                                {
                                    static std::mutex compile_mtx;
-                                   jl_task_t* ct = jl_current_task;
                                    int8_t prev_gc_state = 0;
-                                   const bool can_safe = (ct != nullptr && ct->ptls != nullptr);
+                                   const bool can_safe = (jl_get_pgcstack() != nullptr);
                                    // Enter GC_SAFE state while waiting on the compilation lock
                                    // so that if another thread triggers a GC during JIT compilation,
                                    // this waiting thread will NOT block the Stop-The-World GC.
                                    if (can_safe)
-                                       prev_gc_state = jl_gc_safe_enter(ct->ptls);
+                                       prev_gc_state = jl_gc_safe_enter(jl_current_task->ptls);
 
                                    std::unique_lock<std::mutex> lock(compile_mtx);
 
                                    if (can_safe)
-                                       jl_gc_safe_leave(ct->ptls, prev_gc_state);
+                                       jl_gc_safe_leave(jl_current_task->ptls, prev_gc_state);
 
                                    if (!task_compiled->load(std::memory_order_relaxed))
                                    {

@@ -113,16 +113,20 @@ Thread_pool_Julia::run(const bool async)
 
     if (!async)
     {
-        jl_task_t* ct = jl_current_task;
+        // Enter GC_SAFE while waiting on the spin-barrier so that worker threads triggering a Julia Stop-The-World GC
+        // cycle do not deadlock waiting for this caller thread to reach a GC safepoint.
+        // Note: check 'jl_get_pgcstack() != nullptr' rather than 'jl_current_task != nullptr' because 'jl_current_task'
+        // expands to 'container_of(jl_get_pgcstack(), jl_task_t, gcstack)', which subtracts offsetof(...) from 0x0 on
+        // an unadopted C++ thread and produces a non-null invalid pointer.
         int8_t gc_state = 0;
-        const bool can_safe = (ct != nullptr && ct->ptls != nullptr);
+        const bool can_safe = (jl_get_pgcstack() != nullptr);
         if (can_safe)
-            gc_state = jl_gc_safe_enter(ct->ptls);
+            gc_state = jl_gc_safe_enter(jl_current_task->ptls);
 
         this->barrier.wait();
 
         if (can_safe)
-            jl_gc_safe_leave(ct->ptls, gc_state);
+            jl_gc_safe_leave(jl_current_task->ptls, gc_state);
     }
 }
 
@@ -136,16 +140,16 @@ Thread_pool_Julia::run(std::function<void(const size_t)>& func_exec, const bool 
 void
 Thread_pool_Julia::wait()
 {
-    jl_task_t* ct = jl_current_task;
+    // Enter GC_SAFE while waiting on the spin-barrier (see comment in run() above regarding jl_get_pgcstack()).
     int8_t gc_state = 0;
-    const bool can_safe = (ct != nullptr && ct->ptls != nullptr);
+    const bool can_safe = (jl_get_pgcstack() != nullptr);
     if (can_safe)
-        gc_state = jl_gc_safe_enter(ct->ptls);
+        gc_state = jl_gc_safe_enter(jl_current_task->ptls);
 
     this->barrier.wait();
 
     if (can_safe)
-        jl_gc_safe_leave(ct->ptls, gc_state);
+        jl_gc_safe_leave(jl_current_task->ptls, gc_state);
 
     if (!this->initialized)
     {
@@ -189,6 +193,10 @@ Thread_pool_Julia::_start_thread(const size_t tid)
     }
 
     this->func_deinit(tid);
+    // Permanently transition this worker thread to GC_SAFE before the OS thread exits. When woken up to stop,
+    // 'jl_gc_safe_leave' above restored the thread to GC_UNSAFE; leaving a terminated thread in GC_UNSAFE in Julia's
+    // global thread list would cause any subsequent GC cycle in the process to hang forever waiting for it.
+    jl_gc_safe_enter(ct->ptls);
 }
 
 }

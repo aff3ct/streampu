@@ -32,6 +32,13 @@ class Stateless_Julia final
     std::vector<std::vector<size_t>> jl_constants_id;
     std::vector<std::vector<void*>> jl_func_args;
     bool evaluated;
+    // Address of the thread_local Ref_keeper singleton that evaluated this module instance (set in eval()).
+    // In multi-threaded Sequences and Pipelines, cloned Stateless_Julia modules are evaluated on their respective
+    // worker threads (allocating constant slot IDs in each worker's thread_local Ref_keeper), whereas ~Sequence()
+    // always runs on the main thread and destroys all clones there. Tracking the owning Ref_keeper ensures that
+    // ~Stateless_Julia() only calls tools::Julia::release(jl_id) when destroyed on the same thread that evaluated it,
+    // preventing worker-thread slot IDs from corrupting the main thread's Ref_keeper freelist and marks array.
+    void* jl_eval_thread_keeper;
     std::shared_ptr<size_t> n_clones;
 
     std::shared_ptr<std::vector<std::vector<std::function<void(Stateless_Julia& m)>>>> jl_create_constants;
