@@ -192,7 +192,9 @@ main(int argc, char** argv)
                 end
 
                 for n in eachindex(sck_in)
-                    sck_out[n] = (sck_in[n] + 1) # & 0xff
+                    # Use 'one(eltype(sck_in))' instead of '1' (Int64) to avoid type promotion to Int64 and
+                    # per-element InexactError checks when converting back to smaller integer types (e.g. UInt8/Int8).
+                    sck_out[n] = sck_in[n] + one(eltype(sck_in))
                 end
 
                 if cst_wait_time_ns != 0

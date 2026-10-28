@@ -93,8 +93,22 @@ Incrementer<T>::_increment(const T* in, T* out, const size_t frame_id)
     std::chrono::time_point<std::chrono::steady_clock> t_start;
     if (this->ns) t_start = std::chrono::steady_clock::now();
 
-    for (size_t e = 0; e < this->n_elmts; e++)
-        out[e] = in[e] + 1;
+    // Cache 'this->n_elmts' in a local variable so the compiler knows 'out[e]' cannot alias the loop bound
+    // (under C++ strict aliasing rules, char/uint8_t/int8_t pointers may alias member variables of 'this').
+    const size_t n_elmts = this->n_elmts;
+    // Separate the in-place ('fwd' socket, in == out) and out-of-place ('in'/'out' sockets, in != out) loops
+    // because Clang/LLVM's runtime pointer-overlap check ('(uintptr_t)(out - in) < vector_width') treats
+    // 'in == out' (diff == 0) as an aliasing hazard and falls back to a non-vectorized scalar loop.
+    if (in == out)
+    {
+        for (size_t e = 0; e < n_elmts; e++)
+            out[e] = out[e] + 1;
+    }
+    else
+    {
+        for (size_t e = 0; e < n_elmts; e++)
+            out[e] = in[e] + 1;
+    }
 
     if (this->ns)
     {

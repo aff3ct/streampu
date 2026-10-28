@@ -8,7 +8,9 @@ function increment(sck_in::Array{UInt8}, sck_out::Array{UInt8}, cst_wait_time_ns
     end
 
     for n in eachindex(sck_in)
-        sck_out[n] = (sck_in[n] + 1) # & 0xff
+        # Use 'one(eltype(sck_in))' instead of '1' (Int64) to avoid type promotion to Int64 and
+        # per-element InexactError checks when converting back to smaller integer types (e.g. UInt8/Int8).
+        sck_out[n] = sck_in[n] + one(eltype(sck_in))
     end
 
     if cst_wait_time_ns != 0
@@ -31,7 +33,9 @@ function increment1(sck_in::Array{UInt8}, sck_out::Array{UInt8}, cst_wait_time_n
     end
 
     for n in eachindex(sck_in)
-        sck_out[n] = (sck_in[n] + 1) # & 0xff
+        # Use 'one(eltype(sck_in))' instead of '1' (Int64) to avoid type promotion to Int64 and
+        # per-element InexactError checks when converting back to smaller integer types (e.g. UInt8/Int8).
+        sck_out[n] = sck_in[n] + one(eltype(sck_in))
     end
 
     if cst_wait_time_ns != 0
@@ -54,7 +58,9 @@ function increment2(sck_in, sck_out, cst_wait_time_ns, rnt_frame_id, rnt_n_frame
     end
 
     for n in eachindex(sck_in)
-        sck_out[n] = (sck_in[n] + 1) # & 0xff
+        # Use 'one(eltype(sck_in))' instead of '1' (Int64) to avoid type promotion to Int64 and
+        # per-element InexactError checks when converting back to smaller integer types (e.g. UInt8/Int8).
+        sck_out[n] = sck_in[n] + one(eltype(sck_in))
     end
 
     if cst_wait_time_ns != 0
@@ -75,7 +81,9 @@ function incrementf(sck_fwd, cst_wait_time_ns, rnt_frame_id, rnt_n_frames_per_wa
     end
 
     for n in eachindex(sck_fwd)
-        sck_fwd[n] = (sck_fwd[n] + 1) # & 0xff
+        # Use 'one(eltype(sck_fwd))' instead of '1' (Int64) to avoid type promotion to Int64 and
+        # per-element InexactError checks when converting back to smaller integer types (e.g. UInt8/Int8).
+        sck_fwd[n] = sck_fwd[n] + one(eltype(sck_fwd))
     end
 
     if cst_wait_time_ns != 0
