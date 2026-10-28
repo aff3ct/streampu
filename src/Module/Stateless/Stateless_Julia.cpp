@@ -5,7 +5,6 @@
 #include <iostream>
 #include <julia.h>
 #include <mutex>
-#include <pthread.h>
 #include <sstream>
 
 #include "Module/Stateless/Stateless_Julia.hpp"
