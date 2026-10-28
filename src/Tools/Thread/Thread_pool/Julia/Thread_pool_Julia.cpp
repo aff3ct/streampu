@@ -30,10 +30,11 @@ Thread_pool_Julia::thread_code(void* args)
     }
 
     {
+        // Notify while holding 'data->mtx' so 'data' is never accessed after 'data->ready = true' becomes visible.
         std::lock_guard<std::mutex> lk(data->mtx);
         data->ready = true;
+        data->cv.notify_one();
     }
-    data->cv.notify_one();
 
     jl_task_t* ct = jl_current_task;
 
@@ -112,11 +113,13 @@ Thread_pool_Julia::init(const bool async)
 
     this->gc_old_state = jl_gc_enable(0);
 
+    // Keep 'arg' alive outside the loop so 'arg.mtx' and 'arg.cv' are not destroyed and recreated at the same
+    // stack address between iterations while the previous thread is still unlocking 'arg.mtx'.
+    Thread_arg arg;
+    arg.tp = this;
     for (size_t i = 0; i < n_threads; i++)
     {
-        Thread_arg arg;
         arg.tid = i;
-        arg.tp = this;
         arg.ready = false;
         pthread_create(&pool[i], NULL, thread_code, (void*)&arg);
         std::unique_lock<std::mutex> lk(arg.mtx);
