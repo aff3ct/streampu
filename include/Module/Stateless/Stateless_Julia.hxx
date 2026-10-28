@@ -1,5 +1,5 @@
 #include "Module/Stateless/Stateless_Julia.hpp"
-#include "Tools/Julia/utils.hpp"
+#include "Tools/Julia/Julia.hpp"
 
 namespace spu
 {
@@ -29,10 +29,10 @@ Stateless_Julia::create_constant(runtime::Task& task, const T& value)
     (*this->jl_create_constants)[tid].push_back(
       [tid, value](Stateless_Julia& m)
       {
-          jl_value_t* jl_constant_ptr = tools::box(value);
+          jl_value_t* jl_constant_ptr = tools::Julia::box(value);
 
           // protect from garbage collector
-          size_t jl_constant_id = tools::gc_preserve(jl_constant_ptr);
+          size_t jl_constant_id = tools::Julia::preserve(jl_constant_ptr);
 
           m.jl_constants_ptr[tid].push_back(jl_constant_ptr);
           m.jl_constants_id[tid].push_back(jl_constant_id);

@@ -4,8 +4,8 @@
 #include <sstream>
 
 #include "Tools/Exception/runtime_error/runtime_error.hpp"
+#include "Tools/Julia/Julia.hpp"
 #include "Tools/Julia/Ref_keeper.hpp"
-#include "Tools/Julia/utils.hpp"
 #include "Tools/Thread/Thread_pool/Julia/Thread_pool_Julia.hpp"
 #include "Tools/Thread/Thread_pool/Thread_pool.hpp"
 
@@ -161,7 +161,7 @@ Thread_pool_Julia::_start_thread(const size_t tid)
         std::lock_guard<std::mutex> adopt_lock(Thread_pool_Julia::jl_adopt_mutex);
         jl_gcframe_t** gc_struct = jl_adopt_thread();
         (void)gc_struct;
-        if (module != NULL) Ref_keeper::init(256);
+        if (Julia::is_init()) Ref_keeper::init(Julia::get_n_proxies());
     }
 
     {

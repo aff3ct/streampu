@@ -5,8 +5,8 @@
 #include <iostream>
 #include <julia.h>
 
+#include "Tools/Julia/Julia.hpp"
 #include "Tools/Julia/Ref_keeper.hpp"
-#include "Tools/Julia/utils.hpp"
 
 namespace spu
 {
@@ -20,19 +20,19 @@ Ref_keeper::~Ref_keeper()
 jl_value_t*
 Ref_keeper::get_res() const
 {
-    return jl_call1(jl_get, last_result);
+    return Julia::unref(last_result);
 }
 
 jl_value_t*
 Ref_keeper::call0(jl_function_t* f)
 {
-    return jl_call2(mycall, last_result, f);
+    return jl_call2(Julia::get_call(), last_result, f);
 }
 
 jl_value_t*
 Ref_keeper::call1(jl_function_t* f, jl_value_t* a)
 {
-    return jl_call3(mycall, last_result, f, a);
+    return jl_call3(Julia::get_call(), last_result, f, a);
 }
 
 static inline jl_value_t*
@@ -46,7 +46,7 @@ _call(jl_function_t* call, jl_value_t* ref, jl_function_t* f, jl_value_t** args,
     {
         args2[i + 2] = args[i];
     }
-    jl_value_t* res = jl_call(call, args2, n + 2); // NULL for some reason
+    jl_value_t* res = jl_call(call, args2, n + 2);
     JL_GC_POP();
     return res;
 }
@@ -62,7 +62,7 @@ Ref_keeper::call(jl_function_t* f, jl_value_t** args, size_t n)
     {
         args2[i + 2] = args[i];
     }
-    jl_value_t* res = jl_call(mycall, args2, n + 2); // NULL for some reason
+    jl_value_t* res = jl_call(Julia::get_call(), args2, n + 2);
     JL_GC_POP();
     return res;
 }
@@ -70,17 +70,15 @@ Ref_keeper::call(jl_function_t* f, jl_value_t** args, size_t n)
 jl_value_t*
 Ref_keeper::safe_call(jl_function_t* f, jl_value_t** args, size_t n)
 {
-    jl_value_t* res = _call(jl_safe_call, last_result, f, args, n);
+    jl_value_t* res = _call(Julia::get_safe_call(), last_result, f, args, n);
     if (jl_unbox_bool(jl_get_nth_field(res, 1)))
         throw runtime_error(__FILE__, __LINE__, __func__, jl_string_ptr(jl_get_nth_field(res, 3)));
-    // throw JuliaException(jl_get_nth_field(res, 2), jl_string_ptr(jl_get_nth_field(res, 3)));
     return jl_get_nth_field(res, 0);
 }
 
 jl_value_t*
 Ref_keeper::eval(std::string code)
 {
-    std::cout << "[C] eval" << std::endl;
     size_t len = code.length() + 1;
     char* s = (char*)malloc(sizeof(char) * len);
     size_t i = 0;
@@ -89,12 +87,9 @@ Ref_keeper::eval(std::string code)
         s[i] = c;
         i++;
     }
-    // char* test = std::vector<char>(code.begin(), code.end()).data();
     static jl_value_t* array_type = jl_apply_array_type((jl_value_t*)jl_char_type, 1);
     jl_array_t* c = jl_ptr_to_array_1d(array_type, s, len, false);
-    // jluna::safe_call(print, c);
-    // TODO: jluna::safe_call(jl_eval, c);
-    jl_value_t* res = this->call1(jl_eval, (jl_value_t*)c);
+    jl_value_t* res = this->call1(Julia::get_eval(), (jl_value_t*)c);
     free(s);
     return res;
 }
@@ -103,7 +98,7 @@ jl_value_t*
 Ref_keeper::unsafe_eval(std::string code)
 {
     jl_value_t* res = jl_eval_string(code.c_str());
-    jl_call2(assign, last_result, res);
+    jl_call2(Julia::get_assign(), last_result, res);
     return res;
 }
 
@@ -120,8 +115,7 @@ Ref_keeper::mark(jl_value_t* v)
         }
         else
         {
-            std::cout << "Error: no space avaible for marks: cpt=" << cpt << "; size=" << size + 3 << std::endl;
-            exit(1); // TODO: throw
+            throw runtime_error(__FILE__, __LINE__, __func__, "No space available for marks in Ref_keeper.");
         }
     }
     else
@@ -138,8 +132,7 @@ Ref_keeper::update_value(size_t id, jl_value_t* v)
 {
     if (id <= 2)
     {
-        std::cerr << "Error: trying to change Ref_keeper's protected value" << std::endl;
-        exit(1);
+        throw runtime_error(__FILE__, __LINE__, __func__, "Trying to change Ref_keeper's protected value.");
     }
     marks[id] = v;
 }
@@ -155,7 +148,12 @@ void
 Ref_keeper::init(size_t size)
 {
     Ref_keeper* singleton = get();
-    singleton->last_result = jl_call0(mk_ref);
+    if (singleton->marks != nullptr) return;
+
+    if (size == 0)
+        size = Julia::get_n_proxies();
+
+    singleton->last_result = jl_call0(Julia::get_mk_ref());
     singleton->size = size;
     singleton->marks = new jl_value_t*[size + 3];
     singleton->cpt = 3; // 0 and 1 for gcframe, 2 for last_result

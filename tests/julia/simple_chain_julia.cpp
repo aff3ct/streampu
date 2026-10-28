@@ -19,7 +19,7 @@ main(int argc, char** argv)
 #else
     jl_init();
 #endif
-    tools::init(256);
+    tools::Julia::init(256);
 
     tools::Signal_handler::init();
 

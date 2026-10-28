@@ -1,5 +1,5 @@
+#include "Tools/Julia/Julia.hpp"
 #include "Tools/Julia/Proxy.hpp"
-#include "Tools/Julia/utils.hpp"
 #include <chrono>
 #include <cstddef>
 #include <cstdlib>
@@ -126,7 +126,7 @@ main(int argc, char** argv)
 #else
     jl_init();
 #endif
-    spu::tools::init(256);
+    spu::tools::Julia::init(256);
 
     auto t0 = std::chrono::steady_clock::now();
     std::chrono::nanoseconds duration;
@@ -148,7 +148,7 @@ main(int argc, char** argv)
 
     jl_function_t* jl_get_threadid = jl_eval_string("return Base.Threads.threadid");
     jl_function_t* jl_println = jl_eval_string("return Base.println");
-    (void)spu::tools::jl_eval_file("../tests/julia/computations.jl");
+    (void)spu::tools::Julia::eval_file("../tests/julia/computations.jl");
 
     spu::tools::Proxy computation = jl_eval_string("return computation1");
     std::function<void(std::vector<uint64_t>&, int, const size_t)> func_exec =

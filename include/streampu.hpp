@@ -249,8 +249,8 @@
 #ifndef REF_KEEPER_HPP_
 #include <Tools/Julia/Ref_keeper.hpp>
 #endif
-#ifndef JULIA_UTILS_H_
-#include <Tools/Julia/utils.hpp>
+#ifndef TOOLS_JULIA_HPP_
+#include <Tools/Julia/Julia.hpp>
 #endif
 #ifndef BINARYOP_H
 #include <Tools/Math/binaryop.h>

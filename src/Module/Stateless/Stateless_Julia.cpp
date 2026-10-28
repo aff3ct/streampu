@@ -10,8 +10,8 @@
 #include "Module/Stateless/Stateless_Julia.hpp"
 #include "Runtime/Task/Task.hpp"
 #include "Tools/Exception/exception.hpp"
+#include "Tools/Julia/Julia.hpp"
 #include "Tools/Julia/Proxy.hpp"
-#include "Tools/Julia/utils.hpp"
 
 using namespace spu;
 using namespace spu::module;
@@ -85,7 +85,7 @@ Stateless_Julia::~Stateless_Julia()
     // if ((*this->n_clones) == 0)
     for (size_t tid = 0; tid < this->jl_constants_id.size(); tid++)
         for (size_t jl_id : this->jl_constants_id[tid])
-            tools::gc_release(jl_id);
+            tools::Julia::release(jl_id);
     // else
     (*this->n_clones)--;
 }
@@ -225,7 +225,7 @@ Stateless_Julia::create_codelet_file(runtime::Task& task, const std::string& jul
         throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
     }
 
-    this->jl_evaluate->push_back([julia_filepath]() { tools::jl_eval_file(julia_filepath.c_str()); });
+    this->jl_evaluate->push_back([julia_filepath]() { tools::Julia::eval_file(julia_filepath); });
     this->_create_codelet(task);
 }
 
@@ -252,7 +252,7 @@ Stateless_Julia::create_codelet_function(runtime::Task& task, jl_function_t* f)
     this->jl_evaluate->push_back(
       [this, f, tid]()
       {
-          size_t f_id = tools::gc_preserve(f);
+          size_t f_id = tools::Julia::preserve(f);
           this->jl_constants_ptr[tid].push_back(f);
           this->jl_constants_id[tid].push_back(f_id);
       });
@@ -322,13 +322,13 @@ Stateless_Julia::_create_codelet(runtime::Task& task)
                                    if (!task_compiled->load(std::memory_order_relaxed))
                                    {
                                        tools::Proxy proxy =
-                                         tools::jl_call_func(sjl.jl_func_args[tid], sjl.is_jl_safe());
+                                         tools::Julia::call(sjl.jl_func_args[tid], sjl.is_jl_safe());
                                        task_compiled->store(true, std::memory_order_release);
                                        return jl_unbox_int32((jl_value_t*)proxy);
                                    }
                                }
 
-                               tools::Proxy proxy = tools::jl_call_func(sjl.jl_func_args[tid], sjl.is_jl_safe());
+                               tools::Proxy proxy = tools::Julia::call(sjl.jl_func_args[tid], sjl.is_jl_safe());
                                return jl_unbox_int32((jl_value_t*)proxy);
                            });
 
@@ -357,13 +357,13 @@ Stateless_Julia::_create_codelet(runtime::Task& task)
                 (void*)m.jl_constants_ptr[tid][i];
 
           jl_value_t* jl_frame_id = jl_box_uint32(0);
-          size_t jl_frame_id_id = tools::gc_preserve(jl_frame_id);
+          size_t jl_frame_id_id = tools::Julia::preserve(jl_frame_id);
           m.jl_constants_ptr[tid].push_back(jl_frame_id);
           m.jl_constants_id[tid].push_back(jl_frame_id_id);
           m.jl_func_args[tid][m.jl_func_args[tid].size() - 2] = (void*)jl_frame_id;
 
           jl_value_t* jl_n_frames_per_wave = jl_box_uint32(m.get_n_frames_per_wave());
-          size_t jl_n_frames_per_wave_id = tools::gc_preserve(jl_n_frames_per_wave);
+          size_t jl_n_frames_per_wave_id = tools::Julia::preserve(jl_n_frames_per_wave);
           m.jl_constants_ptr[tid].push_back(jl_n_frames_per_wave);
           m.jl_constants_id[tid].push_back(jl_n_frames_per_wave_id);
           m.jl_func_args[tid][m.jl_func_args[tid].size() - 1] = (void*)jl_n_frames_per_wave;

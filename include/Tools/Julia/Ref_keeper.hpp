@@ -52,7 +52,7 @@ class Ref_keeper
     void unmark(size_t id);
     void update_value(size_t id, jl_value_t* v);
 
-    static void init(size_t size);
+    static void init(size_t size = 0);
     static Ref_keeper* get();
 };
 }

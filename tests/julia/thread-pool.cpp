@@ -164,7 +164,7 @@ main(int argc, char** argv)
 
     jl_function_t* jl_get_threadid = jl_eval_string("return Base.Threads.threadid");
     jl_function_t* jl_println = jl_eval_string("return Base.println");
-    (void)spu::tools::jl_eval_file("../tests/julia/computations.jl");
+    (void)spu::tools::Julia::eval_file("../tests/julia/computations.jl");
 
     std::function<void(const size_t)> func_exec1 = [jl_get_threadid, print_stats](const size_t tid)
     {
