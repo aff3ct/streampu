@@ -97,11 +97,12 @@ split_string(std::string s, const std::string delimiter = "_")
 void
 parse_int_string(std::string& vector_param, std::vector<size_t>& vector)
 {
+    const std::locale loc = std::locale::classic();
     std::vector<std::string> tokens = split_string(vector_param, ",");
     for (size_t i = 0; i < tokens.size(); ++i)
     {
         std::string token = tokens[i];
-        token.erase(remove_if(token.begin(), token.end(), isspace), token.end());
+        token.erase(remove_if(token.begin(), token.end(), [=](char c) { return std::isspace(c, loc); }), token.end());
         vector.push_back(std::atoi(token.c_str()));
     }
 }
@@ -109,6 +110,7 @@ parse_int_string(std::string& vector_param, std::vector<size_t>& vector)
 std::tuple<tsk_e, int, bool>
 extract_tsk_type(const std::string& label, const bool check_replicability)
 {
+    const std::locale loc = std::locale::classic();
     tsk_e tsk = tsk_e::relay;
     int duration = -1;
     bool replicable = true;
@@ -121,7 +123,8 @@ extract_tsk_type(const std::string& label, const bool check_replicability)
         while (i < tokens.size())
         {
             std::string token = tokens[i];
-            token.erase(remove_if(token.begin(), token.end(), isspace), token.end());
+            token.erase(remove_if(token.begin(), token.end(), [=](char c) { return std::isspace(c, loc); }),
+                        token.end());
             if (str_2_tsk.find(token) != str_2_tsk.end())
             {
                 tsk = str_2_tsk[token];
@@ -237,17 +240,19 @@ main(int argc, char** argv)
                           { "debug", no_argument, NULL, 'g' },
                           { "force-sequence", no_argument, NULL, 'q' },
                           { "active-waiting", no_argument, NULL, 'w' },
-                          { "help", no_argument, NULL, 'h' },
                           { "tsk-per-sta", no_argument, NULL, 'n' },
                           { "tsk-types", no_argument, NULL, 'r' },
                           { "tsk-types-sta", no_argument, NULL, 'R' },
                           { "chain", no_argument, NULL, 'C' },
                           { "sched", no_argument, NULL, 'S' },
+                          { "sched-file", no_argument, NULL, 'F' },
 #ifdef SPU_HWLOC
                           { "pinning-policy", no_argument, NULL, 'P' },
 #endif
                           { "verbose", no_argument, NULL, 'v' },
-                          { 0 } };
+                          { "task-autoalloc", no_argument, NULL, 'k' },
+                          { "help", no_argument, NULL, 'h' },
+                          { NULL, 0, NULL, 0 } };
 
     std::string n_threads_param;
     std::vector<size_t> n_threads;
@@ -266,7 +271,6 @@ main(int argc, char** argv)
     bool debug = false;
     bool force_sequence = false;
     bool active_waiting = false;
-    bool verbose = false;
     std::string tsk_per_sta_param;
     std::vector<size_t> tsk_per_sta;
     std::string tsk_types_param;
@@ -276,12 +280,15 @@ main(int argc, char** argv)
     std::string pinning_policy;
     std::string check_task;
     std::string chain_param;
-    std::string scheduler = "OTAC";
+    std::string sched = "OTAC";
+    std::string sched_file = "sched.json";
     std::vector<std::tuple<tsk_e, int, bool>> tsk_chain;
+    bool verbose = false;
+    bool task_autoalloc = false;
 
     while (1)
     {
-        const int opt = getopt_long(argc, argv, "t:f:s:d:e:l:u:o:i:j:n:r:R:P:C:S:cpbgqwhv", longopts, 0);
+        const int opt = getopt_long(argc, argv, "t:f:s:d:e:l:u:o:i:j:n:r:R:P:C:S:F:cpbgqwvkh", longopts, 0);
         if (opt == -1) break;
         switch (opt)
         {
@@ -334,9 +341,6 @@ main(int argc, char** argv)
             case 'q':
                 force_sequence = true;
                 break;
-            case 'v':
-                verbose = true;
-                break;
             case 'n':
                 tsk_per_sta_param = std::string(optarg);
                 parse_int_string(tsk_per_sta_param, tsk_per_sta);
@@ -354,94 +358,109 @@ main(int argc, char** argv)
                 parse_tsk_types_sta(chain_param, tsk_chain, true);
                 break;
             case 'S':
-                scheduler = std::string(optarg);
+                sched = std::string(optarg);
+                break;
+            case 'F':
+                sched_file = std::string(optarg);
                 break;
 #ifdef SPU_HWLOC
             case 'P':
                 pinning_policy = std::string(optarg);
                 break;
 #endif
+            case 'v':
+                verbose = true;
+                break;
+            case 'k':
+                task_autoalloc = true;
+                break;
             case 'h':
                 std::cout << "usage: " << argv[0] << " [options]" << std::endl;
                 std::cout << std::endl;
                 std::cout << "  -t, --n-threads          "
-                          << "Number of threads to run in parallel for each stage                   "
+                          << "Number of threads to run in parallel for each stage                    "
                              "["
                           << (n_threads_param.empty() ? "empty" : "\"" + n_threads_param + "\"") << "]" << std::endl;
                 std::cout << "  -f, --n-inter-frames     "
-                          << "Number of frames to process in one task                               "
+                          << "Number of frames to process in one task                                "
                           << "[" << n_inter_frames << "]" << std::endl;
                 std::cout << "  -s, --sleep-time         "
-                          << "Sleep time duration in one task (microseconds)                        "
+                          << "Sleep time duration in one task (microseconds)                         "
                           << "[" << sleep_time_us << "]" << std::endl;
                 std::cout << "  -d, --data-length        "
-                          << "Size of data to process in one task (in bytes)                        "
+                          << "Size of data to process in one task (in bytes)                         "
                           << "[" << data_length << "]" << std::endl;
                 std::cout << "  -e, --n-exec             "
-                          << "Number of executions (0 means -> never stop because of this counter)  "
+                          << "Number of executions (0 means -> never stop because of this counter)   "
                           << "[" << n_exec << "]" << std::endl;
                 std::cout << "  -l, --n-exec-pro         "
-                          << "Number of executions during the scheduler profiling phase             "
+                          << "Number of executions during the scheduler profiling phase              "
                           << "[" << n_exec_pro << "]" << std::endl;
                 std::cout << "  -u, --buffer-size        "
-                          << "Size of the buffer between the different stages of the pipeline       "
+                          << "Size of the buffer between the different stages of the pipeline        "
                           << "[" << buffer_size << "]" << std::endl;
                 std::cout << "  -o, --dot-filepath       "
-                          << "Path to dot output file                                               "
+                          << "Path to dot output file                                                "
                           << "[" << (dot_filepath.empty() ? "empty" : "\"" + dot_filepath + "\"") << "]" << std::endl;
                 std::cout << "  -i, --in-filepath        "
-                          << "Path to the input file (used to generate bits of the chain)           "
+                          << "Path to the input file (used to generate bits of the chain)            "
                           << "[" << (in_filepath.empty() ? "empty" : "\"" + in_filepath + "\"") << "]" << std::endl;
                 std::cout << "  -j, --out-filepath       "
-                          << "Path to the output file (written at the end of the chain)             "
+                          << "Path to the output file (written at the end of the chain)              "
                           << "[" << (out_filepath.empty() ? "empty" : "\"" + out_filepath + "\"") << "]" << std::endl;
                 std::cout << "  -c, --copy-mode          "
-                          << "Enable to copy data in sequence (performance will be reduced)         "
+                          << "Enable to copy data in sequence (performance will be reduced)          "
                           << "[" << (no_copy_mode ? "false" : "true") << "]" << std::endl;
                 std::cout << "  -b, --step-by-step       "
-                          << "Enable step-by-step sequence execution (performance will be reduced)  "
+                          << "Enable step-by-step sequence execution (performance will be reduced)   "
                           << "[" << (step_by_step ? "true" : "false") << "]" << std::endl;
                 std::cout << "  -p, --print-stats        "
-                          << "Enable to print per task statistics (performance will be reduced)     "
+                          << "Enable to print per task statistics (performance will be reduced)      "
                           << "[" << (print_stats ? "true" : "false") << "]" << std::endl;
                 std::cout << "  -g, --debug              "
-                          << "Enable task debug mode (print socket data)                            "
+                          << "Enable task debug mode (print socket data)                             "
                           << "[" << (debug ? "true" : "false") << "]" << std::endl;
                 std::cout << "  -q, --force-sequence     "
-                          << "Force sequence instead of pipeline                                    "
+                          << "Force sequence instead of pipeline                                     "
                           << "[" << (force_sequence ? "true" : "false") << "]" << std::endl;
                 std::cout << "  -w, --active-waiting     "
-                          << "Enable active waiting in the pipeline synchronizations                "
+                          << "Enable active waiting in the pipeline synchronizations                 "
                           << "[" << (active_waiting ? "true" : "false") << "]" << std::endl;
                 std::cout << "  -n, --tsk-per-sta        "
-                          << "The number of tasks on each stage of the pipeline                     "
+                          << "The number of tasks on each stage of the pipeline                      "
                           << "[" << (tsk_per_sta_param.empty() ? "empty" : "\"" + tsk_per_sta_param + "\"") << "]"
                           << std::endl;
                 std::cout << "  -r, --tsk-types          "
-                          << "The socket type of each task (SFWD or SIO)                            "
+                          << "The socket type of each task (SFWD or SIO)                             "
                           << "[" << (tsk_types_param.empty() ? "empty" : "\"" + tsk_types_param + "\"") << "]"
                           << std::endl;
                 std::cout << "  -R, --tsk-types-sta      "
-                          << "The socket type of tasks on each stage (SFWD or SIO)                  "
+                          << "The socket type of tasks on each stage (SFWD or SIO)                   "
                           << "[" << (tsk_types_sta_param.empty() ? "empty" : "\"" + tsk_types_sta_param + "\"") << "]"
                           << std::endl;
                 std::cout << "  -C, --chain              "
-                          << "Description of the tasks chain (to be combined with '-S' param)       "
+                          << "Description of the tasks chain (to be combined with '-S' param)        "
                           << "[" << (chain_param.empty() ? "empty" : "\"" + chain_param + "\"") << "]" << std::endl;
                 std::cout << "  -S, --sched              "
-                          << "Scheduler algorithm for the pipeline creation ('OTAC')                "
-                          << "[" << (scheduler.empty() ? "empty" : "\"" + scheduler + "\"") << "]" << std::endl;
+                          << "Scheduler algorithm for the pipeline creation ('OTAC', 'GR' or 'FILE') "
+                          << "[" << (sched.empty() ? "empty" : "\"" + sched + "\"") << "]" << std::endl;
+                std::cout << "  -F, --sched-file         "
+                          << "File that contains the scheduling, to combine with 'FILE' scheduler    "
+                          << "[" << (sched_file.empty() ? "empty" : "\"" + sched_file + "\"") << "]" << std::endl;
 #ifdef SPU_HWLOC
                 std::cout << "  -P, --pinning-policy     "
-                          << "Pinning policy for pipeline execution                                 "
+                          << "Pinning policy for pipeline execution                                  "
                           << "[" << (pinning_policy.empty() ? "empty" : "\"" + pinning_policy + "\"") << "]"
                           << std::endl;
 #endif
                 std::cout << "  -v, --verbose            "
-                          << "Show information about the scheduling choices                         "
+                          << "Show information about the scheduling choices                          "
                           << "[false]" << std::endl;
+                std::cout << "  -k, --task-autoalloc     "
+                          << "Enable task SOUT autoalloc mode                                        "
+                          << "[" << (task_autoalloc ? "true" : "false") << "]" << std::endl;
                 std::cout << "  -h, --help               "
-                          << "This help                                                             "
+                          << "This help                                                              "
                           << "[false]" << std::endl;
                 exit(0);
                 break;
@@ -514,9 +533,9 @@ main(int argc, char** argv)
     for (size_t t = 0; t < n_threads.size(); t++)
         n_threads_param += std::to_string(n_threads[t]) + ((t < n_threads.size() - 1) ? "," : "");
 
-    std::cout << "#####################################" << std::endl;
-    std::cout << "# Micro-benchmark: Generic pipeline #" << std::endl;
-    std::cout << "#####################################" << std::endl;
+    std::cout << "######################" << std::endl;
+    std::cout << "# StreamPU Benchmark #" << std::endl;
+    std::cout << "######################" << std::endl;
     std::cout << "#" << std::endl;
 
     std::cout << "# Command line arguments:" << std::endl;
@@ -530,7 +549,10 @@ main(int argc, char** argv)
               << std::endl;
     std::cout << "#   - chain          = " << (chain_param.empty() ? "[empty]" : chain_param.c_str()) << std::endl;
     if (!chain_param.empty())
-        std::cout << "#   - scheduler      = " << (scheduler.empty() ? "[empty]" : scheduler.c_str()) << std::endl;
+    {
+        std::cout << "#   - sched          = " << (sched.empty() ? "[empty]" : sched.c_str()) << std::endl;
+        std::cout << "#   - sched_file     = " << (sched_file.empty() ? "[empty]" : sched_file.c_str()) << std::endl;
+    }
 #ifdef SPU_HWLOC
     std::cout << "#   - pinning_policy = " << (pinning_policy.empty() ? "[empty]" : pinning_policy.c_str())
               << std::endl;
@@ -551,7 +573,10 @@ main(int argc, char** argv)
     std::cout << "#   - force_sequence = " << (force_sequence ? "true" : "false") << std::endl;
     std::cout << "#   - active_waiting = " << (active_waiting ? "true" : "false") << std::endl;
     std::cout << "#   - verbose        = " << (verbose ? "true" : "false") << std::endl;
+    std::cout << "#   - task_autoalloc = " << (task_autoalloc ? "true" : "false") << std::endl;
     std::cout << "#" << std::endl;
+
+    tools::Buffer_allocator::set_task_autoalloc(task_autoalloc);
 
     if (!force_sequence && !no_copy_mode)
         std::clog << rang::tag::warning << "'no_copy_mode' has no effect with pipeline (it is always enable)"
@@ -573,12 +598,9 @@ main(int argc, char** argv)
                     message << "An 'Initializer' can only be at the begining of the chain (tas = '" << tas << "').";
                     throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
                 }
-                if (std::get<1>(tst) != -1)
-                {
-                    message << "An 'Initializer' can't have a duration (tas = '" << tas << "').";
-                    throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
-                }
                 auto initializer = new module::Initializer<uint8_t>(data_length);
+                size_t sleep_duration_us = (std::get<1>(tst) == -1) ? sleep_time_us : std::get<1>(tst);
+                initializer->set_ns(sleep_duration_us * 1000);
                 modules[tas].reset(initializer);
                 initializer->set_custom_name("Init" + std::to_string(tas));
                 break;
@@ -647,12 +669,9 @@ main(int argc, char** argv)
                     message << "A 'Finalizer' can only be at the end of the chain (tas = '" << tas << "').";
                     throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
                 }
-                if (std::get<1>(tst) != -1)
-                {
-                    message << "A 'Finalizer' can't have a duration (tas = '" << tas << "').";
-                    throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
-                }
                 auto finalizer = new module::Finalizer<uint8_t>(data_length);
+                size_t sleep_duration_us = (std::get<1>(tst) == -1) ? sleep_time_us : std::get<1>(tst);
+                finalizer->set_ns(sleep_duration_us * 1000);
                 modules[tas].reset(finalizer);
                 finalizer->set_custom_name("Fin" + std::to_string(tas));
                 break;
@@ -794,14 +813,22 @@ main(int argc, char** argv)
             sequence_chain.reset(new runtime::Sequence((*modules[0].get())[0], 1));
             size_t R = n_threads[0];
 
-            std::unique_ptr<sched::Scheduler> sched;
-            if (scheduler == "OTAC")
+            std::unique_ptr<sched::Scheduler> sched_ptr;
+            if (sched == "OTAC")
             {
-                sched.reset(new sched::Scheduler_OTAC(sequence_chain.get(), R));
+                sched_ptr.reset(new sched::Scheduler_OTAC(sequence_chain.get(), R));
+            }
+            else if (sched == "GR")
+            {
+                sched_ptr.reset(new sched::Scheduler_GR(sequence_chain.get(), R));
+            }
+            else if (sched == "FILE")
+            {
+                sched_ptr.reset(new sched::Scheduler_from_file(sequence_chain.get(), sched_file));
             }
             else
             {
-                message << "Current scheduler is not supported (scheduler = '" << scheduler << "')!";
+                message << "Current scheduler is not supported (sched = '" << sched << "')!";
                 throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
             }
 
@@ -809,13 +836,13 @@ main(int argc, char** argv)
             // pipeline_chain.reset(sched->generate_pipeline());
 
             // step by step method to print intermediate results ------------------------------------------------------
-            sched->profile(n_exec_pro);
-            if (verbose) sched->print_profiling();
+            sched_ptr->profile(n_exec_pro);
+            if (verbose) sched_ptr->print_profiling();
 
-            sched->schedule();
+            sched_ptr->schedule();
             if (verbose)
             {
-                std::vector<std::pair<size_t, size_t>> solution = sched->get_solution();
+                std::vector<std::pair<size_t, size_t>> solution = sched_ptr->get_solution();
                 std::cout << "# Solution stages {(n,r)}"
                           << ": {";
                 for (auto& pair_s : solution)
@@ -823,19 +850,37 @@ main(int argc, char** argv)
                 std::cout << "}" << std::endl;
             }
 
-            bool enable_pinning = true;
+            std::vector<bool> thread_pinnings(sched_ptr->get_solution().size(), true);
             if (pinning_policy.empty())
             {
-                pinning_policy = sched->perform_threads_mapping();
+                thread_pinnings = sched_ptr->get_thread_pinnings();
+                pinning_policy = sched_ptr->get_threads_mapping();
+                std::cout << "# Effective pinning policy: " << pinning_policy << std::endl;
+
+                std::cout << "# Thread pinnings: {";
+                for (auto tp : thread_pinnings)
+                    std::cout << tp << ", ";
+                std::cout << "}" << std::endl;
 #ifdef SPU_HWLOC
                 if (verbose) std::cout << "# Effective pinning policy: " << pinning_policy << std::endl;
 #endif
             }
-            else if (pinning_policy == "none")
-                enable_pinning = false;
+
+            std::vector<size_t> sync_buff_sizes;
+            std::vector<bool> sync_active_waitings;
+            if (sched == "FILE")
+            {
+                sync_buff_sizes = sched_ptr->get_sync_buff_sizes();
+                sync_active_waitings = sched_ptr->get_sync_active_waitings();
+            }
+            else
+            {
+                sync_buff_sizes = std::vector<size_t>(sched_ptr->get_solution().size() - 1, buffer_size);
+                sync_active_waitings = std::vector<bool>(sched_ptr->get_solution().size() - 1, active_waiting);
+            }
 
             pipeline_chain.reset(
-              sched->instantiate_pipeline(buffer_size, active_waiting, enable_pinning, pinning_policy));
+              sched_ptr->instantiate_pipeline(sync_buff_sizes, sync_active_waitings, thread_pinnings, pinning_policy));
             // --------------------------------------------------------------------------------------------------------
 
             // override n_threads to contain the number of threads per stage as it should be

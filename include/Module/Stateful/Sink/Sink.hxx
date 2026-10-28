@@ -133,7 +133,7 @@ Sink<B>::_send(const B* in_data, const size_t frame_id)
 
 template<typename B>
 void
-Sink<B>::_send_count(const B* in_data, const uint32_t* in_count, const size_t frame_id)
+Sink<B>::_send_count(const B* /*in_data*/, const uint32_t* /*in_count*/, const size_t /*frame_id*/)
 {
     throw tools::unimplemented_error(__FILE__, __LINE__, __func__);
 }

@@ -7,10 +7,11 @@ using namespace spu;
 using namespace spu::module;
 
 template<typename T>
-Finalizer<T>::Finalizer(const size_t n_elmts, const size_t history_size)
+Finalizer<T>::Finalizer(const size_t n_elmts, const size_t history_size, const size_t ns)
   : Stateful()
   , data(history_size, std::vector<std::vector<T>>(this->get_n_frames(), std::vector<T>(n_elmts, 0)))
   , next_stream_id(0)
+  , ns(ns)
 {
     const std::string name = "Finalizer";
     this->set_name(name);
@@ -48,6 +49,20 @@ Finalizer<T>::clone() const
     auto m = new Finalizer(*this);
     m->deep_copy(*this);
     return m;
+}
+
+template<typename T>
+size_t
+Finalizer<T>::get_ns() const
+{
+    return this->ns;
+}
+
+template<typename T>
+void
+Finalizer<T>::set_ns(const size_t ns)
+{
+    this->ns = ns;
 }
 
 template<typename T>
@@ -101,9 +116,19 @@ template<typename T>
 void
 Finalizer<T>::_finalize(const T* in, const size_t frame_id)
 {
+    std::chrono::time_point<std::chrono::steady_clock> t_start;
+    if (this->ns) t_start = std::chrono::steady_clock::now();
+
     std::copy(in, in + this->data[this->next_stream_id][0].size(), this->data[this->next_stream_id][frame_id].begin());
 
     if (frame_id == this->get_n_frames() - 1) this->next_stream_id = (this->next_stream_id + 1) % this->data.size();
+
+    if (this->ns)
+    {
+        std::chrono::nanoseconds duration = std::chrono::steady_clock::now() - t_start;
+        while ((size_t)duration.count() < this->ns) // active waiting
+            duration = std::chrono::steady_clock::now() - t_start;
+    }
 }
 
 template<typename T>

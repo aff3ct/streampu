@@ -22,7 +22,7 @@ Controller_static::clone() const
 }
 
 void
-Controller_static::_control(int8_t* out, const size_t frame_id)
+Controller_static::_control(int8_t* out, const size_t /*frame_id*/)
 {
     out[0] = this->path;
 }

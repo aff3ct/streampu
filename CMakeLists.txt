@@ -19,19 +19,19 @@ option(SPU_COMPILE_STATIC_LIB  "Compile the static library"                     
 option(SPU_COMPILE_SHARED_LIB  "Compile the shared library"                                  OFF)
 option(SPU_LINK_HWLOC          "Link with the hwloc library (used for threads pinning)"      OFF)
 option(SPU_COLORS              "Enable the colors in the terminal"                           ON )
+option(SPU_BENCHMARK           "Enable the compilation of the benchmark executable"          ON )
 option(SPU_TESTS               "Enable the compilation of the tests"                         ON )
 option(SPU_STACKTRACE          "Print the stack trace when an exception is raised"           ON )
 option(SPU_STACKTRACE_SEGFAULT "Try to print the stack trace when a segfault occurs"         OFF)
 option(SPU_SHOW_DEPRECATED     "Print message each time a deprecated func. is called"        OFF)
 option(SPU_FAST                "Remove checks to speedup the code"                           OFF)
+option(SPU_HELGRIND            "Annotate the code for Helgrind thread error detector"        OFF)
 option(SPU_OVERRIDE_VERSION    "Compile without .git directory, provided a version and hash" OFF)
 option(SPU_LINK_JULIA          "Link with Julia"                                             OFF)
 option(SPU_LINK_JLUNA          "Link with Jluna (sets SPU_LINK_JULIA to ON automatically)"   OFF)
 
 if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/.git" AND NOT SPU_OVERRIDE_VERSION)
-    message(FATAL_ERROR "The '.git' folder can't be found, StreamPU can't be compiled if it is not cloned "
-                        "from a Git repository. Please do not download archives from GitHub and make a Git "
-                        "clone instead (git clone https://github.com/aff3ct/streampu.git).")
+    message(WARNING "StreamPU - '.git' folder can't be found, this is dangerous!")
 endif()
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -65,6 +65,12 @@ set(LIBRARY_OUTPUT_PATH lib/)
 # Generate the source files list
 file(GLOB_RECURSE source_files ${CMAKE_CURRENT_SOURCE_DIR}/src/*)
 
+# force SPU_BENCHMARK to ON if SPU_TESTS is set
+if(SPU_TESTS AND NOT SPU_BENCHMARK)
+    message(STATUS "StreamPU - SPU_BENCHMARK is forced")
+    set(SPU_BENCHMARK ON)
+endif()
+
 # ---------------------------------------------------------------------------------------------------------------------
 # ------------------------------------------------------------------------------------------------ GET VERSION FROM GIT
 # ---------------------------------------------------------------------------------------------------------------------
@@ -75,6 +81,11 @@ if(NOT SPU_OVERRIDE_VERSION)
     git_describe(GIT_VERSION "--tags" "--abbrev=7")
 else()
     set(GIT_VERSION ${SPU_OVERRIDE_VERSION})
+endif()
+
+if(NOT GIT_VERSION)
+    message(WARNING "StreamPU - Var GIT_VERSION is not defined, forcing a fake version")
+    set(GIT_VERSION v0.0.0)
 endif()
 
 string(REGEX REPLACE "^v"             ""    SPU_VERSION_FULL  ${GIT_VERSION})
@@ -168,6 +179,14 @@ if(SPU_STACKTRACE_SEGFAULT AND CPPTRACE_UNWIND_WITH_LIBUNWIND)
     set_target_properties(spu-signal-tracer PROPERTIES OUTPUT_NAME streampu-signal-tracer POSITION_INDEPENDENT_CODE ON)
 endif()
 
+# Benchmark
+if(SPU_BENCHMARK)
+    add_executable(spu-benchmark $<TARGET_OBJECTS:spu-obj>
+                   ${CMAKE_CURRENT_SOURCE_DIR}/benchmark/main.cpp)
+    set_target_properties(spu-benchmark PROPERTIES OUTPUT_NAME spu-benchmark POSITION_INDEPENDENT_CODE ON)
+    list(APPEND spu_targets_list spu-benchmark)
+endif()
+
 # Tests
 if(SPU_TESTS)
     add_executable(spu-test-simple-chain $<TARGET_OBJECTS:spu-obj> ${CMAKE_CURRENT_SOURCE_DIR}/tests/bootstrap/simple_chain.cpp)
@@ -240,11 +259,6 @@ if(SPU_TESTS)
     set_target_properties(spu-test-complex-pipeline-mix-fwd PROPERTIES OUTPUT_NAME test-complex-pipeline-mix-fwd POSITION_INDEPENDENT_CODE ON)
     list(APPEND spu_targets_list spu-test-complex-pipeline-mix-fwd)
 
-    add_executable(spu-test-generic-pipeline $<TARGET_OBJECTS:spu-obj>
-                   ${CMAKE_CURRENT_SOURCE_DIR}/tests/advanced/generic_pipeline.cpp)
-    set_target_properties(spu-test-generic-pipeline PROPERTIES OUTPUT_NAME test-generic-pipeline POSITION_INDEPENDENT_CODE ON)
-    list(APPEND spu_targets_list spu-test-generic-pipeline)
-
     add_executable(spu-test-exclusive-paths-pipeline $<TARGET_OBJECTS:spu-obj>
                    ${CMAKE_CURRENT_SOURCE_DIR}/tests/ctrl_flow/exclusive_paths_pipeline.cpp)
     set_target_properties(spu-test-exclusive-paths-pipeline PROPERTIES OUTPUT_NAME test-exclusive-paths-pipeline POSITION_INDEPENDENT_CODE ON)
@@ -254,6 +268,16 @@ if(SPU_TESTS)
                    ${CMAKE_CURRENT_SOURCE_DIR}/tests/ctrl_flow/nested_loops_pipeline.cpp)
     set_target_properties(spu-test-nest-loops-pipeline PROPERTIES OUTPUT_NAME test-nested-loops-pipeline POSITION_INDEPENDENT_CODE ON)
     list(APPEND spu_targets_list spu-test-nest-loops-pipeline)
+
+    add_executable(spu-test-pipeline-builder-simple $<TARGET_OBJECTS:spu-obj>
+                   ${CMAKE_CURRENT_SOURCE_DIR}/tests/builder/pipeline_builder_simple.cpp)
+    set_target_properties(spu-test-pipeline-builder-simple PROPERTIES OUTPUT_NAME test-pipeline-builder-simple POSITION_INDEPENDENT_CODE ON)
+    list(APPEND spu_targets_list spu-test-pipeline-builder-simple)
+
+    add_executable(spu-test-pipeline-builder-conditional $<TARGET_OBJECTS:spu-obj>
+                   ${CMAKE_CURRENT_SOURCE_DIR}/tests/builder/pipeline_builder_conditional.cpp)
+    set_target_properties(spu-test-pipeline-builder-conditional PROPERTIES OUTPUT_NAME test-pipeline-builder-conditional POSITION_INDEPENDENT_CODE ON)
+    list(APPEND spu_targets_list spu-test-pipeline-builder-conditional)
 
     if (SPU_LINK_HWLOC)
         # pin test addition
@@ -316,6 +340,7 @@ if (SPU_STACKTRACE OR SPU_STACKTRACE_SEGFAULT)
                             "$ git submodule update --init -- ../lib/cpptrace/")
     endif()
 endif()
+
 
 # ---------------------------------------------------------------------------------------------------------------------
 # ------------------------------------------------------------------------------------------------ COMPILER DEFINITIONS
@@ -415,6 +440,30 @@ else()
                         "$ git submodule update --init -- ../lib/rang/")
 endif()
 
+# nlohmann json
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/lib/json/include/nlohmann/json.hpp")
+    spu_target_include_directories("${spu_targets_list}" PUBLIC "lib/json/include/" "json")
+    message(STATUS "StreamPU - Header found: nlohmann_json")
+else()
+    message(FATAL_ERROR "StreamPU - nlohmann_json can't be found, try to init the submodule with the following cmd:\n"
+                        "$ git submodule update --init -- ../lib/json/")
+endif()
+
+# helgrind
+if (SPU_HELGRIND)
+    # PkgConfig
+    if(UNIX)
+        find_package(PkgConfig REQUIRED)
+    endif()
+
+    find_package(HELGRIND)
+    if(HELGRIND_FOUND)
+        message(STATUS "StreamPU - Header found: helgrind")
+        spu_target_include_directories2("${spu_targets_list}" PUBLIC "${HELGRIND_INCLUDE_DIRS}")
+        spu_target_compile_definitions("${spu_targets_list}" PUBLIC HAS_HELGRIND)
+    endif()
+endif()
+
 # ---------------------------------------------------------------------------------------------------------------------
 # -------------------------------------------------------------------------------------------------- COMPILED LIBRARIES
 # ---------------------------------------------------------------------------------------------------------------------
@@ -465,6 +514,12 @@ set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 spu_target_link_libraries("${spu_targets_list}" PUBLIC Threads::Threads)
 
+# Include getopt-for-windows for MSVC
+if (MSVC AND SPU_TESTS)
+    find_package(unofficial-getopt-win32 CONFIG REQUIRED)
+    spu_target_link_libraries("${spu_targets_list}" PUBLIC unofficial::getopt-win32::getopt)
+endif()
+
 # ---------------------------------------------------------------------------------------------------------------------
 # -------------------------------------------------------------------------------------------------------------- EXPORT
 # ---------------------------------------------------------------------------------------------------------------------
@@ -499,6 +554,11 @@ endif()
 # ---------------------------------------------------------------------------------------------------------------------
 # ------------------------------------------------------------------------------------------------------------- INSTALL
 # ---------------------------------------------------------------------------------------------------------------------
+
+if (SPU_BENCHMARK)
+    install(TARGETS spu-benchmark
+            RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}/)
+endif()
 
 if(SPU_COMPILE_SHARED_LIB)
     if(WIN32)
@@ -545,6 +605,10 @@ if (SPU_COMPILE_SHARED_LIB OR SPU_COMPILE_STATIC_LIB)
             FILES_MATCHING PATTERN "*.hxx")
     install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/lib/rang/include/"
             DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/rang
+            COMPONENT headers
+            FILES_MATCHING PATTERN "*.hpp")
+    install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/lib/json/single_include/"
+            DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/json
             COMPONENT headers
             FILES_MATCHING PATTERN "*.hpp")
 endif()
@@ -617,8 +681,12 @@ if(SPU_TESTS)
 
     add_test(NAME set0::spu-test-simple-chain COMMAND spu-test-simple-chain -d 2048 -s 5 -e 15 -f 13 -u)
     set_tests_properties(set0::spu-test-simple-chain PROPERTIES LABELS set)
-    add_test(NAME set1::spu-test-simple-chain COMMAND spu-test-simple-chain -d 2048 -s 5 -v)
+    add_test(NAME set1::spu-test-simple-chain COMMAND spu-test-simple-chain -d 2048 -s 5 -e 15 -f 13 -u -k)
     set_tests_properties(set1::spu-test-simple-chain PROPERTIES LABELS set)
+    add_test(NAME set2::spu-test-simple-chain COMMAND spu-test-simple-chain -d 2048 -s 5 -v)
+    set_tests_properties(set2::spu-test-simple-chain PROPERTIES LABELS set)
+    add_test(NAME set3::spu-test-simple-chain COMMAND spu-test-simple-chain -d 2048 -s 5 -v -k)
+    set_tests_properties(set3::spu-test-simple-chain PROPERTIES LABELS set)
 
     add_test(NAME path0::spu-test-exclusive-paths COMMAND spu-test-exclusive-paths -d 2048 -s 5 -e 10 -f 13 -a 0)
     set_tests_properties(path0::spu-test-exclusive-paths PROPERTIES LABELS exclusive-paths)
@@ -626,8 +694,10 @@ if(SPU_TESTS)
     set_tests_properties(path1::spu-test-exclusive-paths PROPERTIES LABELS exclusive-paths)
     add_test(NAME path2::spu-test-exclusive-paths COMMAND spu-test-exclusive-paths -d 2048 -s 5 -e 10 -f 13 -a 2)
     set_tests_properties(path2::spu-test-exclusive-paths PROPERTIES LABELS exclusive-paths)
-    add_test(NAME cyclic::spu-test-exclusive-paths COMMAND spu-test-exclusive-paths -d 2048 -s 5 -e 10 -f 13 -y)
-    set_tests_properties(cyclic::spu-test-exclusive-paths PROPERTIES LABELS exclusive-paths)
+    add_test(NAME cyclic0::spu-test-exclusive-paths COMMAND spu-test-exclusive-paths -d 2048 -s 5 -e 10 -f 13 -y)
+    set_tests_properties(cyclic0::spu-test-exclusive-paths PROPERTIES LABELS exclusive-paths)
+    add_test(NAME cyclic1::spu-test-exclusive-paths COMMAND spu-test-exclusive-paths -d 2048 -s 5 -e 10 -f 13 -y -k)
+    set_tests_properties(cyclic1::spu-test-exclusive-paths PROPERTIES LABELS exclusive-paths)
 
     add_test(NAME sequence0::spu-test-simple-pipeline COMMAND spu-test-simple-pipeline -q -t 1 -i ${INPUT_FILE})
     set_tests_properties(sequence0::spu-test-simple-pipeline PROPERTIES LABELS simple-pipeline)
@@ -641,6 +711,8 @@ if(SPU_TESTS)
     set_tests_properties(sequence4::spu-test-simple-pipeline PROPERTIES LABELS simple-pipeline)
     add_test(NAME sequence5::spu-test-simple-pipeline COMMAND spu-test-simple-pipeline -q -t 1 -i ${INPUT_FILE} -f 13)
     set_tests_properties(sequence5::spu-test-simple-pipeline PROPERTIES LABELS simple-pipeline)
+    add_test(NAME sequence6::spu-test-simple-pipeline COMMAND spu-test-simple-pipeline -q -t 1 -i ${INPUT_FILE} -f 13 -k)
+    set_tests_properties(sequence6::spu-test-simple-pipeline PROPERTIES LABELS simple-pipeline)
     add_test(NAME pipeline0::spu-test-simple-pipeline COMMAND spu-test-simple-pipeline -i ${INPUT_FILE})
     set_tests_properties(pipeline0::spu-test-simple-pipeline PROPERTIES LABELS simple-pipeline)
     add_test(NAME pipeline1::spu-test-simple-pipeline COMMAND spu-test-simple-pipeline -i ${INPUT_FILE} -p)
@@ -657,6 +729,8 @@ if(SPU_TESTS)
     set_tests_properties(pipeline6::spu-test-simple-pipeline PROPERTIES LABELS simple-pipeline)
     add_test(NAME pipeline7::spu-test-simple-pipeline COMMAND spu-test-simple-pipeline -i ${INPUT_FILE} -u 17 -f 5)
     set_tests_properties(pipeline7::spu-test-simple-pipeline PROPERTIES LABELS simple-pipeline)
+    add_test(NAME pipeline8::spu-test-simple-pipeline COMMAND spu-test-simple-pipeline -i ${INPUT_FILE} -u 17 -f 5 -k)
+    set_tests_properties(pipeline8::spu-test-simple-pipeline PROPERTIES LABELS simple-pipeline)
 
     # probes
     add_test(NAME sequence0::spu-test-pipeline-probe COMMAND spu-test-pipeline-probe -q -t 1 -i ${INPUT_FILE})
@@ -671,6 +745,8 @@ if(SPU_TESTS)
     set_tests_properties(sequence4::spu-test-pipeline-probe PROPERTIES LABELS pipeline-probe)
     add_test(NAME sequence5::spu-test-pipeline-probe COMMAND spu-test-pipeline-probe -q -t 1 -i ${INPUT_FILE} -f 13)
     set_tests_properties(sequence5::spu-test-pipeline-probe PROPERTIES LABELS pipeline-probe)
+    add_test(NAME sequence6::spu-test-pipeline-probe COMMAND spu-test-pipeline-probe -q -t 1 -i ${INPUT_FILE} -f 13 -k)
+    set_tests_properties(sequence6::spu-test-pipeline-probe PROPERTIES LABELS pipeline-probe)
     add_test(NAME pipeline0::spu-test-pipeline-probe COMMAND spu-test-pipeline-probe -i ${INPUT_FILE})
     set_tests_properties(pipeline0::spu-test-pipeline-probe PROPERTIES LABELS pipeline-probe)
     add_test(NAME pipeline1::spu-test-pipeline-probe COMMAND spu-test-pipeline-probe -i ${INPUT_FILE} -p)
@@ -687,6 +763,8 @@ if(SPU_TESTS)
     set_tests_properties(pipeline6::spu-test-pipeline-probe PROPERTIES LABELS pipeline-probe)
     add_test(NAME pipeline7::spu-test-pipeline-probe COMMAND spu-test-pipeline-probe -i ${INPUT_FILE} -u 17 -f 5)
     set_tests_properties(pipeline7::spu-test-pipeline-probe PROPERTIES LABELS pipeline-probe)
+    add_test(NAME pipeline8::spu-test-pipeline-probe COMMAND spu-test-pipeline-probe -i ${INPUT_FILE} -u 17 -f 5 -k)
+    set_tests_properties(pipeline8::spu-test-pipeline-probe PROPERTIES LABELS pipeline-probe)
 
     # complex pipeline interstage
     add_test(NAME pipeline0::spu-test-complex-pipeline-inter-stage COMMAND spu-test-complex-pipeline-inter-stage -i ${INPUT_FILE})
@@ -695,6 +773,8 @@ if(SPU_TESTS)
     set_tests_properties(pipeline1::spu-test-complex-pipeline-inter-stage PROPERTIES LABELS complex-pipeline-inter-stage)
     add_test(NAME pipeline2::spu-test-complex-pipeline-inter-stage COMMAND spu-test-complex-pipeline-inter-stage -i ${INPUT_FILE} -u 1)
     set_tests_properties(pipeline2::spu-test-complex-pipeline-inter-stage PROPERTIES LABELS complex-pipeline-inter-stage)
+    add_test(NAME pipeline3::spu-test-complex-pipeline-inter-stage COMMAND spu-test-complex-pipeline-inter-stage -i ${INPUT_FILE} -u 1 -k)
+    set_tests_properties(pipeline3::spu-test-complex-pipeline-inter-stage PROPERTIES LABELS complex-pipeline-inter-stage)
 
     # pipeline double-chain
     add_test(NAME sequence0::spu-test-pipeline-double-chain COMMAND spu-test-pipeline-double-chain -e 30 -q -t 1)
@@ -705,12 +785,16 @@ if(SPU_TESTS)
     set_tests_properties(sequence2::spu-test-pipeline-double-chain PROPERTIES LABELS pipeline-double-chain)
     add_test(NAME sequence3::spu-test-pipeline-double-chain COMMAND spu-test-pipeline-double-chain -e 19 -q -t 3 -f 7 -b)
     set_tests_properties(sequence3::spu-test-pipeline-double-chain PROPERTIES LABELS pipeline-double-chain)
+    add_test(NAME sequence4::spu-test-pipeline-double-chain COMMAND spu-test-pipeline-double-chain -e 19 -q -t 3 -f 7 -b -k)
+    set_tests_properties(sequence4::spu-test-pipeline-double-chain PROPERTIES LABELS pipeline-double-chain)
     add_test(NAME pipeline0::spu-test-pipeline-double-chain COMMAND spu-test-pipeline-double-chain -e 30)
     set_tests_properties(pipeline0::spu-test-pipeline-double-chain PROPERTIES LABELS pipeline-double-chain)
     add_test(NAME pipeline1::spu-test-pipeline-double-chain COMMAND spu-test-pipeline-double-chain -e 115 -u 1024)
     set_tests_properties(pipeline1::spu-test-pipeline-double-chain PROPERTIES LABELS pipeline-double-chain)
     add_test(NAME pipeline2::spu-test-pipeline-double-chain COMMAND spu-test-pipeline-double-chain -e 10 -u 15 -f 3)
     set_tests_properties(pipeline2::spu-test-pipeline-double-chain PROPERTIES LABELS pipeline-double-chain)
+    add_test(NAME pipeline3::spu-test-pipeline-double-chain COMMAND spu-test-pipeline-double-chain -e 10 -u 15 -f 3 -k)
+    set_tests_properties(pipeline3::spu-test-pipeline-double-chain PROPERTIES LABELS pipeline-double-chain)
 
     # complex pipeline fwd
     add_test(NAME sequence0::spu-test-complex-pipeline-full-fwd COMMAND spu-test-complex-pipeline-full-fwd -e 100 -q -t 1)
@@ -721,6 +805,8 @@ if(SPU_TESTS)
     set_tests_properties(sequence2::spu-test-complex-pipeline-full-fwd PROPERTIES LABELS complex-pipeline-full-fwd)
     add_test(NAME sequence3::spu-test-complex-pipeline-full-fwd COMMAND spu-test-complex-pipeline-full-fwd -e 100 -q -b -f 5 -t 3)
     set_tests_properties(sequence3::spu-test-complex-pipeline-full-fwd PROPERTIES LABELS complex-pipeline-full-fwd)
+    add_test(NAME sequence4::spu-test-complex-pipeline-full-fwd COMMAND spu-test-complex-pipeline-full-fwd -e 100 -q -b -f 5 -t 3 -k)
+    set_tests_properties(sequence4::spu-test-complex-pipeline-full-fwd PROPERTIES LABELS complex-pipeline-full-fwd)
     add_test(NAME pipeline0::spu-test-complex-pipeline-full-fwd COMMAND spu-test-complex-pipeline-full-fwd -e 10 -t 1)
     set_tests_properties(pipeline0::spu-test-complex-pipeline-full-fwd PROPERTIES LABELS complex-pipeline-full-fwd)
     add_test(NAME pipeline1::spu-test-complex-pipeline-full-fwd COMMAND spu-test-complex-pipeline-full-fwd -e 10)
@@ -731,6 +817,8 @@ if(SPU_TESTS)
     set_tests_properties(pipeline3::spu-test-complex-pipeline-full-fwd PROPERTIES LABELS complex-pipeline-full-fwd)
     add_test(NAME pipeline4::spu-test-complex-pipeline-full-fwd COMMAND spu-test-complex-pipeline-full-fwd -e 1000 -u 413 -w)
     set_tests_properties(pipeline4::spu-test-complex-pipeline-full-fwd PROPERTIES LABELS "complex-pipeline-full-fwd;skip-memcheck") # to exclude this previous test from memchecks, active waiting is too long in Valgrind :-(
+    add_test(NAME pipeline5::spu-test-complex-pipeline-full-fwd COMMAND spu-test-complex-pipeline-full-fwd -e 1000 -u 49 -f 13 -k)
+    set_tests_properties(pipeline5::spu-test-complex-pipeline-full-fwd PROPERTIES LABELS complex-pipeline-full-fwd)
 
     # complex mix pipeline (fwd + in-out)
     add_test(NAME sequence0::spu-test-complex-pipeline-mix-fwd COMMAND spu-test-complex-pipeline-mix-fwd -e 100 -q -t 1)
@@ -741,6 +829,8 @@ if(SPU_TESTS)
     set_tests_properties(sequence2::spu-test-complex-pipeline-mix-fwd PROPERTIES LABELS complex-pipeline-mix-fwd)
     add_test(NAME sequence3::spu-test-complex-pipeline-mix-fwd COMMAND spu-test-complex-pipeline-mix-fwd -e 100 -q -f 5 -t 3)
     set_tests_properties(sequence3::spu-test-complex-pipeline-mix-fwd PROPERTIES LABELS complex-pipeline-mix-fwd)
+    add_test(NAME sequence4::spu-test-complex-pipeline-mix-fwd COMMAND spu-test-complex-pipeline-mix-fwd -e 100 -q -f 5 -t 3 -k)
+    set_tests_properties(sequence4::spu-test-complex-pipeline-mix-fwd PROPERTIES LABELS complex-pipeline-mix-fwd)
     add_test(NAME pipeline0::spu-test-complex-pipeline-mix-fwd COMMAND spu-test-complex-pipeline-mix-fwd -e 10 -t 1)
     set_tests_properties(pipeline0::spu-test-complex-pipeline-mix-fwd PROPERTIES LABELS complex-pipeline-mix-fwd)
     add_test(NAME pipeline1::spu-test-complex-pipeline-mix-fwd COMMAND spu-test-complex-pipeline-mix-fwd -e 10)
@@ -753,122 +843,146 @@ if(SPU_TESTS)
     set_tests_properties(pipeline4::spu-test-complex-pipeline-mix-fwd PROPERTIES LABELS "complex-pipeline-mix-fwd;skip-memcheck") # to exclude this previous test from memchecks, active waiting is too long in Valgrind :-(
     add_test(NAME pipeline5::spu-test-complex-pipeline-mix-fwd COMMAND spu-test-complex-pipeline-mix-fwd -t 12 -o dot2.dot -S "OTAC" -v)
     set_tests_properties(pipeline5::spu-test-complex-pipeline-mix-fwd PROPERTIES LABELS complex-pipeline-mix-fwd)
+    add_test(NAME pipeline6::spu-test-complex-pipeline-mix-fwd COMMAND spu-test-complex-pipeline-mix-fwd -e 1000 -u 49 -f 13 -k)
+    set_tests_properties(pipeline6::spu-test-complex-pipeline-mix-fwd PROPERTIES LABELS complex-pipeline-mix-fwd)
 
     # simple sequence example
-    add_test(NAME sequence0::spu-test-generic-pipeline COMMAND spu-test-generic-pipeline -i ${INPUT_FILE} -n "1,3,1" -t "1" -R "(read,relay,write)" -q)
-    set_tests_properties(sequence0::spu-test-generic-pipeline PROPERTIES LABELS generic-pipeline)
-    add_test(NAME sequence1::spu-test-generic-pipeline COMMAND spu-test-generic-pipeline -i ${INPUT_FILE} -n "1,3,1" -t "1" -R "(read,relayf,write)" -q -b)
-    set_tests_properties(sequence1::spu-test-generic-pipeline PROPERTIES LABELS generic-pipeline)
-    add_test(NAME sequence2::spu-test-generic-pipeline COMMAND spu-test-generic-pipeline -i ${INPUT_FILE} -t "1" -r "((read),(relayf,relay,relayf,relay),(write))" -q)
-    set_tests_properties(sequence2::spu-test-generic-pipeline PROPERTIES LABELS generic-pipeline)
-    add_test(NAME sequence3::spu-test-generic-pipeline COMMAND spu-test-generic-pipeline -i ${INPUT_FILE} -t "1,3,1,3,1" -r "((read),(relayf,relay,relayf,relay),(relayf),(relay,relay),(write))" -q -b)
-    set_tests_properties(sequence3::spu-test-generic-pipeline PROPERTIES LABELS generic-pipeline)
+    add_test(NAME sequence0::spu-benchmark COMMAND spu-benchmark -i ${INPUT_FILE} -n "1,3,1" -t "1" -R "(read,relay,write)" -q)
+    set_tests_properties(sequence0::spu-benchmark PROPERTIES LABELS generic-pipeline)
+    add_test(NAME sequence1::spu-benchmark COMMAND spu-benchmark -i ${INPUT_FILE} -n "1,3,1" -t "1" -R "(read,relayf,write)" -q -b)
+    set_tests_properties(sequence1::spu-benchmark PROPERTIES LABELS generic-pipeline)
+    add_test(NAME sequence2::spu-benchmark COMMAND spu-benchmark -i ${INPUT_FILE} -t "1" -r "((read),(relayf,relay,relayf,relay),(write))" -q)
+    set_tests_properties(sequence2::spu-benchmark PROPERTIES LABELS generic-pipeline)
+    add_test(NAME sequence3::spu-benchmark COMMAND spu-benchmark -i ${INPUT_FILE} -t "1,3,1,3,1" -r "((read),(relayf,relay,relayf,relay),(relayf),(relay,relay),(write))" -q -b)
+    set_tests_properties(sequence3::spu-benchmark PROPERTIES LABELS generic-pipeline)
     # simple pipeline example
-    add_test(NAME pipeline0::spu-test-generic-pipeline COMMAND spu-test-generic-pipeline -i ${INPUT_FILE} -n "1,3,1" -t "1,3,1" -R "(read,relay,write)")
-    set_tests_properties(pipeline0::spu-test-generic-pipeline PROPERTIES LABELS generic-pipeline)
+    add_test(NAME pipeline0::spu-benchmark COMMAND spu-benchmark -i ${INPUT_FILE} -n "1,3,1" -t "1,3,1" -R "(read,relay,write)")
+    set_tests_properties(pipeline0::spu-benchmark PROPERTIES LABELS generic-pipeline)
     # simple pipeline FWD example
-    add_test(NAME pipeline1::spu-test-generic-pipeline COMMAND spu-test-generic-pipeline -i ${INPUT_FILE} -n "1,3,1" -t "1,3,1" -R "(read,relayf,write)")
-    set_tests_properties(pipeline1::spu-test-generic-pipeline PROPERTIES LABELS generic-pipeline)
-    add_test(NAME pipeline2::spu-test-generic-pipeline COMMAND spu-test-generic-pipeline -i ${INPUT_FILE} -n "1,3,1" -t "1,3,1" -R "(read,relayf,write)" -p)
-    set_tests_properties(pipeline2::spu-test-generic-pipeline PROPERTIES LABELS generic-pipeline)
-    add_test(NAME pipeline3::spu-test-generic-pipeline COMMAND spu-test-generic-pipeline -i ${INPUT_FILE} -n "1,3,1" -t "1,3,1" -R "(read,relayf,write)" -w)
-    set_tests_properties(pipeline3::spu-test-generic-pipeline PROPERTIES LABELS "generic-pipeline;skip-memcheck") # to exclude this previous test from memchecks, active waiting is too long in Valgrind :-(
-    add_test(NAME pipeline4::spu-test-generic-pipeline COMMAND spu-test-generic-pipeline -i ${INPUT_FILE} -n "1,3,1" -t "1,3,1" -R "(read,relayf,write)" -u 1)
-    set_tests_properties(pipeline4::spu-test-generic-pipeline PROPERTIES LABELS generic-pipeline)
-    add_test(NAME pipeline5::spu-test-generic-pipeline COMMAND spu-test-generic-pipeline -i ${INPUT_FILE} -n "1,3,1" -t "1,3,1" -R "(read,relayf,write)" -u 1024)
-    set_tests_properties(pipeline5::spu-test-generic-pipeline PROPERTIES LABELS generic-pipeline)
+    add_test(NAME pipeline1::spu-benchmark COMMAND spu-benchmark -i ${INPUT_FILE} -n "1,3,1" -t "1,3,1" -R "(read,relayf,write)")
+    set_tests_properties(pipeline1::spu-benchmark PROPERTIES LABELS generic-pipeline)
+    add_test(NAME pipeline2::spu-benchmark COMMAND spu-benchmark -i ${INPUT_FILE} -n "1,3,1" -t "1,3,1" -R "(read,relayf,write)" -p)
+    set_tests_properties(pipeline2::spu-benchmark PROPERTIES LABELS generic-pipeline)
+    add_test(NAME pipeline3::spu-benchmark COMMAND spu-benchmark -i ${INPUT_FILE} -n "1,3,1" -t "1,3,1" -R "(read,relayf,write)" -w)
+    set_tests_properties(pipeline3::spu-benchmark PROPERTIES LABELS "generic-pipeline;skip-memcheck") # to exclude this previous test from memchecks, active waiting is too long in Valgrind :-(
+    add_test(NAME pipeline4::spu-benchmark COMMAND spu-benchmark -i ${INPUT_FILE} -n "1,3,1" -t "1,3,1" -R "(read,relayf,write)" -u 1)
+    set_tests_properties(pipeline4::spu-benchmark PROPERTIES LABELS generic-pipeline)
+    add_test(NAME pipeline5::spu-benchmark COMMAND spu-benchmark -i ${INPUT_FILE} -n "1,3,1" -t "1,3,1" -R "(read,relayf,write)" -u 1024)
+    set_tests_properties(pipeline5::spu-benchmark PROPERTIES LABELS generic-pipeline)
     # simple pipeline hybrid
-    add_test(NAME pipeline6::spu-test-generic-pipeline COMMAND spu-test-generic-pipeline -i ${INPUT_FILE} -t "1,3,1" -r "((read),(relayf,relay,relayf,relay),(write))")
-    set_tests_properties(pipeline6::spu-test-generic-pipeline PROPERTIES LABELS generic-pipeline)
-    add_test(NAME pipeline7::spu-test-generic-pipeline COMMAND spu-test-generic-pipeline -i ${INPUT_FILE} -t "1,3,1" -r "((read),(relayf,relay,relayf,relay),(write))" -u 1024)
-    set_tests_properties(pipeline7::spu-test-generic-pipeline PROPERTIES LABELS generic-pipeline)
+    add_test(NAME pipeline6::spu-benchmark COMMAND spu-benchmark -i ${INPUT_FILE} -t "1,3,1" -r "((read),(relayf,relay,relayf,relay),(write))")
+    set_tests_properties(pipeline6::spu-benchmark PROPERTIES LABELS generic-pipeline)
+    add_test(NAME pipeline7::spu-benchmark COMMAND spu-benchmark -i ${INPUT_FILE} -t "1,3,1" -r "((read),(relayf,relay,relayf,relay),(write))" -u 1024)
+    set_tests_properties(pipeline7::spu-benchmark PROPERTIES LABELS generic-pipeline)
     # pipeline multiple stages
-    add_test(NAME pipeline8::spu-test-generic-pipeline COMMAND spu-test-generic-pipeline -i ${INPUT_FILE} -t "1,3,1,3,1" -r "((read),(relayf,relay,relayf,relay),(relayf),(relay,relay),(write))")
-    set_tests_properties(pipeline8::spu-test-generic-pipeline PROPERTIES LABELS generic-pipeline)
-    add_test(NAME pipeline9::spu-test-generic-pipeline COMMAND spu-test-generic-pipeline -i ${INPUT_FILE} -t "1,3,1,3,1" -r "((read),(relayf,relay,relayf,relay),(relayf),(relay,relay),(write))" -p)
-    set_tests_properties(pipeline9::spu-test-generic-pipeline PROPERTIES LABELS generic-pipeline)
-    add_test(NAME pipeline10::spu-test-generic-pipeline COMMAND spu-test-generic-pipeline -i ${INPUT_FILE} -t "1,3,1,3,1" -r "((read),(relayf,relay,relayf,relay),(relayf),(relay,relay),(write))" -w)
-    set_tests_properties(pipeline10::spu-test-generic-pipeline PROPERTIES LABELS "generic-pipeline;skip-memcheck") # to exclude this previous test from memchecks, active waiting is too long in Valgrind :-(
-    add_test(NAME pipeline11::spu-test-generic-pipeline COMMAND spu-test-generic-pipeline -i ${INPUT_FILE} -t "1,3,1,3,1" -r "((read),(relayf,relay,relayf,relay),(relayf),(relay,relay),(write))" -u 1)
-    set_tests_properties(pipeline11::spu-test-generic-pipeline PROPERTIES LABELS generic-pipeline)
-    add_test(NAME pipeline12::spu-test-generic-pipeline COMMAND spu-test-generic-pipeline -i ${INPUT_FILE} -t "1,3,1,3,1" -r "((read),(relayf,relay,relayf,relay),(relayf),(relay,relay),(write))" -u 1024)
-    set_tests_properties(pipeline12::spu-test-generic-pipeline PROPERTIES LABELS generic-pipeline)
+    add_test(NAME pipeline8::spu-benchmark COMMAND spu-benchmark -i ${INPUT_FILE} -t "1,3,1,3,1" -r "((read),(relayf,relay,relayf,relay),(relayf),(relay,relay),(write))")
+    set_tests_properties(pipeline8::spu-benchmark PROPERTIES LABELS generic-pipeline)
+    add_test(NAME pipeline9::spu-benchmark COMMAND spu-benchmark -i ${INPUT_FILE} -t "1,3,1,3,1" -r "((read),(relayf,relay,relayf,relay),(relayf),(relay,relay),(write))" -p)
+    set_tests_properties(pipeline9::spu-benchmark PROPERTIES LABELS generic-pipeline)
+    add_test(NAME pipeline10::spu-benchmark COMMAND spu-benchmark -i ${INPUT_FILE} -t "1,3,1,3,1" -r "((read),(relayf,relay,relayf,relay),(relayf),(relay,relay),(write))" -w)
+    set_tests_properties(pipeline10::spu-benchmark PROPERTIES LABELS "generic-pipeline;skip-memcheck") # to exclude this previous test from memchecks, active waiting is too long in Valgrind :-(
+    add_test(NAME pipeline11::spu-benchmark COMMAND spu-benchmark -i ${INPUT_FILE} -t "1,3,1,3,1" -r "((read),(relayf,relay,relayf,relay),(relayf),(relay,relay),(write))" -u 1)
+    set_tests_properties(pipeline11::spu-benchmark PROPERTIES LABELS generic-pipeline)
+    add_test(NAME pipeline12::spu-benchmark COMMAND spu-benchmark -i ${INPUT_FILE} -t "1,3,1,3,1" -r "((read),(relayf,relay,relayf,relay),(relayf),(relay,relay),(write))" -u 1024)
+    set_tests_properties(pipeline12::spu-benchmark PROPERTIES LABELS generic-pipeline)
     # pipeline with socket type per stage
-    add_test(NAME pipeline13::spu-test-generic-pipeline COMMAND spu-test-generic-pipeline -i ${INPUT_FILE} -n "1,4,3,2,1" -t "1,3,1,3,1" -R "(read,relayf,relay,relayf,write)")
-    set_tests_properties(pipeline13::spu-test-generic-pipeline PROPERTIES LABELS generic-pipeline)
+    add_test(NAME pipeline13::spu-benchmark COMMAND spu-benchmark -i ${INPUT_FILE} -n "1,4,3,2,1" -t "1,3,1,3,1" -R "(read,relayf,relay,relayf,write)")
+    set_tests_properties(pipeline13::spu-benchmark PROPERTIES LABELS generic-pipeline)
 
 	############################# same tests with increment instead of relayers #######################################
 
     # simple sequence example
-    add_test(NAME sequence4::spu-test-generic-pipeline COMMAND spu-test-generic-pipeline -e 100 -n "1,3,1" -t "3" -R "(init,incr,fin)" -q)
-    set_tests_properties(sequence4::spu-test-generic-pipeline PROPERTIES LABELS generic-pipeline)
-    add_test(NAME sequence5::spu-test-generic-pipeline COMMAND spu-test-generic-pipeline -e 100 -n "1,3,1" -t "3" -R "(init,incrf,fin)" -q -b)
-    set_tests_properties(sequence5::spu-test-generic-pipeline PROPERTIES LABELS generic-pipeline)
-    add_test(NAME sequence6::spu-test-generic-pipeline COMMAND spu-test-generic-pipeline -e 100 -t "3" -r "((init),(incrf,incr,incrf,incr),(fin))" -q)
-    set_tests_properties(sequence6::spu-test-generic-pipeline PROPERTIES LABELS generic-pipeline)
-    add_test(NAME sequence7::spu-test-generic-pipeline COMMAND spu-test-generic-pipeline -e 123 -t "1,3,1,3,1" -r "((init),(relayf,incr,relayf,relay),(relayf),(incr,relay),(fin))" -q -b)
-    set_tests_properties(sequence7::spu-test-generic-pipeline PROPERTIES LABELS generic-pipeline)
+    add_test(NAME sequence4::spu-benchmark COMMAND spu-benchmark -e 100 -n "1,3,1" -t "3" -R "(init,incr,fin)" -q)
+    set_tests_properties(sequence4::spu-benchmark PROPERTIES LABELS generic-pipeline)
+    add_test(NAME sequence5::spu-benchmark COMMAND spu-benchmark -e 100 -n "1,3,1" -t "3" -R "(init,incrf,fin)" -q -b)
+    set_tests_properties(sequence5::spu-benchmark PROPERTIES LABELS generic-pipeline)
+    add_test(NAME sequence6::spu-benchmark COMMAND spu-benchmark -e 100 -t "3" -r "((init),(incrf,incr,incrf,incr),(fin))" -q)
+    set_tests_properties(sequence6::spu-benchmark PROPERTIES LABELS generic-pipeline)
+    add_test(NAME sequence7::spu-benchmark COMMAND spu-benchmark -e 123 -t "1,3,1,3,1" -r "((init),(relayf,incr,relayf,relay),(relayf),(incr,relay),(fin))" -q -b)
+    set_tests_properties(sequence7::spu-benchmark PROPERTIES LABELS generic-pipeline)
+    add_test(NAME sequence8::spu-benchmark COMMAND spu-benchmark -e 123 -t "1,3,1,3,1" -r "((init),(relayf,incr,relayf,relay),(relayf),(incr,relay),(fin))" -q -b -k)
+    set_tests_properties(sequence8::spu-benchmark PROPERTIES LABELS generic-pipeline)
     # simple pipeline example
-    add_test(NAME pipeline14::spu-test-generic-pipeline COMMAND spu-test-generic-pipeline -e 1000 -n "1,3,1" -t "1,3,1" -R "(init,relay,fin)")
-    set_tests_properties(pipeline14::spu-test-generic-pipeline PROPERTIES LABELS generic-pipeline)
+    add_test(NAME pipeline14::spu-benchmark COMMAND spu-benchmark -e 1000 -n "1,3,1" -t "1,3,1" -R "(init,relay,fin)")
+    set_tests_properties(pipeline14::spu-benchmark PROPERTIES LABELS generic-pipeline)
     # simple pipeline FWD example
-    add_test(NAME pipeline15::spu-test-generic-pipeline COMMAND spu-test-generic-pipeline -e 10 -n "1,3,1" -t "1,3,1" -R "(init,incrf,fin)")
-    set_tests_properties(pipeline15::spu-test-generic-pipeline PROPERTIES LABELS generic-pipeline)
-    add_test(NAME pipeline16::spu-test-generic-pipeline COMMAND spu-test-generic-pipeline -e 13 -n "1,3,1" -t "1,3,1" -R "(init,incrf,fin)" -p)
-    set_tests_properties(pipeline16::spu-test-generic-pipeline PROPERTIES LABELS generic-pipeline)
-    add_test(NAME pipeline17::spu-test-generic-pipeline COMMAND spu-test-generic-pipeline -e 9 -n "1,3,1" -t "1,3,1" -R "(init,incrf,fin)" -w)
-    set_tests_properties(pipeline17::spu-test-generic-pipeline PROPERTIES LABELS "generic-pipeline;skip-memcheck") # to exclude this previous test from memchecks, active waiting is too long in Valgrind :-(
-    add_test(NAME pipeline18::spu-test-generic-pipeline COMMAND spu-test-generic-pipeline -e 13 -n "1,3,1" -t "1,3,1" -R "(init,relayf,fin)" -u 1)
-    set_tests_properties(pipeline18::spu-test-generic-pipeline PROPERTIES LABELS generic-pipeline)
-    add_test(NAME pipeline19::spu-test-generic-pipeline COMMAND spu-test-generic-pipeline -e 128 -n "1,3,1" -t "1,3,1" -R "(init,incrf,fin)" -u 1024)
-    set_tests_properties(pipeline19::spu-test-generic-pipeline PROPERTIES LABELS generic-pipeline)
+    add_test(NAME pipeline15::spu-benchmark COMMAND spu-benchmark -e 10 -n "1,3,1" -t "1,3,1" -R "(init,incrf,fin)")
+    set_tests_properties(pipeline15::spu-benchmark PROPERTIES LABELS generic-pipeline)
+    add_test(NAME pipeline16::spu-benchmark COMMAND spu-benchmark -e 13 -n "1,3,1" -t "1,3,1" -R "(init,incrf,fin)" -p)
+    set_tests_properties(pipeline16::spu-benchmark PROPERTIES LABELS generic-pipeline)
+    add_test(NAME pipeline17::spu-benchmark COMMAND spu-benchmark -e 9 -n "1,3,1" -t "1,3,1" -R "(init,incrf,fin)" -w)
+    set_tests_properties(pipeline17::spu-benchmark PROPERTIES LABELS "generic-pipeline;skip-memcheck") # to exclude this previous test from memchecks, active waiting is too long in Valgrind :-(
+    add_test(NAME pipeline18::spu-benchmark COMMAND spu-benchmark -e 13 -n "1,3,1" -t "1,3,1" -R "(init,relayf,fin)" -u 1)
+    set_tests_properties(pipeline18::spu-benchmark PROPERTIES LABELS generic-pipeline)
+    add_test(NAME pipeline19::spu-benchmark COMMAND spu-benchmark -e 128 -n "1,3,1" -t "1,3,1" -R "(init,incrf,fin)" -u 1024)
+    set_tests_properties(pipeline19::spu-benchmark PROPERTIES LABELS generic-pipeline)
     # simple pipeline hybrid
-    add_test(NAME pipeline20::spu-test-generic-pipeline COMMAND spu-test-generic-pipeline -e 128 -t "1,3,1" -r "((init),(relayf,relay,relayf,incr),(fin))")
-    set_tests_properties(pipeline20::spu-test-generic-pipeline PROPERTIES LABELS generic-pipeline)
-    add_test(NAME pipeline21::spu-test-generic-pipeline COMMAND spu-test-generic-pipeline -e 128 -t "1,3,1" -r "((init),(incrf,relay,relayf,incr),(fin))" -u 1024)
-    set_tests_properties(pipeline21::spu-test-generic-pipeline PROPERTIES LABELS generic-pipeline)
+    add_test(NAME pipeline20::spu-benchmark COMMAND spu-benchmark -e 128 -t "1,3,1" -r "((init),(relayf,relay,relayf,incr),(fin))")
+    set_tests_properties(pipeline20::spu-benchmark PROPERTIES LABELS generic-pipeline)
+    add_test(NAME pipeline21::spu-benchmark COMMAND spu-benchmark -e 128 -t "1,3,1" -r "((init),(incrf,relay,relayf,incr),(fin))" -u 1024)
+    set_tests_properties(pipeline21::spu-benchmark PROPERTIES LABELS generic-pipeline)
     # pipeline multiple stages
-    add_test(NAME pipeline22::spu-test-generic-pipeline COMMAND spu-test-generic-pipeline -e 12 -t "1,3,1,3,1" -r "((init),(relayf,relay,relayf,relay),(relayf),(incr,incr),(fin))")
-    set_tests_properties(pipeline22::spu-test-generic-pipeline PROPERTIES LABELS generic-pipeline)
-    add_test(NAME pipeline23::spu-test-generic-pipeline COMMAND spu-test-generic-pipeline -e 12 -t "1,3,1,3,1" -r "((init),(incrf,incr,incrf,incr),(incrf),(incr,incr),(fin))" -p)
-    set_tests_properties(pipeline23::spu-test-generic-pipeline PROPERTIES LABELS generic-pipeline)
-    add_test(NAME pipeline24::spu-test-generic-pipeline COMMAND spu-test-generic-pipeline -e 12 -t "1,3,1,3,1" -r "((init),(relayf,relay,relayf,relay),(incrf),(relay,relay),(fin))" -w)
-    set_tests_properties(pipeline24::spu-test-generic-pipeline PROPERTIES LABELS "generic-pipeline;skip-memcheck") # to exclude this previous test from memchecks, active waiting is too long in Valgrind :-(
-    add_test(NAME pipeline25::spu-test-generic-pipeline COMMAND spu-test-generic-pipeline -e 12 -t "1,3,1,3,1" -r "((init),(relayf,incr,incrf,incr),(relayf),(incr,relay),(fin))" -u 1)
-    set_tests_properties(pipeline25::spu-test-generic-pipeline PROPERTIES LABELS generic-pipeline)
-    add_test(NAME pipeline26::spu-test-generic-pipeline COMMAND spu-test-generic-pipeline -e 12 -t "1,3,1,3,1" -r "((init),(incrf,relay,incrf,relay),(incrf),(relay,incr),(fin))" -u 1024)
-    set_tests_properties(pipeline26::spu-test-generic-pipeline PROPERTIES LABELS generic-pipeline)
+    add_test(NAME pipeline22::spu-benchmark COMMAND spu-benchmark -e 12 -t "1,3,1,3,1" -r "((init),(relayf,relay,relayf,relay),(relayf),(incr,incr),(fin))")
+    set_tests_properties(pipeline22::spu-benchmark PROPERTIES LABELS generic-pipeline)
+    add_test(NAME pipeline23::spu-benchmark COMMAND spu-benchmark -e 12 -t "1,3,1,3,1" -r "((init),(incrf,incr,incrf,incr),(incrf),(incr,incr),(fin))" -p)
+    set_tests_properties(pipeline23::spu-benchmark PROPERTIES LABELS generic-pipeline)
+    add_test(NAME pipeline24::spu-benchmark COMMAND spu-benchmark -e 12 -t "1,3,1,3,1" -r "((init),(relayf,relay,relayf,relay),(incrf),(relay,relay),(fin))" -w)
+    set_tests_properties(pipeline24::spu-benchmark PROPERTIES LABELS "generic-pipeline;skip-memcheck") # to exclude this previous test from memchecks, active waiting is too long in Valgrind :-(
+    add_test(NAME pipeline25::spu-benchmark COMMAND spu-benchmark -e 12 -t "1,3,1,3,1" -r "((init),(relayf,incr,incrf,incr),(relayf),(incr,relay),(fin))" -u 1)
+    set_tests_properties(pipeline25::spu-benchmark PROPERTIES LABELS generic-pipeline)
+    add_test(NAME pipeline26::spu-benchmark COMMAND spu-benchmark -e 12 -t "1,3,1,3,1" -r "((init),(incrf,relay,incrf,relay),(incrf),(relay,incr),(fin))" -u 1024)
+    set_tests_properties(pipeline26::spu-benchmark PROPERTIES LABELS generic-pipeline)
     # pipeline with socket type per stage
-    add_test(NAME pipeline27::spu-test-generic-pipeline COMMAND spu-test-generic-pipeline -e 12 -n "1,4,3,2,1" -t "1,3,1,3,1" -R "(init,incrf,incr,relayf,fin)")
-    set_tests_properties(pipeline27::spu-test-generic-pipeline PROPERTIES LABELS generic-pipeline)
+    add_test(NAME pipeline27::spu-benchmark COMMAND spu-benchmark -e 12 -n "1,4,3,2,1" -t "1,3,1,3,1" -R "(init,incrf,incr,relayf,fin)")
+    set_tests_properties(pipeline27::spu-benchmark PROPERTIES LABELS generic-pipeline)
+    add_test(NAME pipeline38::spu-benchmark COMMAND spu-benchmark -e 12 -n "1,4,3,2,1" -t "1,3,1,3,1" -R "(init,incrf,incr,relayf,fin)" -k)
+    set_tests_properties(pipeline38::spu-benchmark PROPERTIES LABELS generic-pipeline)
 
     # scheduler tests
-    add_test(NAME pipeline28::spu-test-generic-pipeline COMMAND spu-test-generic-pipeline -e 12 -t "1" -S "OTAC" -C "(init,relayf_15,incrementf_S_20,relay_15,fin)" -P "none")
-    set_tests_properties(pipeline28::spu-test-generic-pipeline PROPERTIES LABELS generic-pipeline)
-    add_test(NAME pipeline29::spu-test-generic-pipeline COMMAND spu-test-generic-pipeline -e 13 -t "4" -S "OTAC" -C "(init,relayf_15,incrementf_20,relay_15,fin)" -P "none")
-    set_tests_properties(pipeline29::spu-test-generic-pipeline PROPERTIES LABELS generic-pipeline)
-    add_test(NAME pipeline30::spu-test-generic-pipeline COMMAND spu-test-generic-pipeline -e 50 -t "3" -S "OTAC" -C "(init_S,relayf_S_15,incrementf_S_20,relay_S_15,fin_S)" -P "none")
-    set_tests_properties(pipeline30::spu-test-generic-pipeline PROPERTIES LABELS generic-pipeline)
-    add_test(NAME pipeline31::spu-test-generic-pipeline COMMAND spu-test-generic-pipeline -e 67 -t "6" -S "OTAC" -C "(init_S,relayf_S_15,incrementf_120,relay_S_15,fin_S)" -P "none")
-    set_tests_properties(pipeline31::spu-test-generic-pipeline PROPERTIES LABELS generic-pipeline)
-    add_test(NAME pipeline32::spu-test-generic-pipeline COMMAND spu-test-generic-pipeline -e 21 -t "3" -S "OTAC" -C "(init,relayf_15,incrementf_S_60,relay_15,fin)" -P "none")
-    set_tests_properties(pipeline32::spu-test-generic-pipeline PROPERTIES LABELS generic-pipeline)
+    add_test(NAME pipeline28::spu-benchmark COMMAND spu-benchmark -e 12 -t "1" -S "OTAC" -C "(init,relayf_15,incrementf_S_20,relay_15,fin)" -P "none")
+    set_tests_properties(pipeline28::spu-benchmark PROPERTIES LABELS generic-pipeline)
+    add_test(NAME pipeline29::spu-benchmark COMMAND spu-benchmark -e 13 -t "4" -S "OTAC" -C "(init,relayf_15,incrementf_20,relay_15,fin)" -P "none")
+    set_tests_properties(pipeline29::spu-benchmark PROPERTIES LABELS generic-pipeline)
+    add_test(NAME pipeline30::spu-benchmark COMMAND spu-benchmark -e 50 -t "3" -S "OTAC" -C "(init_S,relayf_S_15,incrementf_S_20,relay_S_15,fin_S)" -P "none")
+    set_tests_properties(pipeline30::spu-benchmark PROPERTIES LABELS generic-pipeline)
+    add_test(NAME pipeline31::spu-benchmark COMMAND spu-benchmark -e 67 -t "6" -S "OTAC" -C "(init_S,relayf_S_15,incrementf_120,relay_S_15,fin_S)" -P "none")
+    set_tests_properties(pipeline31::spu-benchmark PROPERTIES LABELS generic-pipeline)
+    add_test(NAME pipeline32::spu-benchmark COMMAND spu-benchmark -e 21 -t "3" -S "OTAC" -C "(init,relayf_15,incrementf_S_60,relay_15,fin)" -P "none")
+    set_tests_properties(pipeline32::spu-benchmark PROPERTIES LABELS generic-pipeline)
+
+    # m to n stages
+    add_test(NAME pipeline33::spu-benchmark COMMAND spu-benchmark -e 10 -n "1,3,4,1" -t "1,3,4,1" -R "(init,incrf,incrf,fin)")
+    set_tests_properties(pipeline33::spu-benchmark PROPERTIES LABELS generic-pipeline)
+    add_test(NAME pipeline34::spu-benchmark COMMAND spu-benchmark -e 13 -n "1,4,3,1" -t "1,4,3,1" -R "(init,incr,incr,fin)" -p -f 13)
+    set_tests_properties(pipeline34::spu-benchmark PROPERTIES LABELS generic-pipeline)
+    add_test(NAME pipeline35::spu-benchmark COMMAND spu-benchmark -e 120 -t "1,3,4,5,1" -r "((init),(relayf,incr,incrf,incr),(relayf),(incr,relay),(fin))" -u 1)
+    set_tests_properties(pipeline35::spu-benchmark PROPERTIES LABELS generic-pipeline)
+    add_test(NAME pipeline36::spu-benchmark COMMAND spu-benchmark -e 120 -t "1,3,4,5,1" -r "((init),(relayf,incr,incrf,incr),(relayf),(incr,relay),(fin))" -u 1 -w)
+    set_tests_properties(pipeline36::spu-benchmark PROPERTIES LABELS "generic-pipeline;skip-memcheck") # to exclude this previous test from memchecks, active waiting is too long in Valgrind :-(
+    add_test(NAME pipeline37::spu-benchmark COMMAND spu-benchmark -i ${INPUT_FILE} -n "1,3,3,3,3,3,3,1" -t "1,3,1,4,7,32,1,1" -R "(read,relay,relayf,relay,relay,relay,relayf,write)")
+    set_tests_properties(pipeline37::spu-benchmark PROPERTIES LABELS generic-pipeline)
 
     add_test(NAME sequence0::spu-test-exclusive-paths-pipeline COMMAND spu-test-exclusive-paths-pipeline -t 1 -q -i ${INPUT_FILE})
     set_tests_properties(sequence0::spu-test-exclusive-paths-pipeline PROPERTIES LABELS exclusive-paths-pipeline)
     add_test(NAME sequence1::spu-test-exclusive-paths-pipeline COMMAND spu-test-exclusive-paths-pipeline -t 1 -u 13 -q -b -i ${INPUT_FILE})
     set_tests_properties(sequence1::spu-test-exclusive-paths-pipeline PROPERTIES LABELS exclusive-paths-pipeline)
+    add_test(NAME sequence2::spu-test-exclusive-paths-pipeline COMMAND spu-test-exclusive-paths-pipeline -t 1 -u 13 -q -b -i ${INPUT_FILE} -k)
+    set_tests_properties(sequence2::spu-test-exclusive-paths-pipeline PROPERTIES LABELS exclusive-paths-pipeline)
     add_test(NAME pipeline0::spu-test-exclusive-paths-pipeline COMMAND spu-test-exclusive-paths-pipeline -t 4 -u 1 -i ${INPUT_FILE})
     set_tests_properties(pipeline0::spu-test-exclusive-paths-pipeline PROPERTIES LABELS exclusive-paths-pipeline)
     add_test(NAME pipeline1::spu-test-exclusive-paths-pipeline COMMAND spu-test-exclusive-paths-pipeline -t 1 -u 5 -i ${INPUT_FILE})
     set_tests_properties(pipeline1::spu-test-exclusive-paths-pipeline PROPERTIES LABELS exclusive-paths-pipeline)
     add_test(NAME pipeline2::spu-test-exclusive-paths-pipeline COMMAND spu-test-exclusive-paths-pipeline -t 8 -u 15 -i ${INPUT_FILE})
     set_tests_properties(pipeline2::spu-test-exclusive-paths-pipeline PROPERTIES LABELS exclusive-paths-pipeline)
+    add_test(NAME pipeline3::spu-test-exclusive-paths-pipeline COMMAND spu-test-exclusive-paths-pipeline -t 8 -u 15 -i ${INPUT_FILE} -k)
+    set_tests_properties(pipeline3::spu-test-exclusive-paths-pipeline PROPERTIES LABELS exclusive-paths-pipeline)
 
     add_test(NAME sequence0::spu-test-nest-loops-pipeline COMMAND spu-test-nest-loops-pipeline -e 200 -f 2 -q)
     set_tests_properties(sequence0::spu-test-nest-loops-pipeline PROPERTIES LABELS nest-loops-pipeline)
     add_test(NAME sequence1::spu-test-nest-loops-pipeline COMMAND spu-test-nest-loops-pipeline -e 200 -f 13 -q -b -t 12)
     set_tests_properties(sequence1::spu-test-nest-loops-pipeline PROPERTIES LABELS nest-loops-pipeline)
+    add_test(NAME sequence2::spu-test-nest-loops-pipeline COMMAND spu-test-nest-loops-pipeline -e 200 -f 13 -q -b -t 12 -k)
+    set_tests_properties(sequence2::spu-test-nest-loops-pipeline PROPERTIES LABELS nest-loops-pipeline)
     add_test(NAME pipeline0::spu-test-nest-loops-pipeline COMMAND spu-test-nest-loops-pipeline -e 10 -f 13 -i 10 -j 12 -t 8)
     set_tests_properties(pipeline0::spu-test-nest-loops-pipeline PROPERTIES LABELS nest-loops-pipeline)
     add_test(NAME pipeline1::spu-test-nest-loops-pipeline COMMAND spu-test-nest-loops-pipeline -e 10 -a -i 5 -j 13 -t 1)
@@ -877,7 +991,33 @@ if(SPU_TESTS)
     set_tests_properties(pipeline2::spu-test-nest-loops-pipeline PROPERTIES LABELS nest-loops-pipeline)
     add_test(NAME pipeline3::spu-test-nest-loops-pipeline COMMAND spu-test-nest-loops-pipeline -e 200 -f 13)
     set_tests_properties(pipeline3::spu-test-nest-loops-pipeline PROPERTIES LABELS nest-loops-pipeline)
+    add_test(NAME pipeline4::spu-test-nest-loops-pipeline COMMAND spu-test-nest-loops-pipeline -e 200 -f 13 -k)
+    set_tests_properties(pipeline4::spu-test-nest-loops-pipeline PROPERTIES LABELS nest-loops-pipeline)
 
+    # builder tests
+    add_test(NAME pipeline0::spu-test-pipeline-builder-simple COMMAND spu-test-pipeline-builder-simple -i ${INPUT_FILE})
+    set_tests_properties(pipeline0::spu-test-pipeline-builder-simple PROPERTIES LABELS simple-pipeline)
+    add_test(NAME pipeline1::spu-test-pipeline-builder-simple COMMAND spu-test-pipeline-builder-simple -i ${INPUT_FILE} -p)
+    set_tests_properties(pipeline1::spu-test-pipeline-builder-simple PROPERTIES LABELS simple-pipeline)
+    add_test(NAME pipeline2::spu-test-pipeline-builder-simple COMMAND spu-test-pipeline-builder-simple -i ${INPUT_FILE} -w)
+    set_tests_properties(pipeline2::spu-test-pipeline-builder-simple PROPERTIES LABELS "simple-pipeline;skip-memcheck") # to exclude this previous test from memchecks, active waiting is too long in Valgrind :-(
+    add_test(NAME pipeline3::spu-test-pipeline-builder-simple COMMAND spu-test-pipeline-builder-simple -i ${INPUT_FILE} -u 1)
+    set_tests_properties(pipeline3::spu-test-pipeline-builder-simple PROPERTIES LABELS simple-pipeline)
+    add_test(NAME pipeline4::spu-test-pipeline-builder-simple COMMAND spu-test-pipeline-builder-simple -i ${INPUT_FILE} -u 1024)
+    set_tests_properties(pipeline4::spu-test-pipeline-builder-simple PROPERTIES LABELS simple-pipeline)
+    add_test(NAME pipeline5::spu-test-pipeline-builder-simple COMMAND spu-test-pipeline-builder-simple -i ${INPUT_FILE} -u 128 -o graph.dot)
+    set_tests_properties(pipeline5::spu-test-pipeline-builder-simple PROPERTIES LABELS simple-pipeline)
+    add_test(NAME pipeline6::spu-test-pipeline-builder-simple COMMAND spu-test-pipeline-builder-simple -i ${INPUT_FILE} -u 8 -f 2)
+    set_tests_properties(pipeline6::spu-test-pipeline-builder-simple PROPERTIES LABELS simple-pipeline)
+    add_test(NAME pipeline7::spu-test-pipeline-builder-simple COMMAND spu-test-pipeline-builder-simple -i ${INPUT_FILE} -u 17 -f 5)
+    set_tests_properties(pipeline7::spu-test-pipeline-builder-simple PROPERTIES LABELS simple-pipeline)
+    add_test(NAME pipeline8::spu-test-pipeline-builder-simple COMMAND spu-test-pipeline-builder-simple -i ${INPUT_FILE} -u 17 -f 5 -k)
+    set_tests_properties(pipeline8::spu-test-pipeline-builder-simple PROPERTIES LABELS simple-pipeline)
+
+    add_test(NAME pipeline0::spu-test-pipeline-builder-conditional COMMAND spu-test-pipeline-builder-conditional)
+    set_tests_properties(pipeline0::spu-test-pipeline-builder-conditional PROPERTIES LABELS simple-conditional)
+
+    # hwloc tests
     if (SPU_LINK_HWLOC)
         # Static test to verify pinning (for CPUs with at least 4 hardware threads)
         add_test(NAME pipeline0::spu-test-thread-pinning COMMAND spu-test-thread-pinning -e 30)
@@ -912,9 +1052,9 @@ if(SPU_TESTS)
     endif()
 
     # check if the automatic pipeline scheduling is giving expected results
-    find_program (BASH_PROGRAM bash)
-    if (BASH_PROGRAM)
-        add_test (pipeline::sched ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/ci/test-sched.sh)
-        set_tests_properties(pipeline::sched PROPERTIES LABELS "scheduler;skip-memcheck")
-    endif (BASH_PROGRAM)
+    # find_program (BASH_PROGRAM bash)
+    # if (BASH_PROGRAM)
+    #     add_test (pipeline::sched ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/ci/test-sched.sh)
+    #     set_tests_properties(pipeline::sched PROPERTIES LABELS "scheduler;skip-memcheck")
+    # endif (BASH_PROGRAM)
 endif(SPU_TESTS)

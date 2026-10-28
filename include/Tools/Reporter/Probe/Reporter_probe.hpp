@@ -44,6 +44,7 @@ class Reporter_probe
     std::vector<size_t> precisions;
     std::vector<size_t> column_sizes;
     std::vector<size_t> data_sizes;
+    std::vector<bool> display_as_str;
     std::map<std::string, int> name_to_col;
     std::map<int, std::string> col_to_name;
     size_t n_frames;

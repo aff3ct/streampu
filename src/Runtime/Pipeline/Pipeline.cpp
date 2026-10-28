@@ -4,8 +4,7 @@
 #include <tuple>
 #include <utility>
 
-#include "Module/Stateful/Adaptor/Adaptor_1_to_n.hpp"
-#include "Module/Stateful/Adaptor/Adaptor_n_to_1.hpp"
+#include "Module/Stateful/Adaptor/Adaptor_m_to_n.hpp"
 #include "Runtime/Pipeline/Pipeline.hpp"
 #include "Tools/Exception/exception.hpp"
 #include "Tools/Interface/Interface_waiting.hpp"
@@ -344,6 +343,13 @@ Pipeline
 
 Pipeline::~Pipeline()
 {
+    // hack: this is important to avoid to deallocate twice the same out buffers
+    this->original_sequence.memory_allocation = false;
+
+    // deallocating stages memory
+    for (auto stage : this->stages)
+        stage->deallocate_outbuffers();
+
     this->unbind_adaptors();
 }
 
@@ -384,9 +390,9 @@ create_sequence<const runtime::Task>(const std::vector<const runtime::Task*>& fi
                                      const size_t& n_threads,
                                      const bool& thread_pinning,
                                      const std::vector<size_t>& puids,
-                                     const bool& tasks_inplace)
+                                     const bool& /*tasks_inplace*/)
 {
-    return new runtime::Sequence(firsts, lasts, exclusions, n_threads, thread_pinning, puids);
+    return new runtime::Sequence(firsts, lasts, exclusions, n_threads, thread_pinning, puids, false);
 }
 
 template<>
@@ -399,7 +405,7 @@ create_sequence<runtime::Task>(const std::vector<runtime::Task*>& firsts,
                                const std::vector<size_t>& puids,
                                const bool& tasks_inplace)
 {
-    return new runtime::Sequence(firsts, lasts, exclusions, n_threads, thread_pinning, puids, tasks_inplace);
+    return new runtime::Sequence(firsts, lasts, exclusions, n_threads, thread_pinning, puids, tasks_inplace, false);
 }
 
 // Init and sequence creation for second pinning version
@@ -424,9 +430,9 @@ create_sequence<const runtime::Task>(const std::vector<const runtime::Task*>& fi
                                      const size_t& n_threads,
                                      const bool& thread_pinning,
                                      const std::string& pipeline_pinning_policy,
-                                     const bool& tasks_inplace)
+                                     const bool& /*tasks_inplace*/)
 {
-    return new runtime::Sequence(firsts, lasts, exclusions, n_threads, thread_pinning, pipeline_pinning_policy);
+    return new runtime::Sequence(firsts, lasts, exclusions, n_threads, thread_pinning, pipeline_pinning_policy, false);
 }
 
 template<>
@@ -440,13 +446,13 @@ create_sequence<runtime::Task>(const std::vector<runtime::Task*>& firsts,
                                const bool& tasks_inplace)
 {
     return new runtime::Sequence(
-      firsts, lasts, exclusions, n_threads, thread_pinning, pipeline_pinning_policy, tasks_inplace);
+      firsts, lasts, exclusions, n_threads, thread_pinning, pipeline_pinning_policy, tasks_inplace, false);
 }
 
 template <class TA>
 void Pipeline
-::init(const std::vector<TA*> &firsts,
-       const std::vector<TA*> &lasts,
+::init(const std::vector<TA*> &/*firsts*/,
+       const std::vector<TA*> &/*lasts*/,
        const std::vector<std::tuple<std::vector<TA*>,std::vector<TA*>,std::vector<TA*>>> &sep_stages,
        const std::vector<size_t> &n_threads,
        const std::vector<size_t> &synchro_buffer_sizes,
@@ -507,18 +513,6 @@ void Pipeline
     // 	        << sep_stages.size() << ").";
     // 	throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
     // }
-
-    bool prev_is_parallel = false;
-    for (auto t : n_threads)
-    {
-        if (t > 1 && prev_is_parallel)
-        {
-            std::stringstream message;
-            message << "Consecutive parallel stages are not supported.";
-            throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
-        }
-        prev_is_parallel = t > 1;
-    }
 
     // Creating a vector of pinning policies for each sequence
     std::vector<std::string> sequences_pinning_policies;
@@ -601,8 +595,15 @@ void Pipeline
         }
     }
 
+    // Adding adaptors to pipeline stages
     this->create_adaptors(synchro_buffer_sizes, synchro_active_waiting);
     this->bind_adaptors();
+
+    // Allocating memory for stages
+    for (auto stage : this->stages)
+    {
+        stage->allocate_outbuffers();
+    }
 
     this->thread_pool.reset(new tools::Thread_pool_standard(this->stages.size() - 1));
     this->thread_pool->init(); // threads are spawned here
@@ -812,7 +813,7 @@ Pipeline::create_adaptors(const std::vector<size_t>& synchro_buffer_sizes,
     // ------------------------------------------------------------------------------------------------ create adaptors
     // ----------------------------------------------------------------------------------------------------------------
     auto sck_orphan_binds_cpy = this->sck_orphan_binds;
-    module::Adaptor* adp = nullptr;
+    module::Adaptor_m_to_n* adp = nullptr;
     std::map<runtime::Socket*, size_t> sck_to_adp_sck_id;
     for (size_t sta = 0; sta < this->stages.size(); sta++)
     {
@@ -831,21 +832,20 @@ Pipeline::create_adaptors(const std::vector<size_t>& synchro_buffer_sizes,
                                   std::tuple<runtime::Socket*, size_t, size_t, size_t, runtime::Task*>>>
               sck_orphan_binds_new;
 
-            auto n_threads_prev_sta = this->stages[sta - 1]->get_n_threads();
             for (size_t t = 0; t < n_threads; t++)
             {
-                module::Adaptor* cur_adp = (t == 0) ? adp : adp->clone();
+                module::Adaptor_m_to_n* cur_adp = (t == 0) ? adp : adp->clone();
+                if (t > 0) cur_adp->add_puller();
+
                 for (auto& t : cur_adp->tasks)
                     t->set_fast(true);
                 if (t > 0)
                 {
-                    this->adaptors[sta - 1].second.push_back(std::unique_ptr<module::Adaptor>(cur_adp));
-                    cur_adp->set_custom_name((n_threads_prev_sta == 1 ? "Adp_1_to_n_" : "Adp_n_to_1_") +
-                                             std::to_string(sta - 1));
+                    this->adaptors[sta - 1].second.push_back(std::unique_ptr<module::Adaptor_m_to_n>(cur_adp));
+                    cur_adp->set_custom_name("Adp_m_to_n_" + std::to_string(sta - 1));
                 }
 
-                auto task_pull = n_threads_prev_sta == 1 ? &(*cur_adp)[(int)module::adp::tsk::pull_n]
-                                                         : &(*cur_adp)[(int)module::adp::tsk::pull_1];
+                auto task_pull = &(*cur_adp)("pull");
 
                 sck_orphan_binds_new.clear();
                 for (auto& bind : sck_orphan_binds_cpy)
@@ -880,6 +880,8 @@ Pipeline::create_adaptors(const std::vector<size_t>& synchro_buffer_sizes,
             }
             this->saved_firsts_tasks_id[sta] = this->stages[sta]->firsts_tasks_id;
             sck_orphan_binds_cpy = sck_orphan_binds_new;
+
+            adp->alloc_buffers();
         }
 
         // ------------------------------------------------------------------------------------------------------------
@@ -924,19 +926,16 @@ Pipeline::create_adaptors(const std::vector<size_t>& synchro_buffer_sizes,
             passed_scks_out.clear();
 
             // allocate the adaptor for the first thread
-            if (n_threads == 1)
-                adp = new module::Adaptor_1_to_n(adp_n_elmts, adp_datatype, adp_buffer_size, adp_active_waiting);
-            else
-                adp = new module::Adaptor_n_to_1(adp_n_elmts, adp_datatype, adp_buffer_size, adp_active_waiting);
+            adp = new module::Adaptor_m_to_n(adp_n_elmts, adp_datatype, adp_buffer_size, adp_active_waiting);
             adp->set_n_frames(adp_n_frames);
 
             for (size_t t = 0; t < n_threads; t++)
             {
-                module::Adaptor* cur_adp = (t == 0) ? adp : adp->clone();
-                cur_adp->set_custom_name((n_threads == 1 ? "Adp_1_to_n_" : "Adp_n_to_1_") + std::to_string(sta));
-                this->adaptors[sta].first.push_back(std::unique_ptr<module::Adaptor>(cur_adp));
-                auto task_push = n_threads == 1 ? &(*cur_adp)[(int)module::adp::tsk::push_1]
-                                                : &(*cur_adp)[(int)module::adp::tsk::push_n];
+                module::Adaptor_m_to_n* cur_adp = (t == 0) ? adp : adp->clone();
+                cur_adp->set_custom_name("Adp_m_to_n_" + std::to_string(sta));
+                if (t > 0) cur_adp->add_pusher();
+                this->adaptors[sta].first.push_back(std::unique_ptr<module::Adaptor_m_to_n>(cur_adp));
+                auto task_push = &(*cur_adp)("push");
 
                 std::map<void*, size_t> fwd_source;
                 sck_to_adp_sck_id_new.clear();
@@ -976,9 +975,7 @@ Pipeline::create_adaptors(const std::vector<size_t>& synchro_buffer_sizes,
                             }
                             else // if (tsk_out_sta < sta) // bind prev. adaptor to last adaptor
                             {
-                                auto n_threads_prev_sta = this->stages[sta - 1]->get_n_threads();
-                                auto tsk_out_id = (n_threads_prev_sta == 1) ? (size_t)module::adp::tsk::pull_n
-                                                                            : (size_t)module::adp::tsk::pull_1;
+                                auto tsk_out_id = 1;
                                 auto sck_out_id = sck_to_adp_sck_id[sck_out_ptr];
                                 sck_to_adp_sck_id_new[sck_out_ptr] = adp_sck_id;
                                 auto adp_prev =
@@ -1026,17 +1023,15 @@ Pipeline::_bind_adaptors(const bool bind_adaptors)
             // --------------------------------------------------------------------------------------------------------
             if (sta > 0)
             {
-                auto n_threads_prev_sta = this->stages[sta - 1]->get_n_threads();
                 for (size_t t = 0; t < n_threads; t++)
                 {
-                    module::Adaptor* cur_adp =
+                    module::Adaptor_m_to_n* cur_adp =
                       t > 0 ? adaptors[sta - 1].second[t - 1].get() : adaptors[sta - 1].first[0].get();
 
                     if (t > 0 || sta == this->stages.size() - 1) // add the adaptor to the current stage
                         this->stages[sta]->all_modules[t].push_back(cur_adp);
 
-                    auto task_pull = n_threads_prev_sta == 1 ? &(*cur_adp)[(int)module::adp::tsk::pull_n]
-                                                             : &(*cur_adp)[(int)module::adp::tsk::pull_1];
+                    auto task_pull = &(*cur_adp)("pull");
 
                     auto ss = this->stages[sta]->sequences[t]->get_contents();
                     assert(ss != nullptr);
@@ -1063,13 +1058,12 @@ Pipeline::_bind_adaptors(const bool bind_adaptors)
                 size_t last_task_id = 0;
                 for (size_t t = 0; t < n_threads; t++)
                 {
-                    module::Adaptor* cur_adp = adaptors[sta].first[t].get();
+                    module::Adaptor_m_to_n* cur_adp = adaptors[sta].first[t].get();
 
                     // add the adaptor to the current stage
                     this->stages[sta]->all_modules[t].push_back(cur_adp);
 
-                    auto task_push = n_threads == 1 ? &(*cur_adp)[(int)module::adp::tsk::push_1]
-                                                    : &(*cur_adp)[(int)module::adp::tsk::push_n];
+                    auto task_push = &(*cur_adp)("push");
 
                     auto ss = this->stages[sta]->get_last_subsequence(t);
                     assert(ss != nullptr);
@@ -1265,10 +1259,9 @@ Pipeline::exec(const std::vector<std::function<bool(const std::vector<const int*
         for (size_t th = 0; th < tasks.size(); th++)
             for (size_t ta = 0; ta < tasks[th].size(); ta++)
             {
-                auto m = dynamic_cast<module::Adaptor*>(&tasks[th][ta]->get_module());
+                auto m = dynamic_cast<module::Adaptor_m_to_n*>(&tasks[th][ta]->get_module());
                 if (m != nullptr)
-                    if (tasks[th][ta]->get_name() == "pull_n" || tasks[th][ta]->get_name() == "pull_1")
-                        m->cancel_waiting();
+                    if (tasks[th][ta]->get_name().find("pull") != std::string::npos) m->cancel_waiting();
             }
     };
 
@@ -1340,10 +1333,9 @@ Pipeline::exec(const std::vector<std::function<bool()>>& stop_conditions)
         for (size_t th = 0; th < tasks.size(); th++)
             for (size_t ta = 0; ta < tasks[th].size(); ta++)
             {
-                auto m = dynamic_cast<module::Adaptor*>(&tasks[th][ta]->get_module());
+                auto m = dynamic_cast<module::Adaptor_m_to_n*>(&tasks[th][ta]->get_module());
                 if (m != nullptr)
-                    if (tasks[th][ta]->get_name() == "pull_n" || tasks[th][ta]->get_name() == "pull_1")
-                        m->cancel_waiting();
+                    if (tasks[th][ta]->get_name().find("pull") != std::string::npos) m->cancel_waiting();
             }
     };
 

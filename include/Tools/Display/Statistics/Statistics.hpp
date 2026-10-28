@@ -69,6 +69,8 @@ class Statistics
     static void show_task(const float total_sec,
                           const std::string& module_sname,
                           const std::string& task_name,
+                          const bool task_replicability,
+                          const int task_order,
                           const size_t task_n_elmts,
                           const uint32_t task_n_calls,
                           const std::chrono::nanoseconds task_tot_duration,

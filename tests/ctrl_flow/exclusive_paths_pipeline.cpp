@@ -73,8 +73,9 @@ main(int argc, char** argv)
                           { "debug", no_argument, NULL, 'g' },
                           { "force-sequence", no_argument, NULL, 'q' },
                           { "active-waiting", no_argument, NULL, 'w' },
+                          { "task-autoalloc", no_argument, NULL, 'k' },
                           { "help", no_argument, NULL, 'h' },
-                          { 0 } };
+                          { NULL, 0, NULL, 0 } };
 
     size_t n_threads = std::thread::hardware_concurrency();
     size_t n_inter_frames = 1;
@@ -90,10 +91,11 @@ main(int argc, char** argv)
     bool debug = false;
     bool force_sequence = false;
     bool active_waiting = false;
+    bool task_autoalloc = false;
 
     while (1)
     {
-        const int opt = getopt_long(argc, argv, "t:f:s:u:o:i:j:cpbgqwh", longopts, 0);
+        const int opt = getopt_long(argc, argv, "t:f:s:u:o:i:j:cpbgqwkh", longopts, 0);
         if (opt == -1) break;
         switch (opt)
         {
@@ -135,6 +137,9 @@ main(int argc, char** argv)
                 break;
             case 'q':
                 force_sequence = true;
+                break;
+            case 'k':
+                task_autoalloc = true;
                 break;
             case 'h':
                 std::cout << "usage: " << argv[0] << " [options]" << std::endl;
@@ -178,6 +183,9 @@ main(int argc, char** argv)
                 std::cout << "  -w, --active-waiting  "
                           << "Enable active waiting in the pipeline synchronizations                "
                           << "[" << (active_waiting ? "true" : "false") << "]" << std::endl;
+                std::cout << "  -k, --task-autoalloc "
+                          << "Enable task SOUT autoalloc mode                                      "
+                          << "[" << (task_autoalloc ? "true" : "false") << "]" << std::endl;
                 std::cout << "  -h, --help            "
                           << "This help                                                             "
                           << "[false]" << std::endl;
@@ -207,7 +215,11 @@ main(int argc, char** argv)
     std::cout << "#   - debug          = " << (debug ? "true" : "false") << std::endl;
     std::cout << "#   - force_sequence = " << (force_sequence ? "true" : "false") << std::endl;
     std::cout << "#   - active_waiting = " << (active_waiting ? "true" : "false") << std::endl;
+    std::cout << "#   - task_autoalloc = " << (task_autoalloc ? "true" : "false") << std::endl;
     std::cout << "#" << std::endl;
+
+    tools::Buffer_allocator::set_task_autoalloc(task_autoalloc);
+
     if (!force_sequence && !no_copy_mode)
         std::clog << rang::tag::warning << "'no_copy_mode' has no effect with pipeline (it is always enable)"
                   << std::endl;
@@ -249,23 +261,24 @@ main(int argc, char** argv)
     alternator.create_task("alternate");
     auto s_in_alt = alternator.create_socket_in<uint8_t>(alternator("alternate"), "in", data_length);
     auto s_path = alternator.create_socket_out<int8_t>(alternator("alternate"), "path", 1);
-    alternator.create_codelet(alternator("alternate"),
-                              [s_in_alt, s_path, &pack](module::Module& m, runtime::Task& t, const size_t frame_id)
-                              {
-                                  uint8_t packed = pack(t[s_in_alt].get_dataptr<const uint8_t>());
-                                  if (packed >= 97 && packed <= 122)
-                                      *t[s_path].get_dataptr<uint8_t>() = 0;
-                                  else
-                                      *t[s_path].get_dataptr<uint8_t>() = 1;
-                                  return 0;
-                              });
+    alternator.create_codelet(
+      alternator("alternate"),
+      [s_in_alt, s_path, &pack](module::Module& /*m*/, runtime::Task& t, const size_t /*frame_id*/)
+      {
+          uint8_t packed = pack(t[s_in_alt].get_dataptr<const uint8_t>());
+          if (packed >= 97 && packed <= 122)
+              *t[s_path].get_dataptr<uint8_t>() = 0;
+          else
+              *t[s_path].get_dataptr<uint8_t>() = 1;
+          return 0;
+      });
 
     uppercaser.create_task("upcase");
     auto s_in_up = uppercaser.create_socket_in<uint8_t>(uppercaser("upcase"), "in", data_length);
     auto s_out_up = uppercaser.create_socket_out<uint8_t>(uppercaser("upcase"), "out", data_length);
     uppercaser.create_codelet(
       uppercaser("upcase"),
-      [s_in_up, s_out_up, &pack, &unpack](module::Module& m, runtime::Task& t, const size_t frame_id)
+      [s_in_up, s_out_up, &pack, &unpack](module::Module& /*m*/, runtime::Task& t, const size_t /*frame_id*/)
       {
           uint8_t packed = pack(t[s_in_up].get_dataptr<const uint8_t>());
           if (packed >= 97 && packed <= 122)
@@ -283,7 +296,7 @@ main(int argc, char** argv)
     auto s_out_low = lowercaser.create_socket_out<uint8_t>(lowercaser("lowcase"), "out", data_length);
     lowercaser.create_codelet(
       lowercaser("lowcase"),
-      [s_in_low, s_out_low, &pack, &unpack](module::Module& m, runtime::Task& t, const size_t frame_id)
+      [s_in_low, s_out_low, &pack, &unpack](module::Module& /*m*/, runtime::Task& t, const size_t /*frame_id*/)
       {
           uint8_t packed = pack(t[s_in_low].get_dataptr<const uint8_t>());
           if (packed >= 65 && packed <= 90)
@@ -364,14 +377,14 @@ main(int argc, char** argv)
     else
     {
         pipeline_chain.reset(new runtime::Pipeline(
-          source("generate"), // first task of the sequence
+          { &source("generate") }, // first task of the sequence
           {
             // pipeline stage 0, first & last tasks
-            { { &source("generate") }, { &relayer_com("relay"), &alternator("alternate") } },
+            { { &source("generate") }, { &alternator("alternate") }, { &relayer_com("relay") } },
             // pipeline stage 1 first & last tasks
-            { { &switcher("commute") }, { &relayer_sel("relay") } },
+            { { &relayer_com("relay"), &switcher("commute") }, { &relayer_sel("relay") }, {} },
             // pipeline stage 2 first task
-            { { &sink("send_count") }, {} },
+            { { &sink("send_count") }, {}, {} },
           },
           {
             1,                         // number of threads in the stage 0

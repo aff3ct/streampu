@@ -13,7 +13,7 @@ namespace spu
 {
 namespace tools
 {
-class length_error : public exception
+class SPU_EXPORT_EXCEPTION length_error : public exception
 {
   public:
     length_error() noexcept;

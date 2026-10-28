@@ -52,10 +52,10 @@ Source_user<B>::Source_user(const int max_data_size,
             for (auto i = 0; i < n_src; i++)
                 for (auto j = 0; j < src_size; j++)
                 {
-                    int bit;
+                    B bit;
                     file >> bit;
 
-                    this->source[i][j] = bit != 0;
+                    this->source[i][j] = bit;
                 }
         }
         else
@@ -108,7 +108,7 @@ Source_user<B>::is_done() const
 
 template<typename B>
 void
-Source_user<B>::_generate(B* out_data, const size_t frame_id)
+Source_user<B>::_generate(B* out_data, const size_t /*frame_id*/)
 {
     std::copy(this->source[this->next_frame_idx].begin(), this->source[this->next_frame_idx].end(), out_data);
 

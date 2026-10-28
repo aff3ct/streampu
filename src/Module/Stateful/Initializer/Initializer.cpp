@@ -10,9 +10,10 @@ using namespace spu;
 using namespace spu::module;
 
 template<typename T>
-Initializer<T>::Initializer(const size_t n_elmts)
+Initializer<T>::Initializer(const size_t n_elmts, const size_t ns)
   : Stateful()
   , init_data(this->get_n_frames(), std::vector<T>(n_elmts, 0))
+  , ns(ns)
 {
     const std::string name = "Initializer";
     this->set_name(name);
@@ -43,6 +44,20 @@ Initializer<T>::clone() const
     auto m = new Initializer(*this);
     m->deep_copy(*this);
     return m;
+}
+
+template<typename T>
+size_t
+Initializer<T>::get_ns() const
+{
+    return this->ns;
+}
+
+template<typename T>
+void
+Initializer<T>::set_ns(const size_t ns)
+{
+    this->ns = ns;
 }
 
 template<typename T>
@@ -129,7 +144,17 @@ template<typename T>
 void
 Initializer<T>::_initialize(T* out, const size_t frame_id)
 {
+    std::chrono::time_point<std::chrono::steady_clock> t_start;
+    if (this->ns) t_start = std::chrono::steady_clock::now();
+
     std::copy(this->init_data[frame_id].begin(), this->init_data[frame_id].end(), out);
+
+    if (this->ns)
+    {
+        std::chrono::nanoseconds duration = std::chrono::steady_clock::now() - t_start;
+        while ((size_t)duration.count() < this->ns) // active waiting
+            duration = std::chrono::steady_clock::now() - t_start;
+    }
 }
 
 // ==================================================================================== explicit template instantiation

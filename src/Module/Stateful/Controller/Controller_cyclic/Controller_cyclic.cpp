@@ -48,7 +48,7 @@ Controller_cyclic::reset()
 }
 
 void
-Controller_cyclic::_control(int8_t* out, const size_t frame_id)
+Controller_cyclic::_control(int8_t* out, const size_t /*frame_id*/)
 {
     out[0] = this->path = this->path % this->n_paths;
     this->path++;

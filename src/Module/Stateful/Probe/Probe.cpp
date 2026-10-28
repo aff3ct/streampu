@@ -6,6 +6,7 @@ using namespace spu::module;
 AProbe::AProbe()
   : Stateful()
   , reporter(nullptr)
+  , str_display(false)
 {
 }
 
@@ -36,4 +37,16 @@ AProbe::proxy_probe(const void* data, const size_t frame_id)
 {
     this->check_reporter();
     this->reporter->probe(*this, data, frame_id);
+}
+
+bool
+AProbe::get_str_display() const
+{
+    return this->str_display;
+}
+
+void
+AProbe::set_str_display(bool str_display)
+{
+    this->str_display = str_display;
 }

@@ -13,7 +13,7 @@ namespace spu
 {
 namespace tools
 {
-class control_flow_error : public exception
+class SPU_EXPORT_EXCEPTION control_flow_error : public exception
 {
   public:
     control_flow_error() noexcept;

@@ -13,7 +13,7 @@ namespace spu
 {
 namespace tools
 {
-class waiting_canceled : public exception
+class SPU_EXPORT_EXCEPTION waiting_canceled : public exception
 {
   public:
     waiting_canceled() noexcept;

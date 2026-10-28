@@ -148,7 +148,7 @@ Probe<T>::probe(const int frame_id, const bool managed_memory)
 
 template<typename T>
 void
-Probe<T>::_probe(const T* in, const size_t frame_id)
+Probe<T>::_probe(const T* /*in*/, const size_t /*frame_id*/)
 {
     throw tools::unimplemented_error(__FILE__, __LINE__, __func__);
 }
@@ -207,7 +207,7 @@ Probe<T>::get_col_name() const
 }
 
 template<typename T>
-const size_t
+size_t
 Probe<T>::get_socket_size() const
 {
     return this->socket_size;

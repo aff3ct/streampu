@@ -13,7 +13,7 @@ namespace spu
 {
 namespace tools
 {
-class processing_aborted : public exception
+class SPU_EXPORT_EXCEPTION processing_aborted : public exception
 {
   public:
     processing_aborted() noexcept;

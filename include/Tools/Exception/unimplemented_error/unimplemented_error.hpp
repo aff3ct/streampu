@@ -13,7 +13,7 @@ namespace spu
 {
 namespace tools
 {
-class unimplemented_error : public exception
+class SPU_EXPORT_EXCEPTION unimplemented_error : public exception
 {
   public:
     unimplemented_error() noexcept;

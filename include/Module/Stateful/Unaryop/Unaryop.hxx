@@ -95,7 +95,7 @@ Unaryop<TI, TO, UOP>::perform(const TI* in, TO* out, const int frame_id, const b
 
 template<typename TI, typename TO, tools::proto_uop<TI, TO> UOP>
 void
-Unaryop<TI, TO, UOP>::_perform(const TI* in, TO* out, const size_t frame_id)
+Unaryop<TI, TO, UOP>::_perform(const TI* in, TO* out, const size_t /*frame_id*/)
 {
     for (size_t e = 0; e < this->n_elmts; e++)
         out[e] = UOP(in[e]);

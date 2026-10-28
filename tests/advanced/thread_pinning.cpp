@@ -29,8 +29,9 @@ main(int argc, char** argv)
                           { "print-stats", no_argument, NULL, 'p' },
                           { "debug", no_argument, NULL, 'g' },
                           { "active-waiting", no_argument, NULL, 'w' },
+                          { "task-autoalloc", no_argument, NULL, 'k' },
                           { "help", no_argument, NULL, 'h' },
-                          { 0 } };
+                          { NULL, 0, NULL, 0 } };
 
     size_t n_inter_frames = 1;
     size_t data_length = 1;
@@ -40,10 +41,11 @@ main(int argc, char** argv)
     bool print_stats = false;
     bool debug = false;
     bool active_waiting = false;
+    bool task_autoalloc = false;
 
     while (1)
     {
-        const int opt = getopt_long(argc, argv, "f:e:o:pgwh", longopts, 0);
+        const int opt = getopt_long(argc, argv, "f:e:o:pgwkh", longopts, 0);
         if (opt == -1) break;
         switch (opt)
         {
@@ -64,6 +66,9 @@ main(int argc, char** argv)
                 break;
             case 'w':
                 active_waiting = true;
+                break;
+            case 'k':
+                task_autoalloc = true;
                 break;
             case 'h':
                 std::cout << "usage: " << argv[0] << " [options]" << std::endl;
@@ -86,6 +91,9 @@ main(int argc, char** argv)
                 std::cout << "  -w, --active-waiting  "
                           << "Enable active waiting in the pipeline synchronizations                "
                           << "[" << (active_waiting ? "true" : "false") << "]" << std::endl;
+                std::cout << "  -k, --task-autoalloc "
+                          << "Enable task SOUT autoalloc mode                                      "
+                          << "[" << (task_autoalloc ? "true" : "false") << "]" << std::endl;
                 std::cout << "  -h, --help            "
                           << "This help                                                             "
                           << "[false]" << std::endl;
@@ -110,9 +118,11 @@ main(int argc, char** argv)
     std::cout << "#   - print_stats    = " << (print_stats ? "true" : "false") << std::endl;
     std::cout << "#   - debug          = " << (debug ? "true" : "false") << std::endl;
     std::cout << "#   - active_waiting = " << (active_waiting ? "true" : "false") << std::endl;
+    std::cout << "#   - task_autoalloc = " << (task_autoalloc ? "true" : "false") << std::endl;
     std::cout << "#" << std::endl;
 
     tools::Thread_pinning::init();
+    tools::Buffer_allocator::set_task_autoalloc(task_autoalloc);
 
     std::vector<std::shared_ptr<module::Finalizer<uint32_t>>> finalizers(3);
     for (size_t s = 0; s < finalizers.size(); s++)

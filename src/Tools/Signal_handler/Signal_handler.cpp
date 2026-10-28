@@ -11,6 +11,7 @@
 #include <thread>
 
 #include "Runtime/Sequence/Sequence.hpp"
+#include "Tools/Debug/hellgrind_annotations.h"
 #include "Tools/Display/rang_format/rang_format.h"
 #include "Tools/Signal_handler/Signal_handler.hpp"
 
@@ -141,10 +142,10 @@ warmup_cpptrace()
 bool g_is_interrupt = false;
 #if defined(_WIN64) || defined(_WIN32)
 void
-signal_sigint_handler(int signo)
+signal_sigint_handler(int /*signo*/)
 #else /* Unix-like */
 void
-signal_sigint_handler(int signo, siginfo_t* info, void* context)
+signal_sigint_handler(int /*signo*/, siginfo_t* /*info*/, void* /*context*/)
 #endif
 {
     if (g_is_interrupt)
@@ -207,23 +208,33 @@ Signal_handler::init()
 bool
 Signal_handler::is_sigint()
 {
-    return g_sigint;
+    ANNOTATE_HAPPENS_AFTER(&g_sigint);
+    auto ret = g_sigint;
+    ANNOTATE_HAPPENS_BEFORE(&g_sigint);
+    return ret;
 }
 
 void
 Signal_handler::reset_sigint()
 {
+    ANNOTATE_HAPPENS_AFTER(&g_sigint);
     g_sigint = false;
+    ANNOTATE_HAPPENS_BEFORE(&g_sigint);
 }
 
 bool
 Signal_handler::is_sigsegv()
 {
-    return g_sigsegv;
+    ANNOTATE_HAPPENS_AFTER(&g_sigsegv);
+    auto ret = g_sigsegv;
+    ANNOTATE_HAPPENS_BEFORE(&g_sigsegv);
+    return ret;
 }
 
 void
 Signal_handler::reset_sigsegv()
 {
+    ANNOTATE_HAPPENS_AFTER(&g_sigsegv);
     g_sigsegv = false;
+    ANNOTATE_HAPPENS_BEFORE(&g_sigsegv);
 }

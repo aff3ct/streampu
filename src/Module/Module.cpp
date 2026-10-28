@@ -458,7 +458,7 @@ Module::create_reset_task()
 
     auto& p = this->create_task("reset");
     this->create_codelet(p,
-                         [](Module& m, runtime::Task& t, const size_t frame_id) -> int
+                         [](Module& m, runtime::Task& /*t*/, const size_t /*frame_id*/) -> int
                          {
                              auto& iface = dynamic_cast<tools::Interface_reset&>(m);
                              iface.reset();

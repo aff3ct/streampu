@@ -13,7 +13,7 @@ namespace spu
 {
 namespace tools
 {
-class out_of_range : public exception
+class SPU_EXPORT_EXCEPTION out_of_range : public exception
 {
   public:
     out_of_range() noexcept;

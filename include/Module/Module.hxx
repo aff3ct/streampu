@@ -31,7 +31,7 @@ runtime::Socket&
 Module::operator[](const std::string& tsk_sck)
 {
     size_t pos = tsk_sck.find("::", 0);
-    if ((int)pos < 0)
+    if (pos == std::string::npos)
     {
         std::stringstream message;
         message << "Invalid socket name, it should be of the form task::socket ('tsk_sck' = " << tsk_sck << ").";

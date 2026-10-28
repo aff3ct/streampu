@@ -1,4 +1,5 @@
 #include "Scheduler/Scheduler.hpp"
+#include "Tools/Display/Statistics/Statistics.hpp"
 #include "Tools/Exception/exception.hpp"
 #include "Tools/Thread/Thread_pinning/Thread_pinning.hpp"
 
@@ -28,7 +29,7 @@ Scheduler::Scheduler(runtime::Sequence* sequence)
 }
 
 void
-Scheduler::profile(const size_t n_exec)
+Scheduler::_profile(const int puid, const size_t n_exec)
 {
     if (n_exec == 0)
     {
@@ -51,14 +52,6 @@ Scheduler::profile(const size_t n_exec)
         throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
     }
 
-    if (!this->tasks_desc.empty())
-    {
-        std::stringstream message;
-        message << "'tasks_desc' should be empty, you should call 'Scheduler::reset' first if you want to re-run the "
-                   "profiling'.";
-        throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
-    }
-
     this->sequence->set_auto_stop(false);
     for (auto& mod : this->sequence->get_modules<module::Module>(false))
         for (auto& tsk : mod->tasks)
@@ -68,30 +61,119 @@ Scheduler::profile(const size_t n_exec)
             tsk->set_fast(true);  // enable the fast mode (= disable the useless verifs
                                   // in the tasks)
         }
+
+    bool prev_thread_pinning;
+    std::vector<std::string> prev_pin_objects_per_thread;
+    std::vector<size_t> prev_puids;
+    if (puid >= 0)
+    {
+        prev_thread_pinning = this->sequence->thread_pinning;
+        prev_pin_objects_per_thread = this->sequence->pin_objects_per_thread;
+        prev_puids = this->sequence->puids;
+
+        this->sequence->set_thread_pinning(true, std::vector<size_t>(1, puid));
+    }
+
     unsigned int counter = 0;
     this->sequence->exec([&counter, &n_exec]() { return ++counter >= n_exec; });
     this->sequence->set_auto_stop(true);
 
-    std::vector<runtime::Task*>& tasks = this->sequence->sequences[0]->get_contents()->tasks;
-    for (auto& t : tasks)
+    if (puid >= 0)
     {
-        task_desc_t new_t;
-        new_t.tptr = t;
-        new_t.exec_duration = t->get_duration_avg();
-        this->tasks_desc.push_back(new_t);
+        this->sequence->thread_pinning = prev_thread_pinning;
+        this->sequence->pin_objects_per_thread = prev_pin_objects_per_thread;
+        this->sequence->puids = prev_puids;
     }
+
+    if (this->tasks_desc.empty())
+    {
+        std::vector<runtime::Task*>& tasks = this->sequence->sequences[0]->get_contents()->tasks;
+        for (auto& t : tasks)
+        {
+            task_desc_t new_t;
+            new_t.tptr = t;
+            new_t.exec_duration.push_back(t->get_duration_avg());
+            this->tasks_desc.push_back(new_t);
+        }
+    }
+    else
+    {
+        std::vector<runtime::Task*>& tasks = this->sequence->sequences[0]->get_contents()->tasks;
+        size_t i = 0;
+        for (auto& t : tasks)
+        {
+            task_desc_t& cur_t = this->tasks_desc[i];
+            if (t != cur_t.tptr)
+            {
+                std::stringstream message;
+                message << "'t' should be equal to 'cur_t.tptr' ('t' = " << std::hex << (uint64_t)t
+                        << ", 'cur_t.tptr' = " << (uint64_t)cur_t.tptr << ", 'i' = " << i << ").";
+                throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
+            }
+            cur_t.exec_duration.push_back(t->get_duration_avg());
+            i++;
+        }
+    }
+
+    // TODO: Restore stats and fast mode of tasks as before!
+}
+
+void
+Scheduler::profile(const size_t n_exec)
+{
+    if (!this->tasks_desc.empty())
+    {
+        std::stringstream message;
+        message << "'tasks_desc' should be empty, you should call 'Scheduler::reset' first if you want to re-run the "
+                   "profiling'.";
+        throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
+    }
+
+    this->_profile(-1, n_exec);
+
+    this->profiling_summary.resize(1);
+
+    std::stringstream ss;
+    tools::Stats::show(this->sequence->get_tasks_per_threads()[0], false, false, ss);
+    this->profiling_summary[0] = ss.str();
+}
+
+void
+Scheduler::profile(const std::vector<size_t>& puids, const size_t n_exec)
+{
+    if (!this->tasks_desc.empty())
+    {
+        std::stringstream message;
+        message << "'tasks_desc' should be empty, you should call 'Scheduler::reset' first if you want to re-run the "
+                   "profiling'.";
+        throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
+    }
+
+    this->profiling_summary.resize(puids.size());
+    for (size_t i = 0; i < puids.size(); i++)
+    {
+        this->_profile(puids[i], n_exec);
+        std::stringstream ss;
+        tools::Stats::show(this->sequence->get_tasks_per_threads()[0], false, false, ss);
+        this->profiling_summary[i] = ss.str();
+    }
+
+    this->profiled_puids = puids;
 }
 
 void
 Scheduler::print_profiling(std::ostream& stream)
 {
     stream << "# Profiling:" << std::endl;
-    for (auto& t : this->tasks_desc)
-    {
-        stream << "# - Name: " << t.tptr->get_name();
-        stream << " - Execution duration: " << t.exec_duration.count() << " ns";
-        stream << " - Replicable: " << (t.tptr->is_replicable() ? "yes" : "no") << std::endl;
-    }
+    if (this->profiled_puids.size())
+        for (size_t p = 0; p < this->profiled_puids.size(); p++)
+        {
+            stream << "# On PUID n°" << this->profiled_puids[p] << std::endl;
+            std::cout << this->profiling_summary[p];
+            if (p < this->profiled_puids.size() - 1) stream << "# ----------- " << std::endl;
+        }
+    else
+        stream << this->profiling_summary[0];
 }
 
 const std::vector<task_desc_t>&
@@ -107,8 +189,26 @@ Scheduler::reset()
     this->tasks_desc.clear();
 }
 
+std::vector<bool>
+Scheduler::get_thread_pinnings() const
+{
+    return std::vector<bool>(this->solution.size(), tools::Thread_pinning::is_init());
+}
+
+std::vector<size_t>
+Scheduler::get_sync_buff_sizes() const
+{
+    return std::vector<size_t>(this->solution.size() - 1, 1);
+}
+
+std::vector<bool>
+Scheduler::get_sync_active_waitings() const
+{
+    return std::vector<bool>(this->solution.size() - 1, false);
+}
+
 std::string
-Scheduler::perform_threads_mapping() const
+Scheduler::get_threads_mapping() const
 {
     if (this->solution.size() == 0)
     {
@@ -135,9 +235,9 @@ Scheduler::perform_threads_mapping() const
 }
 
 runtime::Pipeline*
-Scheduler::instantiate_pipeline(const size_t buffer_size,
-                                const bool active_waiting,
-                                const bool thread_pining,
+Scheduler::instantiate_pipeline(const std::vector<size_t> synchro_buffer_sizes,
+                                const std::vector<bool> synchro_active_waitings,
+                                const std::vector<bool> thread_pinings,
                                 const std::string& pinning_policy)
 {
     if (this->solution.size() == 0)
@@ -147,6 +247,20 @@ Scheduler::instantiate_pipeline(const size_t buffer_size,
           << "The solution has to contain at least one element, please run the 'Scheduler::schedule' method first.";
         throw tools::invalid_argument(__FILE__, __LINE__, __func__, message.str());
     }
+
+    // std::cout << "synchro_buffer_sizes = {";
+    // for (size_t i = 0; i < synchro_buffer_sizes.size(); i++)
+    //     std::cout << synchro_buffer_sizes[i] << ", ";
+    // std::cout << "}" << std::endl;
+    // std::cout << "synchro_active_waitings = {";
+    // for (size_t i = 0; i < synchro_active_waitings.size(); i++)
+    //     std::cout << synchro_active_waitings[i] << ", ";
+    // std::cout << "}" << std::endl;
+    // std::cout << "thread_pinings = {";
+    // for (size_t i = 0; i < thread_pinings.size(); i++)
+    //     std::cout << thread_pinings[i] << ", ";
+    // std::cout << "}" << std::endl;
+    // std::cout << "pinning_policy = " << pinning_policy << std::endl;
 
     std::vector<runtime::Task*> firsts(this->tasks_desc.size());
     std::vector<runtime::Task*> lasts(this->tasks_desc.size());
@@ -175,9 +289,9 @@ Scheduler::instantiate_pipeline(const size_t buffer_size,
         s++;
     }
 
-    std::vector<size_t> synchro_buffer_sizes(this->solution.size() - 1, buffer_size);
-    std::vector<bool> synchro_active_waitings(this->solution.size() - 1, active_waiting);
-    std::vector<bool> thread_pinings(this->solution.size(), thread_pining);
+    // hack: this is important to avoid to deallocate twice the same out buffers, the newly instantiated pipeline takes
+    // the ownership of the out buffers deallocation over the sequence
+    this->sequence->memory_allocation = false;
 
     return new runtime::Pipeline(firsts,
                                  lasts,
@@ -187,6 +301,19 @@ Scheduler::instantiate_pipeline(const size_t buffer_size,
                                  synchro_active_waitings,
                                  thread_pinings,
                                  pinning_policy);
+}
+
+runtime::Pipeline*
+Scheduler::instantiate_pipeline(const size_t buffer_size,
+                                const bool active_waiting,
+                                const bool thread_pining,
+                                const std::string& pinning_policy)
+{
+    std::vector<size_t> synchro_buffer_sizes(this->solution.size() - 1, buffer_size);
+    std::vector<bool> synchro_active_waitings(this->solution.size() - 1, active_waiting);
+    std::vector<bool> thread_pinings(this->solution.size(), thread_pining);
+
+    return instantiate_pipeline(synchro_buffer_sizes, synchro_active_waitings, thread_pinings, pinning_policy);
 }
 
 std::vector<std::pair<size_t, size_t>>
@@ -202,7 +329,12 @@ Scheduler::generate_pipeline()
 
     if (solution.empty()) this->schedule();
 
-    return this->instantiate_pipeline(1, false, tools::Thread_pinning::is_init(), this->perform_threads_mapping());
+    std::string threads_mapping = this->get_threads_mapping();
+    std::vector<bool> thread_pinnings =
+      threads_mapping.empty() ? std::vector<bool>(this->solution.size(), false) : this->get_thread_pinnings();
+
+    return this->instantiate_pipeline(
+      this->get_sync_buff_sizes(), this->get_sync_active_waitings(), thread_pinnings, threads_mapping);
 }
 
 size_t

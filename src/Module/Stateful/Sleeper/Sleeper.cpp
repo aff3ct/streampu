@@ -17,7 +17,7 @@ Sleeper::Sleeper(const size_t ns)
 
     auto& p = this->create_task("sleep");
     this->create_codelet(p,
-                         [](Module& m, runtime::Task& t, const size_t frame_id) -> int
+                         [](Module& m, runtime::Task& /*t*/, const size_t frame_id) -> int
                          {
                              auto& slp = static_cast<Sleeper&>(m);
                              slp._sleep(frame_id);
@@ -52,7 +52,7 @@ Sleeper::sleep(const int frame_id, const bool managed_memory)
 }
 
 void
-Sleeper::_sleep(const size_t frame_id)
+Sleeper::_sleep(const size_t /*frame_id*/)
 {
     auto t_start = std::chrono::steady_clock::now();
     std::chrono::nanoseconds duration;

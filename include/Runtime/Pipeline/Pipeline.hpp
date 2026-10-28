@@ -11,7 +11,7 @@
 #include <utility>
 #include <vector>
 
-#include "Module/Stateful/Adaptor/Adaptor.hpp"
+#include "Module/Stateful/Adaptor/Adaptor_m_to_n.hpp"
 #include "Runtime/Sequence/Sequence.hpp"
 #include "Tools/Interface/Interface_get_set_n_frames.hpp"
 #include "Tools/Thread/Thread_pool/Thread_pool.hpp"
@@ -27,8 +27,8 @@ class Pipeline : public tools::Interface_get_set_n_frames
     std::vector<std::shared_ptr<Sequence>> stages;
     std::shared_ptr<tools::Thread_pool> thread_pool;
     // clang-format off
-    std::vector<std::pair<std::vector<std::shared_ptr<module::Adaptor>>,
-                          std::vector<std::shared_ptr<module::Adaptor>>>> adaptors;
+    std::vector<std::pair<std::vector<std::shared_ptr<module::Adaptor_m_to_n>>,
+                          std::vector<std::shared_ptr<module::Adaptor_m_to_n>>>> adaptors;
 
     //                               sck out addr      stage   tsk id  sck id  unbind_pos
     std::vector<std::pair<std::tuple<runtime::Socket*, size_t, size_t, size_t, size_t>,

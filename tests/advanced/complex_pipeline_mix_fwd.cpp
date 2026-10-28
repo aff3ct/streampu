@@ -35,8 +35,9 @@ main(int argc, char** argv)
                           { "active-waiting", no_argument, NULL, 'w' },
                           { "sched", no_argument, NULL, 'S' },
                           { "verbose", no_argument, NULL, 'v' },
+                          { "task-autoalloc", no_argument, NULL, 'k' },
                           { "help", no_argument, NULL, 'h' },
-                          { 0 } };
+                          { NULL, 0, NULL, 0 } };
 
     size_t n_threads = std::thread::hardware_concurrency();
     size_t n_inter_frames = 1;
@@ -52,10 +53,11 @@ main(int argc, char** argv)
     bool force_sequence = false;
     bool active_waiting = false;
     bool verbose = false;
+    bool task_autoalloc = false;
 
     while (1)
     {
-        const int opt = getopt_long(argc, argv, "t:f:s:d:e:u:o:S:pbgqwhv", longopts, 0);
+        const int opt = getopt_long(argc, argv, "t:f:s:d:e:u:o:S:pbgqwvkh", longopts, 0);
         if (opt == -1) break;
         switch (opt)
         {
@@ -100,6 +102,9 @@ main(int argc, char** argv)
                 break;
             case 'v':
                 verbose = true;
+                break;
+            case 'k':
+                task_autoalloc = true;
                 break;
             case 'h':
                 std::cout << "usage: " << argv[0] << " [options]" << std::endl;
@@ -146,6 +151,9 @@ main(int argc, char** argv)
                 std::cout << "  -v, --verbose         "
                           << "Show information about the scheduling choices                         "
                           << "[false]" << std::endl;
+                std::cout << "  -k, --task-autoalloc "
+                          << "Enable task SOUT autoalloc mode                                      "
+                          << "[" << (task_autoalloc ? "true" : "false") << "]" << std::endl;
                 std::cout << "  -h, --help            "
                           << "This help                                                             "
                           << "[false]" << std::endl;
@@ -176,7 +184,10 @@ main(int argc, char** argv)
     std::cout << "#   - active_waiting = " << (active_waiting ? "true" : "false") << std::endl;
     std::cout << "#   - scheduler      = " << scheduler << std::endl;
     std::cout << "#   - verbose        = " << (verbose ? "true" : "false") << std::endl;
+    std::cout << "#   - task_autoalloc = " << (task_autoalloc ? "true" : "false") << std::endl;
     std::cout << "#" << std::endl;
+
+    tools::Buffer_allocator::set_task_autoalloc(task_autoalloc);
 
     if (!force_sequence && step_by_step)
         std::clog << rang::tag::warning << "'step_by_step' is not available with pipeline" << std::endl;
@@ -211,26 +222,26 @@ main(int argc, char** argv)
     auto sock_1 = comp.create_socket_fwd<uint8_t>(task_comp, "fwd1", data_length);
     auto sock_2 = comp.create_socket_fwd<uint8_t>(task_comp, "fwd2", data_length);
 
-    comp.create_codelet(
-      task_comp,
-      [sock_0, sock_1, sock_2, data_length, incs](module::Module& m, runtime::Task& t, const size_t frame_id) -> int
-      {
-          auto tab_0 = t[sock_0].get_dataptr<const uint8_t>();
-          auto tab_1 = t[sock_1].get_dataptr<const uint8_t>();
-          auto tab_2 = t[sock_2].get_dataptr<const uint8_t>();
-          for (size_t i = 0; i < data_length; i++)
-          {
-              if (tab_0[i] != tab_1[i] || tab_0[i] != tab_2[i])
-              {
-                  std::stringstream message;
-                  message << "Found different values => "
-                          << " Tab_0 : " << +tab_0[i] << ", Tab_1 : " << +tab_1[i] << ", Tab_2 : " << +tab_2[i]
-                          << std::endl;
-                  throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
-              }
-          }
-          return runtime::status_t::SUCCESS;
-      });
+    comp.create_codelet(task_comp,
+                        [sock_0, sock_1, sock_2, data_length, incs](
+                          module::Module& /*m*/, runtime::Task& t, const size_t /*frame_id*/) -> int
+                        {
+                            auto tab_0 = t[sock_0].get_dataptr<const uint8_t>();
+                            auto tab_1 = t[sock_1].get_dataptr<const uint8_t>();
+                            auto tab_2 = t[sock_2].get_dataptr<const uint8_t>();
+                            for (size_t i = 0; i < data_length; i++)
+                            {
+                                if (tab_0[i] != tab_1[i] || tab_0[i] != tab_2[i])
+                                {
+                                    std::stringstream message;
+                                    message << "Found different values => "
+                                            << " Tab_0 : " << +tab_0[i] << ", Tab_1 : " << +tab_1[i]
+                                            << ", Tab_2 : " << +tab_2[i] << std::endl;
+                                    throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
+                                }
+                            }
+                            return runtime::status_t::SUCCESS;
+                        });
 
     // sockets binding
     // clang-format off

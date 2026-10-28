@@ -12,14 +12,8 @@
 #ifndef MODULE_HPP_
 #include <Module/Module.hpp>
 #endif
-#ifndef ADAPTOR_1_TO_N_HPP_
-#include <Module/Stateful/Adaptor/Adaptor_1_to_n.hpp>
-#endif
-#ifndef ADAPTOR_HPP_
-#include <Module/Stateful/Adaptor/Adaptor.hpp>
-#endif
-#ifndef ADAPTOR_N_TO_1_HPP_
-#include <Module/Stateful/Adaptor/Adaptor_n_to_1.hpp>
+#ifndef ADAPTOR_M_TO_N_HPP_
+#include <Module/Stateful/Adaptor/Adaptor_m_to_n.hpp>
 #endif
 #ifndef BINARYOP_HPP_
 #include <Module/Stateful/Binaryop/Binaryop.hpp>
@@ -141,6 +135,12 @@
 #ifndef TASK_HPP_
 #include <Runtime/Task/Task.hpp>
 #endif
+#ifndef SCHEDULER_FROM_FILE_HPP__
+#include <Scheduler/From_file/Scheduler_from_file.hpp>
+#endif
+#ifndef SCHEDULER_GR_HPP__
+#include <Scheduler/GR/Scheduler_GR.hpp>
+#endif
 #ifndef SCHEDULER_OTAC_HPP__
 #include <Scheduler/OTAC/Scheduler_OTAC.hpp>
 #endif
@@ -152,6 +152,12 @@
 #endif
 #ifndef DIGRAPH_NODE_HPP_
 #include <Tools/Algo/Digraph/Digraph_node.hpp>
+#endif
+#ifndef BUFFER_ALLOCATOR_HPP__
+#include <Tools/Buffer_allocator/Buffer_allocator.hpp>
+#endif
+#ifndef PIPELINE_BUILDER_HPP_
+#include <Tools/Builder/Pipeline_builder.hpp>
 #endif
 #ifndef COMPUTE_BYTES_H_
 #include <Tools/compute_bytes.h>

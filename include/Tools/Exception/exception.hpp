@@ -11,6 +11,22 @@
 #include <cpptrace/cpptrace.hpp>
 #endif
 
+#if !defined(SPU_EXPORT)
+#if defined(WIN32) || defined(_WIN32)
+#define SPU_EXPORT __declspec(dllexport)
+#else
+#define SPU_EXPORT __attribute__((visibility("default")))
+#endif
+#endif
+
+#if !defined(SPU_EXPORT_EXCEPTION)
+#if defined(__apple_build_version__)
+#define SPU_EXPORT_EXCEPTION SPU_EXPORT
+#else
+#define SPU_EXPORT_EXCEPTION
+#endif
+#endif
+
 namespace spu
 {
 namespace tools
@@ -19,7 +35,7 @@ namespace tools
 class exception : public cpptrace::exception_with_message
 {
 #else
-class exception : public std::exception
+class SPU_EXPORT_EXCEPTION exception : public std::exception
 {
 #endif
   public:

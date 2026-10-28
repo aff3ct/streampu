@@ -1,0 +1,113 @@
+# Windows
+
+.tags-windows:
+  tags:
+    - x86_64
+    - windows
+
+################
+## build jobs ##
+################
+
+# MSVC
+# ----
+
+.config-msvc:
+  extends: .tags-windows
+  before_script:
+    - hostname
+    - whoami
+
+.build-windows-msvc:
+  extends: .config-msvc
+  stage: build
+  needs:
+    - job: analysis-headers
+      artifacts: false
+  variables:
+    GIT_SUBMODULE_STRATEGY: recursive
+    CMAKE_PREFIX_PATH : "C:/Users/ci/vcpkg/installed/x64-windows"
+
+.build-windows-msvc-avx:
+  extends: .build-windows-msvc
+  image: registry.gitlab.com/aff3ct/aff3ct/x86_64_windows_msvc:v15
+  variables:
+    CFLAGS: -D_CRT_SECURE_NO_DEPRECATE /MT /EHsc /arch:AVX
+    CMAKE_OPT: -DSPU_TESTS=ON -DSPU_COMPILE_STATIC_LIB=ON -DSPU_COMPILE_SHARED_LIB=ON -DSPU_STACKTRACE=OFF -DSPU_OVERRIDE_VERSION=$GIT_TAG #-DCMAKE_VERBOSE_MAKEFILE=ON
+    NAME: build_windows_msvc_avx
+  script:
+    - ./ci/windows/build-windows-msvc.bat
+
+# with artifacts
+build-windows-msvc-avx-artifacts:
+  extends: .build-windows-msvc-avx
+  rules :
+    - if : $CI_SPU_BUILD_OPT_ARTIFACTS == null || $CI_SPU_BUILD_OPT_ARTIFACTS == "ON"
+  artifacts:
+    name: build-windows-msvc-avx
+    paths:
+      - ${NAME}
+
+# without artifacts
+build-windows-msvc-avx:
+  extends: .build-windows-msvc-avx
+  rules :
+    - if : $CI_SPU_BUILD_OPT_ARTIFACTS == "OFF"
+
+# GCC (MSYS2)
+# -----------
+
+.config-msys2:
+  extends: .tags-windows
+  variables:
+    MSYSTEM: "MINGW64"
+    CHERE_INVOKING: "yes"
+  before_script:
+    - hostname
+    - whoami
+    - $env:CMAKE_PREFIX_PATH +=";$Env:SystemDrive\msys64\mingw64"
+    - $Env:CMAKE_INSTALL_PREFIX +=";$Env:SystemDrive\msys64\mingw64"
+    - $Env:path += ";$Env:SystemDrive\msys64\usr\bin;$Env:SystemDrive\msys64\mingw64\bin"
+
+.build-windows-msys2:
+  extends: .config-msys2
+  stage: build
+  needs:
+    - job: analysis-headers
+      artifacts: false
+  variables:
+    GIT_SUBMODULE_STRATEGY: recursive
+    CMAKE_INCLUDE_PATH: C:/msys64/mingw64/include/
+
+.build-windows-gcc:
+  extends: .build-windows-msys2
+  parallel:
+    matrix:
+      - COMPILER: gcc-x86-sse4.2
+        CFLAGS: -msse4.2
+      - COMPILER: gcc-x64-avx2
+        CFLAGS: -mavx2  
+  image: registry.gitlab.com/aff3ct/aff3ct/x86_64_windows_gcc:v8.1.0
+  variables:
+    CFLAGS: -Wall -funroll-loops -m64 $CFLAGS
+    LFLAGS: -static -static-libgcc -static-libstdc++
+    CMAKE_OPT: -DSPU_TESTS=ON -DSPU_COMPILE_STATIC_LIB=ON -DSPU_COMPILE_SHARED_LIB=ON -DSPU_STACKTRACE=OFF -DSPU_OVERRIDE_VERSION=$GIT_TAG
+    NAME: build_windows_${COMPILER}
+  script:
+    - ./ci/windows/build-windows-gcc.bat
+
+# with artifacts
+build-windows-gcc-artifacts:
+  extends: .build-windows-gcc
+  rules :
+    - if : $CI_SPU_BUILD_OPT_ARTIFACTS == null || $CI_SPU_BUILD_OPT_ARTIFACTS == "ON"
+  artifacts:
+    name: build-windows-${COMPILER}
+    paths:
+      - ${NAME}
+
+# without artifacts
+build-windows-gcc:
+  extends: .build-windows-gcc
+  rules :
+    - if : $CI_SPU_BUILD_OPT_ARTIFACTS == "OFF"

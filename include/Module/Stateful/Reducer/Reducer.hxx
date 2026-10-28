@@ -96,7 +96,7 @@ Reducer<TI, TO, BOP>::reduce(const TI* in, TO* out, const int frame_id, const bo
 
 template<typename TI, typename TO, tools::proto_bop<TI, TO> BOP>
 void
-Reducer<TI, TO, BOP>::_reduce(const TI* in, TO* out, const size_t frame_id)
+Reducer<TI, TO, BOP>::_reduce(const TI* in, TO* out, const size_t /*frame_id*/)
 {
     TO reduced_val = (TO)(in[0]);
     for (size_t f = 0; f < this->get_n_frames(); f++)

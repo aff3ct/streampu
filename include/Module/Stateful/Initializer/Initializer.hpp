@@ -41,11 +41,15 @@ class Initializer : public Stateful
 
   protected:
     std::vector<std::vector<T>> init_data;
+    size_t ns;
 
   public:
-    Initializer(const size_t n_elmts);
+    Initializer(const size_t n_elmts, const size_t ns = 0);
     virtual ~Initializer() = default;
     virtual Initializer* clone() const;
+
+    size_t get_ns() const;
+    void set_ns(const size_t ns);
 
     const std::vector<std::vector<T>>& get_init_data() const;
 

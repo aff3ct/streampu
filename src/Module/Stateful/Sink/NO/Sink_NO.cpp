@@ -26,7 +26,7 @@ Sink_NO<B>::clone() const
 
 template<typename B>
 void
-Sink_NO<B>::_send_count(const B* in_data, const uint32_t* in_count, const size_t frame_id)
+Sink_NO<B>::_send_count(const B* /*in_data*/, const uint32_t* /*in_count*/, const size_t /*frame_id*/)
 {
     // do nothing, best module ever :-D
 }

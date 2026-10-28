@@ -31,8 +31,9 @@ main(int argc, char** argv)
                           { "print-stats", no_argument, NULL, 'p' },
                           { "debug", no_argument, NULL, 'g' },
                           { "active-waiting", no_argument, NULL, 'w' },
+                          { "task-autoalloc", no_argument, NULL, 'k' },
                           { "help", no_argument, NULL, 'h' },
-                          { 0 } };
+                          { NULL, 0, NULL, 0 } };
 
     size_t n_threads = std::thread::hardware_concurrency();
     size_t n_inter_frames = 1;
@@ -43,10 +44,11 @@ main(int argc, char** argv)
     bool print_stats = false;
     bool debug = false;
     bool active_waiting = false;
+    bool task_autoalloc = false;
 
     while (1)
     {
-        const int opt = getopt_long(argc, argv, "t:f:s:d:u:o:i:j:cpbgqwh", longopts, 0);
+        const int opt = getopt_long(argc, argv, "t:f:s:d:u:o:i:j:cpbgqwkh", longopts, 0);
         if (opt == -1) break;
         switch (opt)
         {
@@ -76,6 +78,9 @@ main(int argc, char** argv)
                 break;
             case 'w':
                 active_waiting = true;
+                break;
+            case 'k':
+                task_autoalloc = true;
                 break;
             case 'h':
                 std::cout << "usage: " << argv[0] << " [options]" << std::endl;
@@ -107,6 +112,9 @@ main(int argc, char** argv)
                 std::cout << "  -w, --active-waiting  "
                           << "Enable active waiting in the pipeline synchronizations                "
                           << "[" << (active_waiting ? "true" : "false") << "]" << std::endl;
+                std::cout << "  -k, --task-autoalloc "
+                          << "Enable task SOUT autoalloc mode                                      "
+                          << "[" << (task_autoalloc ? "true" : "false") << "]" << std::endl;
                 std::cout << "  -h, --help            "
                           << "This help                                                             "
                           << "[false]" << std::endl;
@@ -132,7 +140,10 @@ main(int argc, char** argv)
     std::cout << "#   - print_stats    = " << (print_stats ? "true" : "false") << std::endl;
     std::cout << "#   - debug          = " << (debug ? "true" : "false") << std::endl;
     std::cout << "#   - active_waiting = " << (active_waiting ? "true" : "false") << std::endl;
+    std::cout << "#   - task_autoalloc = " << (task_autoalloc ? "true" : "false") << std::endl;
     std::cout << "#" << std::endl;
+
+    tools::Buffer_allocator::set_task_autoalloc(task_autoalloc);
 
     module::Initializer<uint8_t> initializer(data_length);
     module::Finalizer<uint8_t> finalizer(data_length);
@@ -159,7 +170,7 @@ main(int argc, char** argv)
 
     multi_comp.create_codelet(
       task_multi_comp,
-      [sock_0, sock_1, data_length, incs](module::Module& m, runtime::Task& t, const size_t frame_id) -> int
+      [sock_0, sock_1, data_length, incs](module::Module& /*m*/, runtime::Task& t, const size_t /*frame_id*/) -> int
       {
           auto tab_0 = t[sock_0].get_dataptr<uint8_t>();
           auto tab_1 = t[sock_1].get_dataptr<const uint8_t>();

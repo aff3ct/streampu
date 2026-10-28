@@ -117,7 +117,7 @@ Source<B>::generate(B* out_data, uint32_t* out_count, const int frame_id, const 
 
 template<typename B>
 void
-Source<B>::_generate(B* out_data, const size_t frame_id)
+Source<B>::_generate(B* /*out_data*/, const size_t /*frame_id*/)
 {
     throw tools::unimplemented_error(__FILE__, __LINE__, __func__);
 }
@@ -132,7 +132,7 @@ Source<B>::_generate(B* out_data, uint32_t* out_count, const size_t frame_id)
 
 template<typename B>
 void
-Source<B>::set_seed(const int seed)
+Source<B>::set_seed(const int /*seed*/)
 {
     // do nothing in the general case, this method has to be overrided
 }

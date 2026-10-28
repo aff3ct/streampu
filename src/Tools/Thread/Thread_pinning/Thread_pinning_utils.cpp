@@ -9,11 +9,11 @@ using namespace spu::tools;
 
 #ifdef SPU_HWLOC
 static std::map<std::string, hwloc_obj_type_t> object_map = {
-    { "NUMA", HWLOC_OBJ_NUMANODE }, { "PACKAGE", HWLOC_OBJ_PACKAGE }, { "CORE", HWLOC_OBJ_CORE },
-    { "PU", HWLOC_OBJ_PU },         { "L1D", HWLOC_OBJ_L1CACHE },     { "L2D", HWLOC_OBJ_L2CACHE },
-    { "L3D", HWLOC_OBJ_L3CACHE },   { "L4D", HWLOC_OBJ_L4CACHE },     { "L5D", HWLOC_OBJ_L5CACHE },
-    { "L1I", HWLOC_OBJ_L1ICACHE },  { "L2I", HWLOC_OBJ_L2ICACHE },    { "L3I", HWLOC_OBJ_L3ICACHE },
-    { "GROUP", HWLOC_OBJ_GROUP },
+    { "MACHINE", HWLOC_OBJ_MACHINE }, { "NUMA", HWLOC_OBJ_NUMANODE }, { "PACKAGE", HWLOC_OBJ_PACKAGE },
+    { "CORE", HWLOC_OBJ_CORE },       { "PU", HWLOC_OBJ_PU },         { "L1D", HWLOC_OBJ_L1CACHE },
+    { "L2D", HWLOC_OBJ_L2CACHE },     { "L3D", HWLOC_OBJ_L3CACHE },   { "L4D", HWLOC_OBJ_L4CACHE },
+    { "L5D", HWLOC_OBJ_L5CACHE },     { "L1I", HWLOC_OBJ_L1ICACHE },  { "L2I", HWLOC_OBJ_L2ICACHE },
+    { "L3I", HWLOC_OBJ_L3ICACHE },    { "GROUP", HWLOC_OBJ_GROUP },
 };
 #endif
 

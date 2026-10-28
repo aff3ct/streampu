@@ -24,7 +24,7 @@ Source_random<B>::clone() const
 
 template<typename B>
 void
-Source_random<B>::_generate(B* out_data, const size_t frame_id)
+Source_random<B>::_generate(B* out_data, const size_t /*frame_id*/)
 {
     // generate a random k bits vector out_data
     for (auto i = 0; i < this->max_data_size; i++)

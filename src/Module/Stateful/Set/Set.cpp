@@ -42,7 +42,6 @@ Set::init()
     }
 
     auto& p = this->create_task("exec");
-    p.set_autoalloc(true);
 
     auto& firsts = sequence.get_firsts_tasks()[0];
     for (auto& first : firsts)
@@ -136,7 +135,7 @@ Set::init()
         }
 
     this->create_codelet(p,
-                         [](Module& m, runtime::Task& t, const size_t frame_id) -> int
+                         [](Module& m, runtime::Task& t, const size_t /*frame_id*/) -> int
                          {
                              auto& ss = static_cast<Set&>(m);
 

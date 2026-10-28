@@ -13,7 +13,7 @@ namespace spu
 {
 namespace tools
 {
-class invalid_argument : public exception
+class SPU_EXPORT_EXCEPTION invalid_argument : public exception
 {
   public:
     invalid_argument() noexcept;

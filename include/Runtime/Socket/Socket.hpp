@@ -13,15 +13,16 @@
 
 #include "Runtime/Task/Task.hpp"
 #include "Tools/Interface/Interface_reset.hpp"
+#include "Tools/System/memory.hpp"
 
 namespace spu
 {
 namespace module
 {
-class Adaptor_n_to_1;
-class Adaptor_1_to_n;
+class Adaptor_m_to_n;
 class Set;
 }
+
 namespace runtime
 {
 class Sequence;
@@ -29,10 +30,12 @@ class Pipeline;
 
 class Socket : public tools::Interface_reset
 {
+    // Alias for buffer datatype
+    typedef std::vector<uint8_t, tools::aligned_allocator<uint8_t>> buffer;
+
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
     friend Task;
-    friend module::Adaptor_n_to_1;
-    friend module::Adaptor_1_to_n;
+    friend module::Adaptor_m_to_n;
     friend module::Set;
     friend Sequence;
     friend Pipeline;
@@ -51,6 +54,8 @@ class Socket : public tools::Interface_reset
     std::vector<Socket*> bound_sockets;
     Socket* bound_socket;
     socket_t type;
+    buffer out_buffer;
+    bool sck_out_buffer_allocated;
 
   public:
     inline Socket(Task& task,
@@ -86,6 +91,7 @@ class Socket : public tools::Interface_reset
     inline const Socket& get_bound_socket() const;
     inline Socket& get_bound_socket();
     inline socket_t get_type() const;
+    inline buffer& get_out_buffer();
 
     template<typename T>
     inline T* get_dataptr(const size_t start_col = 0) const;
@@ -153,6 +159,10 @@ class Socket : public tools::Interface_reset
 
     inline size_t unbind(Socket& s_out);
 
+    inline void allocate_buffer();
+
+    inline void deallocate_buffer();
+
   protected:
     inline void* _get_dataptr(const size_t start_col = 0) const;
     inline void* _get_dptr(const size_t start_col = 0) const;
@@ -175,6 +185,8 @@ class Socket : public tools::Interface_reset
 
     inline void _bind(void* dataptr);
 
+    inline void _allocate_buffer();
+
     inline void set_name(const std::string& name);
 
     inline void set_datatype(const std::type_index datatype);
@@ -184,6 +196,8 @@ class Socket : public tools::Interface_reset
     inline void set_dataptr(void* dataptr);
 
     inline void set_n_rows(const size_t n_rows);
+
+    inline void resize_out_buffer(size_t new_data_bytes);
 
   private:
     inline void check_bound_socket();

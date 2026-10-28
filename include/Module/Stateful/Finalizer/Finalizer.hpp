@@ -47,11 +47,15 @@ class Finalizer
   protected:
     std::vector<std::vector<std::vector<T>>> data;
     size_t next_stream_id;
+    size_t ns;
 
   public:
-    Finalizer(const size_t n_elmts, const size_t history_size = 1);
+    Finalizer(const size_t n_elmts, const size_t history_size = 1, const size_t ns = 0);
     virtual ~Finalizer() = default;
     virtual Finalizer* clone() const;
+
+    size_t get_ns() const;
+    void set_ns(const size_t ns);
 
     const std::vector<std::vector<T>>& get_final_data() const;
     const std::vector<std::vector<std::vector<T>>>& get_histo_data() const;

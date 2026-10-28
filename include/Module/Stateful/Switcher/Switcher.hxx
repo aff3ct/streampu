@@ -83,7 +83,7 @@ Switcher::Switcher(const size_t n_data_sockets,
 
     this->create_codelet(
       p1,
-      [p1s_in_data, p1s_in_ctrl, p1s_out_data](Module& m, runtime::Task& t, const size_t frame_id) -> int
+      [p1s_in_data, p1s_in_ctrl, p1s_out_data](Module& m, runtime::Task& t, const size_t /*frame_id*/) -> int
       {
           auto& swi = static_cast<Switcher&>(m);
 
@@ -111,7 +111,7 @@ Switcher::Switcher(const size_t n_data_sockets,
     auto p2s_out_data = this->create_socket_out(p2, "out_data", n_elmts_select, datatype_select);
 
     this->create_codelet(p2,
-                         [p2s_in_data, p2s_out_data](Module& m, runtime::Task& t, const size_t frame_id) -> int
+                         [p2s_in_data, p2s_out_data](Module& m, runtime::Task& t, const size_t /*frame_id*/) -> int
                          {
                              auto& swi = static_cast<Switcher&>(m);
 

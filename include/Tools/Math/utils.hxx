@@ -264,6 +264,5 @@ bool inline signbit(long double arg)
     return std::signbit(arg);
 }
 #endif
-
 }
 }

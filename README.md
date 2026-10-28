@@ -34,6 +34,8 @@ CMake options:
 - `SPU_LINK_HWLOC`: Link with the `hwloc` library (used for threads pinning) 
   (default = `OFF`)
 - `SPU_COLORS`: Enable the colors in the terminal (default = `ON`)
+- `SPU_BENCHMARK`: Enable the compilation of the benchmark executable binary 
+  (default = `ON`)
 - `SPU_TESTS`: Enable the compilation of the tests (default = `ON`)
 - `SPU_STACKTRACE`: Print the stack trace when an exception is raised (and link 
   with the `cpptrace` lib) (default = `ON`)
@@ -47,30 +49,26 @@ CMake options:
 
 Build the library in `debug` mode:
 ```bash
-mkdir build_debug
-cd build_debug
-cmake ..
-cmake --build . -j 4
-ctest
+cmake -S . -B build_debug
+cmake --build build_debug -j 4
+ctest --test-dir build_debug
 ```
 
 Build the library in `release` mode:
 ```bash
-mkdir build_release
-cd build_release
-cmake .. -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_CXX_FLAGS="-Wall -march=native -funroll-loops"
-cmake --build . -j 4
-ctest
+cmake -S . -B build_release -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_CXX_FLAGS="-Wall -march=native -funroll-loops"
+cmake --build build_release -j 4
+ctest --test-dir build_release
 ```
 
 Install the library on the system (`/usr/local`):
 ```bash
-cmake --install .
+cmake --install build_release
 ```
 
 Install the library in a custom path (`/opt/streampu`):
 ```bash
-cmake --install . --prefix /opt/streampu/
+cmake --install build_release --prefix /opt/streampu/
 ```
 
 ## Link with the Library
@@ -107,7 +105,7 @@ option(SPU_TESTS "" OFF) # do NOT compile the tests
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/lib/streampu/)
 
 # `my-exe` links with `StreamPU` static lib -----------------------------------
-target_link_libraries(my-exe PUBLIC spu::spu-static-lib)
+target_link_libraries(my-exe PUBLIC spu-static-lib)
 
 # `my-exe` finds and links with thread library --------------------------------
 set(CMAKE_THREAD_PREFER_PTHREAD ON)
@@ -187,6 +185,6 @@ The project is licensed under the MIT license.
 The main contributions of this work are described in the following journal 
 article:  
 - A. Cassagne, R. Tajan, O. Aumage, D. Barthou, C. Leroux and C. Jégo,  
-  “**A DSEL for High Throughput and Low Latency Software-Defined Radio on Multicore CPUs**,“  
+  “**StreamPU: A DSEL for High Throughput and Low Latency Software-Defined Radio on Multicore CPUs**,“  
   *Wiley Concurrency and Computation: Practice and Experience (CCPE)*, 2023.  
-  [[Open access article](https://doi.org/10.1002/cpe.7820)] [[Bibtex entry](https://aff3ct.github.io/resources/bibtex/Cassagne2023%20-%20A%20DSEL%20for%20High%20Throughput%20and%20Low%20Latency%20Software-Defined%20Radio%20on%20Multicore%20CPUs.bib)]
+  [[Open access article](https://doi.org/10.1002/cpe.7820)] [[Bibtex entry](https://aff3ct.github.io/resources/bibtex/Cassagne2023%20-%20StreamPU%20A%20DSEL%20for%20High%20Throughput%20and%20Low%20Latency%20Software-Defined%20Radio%20on%20Multicore%20CPUs.bib)]

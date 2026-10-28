@@ -13,7 +13,7 @@ namespace spu
 {
 namespace tools
 {
-class runtime_error : public exception
+class SPU_EXPORT_EXCEPTION runtime_error : public exception
 {
   public:
     runtime_error() noexcept;

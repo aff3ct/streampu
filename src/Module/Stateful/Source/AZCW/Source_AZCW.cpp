@@ -24,9 +24,9 @@ Source_AZCW<B>::clone() const
 
 template<typename B>
 void
-Source_AZCW<B>::_generate(B* out_data, const size_t frame_id)
+Source_AZCW<B>::_generate(B* out_data, const size_t /*frame_id*/)
 {
-    std::fill(out_data, out_data + this->max_data_size, 0);
+    std::fill(out_data, out_data + this->max_data_size, static_cast<B>(0));
 }
 
 // ==================================================================================== explicit template instantiation

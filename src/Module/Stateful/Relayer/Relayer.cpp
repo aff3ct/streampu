@@ -88,7 +88,7 @@ Relayer<T>::relay(const T* in, T* out, const int frame_id, const bool managed_me
 
 template<typename T>
 void
-Relayer<T>::_relay(const T* in, T* out, const size_t frame_id)
+Relayer<T>::_relay(const T* in, T* out, const size_t /*frame_id*/)
 {
     std::chrono::time_point<std::chrono::steady_clock> t_start;
     if (this->ns) t_start = std::chrono::steady_clock::now();
