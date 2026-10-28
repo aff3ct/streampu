@@ -1,5 +1,6 @@
 #ifdef SPU_JULIA
 
+#include <atomic>
 #include <cstddef>
 #include <iostream>
 #include <julia.h>
@@ -270,8 +271,11 @@ Stateless_Julia::_create_codelet(runtime::Task& task)
 {
     size_t tid = Stateless_Julia::get_task_id(task);
 
+    // Shared compilation flag across the original task and all its thread clones
+    auto task_compiled = std::make_shared<std::atomic<bool>>(false);
+
     Module::create_codelet(task,
-                           [tid](module::Module& m, runtime::Task& t, const size_t frame_id)
+                           [tid, task_compiled](module::Module& m, runtime::Task& t, const size_t frame_id)
                            {
                                auto& sjl = static_cast<Stateless_Julia&>(m);
 
@@ -297,6 +301,33 @@ Stateless_Julia::_create_codelet(runtime::Task& task)
                                *(int32_t*)sjl.jl_func_args[tid][sjl.jl_func_args[tid].size() - 2] = frame_id;
                                *(int32_t*)sjl.jl_func_args[tid][sjl.jl_func_args[tid].size() - 1] =
                                  sjl.get_n_frames_per_wave();
+
+                               // If the Julia function has not been JIT compiled yet:
+                               if (!task_compiled->load(std::memory_order_acquire))
+                               {
+                                   static std::mutex compile_mtx;
+                                   jl_task_t* ct = jl_current_task;
+                                   int8_t prev_gc_state = 0;
+                                   const bool can_safe = (ct != nullptr && ct->ptls != nullptr);
+                                   // Enter GC_SAFE state while waiting on the compilation lock
+                                   // so that if another thread triggers a GC during JIT compilation,
+                                   // this waiting thread will NOT block the Stop-The-World GC.
+                                   if (can_safe)
+                                       prev_gc_state = jl_gc_safe_enter(ct->ptls);
+
+                                   std::unique_lock<std::mutex> lock(compile_mtx);
+
+                                   if (can_safe)
+                                       jl_gc_safe_leave(ct->ptls, prev_gc_state);
+
+                                   if (!task_compiled->load(std::memory_order_relaxed))
+                                   {
+                                       tools::Proxy proxy =
+                                         tools::jl_call_func(sjl.jl_func_args[tid], sjl.is_jl_safe());
+                                       task_compiled->store(true, std::memory_order_release);
+                                       return jl_unbox_int32((jl_value_t*)proxy);
+                                   }
+                               }
 
                                tools::Proxy proxy = tools::jl_call_func(sjl.jl_func_args[tid], sjl.is_jl_safe());
                                return jl_unbox_int32((jl_value_t*)proxy);

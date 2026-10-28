@@ -148,7 +148,19 @@ Thread_pool_Julia::run(const bool async)
         this->cnd[tid].notify_one();
     }
 
-    if (!async) this->barrier.wait();
+    if (!async)
+    {
+        jl_task_t* ct = jl_current_task;
+        int8_t gc_state = 0;
+        const bool can_safe = (ct != nullptr && ct->ptls != nullptr);
+        if (can_safe)
+            gc_state = jl_gc_safe_enter(ct->ptls);
+
+        this->barrier.wait();
+
+        if (can_safe)
+            jl_gc_safe_leave(ct->ptls, gc_state);
+    }
 }
 
 void
@@ -161,7 +173,17 @@ Thread_pool_Julia::run(std::function<void(const size_t)>& func_exec, bool async)
 void
 Thread_pool_Julia::wait()
 {
+    jl_task_t* ct = jl_current_task;
+    int8_t gc_state = 0;
+    const bool can_safe = (ct != nullptr && ct->ptls != nullptr);
+    if (can_safe)
+        gc_state = jl_gc_safe_enter(ct->ptls);
+
     this->barrier.wait();
+
+    if (can_safe)
+        jl_gc_safe_leave(ct->ptls, gc_state);
+
     if (!this->initialized)
     {
         this->initialized = true;
