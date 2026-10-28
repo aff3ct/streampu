@@ -131,7 +131,6 @@ main(int argc, char** argv)
     auto t0 = std::chrono::steady_clock::now();
     std::chrono::nanoseconds duration;
 
-    jl_function_t* print = jl_get_function(jl_base_module, "println");
     std::function<void(const char*)> print_verbose = [verbose](const char* msg)
     {
         if (verbose) std::cout << msg << std::endl;
@@ -143,7 +142,7 @@ main(int argc, char** argv)
     {
         array[i] = rand();
     }
-    jl_value_t* datatype = jl_apply_array_type((jl_value_t*)jl_uint64_type, 1);
+    jl_value_t* datatype = jl_apply_array_type((jl_value_t*)jl_eval_string("return UInt64"), 1);
     jl_array_t* jl_array = jl_ptr_to_array_1d(datatype, array.data(), array.size(), 0);
 
     jl_function_t* jl_get_threadid = jl_eval_string("return Base.Threads.threadid");

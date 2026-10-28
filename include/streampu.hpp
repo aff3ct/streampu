@@ -243,14 +243,14 @@
 #ifndef INTERFACE_WAITING_HPP__
 #include <Tools/Interface/Interface_waiting.hpp>
 #endif
+#ifndef TOOLS_JULIA_HPP_
+#include <Tools/Julia/Julia.hpp>
+#endif
 #ifndef PROXY_HPP_
 #include <Tools/Julia/Proxy.hpp>
 #endif
 #ifndef REF_KEEPER_HPP_
 #include <Tools/Julia/Ref_keeper.hpp>
-#endif
-#ifndef TOOLS_JULIA_HPP_
-#include <Tools/Julia/Julia.hpp>
 #endif
 #ifndef BINARYOP_H
 #include <Tools/Math/binaryop.h>
