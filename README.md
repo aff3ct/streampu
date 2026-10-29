@@ -44,8 +44,7 @@ CMake options:
 - `SPU_SHOW_DEPRECATED`: Print message each time a deprecated function is called 
   (default = `OFF`)
 - `SPU_FAST`: Remove checks to speedup the code (default = `OFF`)
-- `SPU_LINK_JLUNA`: Link with Julia & Jluna and compile Julia tests 
-  (default = `OFF`)
+- `SPU_LINK_JULIA`: Link with Julia and compile Julia tests (default = `OFF`)
 
 Build the library in `debug` mode:
 ```bash

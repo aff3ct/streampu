@@ -28,7 +28,6 @@ option(SPU_FAST                "Remove checks to speedup the code"              
 option(SPU_HELGRIND            "Annotate the code for Helgrind thread error detector"        OFF)
 option(SPU_OVERRIDE_VERSION    "Compile without .git directory, provided a version and hash" OFF)
 option(SPU_LINK_JULIA          "Link with Julia"                                             OFF)
-option(SPU_LINK_JLUNA          "Link with Jluna (sets SPU_LINK_JULIA to ON automatically)"   OFF)
 
 if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/.git" AND NOT SPU_OVERRIDE_VERSION)
     message(WARNING "StreamPU - '.git' folder can't be found, this is dangerous!")
@@ -44,19 +43,9 @@ include(GNUInstallDirs)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules/")
 set(CMAKE_MACOSX_RPATH 1)
 
-if (SPU_LINK_JLUNA)
-    set(SPU_LINK_JULIA ON)
-endif()
-
-if(SPU_LINK_JLUNA)
-    # Enable C++20
-    set(CMAKE_CXX_STANDARD 20) # because Jluna requires C++20 (concepts)
-    set(CMAKE_CXX_STANDARD_REQUIRED ON)
-else()
-    # Enable C++11
-    set(CMAKE_CXX_STANDARD 11)
-    set(CMAKE_CXX_STANDARD_REQUIRED ON)
-endif()
+# Enable C++11
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Specify bin and lib paths
 set(EXECUTABLE_OUTPUT_PATH bin/)
@@ -320,18 +309,6 @@ if(SPU_TESTS)
             list(APPEND spu_targets_list spu-test-jl_adopt_thread-julia)
         endif()
     endif()
-
-    if(SPU_LINK_JLUNA)
-        add_executable(spu-test-simple-chain-jluna $<TARGET_OBJECTS:spu-obj> ${CMAKE_CURRENT_SOURCE_DIR}/tests/julia/simple_chain_jluna.cpp)
-        set_target_properties(spu-test-simple-chain-jluna PROPERTIES OUTPUT_NAME test-simple-chain-jluna POSITION_INDEPENDENT_CODE ON)
-        list(APPEND spu_tests_list spu-test-simple-chain-jluna)
-        list(APPEND spu_targets_list spu-test-simple-chain-jluna)
-
-        add_executable(spu-test-simple-chain-fwd-jluna $<TARGET_OBJECTS:spu-obj> ${CMAKE_CURRENT_SOURCE_DIR}/tests/julia/simple_chain_fwd_jluna.cpp)
-        set_target_properties(spu-test-simple-chain-fwd-jluna PROPERTIES OUTPUT_NAME test-simple-chain-fwd-jluna POSITION_INDEPENDENT_CODE ON)
-        list(APPEND spu_tests_list spu-test-simple-chain-fwd-jluna)
-        list(APPEND spu_targets_list spu-test-simple-chain-fwd-jluna)
-    endif()
 endif()
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -508,13 +485,6 @@ if(SPU_LINK_JULIA)
     find_package(Julia 1.10.9 REQUIRED) # because Julia thread adoption feature is required
     spu_target_link_libraries("${spu_targets_list}" PUBLIC "Julia::Julia")
     spu_target_compile_definitions("${spu_targets_list}" PUBLIC "SPU_JULIA")
-endif()
-
-# jluna
-if(SPU_LINK_JLUNA)
-    find_package(jluna REQUIRED PATHS ${jluna_DIR})
-    spu_target_link_libraries("${spu_targets_list}" PUBLIC "jluna::jluna")
-    spu_target_compile_definitions("${spu_targets_list}" PUBLIC "SPU_JLUNA")
 endif()
 
 # Threads

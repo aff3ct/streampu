@@ -30,7 +30,6 @@ namespace module
 {
 class Task;
 class Module;
-class Stateless_Jluna;
 } // namespace module
 namespace sched
 {

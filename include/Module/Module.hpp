@@ -25,7 +25,6 @@ class Module_Julia;
 class Stateful;
 class Stateful_Julia;
 class Stateless;
-class Stateless_Jluna;
 class Stateless_Julia;
 /*!
  * \class Module
@@ -40,7 +39,6 @@ class Module
     friend Stateful;
     friend Stateful_Julia;
     friend Stateless;
-    friend Stateless_Jluna;
     friend Stateless_Julia;
 
   protected:

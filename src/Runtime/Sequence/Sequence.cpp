@@ -26,10 +26,6 @@
 #ifdef SPU_JULIA
 #include "Module/Module_Julia.hpp"
 #include "Tools/Thread/Thread_pool/Julia/Thread_pool_Julia.hpp"
-#ifdef SPU_JLUNA
-#include "Module/Stateless/Stateless_Jluna.hpp"
-#include "Tools/Thread/Thread_pool/Jluna/Thread_pool_Jluna_v1.hpp"
-#endif
 #endif
 
 using namespace spu;
@@ -569,11 +565,7 @@ Sequence::init(const std::vector<TA*>& firsts, const std::vector<TA*>& lasts, co
 
 #ifdef SPU_JULIA
     if (this->has_julia())
-#ifdef SPU_JLUNA
-        this->thread_pool.reset(new tools::Thread_pool_Jluna_v1(this->n_threads - 1));
-#else
         this->thread_pool.reset(new tools::Thread_pool_Julia(this->n_threads - 1));
-#endif /* SPU_JLUNA */
     else
         this->thread_pool.reset(new tools::Thread_pool_standard(this->n_threads - 1));
 #else
@@ -1616,10 +1608,6 @@ Sequence::replicate(const tools::Digraph_node<SS>* sequence)
             }
             this->all_modules[tid + (this->tasks_inplace ? 1 : 0)][m] = this->modules[tid][m].get();
 #ifdef SPU_JULIA
-#ifdef SPU_JLUNA
-            if (dynamic_cast<module::Stateless_Jluna*>(this->modules[tid][m].get()))
-                this->jl_modules[tid + (this->tasks_inplace ? 1 : 0)].push_back(this->modules[tid][m].get());
-#endif /* SPU_JLUNA */
             if (dynamic_cast<module::Module_Julia*>(this->modules[tid][m].get()))
                 this->jl_modules[tid + (this->tasks_inplace ? 1 : 0)].push_back(this->modules[tid][m].get());
 #endif /* SPU_JULIA */
@@ -2765,9 +2753,6 @@ void
 Sequence::init_jl_module(module::Module* m)
 {
 #ifdef SPU_JULIA
-#ifdef SPU_JLUNA
-    if (dynamic_cast<module::Stateless_Jluna*>(m)) this->jl_modules[0].push_back(m);
-#endif /* SPU_JLUNA */
     if (dynamic_cast<module::Module_Julia*>(m)) this->jl_modules[0].push_back(m);
 #endif /* SPU_JULIA */
 }

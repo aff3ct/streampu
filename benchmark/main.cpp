@@ -218,10 +218,6 @@ parse_tsk_types_sta(std::string& sck_type_sta_param,
 int
 main(int argc, char** argv)
 {
-#ifdef SPU_JLUNA
-    jluna::initialize(1);
-#endif
-
     tools::Signal_handler::init();
 
     option longopts[] = { { "n-threads", required_argument, NULL, 't' },

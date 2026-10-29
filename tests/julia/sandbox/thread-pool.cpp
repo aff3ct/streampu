@@ -48,7 +48,6 @@ main(int argc, char** argv)
     printf("pid: %d\n", getpid()); // to kill if necessary
 
     option longopts[] = { { "threads", required_argument, NULL, 't' },
-                          { "jluna-threads", required_argument, NULL, 'J' },
                           { "thread-pool", required_argument, NULL, 'V' },
                           { "computation", required_argument, NULL, 'c' }, // TODO
                           { "seed", required_argument, NULL, 's' },
@@ -64,22 +63,18 @@ main(int argc, char** argv)
     bool verbose = false;
     bool jl_safe = false;
     int tp_version = 0;
-    size_t jluna_threads = 0;
     size_t computation_id = 0;
     std::hash<std::string> hash;
     unsigned seed = 0;
 
     while (1)
     {
-        const int opt = getopt_long(argc, argv, "t:J:V:c:s:pvh", longopts, 0);
+        const int opt = getopt_long(argc, argv, "t:V:c:s:pvh", longopts, 0);
         if (opt == -1) break;
         switch (opt)
         {
             case 't':
                 n_threads = atoi(optarg);
-                break;
-            case 'J':
-                jluna_threads = atoi(optarg);
                 break;
             case 'c':
                 computation_id = atoi(optarg);
@@ -105,9 +100,6 @@ main(int argc, char** argv)
                 std::cout << "  -t, --threads         "
                           << "Number of Julia threads                                               "
                           << "[" << n_threads << "]" << std::endl;
-                std::cout << "  -J, --jluna-threads   "
-                          << "Number of jluna threads                                               "
-                          << "[" << jluna_threads << "]" << std::endl;
                 std::cout << "  -V, --thread-pool     "
                           << "Version of the thread pool (0 for julia)                              "
                           << "[" << tp_version << "]" << std::endl;
@@ -136,13 +128,6 @@ main(int argc, char** argv)
         }
     }
 
-#ifdef SPU_JLUNA
-    jluna::initialize(jluna_threads);
-    gc_pause; // Macro
-              // TODO: Remove this
-#else
-    jl_init();
-#endif
     spu::tools::Julia::init();
 
     auto t0 = std::chrono::steady_clock::now();
@@ -212,25 +197,7 @@ main(int argc, char** argv)
 
     print_verbose("main -- 0");
     spu::tools::Thread_pool* tp;
-#ifdef SPU_JLUNA
-    switch (tp_version)
-    {
-        case 1:
-            tp = new spu::tools::Thread_pool_Jluna_v1(n_threads);
-            break;
-        case 2:
-            tp = new spu::tools::Thread_pool_Jluna_v2(n_threads);
-            break;
-        case 3:
-            tp = new spu::tools::Thread_pool_Jluna_v3(n_threads);
-            break;
-        default:
-            tp = new spu::tools::Thread_pool_Julia(n_threads);
-            break;
-    }
-#else
     tp = new spu::tools::Thread_pool_Julia(n_threads);
-#endif
 
     print_verbose("main -- 1");
     tp->init();
@@ -332,12 +299,7 @@ main(int argc, char** argv)
         }
     }
 
-#ifndef SPU_JLUNA
-    jl_atexit_hook(0);
-#endif // !SPU_JLUNA
+    spu::tools::Julia::exit(0);
 
-    // Jluna sandbox
-    // ==============================================================================================
-    // END
     return ok ? 0 : 1;
 }

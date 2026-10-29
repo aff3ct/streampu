@@ -49,7 +49,6 @@ main(int argc, char** argv)
     printf("pid: %d\n", getpid()); // to kill if necessary
 
     option longopts[] = { { "threads", required_argument, NULL, 't' },
-                          { "jluna-threads", required_argument, NULL, 'J' },
                           { "thread-pool", required_argument, NULL, 'V' },
                           { "seed", required_argument, NULL, 's' },
                           { "print-stats", no_argument, NULL, 'p' },
@@ -119,13 +118,6 @@ main(int argc, char** argv)
         }
     }
 
-#ifdef SPU_JLUNA
-    jluna::initialize();
-    gc_pause; // Macro
-              // TODO: Remove this
-#else
-    jl_init();
-#endif
     spu::tools::Julia::init(256);
 
     auto t0 = std::chrono::steady_clock::now();
@@ -268,12 +260,7 @@ main(int argc, char** argv)
         }
     }
 
-#ifndef SPU_JLUNA
-    jl_atexit_hook(0);
-#endif // !SPU_JLUNA
+    spu::tools::Julia::exit(0);
 
-    // Jluna sandbox
-    // ==============================================================================================
-    // END
     return ok ? 0 : 1;
 }

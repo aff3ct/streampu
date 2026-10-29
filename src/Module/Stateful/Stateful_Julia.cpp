@@ -1,5 +1,4 @@
 #ifdef SPU_JULIA
-#ifndef SPU_JLUNA
 
 #include "Module/Stateful/Stateful_Julia.hpp"
 
@@ -83,5 +82,4 @@ Stateful_Julia::get_states() const
     return this->_get_states();
 }
 
-#endif /* SPU_JLUNA */
 #endif /* SPU_JULIA */

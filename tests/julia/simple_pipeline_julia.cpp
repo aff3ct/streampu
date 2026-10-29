@@ -5,7 +5,6 @@
 #include <fstream>
 #include <getopt.h>
 #include <iostream>
-#include <julia.h>
 #include <memory>
 #include <string>
 #include <vector>
@@ -42,14 +41,8 @@ compare_files(const std::string& filename1, const std::string& filename2)
 int
 main(int argc, char** argv)
 {
-#ifdef SPU_JLUNA
-    jluna::initialize(1);
-#else
-    jl_init();
-#endif
-    tools::Julia::init(256);
-
     tools::Signal_handler::init();
+    tools::Julia::init(256);
 
     option longopts[] = { { "n-threads", required_argument, NULL, 't' },
                           { "n-inter-frames", required_argument, NULL, 'f' },

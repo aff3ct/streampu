@@ -17,10 +17,6 @@ using namespace spu::runtime;
 int
 main(int argc, char** argv)
 {
-#ifdef SPU_JLUNA
-    jluna::initialize(1);
-#endif
-
     tools::Signal_handler::init();
 
     option longopts[] = { { "n-inter-frames", required_argument, NULL, 'f' },

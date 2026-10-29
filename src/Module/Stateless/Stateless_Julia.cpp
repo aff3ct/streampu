@@ -1,5 +1,4 @@
 #ifdef SPU_JULIA
-#ifndef SPU_JLUNA
 
 #include "Module/Stateless/Stateless_Julia.hpp"
 
@@ -45,5 +44,4 @@ Stateless_Julia::create_tsk(const std::string& name)
     return this->_create_task(name);
 }
 
-#endif /* SPU_JLUNA */
 #endif /* SPU_JULIA */

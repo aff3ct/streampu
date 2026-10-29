@@ -1,9 +1,6 @@
 #include <cstddef>
 #include <getopt.h>
 #include <iostream>
-#ifdef SPU_JLUNA
-#include <jluna.hpp>
-#endif
 #include <julia.h>
 #include <pthread.h>
 #include <sched.h>
@@ -63,11 +60,7 @@ thread_code(void* args)
 int
 main(int argc, char** argv)
 {
-#ifdef SPU_JLUNA
-    jluna::initialize(0);
-#else
     jl_init();
-#endif
     jl_value_t* str = jl_cstr_to_string("Hello World!");
     size_t n_threads = 2;
     size_t N = 1 << 20;
@@ -139,9 +132,7 @@ main(int argc, char** argv)
     }
 
     pthread_barrier_wait(&args.barrier);
-#ifndef SPU_JLUNA /* GC not working w/ jluna for some reason */
     jl_gc_enable(1);
-#endif
 
     if (verbose)
     {
@@ -156,8 +147,6 @@ main(int argc, char** argv)
         pthread_join(t, &ret);
         if (verbose) std::cout << "ret: " << ret << std::endl;
     }
-#ifndef SPU_JLUNA
     jl_atexit_hook(0);
-#endif
     return 0;
 }

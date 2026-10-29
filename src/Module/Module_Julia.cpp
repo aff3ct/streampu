@@ -1,5 +1,4 @@
 #ifdef SPU_JULIA
-#ifndef SPU_JLUNA
 
 #include <atomic>
 #include <cstdint>
@@ -503,6 +502,5 @@ Module_Julia::_create_codelet(runtime::Task& task, const std::string& julia_func
       });
 }
 
-#endif /* SPU_JLUNA */
 #endif /* SPU_JULIA */
 

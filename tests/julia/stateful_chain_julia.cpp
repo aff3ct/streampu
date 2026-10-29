@@ -16,10 +16,8 @@ using namespace spu::runtime;
 int
 main(int argc, char** argv)
 {
-    jl_init();
-    tools::Julia::init(256);
-
     tools::Signal_handler::init();
+    tools::Julia::init(256);
 
     option longopts[] = { { "n-threads", required_argument, NULL, 't' },
                           { "n-inter-frames", required_argument, NULL, 'f' },
