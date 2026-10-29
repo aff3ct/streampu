@@ -201,9 +201,9 @@ function increment_stateful(stt_step, sck_in, sck_out, cst_wait_time_ns, rnt_fra
     return 0
 end
 
-function memorize(stt_buf, sck_in, sck_sync, cst_wait_time_ns, rnt_frame_id, rnt_n_frames_per_wave)
+function write_buf(stt_buf, sck_in, cst_wait_time_ns, rnt_frame_id, rnt_n_frames_per_wave)
     if cst_wait_time_ns > 0
-        start_mem = time_ns()
+        start_wr = time_ns()
     end
 
     frame_len = div(length(sck_in), Int(rnt_n_frames_per_wave))
@@ -215,21 +215,20 @@ function memorize(stt_buf, sck_in, sck_sync, cst_wait_time_ns, rnt_frame_id, rnt
     for n in eachindex(sck_in)
         stt_buf.buf[offset + n] = sck_in[n] + one(eltype(sck_in))
     end
-    sck_sync[1] = one(eltype(sck_sync))
 
     if cst_wait_time_ns != 0
-        stop_mem = time_ns()
-        elapse_mem = stop_mem - start_mem
+        stop_wr = time_ns()
+        elapse_wr = stop_wr - start_wr
 
-        while elapse_mem < cst_wait_time_ns
-            elapse_mem = time_ns() - start_mem
+        while elapse_wr < cst_wait_time_ns
+            elapse_wr = time_ns() - start_wr
         end
     end
 
     return 0
 end
 
-function produce(stt_buf, sck_sync, sck_out, cst_wait_time_ns, rnt_frame_id, rnt_n_frames_per_wave)
+function read_buf(stt_buf, sck_out, cst_wait_time_ns, rnt_frame_id, rnt_n_frames_per_wave)
     frame_len = div(length(sck_out), Int(rnt_n_frames_per_wave))
     offset = Int(rnt_frame_id) * frame_len
     for n in eachindex(sck_out)

@@ -25,6 +25,7 @@
 *[DSEL]: Domain-Specific Embedded Language
 *[EOF]: End Of File
 *[FER]: Frame Error Rate
+*[GC]: Garbage Collector
 *[GNU]: GNU's Not Unix!
 *[GPP]: General Purpose Processor
 *[GPPs]: General Purpose Processors
@@ -36,6 +37,7 @@
 *[IEEE]: Institute of Electrical and Electronics Engineers
 *[ISA]: Instruction Set Architecture
 *[ISAs]: Instruction Set Architectures
+*[JIT]: Just-In-Time
 *[JSON]: JavaScript Object Notation
 *[LLC]: Last Level Cache
 *[LUT]: Look Up Table

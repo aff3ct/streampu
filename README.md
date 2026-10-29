@@ -44,7 +44,9 @@ CMake options:
 - `SPU_SHOW_DEPRECATED`: Print message each time a deprecated function is called 
   (default = `OFF`)
 - `SPU_FAST`: Remove checks to speedup the code (default = `OFF`)
-- `SPU_LINK_JULIA`: Link with Julia and compile Julia tests (default = `OFF`)
+- `SPU_LINK_JULIA`: Link with Julia and compile Julia tests (requires the 
+  `jl_adopt_thread` C API feature, tested from Julia 1.10 to Julia 1.13) 
+  (default = `OFF`)
 
 Build the library in `debug` mode:
 ```bash

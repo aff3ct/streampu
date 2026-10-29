@@ -227,39 +227,37 @@ main(int argc, char** argv)
         incs[s]->set_jl_safety(jl_safe);
     }
 
-    // 2. A two-task Stateful_Julia module ('memorize' -> 'produce') sharing a common SharedBufferState
-    module::Stateful_Julia mem_prod;
-    mem_prod.set_custom_name("StMemProd");
-    mem_prod.set_jl_safety(jl_safe);
-    runtime::Task& t_mem = mem_prod.create_task("memorize");
-    mem_prod.create_socket_in<uint8_t>(t_mem, "in", data_length);
-    mem_prod.create_socket_out<uint8_t>(t_mem, "sync", 1);
-    mem_prod.create_constant<uint32_t>(t_mem, sleep_time_us * 1000);
+    // 2. A two-task Stateful_Julia module ('write' -> 'read') sharing a common SharedBufferState via task binding
+    module::Stateful_Julia rw;
+    rw.set_custom_name("StReadWrite");
+    rw.set_jl_safety(jl_safe);
+    runtime::Task& t_write = rw.create_task("write");
+    rw.create_socket_in<uint8_t>(t_write, "in", data_length);
+    rw.create_constant<uint32_t>(t_write, sleep_time_us * 1000);
 
-    runtime::Task& t_prod = mem_prod.create_task("produce");
-    mem_prod.create_socket_in<uint8_t>(t_prod, "sync", 1);
-    mem_prod.create_socket_out<uint8_t>(t_prod, "out", data_length);
-    mem_prod.create_constant<uint32_t>(t_prod, 0);
+    runtime::Task& t_read = rw.create_task("read");
+    rw.create_socket_out<uint8_t>(t_read, "out", data_length);
+    rw.create_constant<uint32_t>(t_read, 0);
 
     const std::string buf_ctor =
       "SharedBufferState(zeros(UInt8, " + std::to_string(data_length * n_inter_frames) + "))";
     if (jl_extern)
     {
-        mem_prod.create_state_file(buf_ctor, false, "../tests/julia/states.jl");
-        mem_prod.create_codelet_file(t_mem, "../tests/julia/codelets.jl");
-        mem_prod.create_codelet_file(t_prod, "../tests/julia/codelets.jl");
+        rw.create_state_file(buf_ctor, false, "../tests/julia/states.jl");
+        rw.create_codelet_file(t_write, "../tests/julia/codelets.jl", "write_buf");
+        rw.create_codelet_file(t_read, "../tests/julia/codelets.jl", "read_buf");
     }
     else
     {
-        mem_prod.create_state(buf_ctor, false, R""""(
+        rw.create_state(buf_ctor, false, R""""(
             mutable struct SharedBufferState
                 buf::Vector{UInt8}
             end
         )"""");
-        mem_prod.create_codelet(t_mem, R""""(
-            function memorize(stt_buf, sck_in, sck_sync, cst_wait_time_ns, rnt_frame_id, rnt_n_frames_per_wave)
+        rw.create_codelet(t_write, R""""(
+            function write_buf(stt_buf, sck_in, cst_wait_time_ns, rnt_frame_id, rnt_n_frames_per_wave)
                 if cst_wait_time_ns > 0
-                    start_mem = time_ns()
+                    start_wr = time_ns()
                 end
 
                 frame_len = div(length(sck_in), Int(rnt_n_frames_per_wave))
@@ -271,22 +269,21 @@ main(int argc, char** argv)
                 for n in eachindex(sck_in)
                     stt_buf.buf[offset + n] = sck_in[n] + one(eltype(sck_in))
                 end
-                sck_sync[1] = one(eltype(sck_sync))
 
                 if cst_wait_time_ns != 0
-                    stop_mem = time_ns()
-                    elapse_mem = stop_mem - start_mem
+                    stop_wr = time_ns()
+                    elapse_wr = stop_wr - start_wr
 
-                    while elapse_mem < cst_wait_time_ns
-                        elapse_mem = time_ns() - start_mem
+                    while elapse_wr < cst_wait_time_ns
+                        elapse_wr = time_ns() - start_wr
                     end
                 end
 
                 return 0
             end
-        )"""");
-        mem_prod.create_codelet(t_prod, R""""(
-            function produce(stt_buf, sck_sync, sck_out, cst_wait_time_ns, rnt_frame_id, rnt_n_frames_per_wave)
+        )"""", "write_buf");
+        rw.create_codelet(t_read, R""""(
+            function read_buf(stt_buf, sck_out, cst_wait_time_ns, rnt_frame_id, rnt_n_frames_per_wave)
                 frame_len = div(length(sck_out), Int(rnt_n_frames_per_wave))
                 offset = Int(rnt_frame_id) * frame_len
                 for n in eachindex(sck_out)
@@ -294,18 +291,18 @@ main(int argc, char** argv)
                 end
                 return 0
             end
-        )"""");
+        )"""", "read_buf");
     }
 
     const size_t total_increments = incs.size() + 1;
 
-    // sockets binding
+    // sockets and task binding
     (*incs[0])["increment_stateful::in"] = initializer["initialize::out"];
     for (size_t s = 0; s < incs.size() - 1; s++)
         (*incs[s + 1])["increment_stateful::in"] = (*incs[s])["increment_stateful::out"];
-    mem_prod["memorize::in"] = (*incs[incs.size() - 1])["increment_stateful::out"];
-    mem_prod["produce::sync"] = mem_prod["memorize::sync"];
-    finalizer["finalize::in"] = mem_prod["produce::out"];
+    rw["write::in"] = (*incs[incs.size() - 1])["increment_stateful::out"];
+    rw("read") = rw("write");
+    finalizer["finalize::in"] = rw["read::out"];
 
     runtime::Sequence sequence_chain(initializer("initialize"), n_threads);
     sequence_chain.set_n_frames(n_inter_frames);
@@ -356,7 +353,7 @@ main(int argc, char** argv)
         tools::help(initializer);
         for (size_t s = 0; s < incs.size(); s++)
             tools::help(*incs[s]);
-        tools::help(mem_prod);
+        tools::help(rw);
         tools::help(finalizer);
     }
 
@@ -448,7 +445,7 @@ main(int argc, char** argv)
     // Verify StreamPU type hierarchy (Stateless vs Stateful) for Stateless_Julia and Stateful_Julia
     module::Stateless_Julia dummy_stateless;
     module::Module* m_stateless = &dummy_stateless;
-    module::Module* m_stateful = &mem_prod;
+    module::Module* m_stateful = &rw;
     if (!m_stateless->is_stateless() || m_stateless->is_stateful() ||
         dynamic_cast<module::Stateless*>(m_stateless) == nullptr ||
         dynamic_cast<module::Stateful*>(m_stateless) != nullptr ||
@@ -480,9 +477,9 @@ main(int argc, char** argv)
     (*incs[0])["increment_stateful::in"].unbind(initializer["initialize::out"]);
     for (size_t s = 0; s < incs.size() - 1; s++)
         (*incs[s + 1])["increment_stateful::in"].unbind((*incs[s])["increment_stateful::out"]);
-    mem_prod["memorize::in"].unbind((*incs[incs.size() - 1])["increment_stateful::out"]);
-    mem_prod["produce::sync"].unbind(mem_prod["memorize::sync"]);
-    finalizer["finalize::in"].unbind(mem_prod["produce::out"]);
+    rw["write::in"].unbind((*incs[incs.size() - 1])["increment_stateful::out"]);
+    rw("read").unbind(rw("write"));
+    finalizer["finalize::in"].unbind(rw["read::out"]);
 
     return test_results;
 }

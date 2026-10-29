@@ -102,6 +102,8 @@
 \definecolor{Blues-7}{RGB}{33,113,181}
 \definecolor{Blues-8}{RGB}{8,81,156}
 \definecolor{Blues-9}{RGB}{8,48,107}
+\definecolor{JuliaPurple}{RGB}{149,88,178}
+\definecolor{JuliaRed}{RGB}{203,60,51}
 
 \newcommand{\tskminsize}{1.0cm}
 \newcommand{\scksize}{0.3cm}
@@ -109,15 +111,19 @@
 \newcommand{\sckshdwsize}{0.25cm}
 \newcommand{\thrshdwsize}{0.20cm}
 
-\tikzset{ task/.style    = {draw=Paired-1, rounded corners=0pt, text=Paired-1, minimum height=\tskminsize, minimum width=\tskminsize, inner sep=0.3cm, fill=white} }
-\tikzset{ stask/.style   = {draw=Paired-1, rounded corners=0pt, text=Paired-1, minimum height=\tskminsize, minimum width=\tskminsize, inner sep=0.3cm, fill=Paired-1!20} }
-\tikzset{ seq/.style     = {draw=Paired-11,rounded corners=2pt, densely dashed} }
-\tikzset{ subseq/.style  = {draw=Paired-9, rounded corners=2pt} }
-\tikzset{ pip/.style     = {draw=Dark2-8,  dotted, thick, rounded corners=2pt} }
-\tikzset{ sin/.style     = {draw=Paired-7, circle, minimum width=\scksize, text=Paired-7!80!black, preaction={fill=white}, pattern=north east lines, pattern color=Paired-7} }
-\tikzset{ sout/.style    = {draw=Paired-5, circle, minimum width=\scksize, text=Paired-5!80!black, preaction={fill=white}, pattern=crosshatch dots, pattern color=Paired-5} }
-\tikzset{ sfwd/.style    = {draw=Dark2-7,  circle, minimum width=\scksize, text=Dark2-7!80!black,  preaction={fill=white}, pattern=grid, pattern color=Dark2-7} }
-\tikzset{ taskcln/.style = {draw=Paired-1!30!white} }
+\tikzset{ task/.style     = {draw=Paired-1, rounded corners=0pt, text=Paired-1, minimum height=\tskminsize, minimum width=\tskminsize, inner sep=0.3cm, fill=white} }
+\tikzset{ stask/.style    = {draw=Paired-1, rounded corners=0pt, text=Paired-1, minimum height=\tskminsize, minimum width=\tskminsize, inner sep=0.3cm, fill=Paired-1!20} }
+\tikzset{ jtask/.style    = {draw=JuliaPurple, rounded corners=0pt, text=JuliaPurple!90!black, minimum height=\tskminsize, minimum width=\tskminsize, inner sep=0.3cm, fill=white} }
+\tikzset{ jstask/.style   = {draw=JuliaPurple, rounded corners=0pt, text=JuliaPurple!90!black, minimum height=\tskminsize, minimum width=\tskminsize, inner sep=0.3cm, fill=JuliaPurple!20} }
+\tikzset{ jstate/.style   = {draw=JuliaRed, rounded corners=2pt, text=JuliaRed!85!black, fill=JuliaRed!10, font=\scriptsize, inner sep=2.5pt} }
+\tikzset{ seq/.style      = {draw=Paired-11,rounded corners=2pt, densely dashed} }
+\tikzset{ subseq/.style   = {draw=Paired-9, rounded corners=2pt} }
+\tikzset{ pip/.style      = {draw=Dark2-8,  dotted, thick, rounded corners=2pt} }
+\tikzset{ sin/.style      = {draw=Paired-7, circle, minimum width=\scksize, text=Paired-7!80!black, preaction={fill=white}, pattern=north east lines, pattern color=Paired-7} }
+\tikzset{ sout/.style     = {draw=Paired-5, circle, minimum width=\scksize, text=Paired-5!80!black, preaction={fill=white}, pattern=crosshatch dots, pattern color=Paired-5} }
+\tikzset{ sfwd/.style     = {draw=Dark2-7,  circle, minimum width=\scksize, text=Dark2-7!80!black,  preaction={fill=white}, pattern=grid, pattern color=Dark2-7} }
+\tikzset{ taskcln/.style  = {draw=Paired-1!30!white} }
+\tikzset{ jtaskcln/.style = {draw=JuliaPurple!30!white} }
 \tikzset{ sincln/.style  = {draw=Paired-7!30!white, preaction={fill=white}, pattern=north east lines, pattern color=Paired-7!30!white} }
 \tikzset{ soutcln/.style = {draw=Paired-5!30!white, preaction={fill=white}, pattern=crosshatch dots, pattern color=Paired-5!30!white} }
 \tikzset{ sfwdcln/.style = {draw=Dark2-7!30!white,  preaction={fill=white}, pattern=grid, pattern color=Dark2-7!30!white} }
@@ -138,7 +144,7 @@
 % #5 number of input sockets (can be 0)
 % #6 number of output sockets (can be 0)
 % #7 number of forward sockets (can be 0)
-% #8 a list of attributes (can be {"rev", "seq", "sckn"} and can also be empty)
+% #8 a list of attributes (can be {"rev", "seq", "sckn", "jl"} and can also be empty)
 \newcommand{\task}[8][]{
   % parse arguments
   \def\tskid{#2}
@@ -153,6 +159,7 @@
   \def\tskisrev{no}
   \def\tskstyle{task}
   \def\tskisseq{no}
+  \def\tskisjl{no}
   \def\scknum{no}
   \ifthenelse{\equal{#8}{}} {
   }{
@@ -170,14 +177,31 @@
         \xdef\tskisrev{yes}
       }{
         \ifthenelse{\equal{\curattr}{seq}} {
-          \xdef\tskstyle{stask}
           \xdef\tskisseq{yes}
         }{
           \ifthenelse{\equal{\curattr}{sckn}} {
             \xdef\scknum{yes}
-          }{}
+          }{
+            \ifthenelse{\equal{\curattr}{jl}} {
+              \xdef\tskisjl{yes}
+            }{}
+          }
         }
       }
+    }
+  }
+  \ifthenelse{\equal{\tskisjl}{yes}} {
+    \expandafter\gdef\csname @tskjl@\tskid\endcsname{yes}
+    \ifthenelse{\equal{\tskisseq}{yes}} {
+      \def\tskstyle{jstask}
+    }{
+      \def\tskstyle{jtask}
+    }
+  }{
+    \ifthenelse{\equal{\tskisseq}{yes}} {
+      \def\tskstyle{stask}
+    }{
+      \def\tskstyle{task}
     }
   }
 
@@ -348,6 +372,11 @@
           \pgfmathsetmacro{\rc}{\nclones-\c}
           \pgfmathsetmacro{\clnshft}{(\rc+1)*0.075cm}
 
+          \@ifundefined{@tskjl@\curtsk}{
+            \def\clnstyl{taskcln}
+          }{
+            \def\clnstyl{jtaskcln}
+          }
           \begin{scope}[on background layer]
             \path let
               \p1=(\curtsk),
@@ -355,7 +384,7 @@
               \p2=($(\curtsk.north)-(\curtsk.south)$),
               \n1={veclen(\p1)-\pgflinewidth},
               \n2={veclen(\p2)-\pgflinewidth},
-              in node [task, taskcln, at=(\curtsk), minimum width=\n1, minimum height=\n2, inner sep=0.0cm, xshift=\clnshft, yshift=\clnshft,#1] (\curtsk_cln\c) {};
+              in node [task, \clnstyl, at=(\curtsk), minimum width=\n1, minimum height=\n2, inner sep=0.0cm, xshift=\clnshft, yshift=\clnshft,#1] (\curtsk_cln\c) {};
           \end{scope}
 
           % loop over input sockets
@@ -578,6 +607,41 @@
     \draw[thick] plot [smooth,tension=0.7, xshift=7cm, yshift=0.7cm] coordinates {(0,0.375) (0.056,0.3228) (-0.0375,0.234) (0.075,0.093) (0,0)} node (l10){};
     \node[] (l11) at (8.625, 0.9) {Software thread};
     \node[draw, fit=(l1) (l2) (l3) (l4) (l5) (l6) (l7) (l8) (l9) (l11)] (legend) {};
+  \end{scope}
+}
+
+\newcommand{\legendjl}[1][]{
+  \begin{scope}[#1]
+    \node[draw=Paired-1, rounded corners=0pt, minimum height=0.3cm, minimum width=0.7cm, text=Paired-1, fill=white, label={right:C++ parallel task}] (l1) at (+0.0, 1.9) {};
+    \node[draw=Paired-1, rounded corners=0pt, minimum height=0.3cm, minimum width=0.7cm, text=Paired-1, fill=Paired-1!20, label={right:C++ sequential task}] (l2) at (+0.0, 1.4) {};
+    \node[draw=JuliaPurple, rounded corners=0pt, minimum height=0.3cm, minimum width=0.7cm, text=JuliaPurple!90!black, fill=white, label={right:Julia parallel task}] (l3) at (+0.0, 0.9) {};
+    \node[sin,  label={right:Input socket} ] (l4) at (+4.1, 1.9) {};
+    \node[sout, label={right:Output socket}] (l5) at (+4.1, 1.4) {};
+    \node[sfwd, label={right:Forward socket}] (l6) at (+4.1, 0.9) {};
+    \node[draw=Paired-3, rounded corners=0pt, minimum height=0.3cm, minimum width=0.7cm, text=Paired-3, dashed, label={right:Module}] (l8) at (+7.6, 1.9) {};
+    \node[draw=Paired-11, rounded corners=0pt, minimum height=0.3cm, minimum width=0.7cm, dashed, label={right:Sequence or pipeline stage}] (l7) at (+7.6, 1.4) {};
+    \node[] (l9) at (11.75, 1.9) {};
+    \draw[thick] plot [smooth,tension=0.7, xshift=7.6cm, yshift=0.7cm] coordinates {(0,0.375) (0.056,0.3228) (-0.0375,0.234) (0.075,0.093) (0,0)} node (l10){};
+    \node[] (l11) at (9.225, 0.9) {Software thread};
+    \node[draw, fit=(l1) (l2) (l3) (l4) (l5) (l6) (l7) (l8) (l9) (l11)] (legend) {};
+  \end{scope}
+}
+
+\newcommand{\legendjlstate}[1][]{
+  \begin{scope}[#1]
+    \node[draw=Paired-1, rounded corners=0pt, minimum height=0.3cm, minimum width=0.7cm, text=Paired-1, fill=white, label={right:C++ parallel task}] (l1) at (+0.0, 1.9) {};
+    \node[draw=Paired-1, rounded corners=0pt, minimum height=0.3cm, minimum width=0.7cm, text=Paired-1, fill=Paired-1!20, label={right:C++ sequential task}] (l2) at (+0.0, 1.4) {};
+    \node[draw=JuliaPurple, rounded corners=0pt, minimum height=0.3cm, minimum width=0.7cm, text=JuliaPurple!90!black, fill=white, label={right:Julia parallel task}] (l3) at (+0.0, 0.9) {};
+    \node[sin,  label={right:Input socket} ] (l4) at (+4.1, 1.9) {};
+    \node[sout, label={right:Output socket}] (l5) at (+4.1, 1.4) {};
+    \node[sfwd, label={right:Forward socket}] (l6) at (+4.1, 0.9) {};
+    \node[draw=Paired-3, rounded corners=0pt, minimum height=0.3cm, minimum width=0.7cm, text=Paired-3, dashed, label={right:Module}] (l8) at (+7.6, 1.9) {};
+    \node[draw=Paired-11, rounded corners=0pt, minimum height=0.3cm, minimum width=0.7cm, dashed, label={right:Sequence or pipeline stage}] (l7) at (+7.6, 1.4) {};
+    \draw[thick] plot [smooth,tension=0.7, xshift=7.6cm, yshift=0.7cm] coordinates {(0,0.375) (0.056,0.3228) (-0.0375,0.234) (0.075,0.093) (0,0)} node (l10){};
+    \node[] (l11) at (9.225, 0.9) {Software thread};
+    \node[draw=JuliaRed, rounded corners=2pt, minimum height=0.3cm, minimum width=0.7cm, fill=JuliaRed!10, label={right:Julia state}] (l12) at (+12.4, 1.9) {};
+    \node[] (l9) at (14.65, 1.9) {};
+    \node[draw, fit=(l1) (l2) (l3) (l4) (l5) (l6) (l7) (l8) (l9) (l11) (l12)] (legend) {};
   \end{scope}
 }
 

@@ -80,6 +80,7 @@ nav:
     - Tests:
       - tests_bootstrap.md
     - benchmark.md
+    - julia.md
     - Runtime:
       - thread_pinning.md
   - For Developers:
