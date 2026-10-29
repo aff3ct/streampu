@@ -1,5 +1,3 @@
-#include "Tools/Julia/Julia.hpp"
-#include "Tools/Julia/Proxy.hpp"
 #include <chrono>
 #include <cstddef>
 #include <cstdlib>
@@ -8,6 +6,7 @@
 #include <getopt.h>
 #include <iostream>
 #include <julia.h>
+#include <julia_threads.h>
 #include <sstream>
 #include <stdio.h>
 #include <string>
@@ -51,6 +50,7 @@ main(int argc, char** argv)
     option longopts[] = { { "threads", required_argument, NULL, 't' },
                           { "jluna-threads", required_argument, NULL, 'J' },
                           { "thread-pool", required_argument, NULL, 'V' },
+                          { "computation", required_argument, NULL, 'c' }, // TODO
                           { "seed", required_argument, NULL, 's' },
                           { "print-stats", no_argument, NULL, 'p' },
                           { "verbose", no_argument, NULL, 'v' },
@@ -64,17 +64,25 @@ main(int argc, char** argv)
     bool verbose = false;
     bool jl_safe = false;
     int tp_version = 0;
+    size_t jluna_threads = 0;
+    size_t computation_id = 0;
     std::hash<std::string> hash;
     unsigned seed = 0;
 
     while (1)
     {
-        const int opt = getopt_long(argc, argv, "t:s:pvh", longopts, 0);
+        const int opt = getopt_long(argc, argv, "t:J:V:c:s:pvh", longopts, 0);
         if (opt == -1) break;
         switch (opt)
         {
             case 't':
                 n_threads = atoi(optarg);
+                break;
+            case 'J':
+                jluna_threads = atoi(optarg);
+                break;
+            case 'c':
+                computation_id = atoi(optarg);
                 break;
             case 's':
                 seed = hash(optarg);
@@ -97,6 +105,15 @@ main(int argc, char** argv)
                 std::cout << "  -t, --threads         "
                           << "Number of Julia threads                                               "
                           << "[" << n_threads << "]" << std::endl;
+                std::cout << "  -J, --jluna-threads   "
+                          << "Number of jluna threads                                               "
+                          << "[" << jluna_threads << "]" << std::endl;
+                std::cout << "  -V, --thread-pool     "
+                          << "Version of the thread pool (0 for julia)                              "
+                          << "[" << tp_version << "]" << std::endl;
+                std::cout << "  -c, --computation     "
+                          << "Name of the julia function                                            "
+                          << "[" << computation_id << "]" << std::endl;
                 std::cout << "  -s, --seed            "
                           << "Seed for the computation (hash of a string)                           "
                           << "[" << seed << "]" << std::endl;
@@ -120,13 +137,13 @@ main(int argc, char** argv)
     }
 
 #ifdef SPU_JLUNA
-    jluna::initialize();
+    jluna::initialize(jluna_threads);
     gc_pause; // Macro
               // TODO: Remove this
 #else
     jl_init();
 #endif
-    spu::tools::Julia::init(256);
+    spu::tools::Julia::init();
 
     auto t0 = std::chrono::steady_clock::now();
     std::chrono::nanoseconds duration;
@@ -136,7 +153,7 @@ main(int argc, char** argv)
         if (verbose) std::cout << msg << std::endl;
     };
 
-    std::vector<uint64_t> array(1 << 3);
+    std::vector<uint64_t> array(1 << 20);
     srand(seed);
     for (size_t i = 0; i < array.size(); i++)
     {
@@ -147,9 +164,26 @@ main(int argc, char** argv)
 
     jl_function_t* jl_get_threadid = jl_eval_string("return Base.Threads.threadid");
     jl_function_t* jl_println = jl_eval_string("return Base.println");
-    (void)spu::tools::Julia::eval_file("../tests/julia/computations.jl");
+    (void)spu::tools::Julia::eval_file("../tests/julia/sandbox/computations.jl");
 
-    spu::tools::Proxy computation = jl_eval_string("return computation1");
+    std::function<void(const size_t)> func_exec1 = [jl_get_threadid, print_stats](const size_t tid)
+    {
+        auto t0 = std::chrono::steady_clock::now();
+        std::stringstream msg;
+        msg << '[' << tid << "] COUCOUUUUUUUUUU 1 - jl_threadid = " << jl_unbox_int64(jl_call0(jl_get_threadid))
+            << std::endl;
+        std::cout << msg.str();
+        std::chrono::nanoseconds duration = std::chrono::steady_clock::now() - t0;
+        if (print_stats)
+        {
+            std::stringstream ss;
+            ss << '[' << tid << "] time elapsed for 1: " << duration.count() / 1000000.0 << "ms" << std::endl;
+            std::cout << ss.str();
+        }
+    };
+
+    // jl_function_t* computation = jl_eval_string("return multiple_square_and_multiply");
+    jl_function_t* computation = jl_eval_string("return computation1");
     std::function<void(std::vector<uint64_t>&, int, const size_t)> func_exec =
       [computation, jl_array, jl_println, print_stats, verbose](std::vector<uint64_t>& res, int i, const size_t tid)
     {
@@ -158,9 +192,8 @@ main(int argc, char** argv)
             std::cout << "lambda " << i << " called with " << tid << std::endl;
         }
         auto t0 = std::chrono::steady_clock::now();
-        spu::tools::Proxy threadid = jl_box_int32(tid);
-        spu::tools::Proxy jl_text3 = jl_eval_string("return \" - \"");
-        spu::tools::Proxy r = computation(threadid, (jl_value_t*)jl_array);
+        jl_value_t* threadid = jl_box_int32(tid);
+        jl_value_t* r = jl_call2(computation, threadid, (jl_value_t*)jl_array);
         res[tid] = jl_unbox_uint64(r);
         std::chrono::nanoseconds duration = std::chrono::steady_clock::now() - t0;
         if (verbose)
@@ -179,11 +212,42 @@ main(int argc, char** argv)
 
     print_verbose("main -- 0");
     spu::tools::Thread_pool* tp;
+#ifdef SPU_JLUNA
+    switch (tp_version)
+    {
+        case 1:
+            tp = new spu::tools::Thread_pool_Jluna_v1(n_threads);
+            break;
+        case 2:
+            tp = new spu::tools::Thread_pool_Jluna_v2(n_threads);
+            break;
+        case 3:
+            tp = new spu::tools::Thread_pool_Jluna_v3(n_threads);
+            break;
+        default:
+            tp = new spu::tools::Thread_pool_Julia(n_threads);
+            break;
+    }
+#else
     tp = new spu::tools::Thread_pool_Julia(n_threads);
+#endif
 
     print_verbose("main -- 1");
     tp->init();
     print_verbose("main -- 2");
+
+    if (verbose)
+    {
+        t0 = std::chrono::steady_clock::now();
+        tp->run(func_exec1);
+        duration = std::chrono::steady_clock::now() - t0;
+        if (print_stats)
+        {
+            std::stringstream ss;
+            ss << "[main] time elapsed for 0: " << duration.count() / 1000000.0 << "ms" << std::endl;
+            std::cout << ss.str();
+        }
+    }
 
     print_verbose("main -- 3");
 

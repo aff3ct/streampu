@@ -104,6 +104,31 @@ function incrementf(sck_fwd, cst_wait_time_ns, rnt_frame_id, rnt_n_frames_per_wa
     return 0
 end
 
+# Allocate a temporary Vector on the Julia heap at each invocation
+# to stress the Garbage Collector (GC) and test multi-threaded GC safety / safepoints.
+function increment_gc_stress(sck_in, sck_out, cst_wait_time_ns, rnt_frame_id, rnt_n_frames_per_wave)
+    if cst_wait_time_ns > 0
+        start_incr = time_ns()
+    end
+
+    tmp = Vector{eltype(sck_in)}(undef, length(sck_in))
+    for n in eachindex(sck_in)
+        tmp[n] = sck_in[n] + one(eltype(sck_in))
+        sck_out[n] = tmp[n]
+    end
+
+    if cst_wait_time_ns != 0
+        stop_incr = time_ns()
+        elapse_incr = stop_incr - start_incr
+
+        while elapse_incr < cst_wait_time_ns
+            elapse_incr = time_ns() - start_incr
+        end
+    end
+
+    return 0
+end
+
 function relay(sck_in, sck_out, cst_wait_time_ns, rnt_frame_id, rnt_n_frames_per_wave)
     if cst_wait_time_ns > 0
         start_rly = time_ns()
@@ -124,3 +149,92 @@ function relay(sck_in, sck_out, cst_wait_time_ns, rnt_frame_id, rnt_n_frames_per
 
     return 0
 end
+
+# Allocate a temporary Vector on the Julia heap at each invocation
+# to stress the Garbage Collector (GC) and test multi-threaded GC safety / safepoints.
+function relay_gc_stress(sck_in, sck_out, cst_wait_time_ns, rnt_frame_id, rnt_n_frames_per_wave)
+    if cst_wait_time_ns > 0
+        start_rly = time_ns()
+    end
+
+    tmp = Vector{eltype(sck_in)}(undef, length(sck_in))
+    for n in eachindex(sck_in)
+        tmp[n] = sck_in[n]
+        sck_out[n] = tmp[n]
+    end
+
+    if cst_wait_time_ns != 0
+        stop_rly = time_ns()
+        elapse_rly = stop_rly - start_rly
+
+        while elapse_rly < cst_wait_time_ns
+            elapse_rly = time_ns() - start_rly
+        end
+    end
+
+    return 0
+end
+
+function increment_stateful(stt_step, sck_in, sck_out, cst_wait_time_ns, rnt_frame_id, rnt_n_frames_per_wave)
+    if cst_wait_time_ns > 0
+        start_incr = time_ns()
+    end
+
+    if rnt_frame_id == 0
+        stt_step.calls += one(typeof(stt_step.calls))
+    end
+
+    step_val = eltype(sck_in)(stt_step.step)
+    for n in eachindex(sck_in)
+        sck_out[n] = sck_in[n] + step_val
+    end
+
+    if cst_wait_time_ns != 0
+        stop_incr = time_ns()
+        elapse_incr = stop_incr - start_incr
+
+        while elapse_incr < cst_wait_time_ns
+            elapse_incr = time_ns() - start_incr
+        end
+    end
+
+    return 0
+end
+
+function memorize(stt_buf, sck_in, sck_sync, cst_wait_time_ns, rnt_frame_id, rnt_n_frames_per_wave)
+    if cst_wait_time_ns > 0
+        start_mem = time_ns()
+    end
+
+    frame_len = div(length(sck_in), Int(rnt_n_frames_per_wave))
+    offset = Int(rnt_frame_id) * frame_len
+    if length(stt_buf.buf) < offset + length(sck_in)
+        resize!(stt_buf.buf, offset + length(sck_in))
+    end
+
+    for n in eachindex(sck_in)
+        stt_buf.buf[offset + n] = sck_in[n] + one(eltype(sck_in))
+    end
+    sck_sync[1] = one(eltype(sck_sync))
+
+    if cst_wait_time_ns != 0
+        stop_mem = time_ns()
+        elapse_mem = stop_mem - start_mem
+
+        while elapse_mem < cst_wait_time_ns
+            elapse_mem = time_ns() - start_mem
+        end
+    end
+
+    return 0
+end
+
+function produce(stt_buf, sck_sync, sck_out, cst_wait_time_ns, rnt_frame_id, rnt_n_frames_per_wave)
+    frame_len = div(length(sck_out), Int(rnt_n_frames_per_wave))
+    offset = Int(rnt_frame_id) * frame_len
+    for n in eachindex(sck_out)
+        sck_out[n] = stt_buf.buf[offset + n]
+    end
+    return 0
+end
+

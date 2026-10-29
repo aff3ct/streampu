@@ -1,4 +1,4 @@
-#include "Module/Stateless/Stateless_Julia.hpp"
+#include "Module/Module_Julia.hpp"
 #include "Tools/Julia/Julia.hpp"
 
 namespace spu
@@ -7,7 +7,7 @@ namespace module
 {
 template<typename T>
 void
-Stateless_Julia::create_constant(runtime::Task& task, const T& value)
+Module_Julia::create_constant(runtime::Task& task, const T& value)
 {
     if ((*this->n_clones) > 0)
     {
@@ -25,9 +25,9 @@ Stateless_Julia::create_constant(runtime::Task& task, const T& value)
             throw tools::runtime_error(__FILE__, __LINE__, __func__, message.str());
         }
 
-    size_t tid = Stateless_Julia::get_task_id(task);
+    size_t tid = Module_Julia::get_task_id(task);
     (*this->jl_create_constants)[tid].push_back(
-      [tid, value](Stateless_Julia& m)
+      [tid, value](Module_Julia& m)
       {
           jl_value_t* jl_constant_ptr = tools::Julia::box(value);
 
@@ -40,3 +40,4 @@ Stateless_Julia::create_constant(runtime::Task& task, const T& value)
 }
 }
 }
+

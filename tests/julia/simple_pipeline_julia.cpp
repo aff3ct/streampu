@@ -71,6 +71,7 @@ main(int argc, char** argv)
                           { "jl-extern", no_argument, NULL, 'E' },
                           { "hybrid", no_argument, NULL, 'H' },
                           { "gc-stress", no_argument, NULL, 'G' },
+                          { "warmup", no_argument, NULL, 'W' },
                           { "help", no_argument, NULL, 'h' },
                           { NULL, 0, NULL, 0 } };
 
@@ -94,10 +95,11 @@ main(int argc, char** argv)
     bool jl_extern = false;
     bool hybrid = false;
     bool gc_stress = false;
+    bool warmup = false;
 
     while (1)
     {
-        const int opt = getopt_long(argc, argv, "t:f:s:d:e:u:o:i:j:cpbgqwkJEHGh", longopts, 0);
+        const int opt = getopt_long(argc, argv, "t:f:s:d:e:u:o:i:j:cpbgqwkJEHGWh", longopts, 0);
         if (opt == -1) break;
         switch (opt)
         {
@@ -160,6 +162,9 @@ main(int argc, char** argv)
                 break;
             case 'G':
                 gc_stress = true;
+                break;
+            case 'W':
+                warmup = true;
                 break;
             case 'h':
                 std::cout << "usage: " << argv[0] << " [options]" << std::endl;
@@ -224,6 +229,9 @@ main(int argc, char** argv)
                 std::cout << "  -G, --gc-stress       "
                           << "Allocate temporary Julia arrays to stress-test multi-stage GC         "
                           << "[" << (gc_stress ? "true" : "false") << "]" << std::endl;
+                std::cout << "  -W, --warmup          "
+                          << "Run a 1-stream warmup execution before the main execution             "
+                          << "[" << (warmup ? "true" : "false") << "]" << std::endl;
                 std::cout << "  -h, --help            "
                           << "This help                                                             "
                           << "[false]" << std::endl;
@@ -260,6 +268,7 @@ main(int argc, char** argv)
     std::cout << "#   - jl_extern      = " << (jl_extern ? "true" : "false") << std::endl;
     std::cout << "#   - hybrid         = " << (hybrid ? "true" : "false") << std::endl;
     std::cout << "#   - gc_stress      = " << (gc_stress ? "true" : "false") << std::endl;
+    std::cout << "#   - warmup         = " << (warmup ? "true" : "false") << std::endl;
     std::cout << "#" << std::endl;
 
     tools::Buffer_allocator::set_task_autoalloc(task_autoalloc);
@@ -290,9 +299,11 @@ main(int argc, char** argv)
         rly_proto.create_socket_out<uint8_t>(t, "out", data_length);
         rly_proto.create_constant<uint32_t>(t, sleep_time_us * 1000);
         if (jl_extern)
-            rly_proto.create_codelet_file(t, "../tests/julia/incr_relay.jl");
+            rly_proto.create_codelet_file(t, "../tests/julia/codelets.jl", gc_stress ? "relay_gc_stress" : "");
         else if (gc_stress)
             rly_proto.create_codelet(t, R""""(
+                # Allocate a temporary Vector on the Julia heap at each invocation
+                # to stress the Garbage Collector (GC) and test multi-threaded GC safety / safepoints.
                 function relay(sck_in, sck_out, cst_wait_time_ns, rnt_frame_id, rnt_n_frames_per_wave)
                     if cst_wait_time_ns > 0
                         start_rly = time_ns()
@@ -377,6 +388,20 @@ main(int argc, char** argv)
                     tsk->set_fast(true);
                 }
 
+            if (warmup)
+            {
+                auto t_start_warmup = std::chrono::steady_clock::now();
+                sequence_chain->exec([]() { return true; });
+                std::chrono::nanoseconds duration_warmup = std::chrono::steady_clock::now() - t_start_warmup;
+                auto elapsed_time_warmup = duration_warmup.count() / 1000.f / 1000.f;
+                std::cout << "# Julia warmup (= JIT compilation) time: " << elapsed_time_warmup << " ms" << std::endl;
+                for (auto* m : sequence_chain->get_modules<tools::Interface_reset>(false))
+                    m->reset();
+                for (auto& mod : sequence_chain->get_modules<module::Module>(false))
+                    for (auto& tsk : mod->tasks)
+                        tsk->reset();
+            }
+
             auto t_start = std::chrono::steady_clock::now();
             if (!step_by_step)
                 sequence_chain->exec();
@@ -441,6 +466,20 @@ main(int argc, char** argv)
                     tsk->set_stats(print_stats);
                     tsk->set_fast(true);
                 }
+
+            if (warmup)
+            {
+                auto t_start_warmup = std::chrono::steady_clock::now();
+                pipeline_chain->exec([]() { return true; });
+                std::chrono::nanoseconds duration_warmup = std::chrono::steady_clock::now() - t_start_warmup;
+                auto elapsed_time_warmup = duration_warmup.count() / 1000.f / 1000.f;
+                std::cout << "# Julia warmup (= JIT compilation) time: " << elapsed_time_warmup << " ms" << std::endl;
+                for (auto* m : pipeline_chain->get_modules<tools::Interface_reset>(false))
+                    m->reset();
+                for (auto& mod : pipeline_chain->get_modules<module::Module>(false))
+                    for (auto& tsk : mod->tasks)
+                        tsk->reset();
+            }
 
             auto t_start = std::chrono::steady_clock::now();
             pipeline_chain->exec();
@@ -510,9 +549,11 @@ main(int argc, char** argv)
     incr_proto.create_socket_out<uint8_t>(t, "out", data_length);
     incr_proto.create_constant<uint32_t>(t, sleep_time_us * 1000);
     if (jl_extern)
-        incr_proto.create_codelet_file(t, "../tests/julia/incr_relay.jl");
+        incr_proto.create_codelet_file(t, "../tests/julia/codelets.jl", gc_stress ? "increment_gc_stress" : "");
     else if (gc_stress)
         incr_proto.create_codelet(t, R""""(
+            # Allocate a temporary Vector on the Julia heap at each invocation
+            # to stress the Garbage Collector (GC) and test multi-threaded GC safety / safepoints.
             function increment(sck_in, sck_out, cst_wait_time_ns, rnt_frame_id, rnt_n_frames_per_wave)
                 if cst_wait_time_ns > 0
                     start_incr = time_ns()
@@ -642,6 +683,18 @@ main(int argc, char** argv)
                 tsk->set_fast(true);
             }
 
+        if (warmup)
+        {
+            auto t_start_warmup = std::chrono::steady_clock::now();
+            sequence_chain->exec([]() { return true; });
+            std::chrono::nanoseconds duration_warmup = std::chrono::steady_clock::now() - t_start_warmup;
+            auto elapsed_time_warmup = duration_warmup.count() / 1000.f / 1000.f;
+            std::cout << "# Julia warmup (= JIT compilation) time: " << elapsed_time_warmup << " ms" << std::endl;
+            for (auto& mod : sequence_chain->get_modules<module::Module>(false))
+                for (auto& tsk : mod->tasks)
+                    tsk->reset();
+        }
+
         std::atomic<unsigned int> counter(0);
         auto t_start = std::chrono::steady_clock::now();
         if (!step_by_step)
@@ -723,6 +776,18 @@ main(int argc, char** argv)
                 tsk->set_stats(print_stats);
                 tsk->set_fast(true);
             }
+
+        if (warmup)
+        {
+            auto t_start_warmup = std::chrono::steady_clock::now();
+            pipeline_chain->exec([]() { return true; });
+            std::chrono::nanoseconds duration_warmup = std::chrono::steady_clock::now() - t_start_warmup;
+            auto elapsed_time_warmup = duration_warmup.count() / 1000.f / 1000.f;
+            std::cout << "# Julia warmup (= JIT compilation) time: " << elapsed_time_warmup << " ms" << std::endl;
+            for (auto& mod : pipeline_chain->get_modules<module::Module>(false))
+                for (auto& tsk : mod->tasks)
+                    tsk->reset();
+        }
 
         std::atomic<unsigned int> counter(0);
         auto t_start = std::chrono::steady_clock::now();

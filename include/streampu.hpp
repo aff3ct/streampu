@@ -12,6 +12,9 @@
 #ifndef MODULE_HPP_
 #include <Module/Module.hpp>
 #endif
+#ifndef MODULE_JULIA_HPP_
+#include <Module/Module_Julia.hpp>
+#endif
 #ifndef ADAPTOR_M_TO_N_HPP_
 #include <Module/Stateful/Adaptor/Adaptor_m_to_n.hpp>
 #endif
@@ -107,6 +110,9 @@
 #endif
 #ifndef STATEFUL_HPP_
 #include <Module/Stateful/Stateful.hpp>
+#endif
+#ifndef STATEFUL_JULIA_HPP_
+#include <Module/Stateful/Stateful_Julia.hpp>
 #endif
 #ifndef SWITCHER_HPP_
 #include <Module/Stateful/Switcher/Switcher.hpp>

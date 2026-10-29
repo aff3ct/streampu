@@ -21,7 +21,9 @@ namespace spu
 {
 namespace module
 {
+class Module_Julia;
 class Stateful;
+class Stateful_Julia;
 class Stateless;
 class Stateless_Jluna;
 class Stateless_Julia;
@@ -34,7 +36,9 @@ class Module
   : public tools::Interface_clone
   , public tools::Interface_get_set_n_frames
 {
+    friend Module_Julia;
     friend Stateful;
+    friend Stateful_Julia;
     friend Stateless;
     friend Stateless_Jluna;
     friend Stateless_Julia;

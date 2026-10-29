@@ -24,7 +24,7 @@
 #include "Tools/Thread/Thread_pinning/Thread_pinning_utils.hpp"
 #include "Tools/Thread/Thread_pool/Standard/Thread_pool_standard.hpp"
 #ifdef SPU_JULIA
-#include "Module/Stateless/Stateless_Julia.hpp"
+#include "Module/Module_Julia.hpp"
 #include "Tools/Thread/Thread_pool/Julia/Thread_pool_Julia.hpp"
 #ifdef SPU_JLUNA
 #include "Module/Stateless/Stateless_Jluna.hpp"
@@ -601,7 +601,7 @@ Sequence::eval_jl_modules(const size_t tid)
 
     for (auto* jl_m : this->jl_modules[tid])
     {
-        spu::module::Stateless_Julia* ptr = dynamic_cast<spu::module::Stateless_Julia*>(jl_m);
+        spu::module::Module_Julia* ptr = dynamic_cast<spu::module::Module_Julia*>(jl_m);
         if (ptr && !ptr->is_eval()) ptr->eval();
     }
 
@@ -1616,13 +1616,12 @@ Sequence::replicate(const tools::Digraph_node<SS>* sequence)
             }
             this->all_modules[tid + (this->tasks_inplace ? 1 : 0)][m] = this->modules[tid][m].get();
 #ifdef SPU_JULIA
-            module::Module* jl_m = nullptr;
 #ifdef SPU_JLUNA
-            if ((jl_m = dynamic_cast<module::Stateless_Jluna*>(this->modules[tid][m].get())))
-                this->jl_modules[tid + (this->tasks_inplace ? 1 : 0)].push_back(jl_m);
+            if (dynamic_cast<module::Stateless_Jluna*>(this->modules[tid][m].get()))
+                this->jl_modules[tid + (this->tasks_inplace ? 1 : 0)].push_back(this->modules[tid][m].get());
 #endif /* SPU_JLUNA */
-            if ((jl_m = dynamic_cast<module::Stateless_Julia*>(this->modules[tid][m].get())))
-                this->jl_modules[tid + (this->tasks_inplace ? 1 : 0)].push_back(jl_m);
+            if (dynamic_cast<module::Module_Julia*>(this->modules[tid][m].get()))
+                this->jl_modules[tid + (this->tasks_inplace ? 1 : 0)].push_back(this->modules[tid][m].get());
 #endif /* SPU_JULIA */
         }
 
@@ -2766,11 +2765,10 @@ void
 Sequence::init_jl_module(module::Module* m)
 {
 #ifdef SPU_JULIA
-    module::Module* jl_m = nullptr;
 #ifdef SPU_JLUNA
-    if ((jl_m = dynamic_cast<module::Stateless_Jluna*>(m))) this->jl_modules[0].push_back(jl_m);
+    if (dynamic_cast<module::Stateless_Jluna*>(m)) this->jl_modules[0].push_back(m);
 #endif /* SPU_JLUNA */
-    if ((jl_m = dynamic_cast<module::Stateless_Julia*>(m))) this->jl_modules[0].push_back(jl_m);
+    if (dynamic_cast<module::Module_Julia*>(m)) this->jl_modules[0].push_back(m);
 #endif /* SPU_JULIA */
 }
 
