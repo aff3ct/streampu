@@ -47,34 +47,34 @@ Stateful_Julia::create_tsk(const std::string& name)
 
 void
 Stateful_Julia::create_state(const std::string& julia_constructor,
-                             const std::string& julia_code,
-                             const bool shared)
+                             const bool shared,
+                             const std::string& julia_code)
 {
-    this->_create_state(julia_constructor, julia_code, shared);
+    this->_create_state(julia_constructor, shared, julia_code);
 }
 
 void
 Stateful_Julia::create_stt(const std::string& julia_constructor,
-                           const std::string& julia_code,
-                           const bool shared)
+                           const bool shared,
+                           const std::string& julia_code)
 {
-    this->_create_state(julia_constructor, julia_code, shared);
+    this->_create_state(julia_constructor, shared, julia_code);
 }
 
 void
 Stateful_Julia::create_state_file(const std::string& julia_constructor,
-                                  const std::string& julia_filepath,
-                                  const bool shared)
+                                  const bool shared,
+                                  const std::string& julia_filepath)
 {
-    this->_create_state_file(julia_constructor, julia_filepath, shared);
+    this->_create_state_file(julia_constructor, shared, julia_filepath);
 }
 
 void
 Stateful_Julia::create_stt_file(const std::string& julia_constructor,
-                                const std::string& julia_filepath,
-                                const bool shared)
+                                const bool shared,
+                                const std::string& julia_filepath)
 {
-    this->_create_state_file(julia_constructor, julia_filepath, shared);
+    this->_create_state_file(julia_constructor, shared, julia_filepath);
 }
 
 const std::vector<jl_value_t*>&

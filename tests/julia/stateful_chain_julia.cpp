@@ -181,12 +181,12 @@ main(int argc, char** argv)
     incr.create_constant<uint32_t>(t, sleep_time_us * 1000);
     if (jl_extern)
     {
-        incr.create_state_file("StepState(1, 0)", "../tests/julia/states.jl");
+        incr.create_state_file("StepState(1, 0)", false, "../tests/julia/states.jl");
         incr.create_codelet_file(t, "../tests/julia/codelets.jl");
     }
     else
     {
-        incr.create_state("StepState(1, 0)", R""""(
+        incr.create_state("StepState(1, 0)", false, R""""(
             mutable struct StepState
                 step::UInt8
                 calls::UInt32
@@ -247,13 +247,13 @@ main(int argc, char** argv)
       "SharedBufferState(zeros(UInt8, " + std::to_string(data_length * n_inter_frames) + "))";
     if (jl_extern)
     {
-        mem_prod.create_state_file(buf_ctor, "../tests/julia/states.jl");
+        mem_prod.create_state_file(buf_ctor, false, "../tests/julia/states.jl");
         mem_prod.create_codelet_file(t_mem, "../tests/julia/codelets.jl");
         mem_prod.create_codelet_file(t_prod, "../tests/julia/codelets.jl");
     }
     else
     {
-        mem_prod.create_state(buf_ctor, R""""(
+        mem_prod.create_state(buf_ctor, false, R""""(
             mutable struct SharedBufferState
                 buf::Vector{UInt8}
             end

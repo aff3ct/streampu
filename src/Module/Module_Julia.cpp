@@ -147,8 +147,8 @@ Module_Julia::_get_states() const
 
 void
 Module_Julia::_create_state(const std::string& julia_constructor,
-                            const std::string& julia_code,
-                            const bool shared)
+                            const bool shared,
+                            const std::string& julia_code)
 {
     if ((*this->n_clones) > 0)
     {
@@ -174,8 +174,8 @@ Module_Julia::_create_state(const std::string& julia_constructor,
 
 void
 Module_Julia::_create_state_file(const std::string& julia_constructor,
-                                 const std::string& julia_filepath,
-                                 const bool shared)
+                                 const bool shared,
+                                 const std::string& julia_filepath)
 {
     if ((*this->n_clones) > 0)
     {

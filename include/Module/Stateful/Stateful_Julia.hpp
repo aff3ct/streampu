@@ -54,21 +54,25 @@ class Stateful_Julia
     using Stateful::set_single_wave;
 
     using Module_Julia::create_cdl;
+    using Module_Julia::create_cdl_file;
+    using Module_Julia::create_cdl_function;
     using Module_Julia::create_codelet;
+    using Module_Julia::create_codelet_file;
+    using Module_Julia::create_codelet_function;
 
     void create_state(const std::string& julia_constructor,
-                      const std::string& julia_code = "",
-                      const bool shared = false);
+                      const bool shared = false,
+                      const std::string& julia_code = "");
     void create_stt(const std::string& julia_constructor,
-                    const std::string& julia_code = "",
-                    const bool shared = false);
+                    const bool shared = false,
+                    const std::string& julia_code = "");
 
     void create_state_file(const std::string& julia_constructor,
-                           const std::string& julia_filepath = "",
-                           const bool shared = false);
+                           const bool shared = false,
+                           const std::string& julia_filepath = "");
     void create_stt_file(const std::string& julia_constructor,
-                         const std::string& julia_filepath = "",
-                         const bool shared = false);
+                         const bool shared = false,
+                         const std::string& julia_filepath = "");
 
     const std::vector<jl_value_t*>& get_states() const;
 };

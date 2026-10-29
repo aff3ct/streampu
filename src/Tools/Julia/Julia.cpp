@@ -1,5 +1,6 @@
 #ifdef SPU_JULIA
 
+#include <csignal>
 #include <fstream>
 #include <iostream>
 #include <mutex>
@@ -92,6 +93,18 @@ Julia::init(const uint64_t n_proxies)
 
     Julia::n_proxies = n_proxies;
 
+    // Preserve any pre-existing SIGINT handler (e.g. spu::tools::Signal_handler) across jl_init(),
+    // which otherwise overwrites SIGINT with Julia's internal signal handler.
+#if defined(_WIN64) || defined(_WIN32)
+    void (*prev_sigint)(int) = SIG_DFL;
+    const bool restore_sigint = !jl_is_initialized();
+    if (restore_sigint)
+        prev_sigint = signal(SIGINT, SIG_DFL);
+#else
+    struct sigaction prev_sigint = {};
+    const bool restore_sigint = !jl_is_initialized() && (sigaction(SIGINT, nullptr, &prev_sigint) == 0);
+#endif
+
     if (!jl_is_initialized())
     {
         jl_init();
@@ -108,6 +121,15 @@ Julia::init(const uint64_t n_proxies)
     Julia::call_func_handle = jl_get_function(Julia::module, "call");
 
     Ref_keeper::init(n_proxies);
+
+#if defined(_WIN64) || defined(_WIN32)
+    if (restore_sigint && prev_sigint != SIG_ERR && prev_sigint != SIG_DFL && prev_sigint != SIG_IGN)
+        signal(SIGINT, prev_sigint);
+#else
+    if (restore_sigint && prev_sigint.sa_handler != SIG_DFL && prev_sigint.sa_handler != SIG_IGN)
+        sigaction(SIGINT, &prev_sigint, nullptr);
+#endif
+
     Julia::is_initialized = true;
 }
 

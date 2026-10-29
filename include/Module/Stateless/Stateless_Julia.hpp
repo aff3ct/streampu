@@ -31,7 +31,11 @@ class Stateless_Julia final
     runtime::Task& create_tsk(const std::string& name);
 
     using Module_Julia::create_cdl;
+    using Module_Julia::create_cdl_file;
+    using Module_Julia::create_cdl_function;
     using Module_Julia::create_codelet;
+    using Module_Julia::create_codelet_file;
+    using Module_Julia::create_codelet_function;
 };
 }
 }

@@ -69,9 +69,11 @@ class Module_Julia
     template<typename T>
     void create_constant(runtime::Task& task, const T& value);
 
-    void create_cdl(runtime::Task& task, const std::string& julia_code, const std::string& julia_function_name = "");
+    void create_cdl(runtime::Task& task,
+                    const std::string& julia_code = "",
+                    const std::string& julia_function_name = "");
     void create_codelet(runtime::Task& task,
-                        const std::string& julia_code,
+                        const std::string& julia_code = "",
                         const std::string& julia_function_name = "");
 
     void create_cdl_file(runtime::Task& task,
@@ -94,11 +96,11 @@ class Module_Julia
     void _create_codelet(runtime::Task& task, const std::string& julia_function_name = "");
 
     void _create_state(const std::string& julia_constructor,
-                       const std::string& julia_code = "",
-                       const bool shared = false);
+                       const bool shared = false,
+                       const std::string& julia_code = "");
     void _create_state_file(const std::string& julia_constructor,
-                            const std::string& julia_filepath = "",
-                            const bool shared = false);
+                            const bool shared = false,
+                            const std::string& julia_filepath = "");
     void _register_state(const std::string& julia_constructor, const bool shared);
     const std::vector<jl_value_t*>& _get_states() const;
 
