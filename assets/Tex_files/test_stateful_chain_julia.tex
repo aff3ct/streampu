@@ -1,0 +1,81 @@
+\documentclass{standalone}
+
+\usepackage{tikz}
+\usetikzlibrary{streampu}
+
+\begin{document}
+  \begin{tikzpicture}[background rectangle/.style={thick, draw=gray!60, fill=white, fill opacity=1.0, rounded corners=2px}, show background rectangle]
+    %%%%%%%%%%%%%%%%%%
+    %% create tasks %%
+    %%%%%%%%%%%%%%%%%%
+    %     options              id   coords      label                          sin sout sfwd attributes
+    %     -------              --   ------      -----                          --- ---- ---- ----------
+    \task                      {t1} {-0.5, 0}   {initialize\\($t_1$)}          {0} {1}  {0}  {};
+    \task [right=1.05cm of t1] {t2} {}          {increment\_stateful\\($t_2$)} {1} {1}  {0}  {"jl"};
+    \task [right=1.05cm of t2] {t3} {}          {increment\_stateful\\($t_3$)} {1} {1}  {0}  {"jl"};
+    \task [right=1.05cm of t3] {t4} {}          {increment\_stateful\\($t_4$)} {1} {1}  {0}  {"jl"};
+    \task [right=1.05cm of t4] {t5} {}          {increment\_stateful\\($t_5$)} {1} {1}  {0}  {"jl"};
+    \task [right=1.05cm of t5] {t6} {}          {increment\_stateful\\($t_6$)} {1} {1}  {0}  {"jl"};
+    \task [right=1.05cm of t6] {t7} {}          {write\\($t_7$)}               {1} {0}  {0}  {"jl"};
+    \task [right=0.90cm of t7] {t8} {}          {read\\($t_8$)}                {0} {1}  {0}  {"jl"};
+    \task [right=1.05cm of t8] {t9} {}          {finalize\\($t_9$)}            {1} {0}  {0}  {};
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%
+    %% create Julia states %%
+    %%%%%%%%%%%%%%%%%%%%%%%%%
+    \node[jstate, above=0.22cm of t2] (st2) {StepState};
+    \node[jstate, above=0.22cm of t3] (st3) {StepState};
+    \node[jstate, above=0.22cm of t4] (st4) {StepState};
+    \node[jstate, above=0.22cm of t5] (st5) {StepState};
+    \node[jstate, above=0.22cm of t6] (st6) {StepState};
+    \node[jstate, yshift=0.45cm]      (st7) at ($(t7.north)!0.5!(t8.north)$) {SharedBufferState};
+
+    \draw[densely dotted, JuliaRed, thick] (st2.south) -- (t2.north);
+    \draw[densely dotted, JuliaRed, thick] (st3.south) -- (t3.north);
+    \draw[densely dotted, JuliaRed, thick] (st4.south) -- (t4.north);
+    \draw[densely dotted, JuliaRed, thick] (st5.south) -- (t5.north);
+    \draw[densely dotted, JuliaRed, thick] (st6.south) -- (t6.north);
+    \draw[densely dotted, JuliaRed, thick] (st7.south) -- (t7.north);
+    \draw[densely dotted, JuliaRed, thick] (st7.south) -- (t8.north);
+
+    %%%%%%%%%%%%%%%%%%%%
+    %% create modules %%
+    %%%%%%%%%%%%%%%%%%%%
+    %       options           task ids             id   label
+    %       -------           --------             --   -----
+    \module                   {"t1"}               {m1} {Initializer};
+    \module                   {"t2","st2"}         {m2} {Stateful\_Julia};
+    \module                   {"t3","st3"}         {m3} {Stateful\_Julia};
+    \module                   {"t4","st4"}         {m4} {Stateful\_Julia};
+    \module                   {"t5","st5"}         {m5} {Stateful\_Julia};
+    \module                   {"t6","st6"}         {m6} {Stateful\_Julia};
+    \module                   {"t7","t8","st7"}    {m7} {Stateful\_Julia};
+    \module                   {"t9"}               {m8} {Finalizer};
+
+    %%%%%%%%%%%%%%%%
+    %% bind tasks %%
+    %%%%%%%%%%%%%%%%
+    %     options start id path end id
+    %     ------- -------- ---- ------
+    \draw [bind]  (t1_so1) --   (t2_si1);
+    \draw [bind]  (t2_so1) --   (t3_si1);
+    \draw [bind]  (t3_so1) --   (t4_si1);
+    \draw [bind]  (t4_so1) --   (t5_si1);
+    \draw [bind]  (t5_so1) --   (t6_si1);
+    \draw [bind]         (t6_so1) -- (t7_si1);
+    \draw [bind, dashed] (t7.east) -- (t8.west);
+    \draw [bind]         (t8_so1) -- (t9_si1);
+
+    %%%%%%%%%%%%%%%%%%%
+    %% create stages %%
+    %%%%%%%%%%%%%%%%%%%
+    %      options                 object ids        id   label      n_threads
+    %      -------                 ----------        --   -----      ---------
+    \stage [minimum height=3.80cm] {"m1","m2","m8"}  {s1} {Sequence} {4}
+
+    %%%%%%%%%%%%%%%%%%%%%
+    %% draw the legend %%
+    %%%%%%%%%%%%%%%%%%%%%
+    \legendjlstate [shift={(-1.3,2.25)}]
+  \end{tikzpicture}
+\end{document}
