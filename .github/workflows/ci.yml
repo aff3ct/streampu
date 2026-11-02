@@ -94,6 +94,33 @@ jobs:
         with:
           name: build
           path: build
+  build-linux-gcc-regression-julia:
+    runs-on: ubuntu-latest
+    needs: [analysis-headers]
+    container: registry.gitlab.com/aff3ct/aff3ct/x86_64_ubuntu_gcc:v9.3.0
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+      - name: Build
+        run: |
+          export CXX="g++"
+          export CFLAGS="-Wall -funroll-loops -msse4.2 --coverage"
+          export LFLAGS="--coverage"
+          export GIT_TAG="v0.0.0"
+          export CMAKE_OPT="-DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS_DEBUG=-O0 -DSPU_TESTS=ON -DSPU_COMPILE_STATIC_LIB=ON -DSPU_COMPILE_SHARED_LIB=ON -DSPU_LINK_JULIA=ON -DSPU_OVERRIDE_VERSION=$GIT_TAG"
+          source ./ci/tools/threads.sh
+          source ./ci/tools/env-julia.sh
+          ./ci/build-linux-macos.sh
+          find build/bin -type f ! -name '*-julia' -delete
+          rm -rf build/lib
+        shell: bash
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-julia
+          path: build
   build-linux-clang:
     runs-on: ubuntu-latest
     needs: [analysis-headers]
@@ -119,9 +146,39 @@ jobs:
         with:
           name: build-linux-clang
           path: build_linux_clang
+  test-regression-julia:
+    runs-on: ubuntu-latest
+    needs: [build-linux-gcc-regression-julia]
+    container: registry.gitlab.com/aff3ct/aff3ct/x86_64_ubuntu_coverage
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      - name: Download Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-julia
+          path: build/
+      - name: Run Julia Tests & Collect Code Coverage
+        run: |
+          ls -lah ./build/
+          ls -lah ./build/bin/
+          chmod +x ./build/bin/*
+          source ./ci/tools/env-julia.sh
+          ./ci/test-coverage-regression-julia.sh
+        shell: bash
+      - name: Upload Coverage Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-regression-julia-code-coverage-files
+          path: code_coverage_files/
+      - name: Upload Testing Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-regression-julia
+          path: build/Testing
   test-coverage-regression:
     runs-on: ubuntu-latest
-    needs: [build-linux-gcc-coverage]
+    needs: [build-linux-gcc-coverage, test-regression-julia]
     container: registry.gitlab.com/aff3ct/aff3ct/x86_64_ubuntu_coverage
     steps:
       - name: Checkout Code
@@ -131,6 +188,11 @@ jobs:
         with:
           name: build
           path: build/
+      - name: Download Julia Coverage Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: test-regression-julia-code-coverage-files
+          path: code_coverage_files/
       - name: Run Tests & Collect Code Coverage
         run: |
           ls -lah ./build/

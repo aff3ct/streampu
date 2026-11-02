@@ -136,6 +136,25 @@ build-linux-gcc-coverage-regression:
     - rm -rf build/bin
     - rm -rf build/lib
 
+build-linux-gcc-regression-julia:
+  extends: .build-linux-gcc
+  image: registry.gitlab.com/aff3ct/aff3ct/x86_64_ubuntu_coverage
+  variables:
+    CFLAGS: -Wall -funroll-loops -msse4.2 --coverage
+    LFLAGS: --coverage
+    CMAKE_OPT: -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS_DEBUG=-O0 -DSPU_TESTS=ON -DSPU_COMPILE_STATIC_LIB=ON -DSPU_COMPILE_SHARED_LIB=ON -DSPU_LINK_HWLOC=ON -DSPU_LINK_JULIA=ON -DSPU_OVERRIDE_VERSION=$GIT_TAG
+  artifacts:
+    name: build-linux-gcc-regression-julia
+    when: always
+    paths:
+      - build/
+  script:
+    - source ./ci/tools/threads.sh
+    - source ./ci/tools/env-julia.sh
+    - ./ci/build-linux-macos.sh
+    - find build/bin -type f ! -name '*-julia' -delete
+    - rm -rf build/lib
+
 .build-linux-gcc-x64-avx2:
   extends: .build-linux-gcc
   image: registry.gitlab.com/aff3ct/aff3ct/x86_64_ubuntu_gcc:v9.3.0
@@ -252,6 +271,25 @@ test-memcheck-regression:
     - ./ci/build-linux-macos.sh
     - ./ci/test-memcheck-regression.sh
 
+test-regression-julia:
+  extends: .config-common-linux
+  stage: test
+  image: registry.gitlab.com/aff3ct/aff3ct/x86_64_ubuntu_coverage
+  variables:
+    GIT_SUBMODULE_STRATEGY: recursive
+  needs:
+    - job: build-linux-gcc-regression-julia
+      artifacts: true
+  artifacts:
+    name: test-regression-julia
+    when: always
+    paths:
+      - build/Testing
+      - code_coverage_files/
+  script:
+    - source ./ci/tools/env-julia.sh
+    - ./ci/test-coverage-regression-julia.sh
+
 ###################
 ## coverage jobs ##
 ###################
@@ -263,6 +301,8 @@ coverage-linux:
   image: registry.gitlab.com/aff3ct/aff3ct/x86_64_ubuntu_coverage
   needs:
     - job: build-linux-gcc-coverage-regression
+      artifacts: true
+    - job: test-regression-julia
       artifacts: true
   coverage: '/.*lines\.*: (\d+.\d+\%)/'
   artifacts:
