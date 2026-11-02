@@ -254,7 +254,8 @@ main(int argc, char** argv)
                 buf::Vector{UInt8}
             end
         )"""");
-        rw.create_codelet(t_write, R""""(
+        rw.create_codelet(t_write,
+                          R""""(
             function write_buf(stt_buf, sck_in, cst_wait_time_ns, rnt_frame_id, rnt_n_frames_per_wave)
                 if cst_wait_time_ns > 0
                     start_wr = time_ns()
@@ -281,8 +282,10 @@ main(int argc, char** argv)
 
                 return 0
             end
-        )"""", "write_buf");
-        rw.create_codelet(t_read, R""""(
+        )"""",
+                          "write_buf");
+        rw.create_codelet(t_read,
+                          R""""(
             function read_buf(stt_buf, sck_out, cst_wait_time_ns, rnt_frame_id, rnt_n_frames_per_wave)
                 frame_len = div(length(sck_out), Int(rnt_n_frames_per_wave))
                 offset = Int(rnt_frame_id) * frame_len
@@ -291,7 +294,8 @@ main(int argc, char** argv)
                 end
                 return 0
             end
-        )"""", "read_buf");
+        )"""",
+                          "read_buf");
     }
 
     const size_t total_increments = incs.size() + 1;
@@ -361,11 +365,7 @@ main(int argc, char** argv)
     auto t_start = std::chrono::steady_clock::now();
     if (!step_by_step)
     {
-        sequence_chain.exec(
-          [&counter, n_exec]()
-          {
-              return ++counter >= n_exec;
-          });
+        sequence_chain.exec([&counter, n_exec]() { return ++counter >= n_exec; });
     }
     else
     {
@@ -448,9 +448,8 @@ main(int argc, char** argv)
     module::Module* m_stateful = &rw;
     if (!m_stateless->is_stateless() || m_stateless->is_stateful() ||
         dynamic_cast<module::Stateless*>(m_stateless) == nullptr ||
-        dynamic_cast<module::Stateful*>(m_stateless) != nullptr ||
-        !m_stateful->is_stateful() || m_stateful->is_stateless() ||
-        dynamic_cast<module::Stateful*>(m_stateful) == nullptr ||
+        dynamic_cast<module::Stateful*>(m_stateless) != nullptr || !m_stateful->is_stateful() ||
+        m_stateful->is_stateless() || dynamic_cast<module::Stateful*>(m_stateful) == nullptr ||
         dynamic_cast<module::Stateless*>(m_stateful) != nullptr)
     {
         std::cout << "# Type hierarchy check failed for Stateless_Julia / Stateful_Julia!" << std::endl;
@@ -483,4 +482,3 @@ main(int argc, char** argv)
 
     return test_results;
 }
-

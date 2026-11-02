@@ -145,9 +145,7 @@ Module_Julia::_get_states() const
 }
 
 void
-Module_Julia::_create_state(const std::string& julia_constructor,
-                            const bool shared,
-                            const std::string& julia_code)
+Module_Julia::_create_state(const std::string& julia_constructor, const bool shared, const std::string& julia_code)
 {
     if ((*this->n_clones) > 0)
     {
@@ -163,8 +161,7 @@ Module_Julia::_create_state(const std::string& julia_constructor,
         this->jl_evaluate_states->push_back(
           [julia_code, code_evaluated]()
           {
-              if (!code_evaluated->exchange(true))
-                  tools::Julia::eval_string(julia_code);
+              if (!code_evaluated->exchange(true)) tools::Julia::eval_string(julia_code);
           });
     }
 
@@ -190,8 +187,7 @@ Module_Julia::_create_state_file(const std::string& julia_constructor,
         this->jl_evaluate_states->push_back(
           [julia_filepath, file_evaluated]()
           {
-              if (!file_evaluated->exchange(true))
-                  tools::Julia::eval_file(julia_filepath);
+              if (!file_evaluated->exchange(true)) tools::Julia::eval_file(julia_filepath);
           });
     }
 
@@ -303,9 +299,7 @@ Module_Julia::_create_task(const std::string& name)
 }
 
 void
-Module_Julia::create_codelet(runtime::Task& task,
-                             const std::string& julia_code,
-                             const std::string& julia_function_name)
+Module_Julia::create_codelet(runtime::Task& task, const std::string& julia_code, const std::string& julia_function_name)
 {
     if ((*this->n_clones) > 0)
     {
@@ -320,9 +314,7 @@ Module_Julia::create_codelet(runtime::Task& task,
 }
 
 void
-Module_Julia::create_cdl(runtime::Task& task,
-                         const std::string& julia_code,
-                         const std::string& julia_function_name)
+Module_Julia::create_cdl(runtime::Task& task, const std::string& julia_code, const std::string& julia_function_name)
 {
     this->create_codelet(task, julia_code, julia_function_name);
 }
@@ -428,13 +420,11 @@ Module_Julia::_create_codelet(runtime::Task& task, const std::string& julia_func
               // Enter GC_SAFE state while waiting on the compilation lock
               // so that if another thread triggers a GC during JIT compilation,
               // this waiting thread will NOT block the Stop-The-World GC.
-              if (can_safe)
-                  prev_gc_state = jl_gc_safe_enter(jl_current_task->ptls);
+              if (can_safe) prev_gc_state = jl_gc_safe_enter(jl_current_task->ptls);
 
               std::unique_lock<std::mutex> lock(compile_mtx);
 
-              if (can_safe)
-                  jl_gc_safe_leave(jl_current_task->ptls, prev_gc_state);
+              if (can_safe) jl_gc_safe_leave(jl_current_task->ptls, prev_gc_state);
 
               if (!task_compiled->load(std::memory_order_relaxed))
               {
@@ -481,8 +471,7 @@ Module_Julia::_create_codelet(runtime::Task& task, const std::string& julia_func
               m.jl_func_args[tid][1 + i] = (void*)m.jl_states_ptr[i];
 
           for (size_t i = 0; i < n_csts; i++)
-              m.jl_func_args[tid][m.jl_func_args[tid].size() - (n_csts + 2) + i] =
-                (void*)m.jl_constants_ptr[tid][i];
+              m.jl_func_args[tid][m.jl_func_args[tid].size() - (n_csts + 2) + i] = (void*)m.jl_constants_ptr[tid][i];
 
           // Allocate dedicated heap-backed UInt32 boxes (passing a value >= 1024 bypasses Julia's
           // global box_uint32_cache[0..1023] singletons, which must never be mutated in-place).
@@ -503,4 +492,3 @@ Module_Julia::_create_codelet(runtime::Task& task, const std::string& julia_func
 }
 
 #endif /* SPU_JULIA */
-

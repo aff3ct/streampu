@@ -419,29 +419,29 @@ main(int argc, char** argv)
         }
         else
         {
-            pipeline_chain.reset(new runtime::Pipeline(
-              source("generate"),
-              {
-                // pipeline stage 0: first & last tasks
-                { { &source("generate") }, { &source("generate") } },
-                // pipeline stage 1: first & last tasks
-                { { &(*rlys[0])("relay") }, { &(*rlys[rlys.size() - 1])("relay") } },
-                // pipeline stage 2: first task
-                { { &sink("send_count") }, {} },
-              },
-              {
-                1,                         // number of threads in stage 0
-                n_threads ? n_threads : 1, // number of threads in stage 1
-                1                          // number of threads in stage 2
-              },
-              {
-                buffer_size, // synchronization buffer size between stages 0 and 1
-                buffer_size, // synchronization buffer size between stages 1 and 2
-              },
-              {
-                active_waiting, // type of waiting between stages 0 and 1
-                active_waiting, // type of waiting between stages 1 and 2
-              }));
+            pipeline_chain.reset(
+              new runtime::Pipeline(source("generate"),
+                                    {
+                                      // pipeline stage 0: first & last tasks
+                                      { { &source("generate") }, { &source("generate") } },
+                                      // pipeline stage 1: first & last tasks
+                                      { { &(*rlys[0])("relay") }, { &(*rlys[rlys.size() - 1])("relay") } },
+                                      // pipeline stage 2: first task
+                                      { { &sink("send_count") }, {} },
+                                    },
+                                    {
+                                      1,                         // number of threads in stage 0
+                                      n_threads ? n_threads : 1, // number of threads in stage 1
+                                      1                          // number of threads in stage 2
+                                    },
+                                    {
+                                      buffer_size, // synchronization buffer size between stages 0 and 1
+                                      buffer_size, // synchronization buffer size between stages 1 and 2
+                                    },
+                                    {
+                                      active_waiting, // type of waiting between stages 0 and 1
+                                      active_waiting, // type of waiting between stages 1 and 2
+                                    }));
             pipeline_chain->set_n_frames(n_inter_frames);
 
             if (!dot_filepath.empty())
@@ -713,34 +713,34 @@ main(int argc, char** argv)
         runtime::Task* stage2_last =
           hybrid ? &(*incs_cpp2[n_stage2 - 1])("increment") : &(*incs_jl2[n_stage2 - 1])("increment");
 
-        pipeline_chain.reset(new runtime::Pipeline(
-          initializer("initialize"),
-          {
-            // pipeline stage 0: Initializer (C++)
-            { { &initializer("initialize") }, { &initializer("initialize") } },
-            // pipeline stage 1: 3x Stateless_Julia incrementers
-            { { &(*incs_jl1[0])("increment") }, { &(*incs_jl1[n_stage1 - 1])("increment") } },
-            // pipeline stage 2: 3x Stateless_Julia (or C++ Incrementer in hybrid mode)
-            { { stage2_first }, { stage2_last } },
-            // pipeline stage 3: Finalizer (C++)
-            { { &finalizer("finalize") }, {} },
-          },
-          {
-            1,                         // stage 0 threads
-            n_threads ? n_threads : 1, // stage 1 threads
-            n_threads ? n_threads : 1, // stage 2 threads
-            1                          // stage 3 threads
-          },
-          {
-            buffer_size, // buffer between stages 0 and 1
-            buffer_size, // buffer between stages 1 and 2
-            buffer_size, // buffer between stages 2 and 3
-          },
-          {
-            active_waiting,
-            active_waiting,
-            active_waiting,
-          }));
+        pipeline_chain.reset(
+          new runtime::Pipeline(initializer("initialize"),
+                                {
+                                  // pipeline stage 0: Initializer (C++)
+                                  { { &initializer("initialize") }, { &initializer("initialize") } },
+                                  // pipeline stage 1: 3x Stateless_Julia incrementers
+                                  { { &(*incs_jl1[0])("increment") }, { &(*incs_jl1[n_stage1 - 1])("increment") } },
+                                  // pipeline stage 2: 3x Stateless_Julia (or C++ Incrementer in hybrid mode)
+                                  { { stage2_first }, { stage2_last } },
+                                  // pipeline stage 3: Finalizer (C++)
+                                  { { &finalizer("finalize") }, {} },
+                                },
+                                {
+                                  1,                         // stage 0 threads
+                                  n_threads ? n_threads : 1, // stage 1 threads
+                                  n_threads ? n_threads : 1, // stage 2 threads
+                                  1                          // stage 3 threads
+                                },
+                                {
+                                  buffer_size, // buffer between stages 0 and 1
+                                  buffer_size, // buffer between stages 1 and 2
+                                  buffer_size, // buffer between stages 2 and 3
+                                },
+                                {
+                                  active_waiting,
+                                  active_waiting,
+                                  active_waiting,
+                                }));
         pipeline_chain->set_n_frames(n_inter_frames);
 
         size_t tid = 0;
@@ -869,4 +869,3 @@ main(int argc, char** argv)
 
     return test_results;
 }
-

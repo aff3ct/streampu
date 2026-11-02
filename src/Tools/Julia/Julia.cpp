@@ -98,8 +98,7 @@ Julia::init(const uint64_t n_proxies)
 #if defined(_WIN64) || defined(_WIN32)
     void (*prev_sigint)(int) = SIG_DFL;
     const bool restore_sigint = !jl_is_initialized();
-    if (restore_sigint)
-        prev_sigint = signal(SIGINT, SIG_DFL);
+    if (restore_sigint) prev_sigint = signal(SIGINT, SIG_DFL);
 #else
     struct sigaction prev_sigint = {};
     const bool restore_sigint = !jl_is_initialized() && (sigaction(SIGINT, nullptr, &prev_sigint) == 0);

@@ -1,5 +1,5 @@
-#include "Tools/Julia/Julia.hpp"
 #include "Tools/Julia/Proxy.hpp"
+#include "Tools/Julia/Julia.hpp"
 #include <chrono>
 #include <cstddef>
 #include <cstdlib>
@@ -48,14 +48,10 @@ main(int argc, char** argv)
 {
     printf("pid: %d\n", getpid()); // to kill if necessary
 
-    option longopts[] = { { "threads", required_argument, NULL, 't' },
-                          { "thread-pool", required_argument, NULL, 'V' },
-                          { "seed", required_argument, NULL, 's' },
-                          { "print-stats", no_argument, NULL, 'p' },
-                          { "verbose", no_argument, NULL, 'v' },
-                          { "debug", no_argument, NULL, 'g' },
-                          { "help", no_argument, NULL, 'h' },
-                          { 0 } };
+    option longopts[] = { { "threads", required_argument, NULL, 't' }, { "thread-pool", required_argument, NULL, 'V' },
+                          { "seed", required_argument, NULL, 's' },    { "print-stats", no_argument, NULL, 'p' },
+                          { "verbose", no_argument, NULL, 'v' },       { "debug", no_argument, NULL, 'g' },
+                          { "help", no_argument, NULL, 'h' },          { 0 } };
 
     size_t n_threads = std::thread::hardware_concurrency();
     bool print_stats = false;

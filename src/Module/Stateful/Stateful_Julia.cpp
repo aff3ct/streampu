@@ -45,17 +45,13 @@ Stateful_Julia::create_tsk(const std::string& name)
 }
 
 void
-Stateful_Julia::create_state(const std::string& julia_constructor,
-                             const bool shared,
-                             const std::string& julia_code)
+Stateful_Julia::create_state(const std::string& julia_constructor, const bool shared, const std::string& julia_code)
 {
     this->_create_state(julia_constructor, shared, julia_code);
 }
 
 void
-Stateful_Julia::create_stt(const std::string& julia_constructor,
-                           const bool shared,
-                           const std::string& julia_code)
+Stateful_Julia::create_stt(const std::string& julia_constructor, const bool shared, const std::string& julia_code)
 {
     this->_create_state(julia_constructor, shared, julia_code);
 }

@@ -150,8 +150,7 @@ Ref_keeper::init(size_t size)
     Ref_keeper* singleton = get();
     if (singleton->marks != nullptr) return;
 
-    if (size == 0)
-        size = Julia::get_n_proxies();
+    if (size == 0) size = Julia::get_n_proxies();
 
     singleton->last_result = jl_call0(Julia::get_mk_ref());
     singleton->size = size;

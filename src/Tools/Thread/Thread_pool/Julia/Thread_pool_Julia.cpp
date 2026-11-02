@@ -57,8 +57,7 @@ Thread_pool_Julia::~Thread_pool_Julia()
     }
 
     for (size_t tid = 0; tid < this->n_threads; tid++)
-        if (this->pool[tid].joinable())
-            this->pool[tid].join();
+        if (this->pool[tid].joinable()) this->pool[tid].join();
 }
 
 void
@@ -120,13 +119,11 @@ Thread_pool_Julia::run(const bool async)
         // an unadopted C++ thread and produces a non-null invalid pointer.
         int8_t gc_state = 0;
         const bool can_safe = (jl_get_pgcstack() != nullptr);
-        if (can_safe)
-            gc_state = jl_gc_safe_enter(jl_current_task->ptls);
+        if (can_safe) gc_state = jl_gc_safe_enter(jl_current_task->ptls);
 
         this->barrier.wait();
 
-        if (can_safe)
-            jl_gc_safe_leave(jl_current_task->ptls, gc_state);
+        if (can_safe) jl_gc_safe_leave(jl_current_task->ptls, gc_state);
     }
 }
 
@@ -143,13 +140,11 @@ Thread_pool_Julia::wait()
     // Enter GC_SAFE while waiting on the spin-barrier (see comment in run() above regarding jl_get_pgcstack()).
     int8_t gc_state = 0;
     const bool can_safe = (jl_get_pgcstack() != nullptr);
-    if (can_safe)
-        gc_state = jl_gc_safe_enter(jl_current_task->ptls);
+    if (can_safe) gc_state = jl_gc_safe_enter(jl_current_task->ptls);
 
     this->barrier.wait();
 
-    if (can_safe)
-        jl_gc_safe_leave(jl_current_task->ptls, gc_state);
+    if (can_safe) jl_gc_safe_leave(jl_current_task->ptls, gc_state);
 
     if (!this->initialized)
     {

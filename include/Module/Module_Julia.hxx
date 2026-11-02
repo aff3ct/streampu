@@ -40,4 +40,3 @@ Module_Julia::create_constant(runtime::Task& task, const T& value)
 }
 }
 }
-

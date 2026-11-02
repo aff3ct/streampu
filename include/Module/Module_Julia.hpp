@@ -117,4 +117,3 @@ class Module_Julia
 #endif /* SPU_JULIA */
 
 #endif /* MODULE_JULIA_HPP_ */
-

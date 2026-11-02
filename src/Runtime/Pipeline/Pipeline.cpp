@@ -615,7 +615,7 @@ void Pipeline
         this->thread_pool.reset(new tools::Thread_pool_standard(this->stages.size() - 1));
 #else
     this->thread_pool.reset(new tools::Thread_pool_standard(this->stages.size() - 1));
-#endif /* SPU_JULIA */
+#endif                         /* SPU_JULIA */
     this->thread_pool->init(); // threads are spawned here
 }
 

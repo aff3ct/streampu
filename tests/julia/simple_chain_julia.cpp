@@ -275,11 +275,7 @@ main(int argc, char** argv)
     if (!step_by_step)
     {
         // execute the sequence (multi-threaded)
-        sequence_chain.exec(
-          [&counter, n_exec]()
-          {
-              return ++counter >= n_exec;
-          });
+        sequence_chain.exec([&counter, n_exec]() { return ++counter >= n_exec; });
     }
     else
     {
