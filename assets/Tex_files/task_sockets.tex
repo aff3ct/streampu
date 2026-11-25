@@ -1,0 +1,35 @@
+\documentclass{standalone}
+
+\usepackage{tikz}
+\usetikzlibrary{streampu}
+
+\newcommand{\legendLight}[1][]{
+  \begin{scope}[#1]
+    \node[draw=Paired-1, rounded corners=0pt, minimum height=0.3cm, minimum width=0.7cm, text=Paired-1, fill=white, label={right:task}] (l2) at (-0.4, 1) {};
+    \node[sin,  label={right:Input socket} ] (l5) at (1.1, 1.0) {};
+    \node[sout, label={right:Output socket}] (l6) at (3.65, 1.0) {};
+    \node[sfwd, label={right:Forward socket}] (l3) at (6.5, 1.0) {};
+    \node[] (l9) at (8.85, 1.0) {};
+    \node[draw, fit= (l2) (l3) (l5) (l6) (l9)] (legend) {};
+  \end{scope}
+}
+
+\begin{document}
+  \begin{tikzpicture}[background rectangle/.style={thick, draw=gray!60, fill=white, fill opacity=1.0, rounded corners=2px}, show background rectangle]
+    %%%%%%%%%%%%%%%%%%
+    %% create tasks %%
+    %%%%%%%%%%%%%%%%%%
+    %     options             id   coords    label   sin sout sfwd attributes
+    %     -------             --   ------    -----   --- ---- ---- ----------
+    \task                     {t1} {0.0, 0}  {$t_1$} {1} {1}  {0}  {};
+    \task [right=1.0cm of t1] {t2} {}        {$t_2$} {0} {0}  {1}  {};
+    \task [right=1.0cm of t2] {t3} {}        {$t_3$} {1} {1}  {1}  {};
+    \task [right=1.0cm of t3] {t4} {}        {$t_4$} {1} {2}  {0}  {};
+    \task [right=1.0cm of t4] {t5} {}        {$t_5$} {0} {0}  {2}  {};
+
+    %%%%%%%%%%%%%%%%%%%%%
+    %% draw the legend %%
+    %%%%%%%%%%%%%%%%%%%%%
+    \legendLight [shift={(0.0,0.5)}]
+  \end{tikzpicture}
+\end{document}

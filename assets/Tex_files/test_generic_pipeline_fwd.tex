@@ -1,0 +1,60 @@
+\documentclass{standalone}
+
+\usepackage{tikz}
+\usetikzlibrary{streampu}
+
+\begin{document}
+  \begin{tikzpicture}[background rectangle/.style={thick, draw=gray!60, fill=white, fill opacity=1.0, rounded corners=2px}, show background rectangle]
+    %%%%%%%%%%%%%%%%%%
+    %% create tasks %%
+    %%%%%%%%%%%%%%%%%%
+    %     options             id   coords  label                 sin sout sfwd attributes
+    %     -------             --   ------  -----                 --- ---- ---- ----------
+    \task                     {t1} {-0.5, 0}   {read\\($t_1$)}   {0} {1}  {0}  {"seq"};
+    \task [right=1.0cm of t1] {t2} {}          {relayf\\($t_2$)} {0} {0}  {1}  {};
+    \task [right=1.0cm of t2] {t3} {}          {relayf\\($t_3$)} {0} {0}  {1}  {};
+    \task [right=1.0cm of t3] {t4} {}          {relayf\\($t_4$)} {0} {0}  {1}  {};
+    \task [right=1.0cm of t4] {t5} {}          {write\\($t_5$)}  {1} {0}  {0}  {"seq"};
+
+    %%%%%%%%%%%%%%%%%%%%
+    %% create modules %%
+    %%%%%%%%%%%%%%%%%%%%
+    %       options  task ids id   label
+    %       -------  -------- --   -----
+    \module          {"t1"}   {m1} {Writer};
+    \module          {"t2"}   {m2} {Relayer};
+    \module          {"t3"}   {m3} {Relayer};
+    \module          {"t4"}   {m4} {Relayer};
+    \module          {"t5"}   {m5} {Reader};
+
+    %%%%%%%%%%%%%%%%
+    %% bind tasks %%
+    %%%%%%%%%%%%%%%%
+    %     options start id path end id
+    %     ------- -------- ---- ------
+    \draw [bind]  (t1_so1) --   (t2_si1);
+    \draw [bind]  (t2_so1) --   (t3_si1);
+    \draw [bind]  (t3_so1) --   (t4_si1);
+    \draw [bind]  (t4_so1) --   (t5_si1);
+
+    %%%%%%%%%%%%%%%%%%%
+    %% create stages %%
+    %%%%%%%%%%%%%%%%%%%
+    %      options                 object ids       id   label     n_threads
+    %      -------                 ----------       --   -----     ---------
+    \stage [minimum height=3.00cm] {"m1"}           {s1} {Stage 1} {1}
+    \stage [minimum height=3.00cm] {"m2","m3","m4"} {s2} {Stage 2} {3}
+    \stage [minimum height=3.00cm] {"m5"}           {s3} {Stage 3} {1}
+
+    %%%%%%%%%%%%%%%%%%%%%
+    %% clone the tasks %%
+    %%%%%%%%%%%%%%%%%%%%%
+    %      options task ids         n clones
+    %      ------- --------         --------
+    \clone []      {"t2","t3","t4"} {3}
+    %%%%%%%%%%%%%%%%%%%%%
+    %% draw the legend %%
+    %%%%%%%%%%%%%%%%%%%%%
+    \legend [shift={(-1.15,1.75)}]
+  \end{tikzpicture}
+\end{document}
