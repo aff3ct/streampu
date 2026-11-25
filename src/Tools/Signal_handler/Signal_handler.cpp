@@ -155,7 +155,7 @@ signal_sigint_handler(int /*signo*/, siginfo_t* /*info*/, void* /*context*/)
                   << rang::tag::error << "Signal \"Interruption\" caught twice by StreamPU signal handler!"
                   << std::endl;
         std::cerr << rang::tag::error << "Killing the application RIGHT NOW sir!" << std::endl;
-        exit(1);
+        std::_Exit(1);
     }
     else
     {
